@@ -25,8 +25,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "DIARAMA",
-  description: "Marketplace DIARAMA",
+  title: "DIARAMA BACK OFFICE",
+  description: "Espace d'administration de DIARAMA",
 };
 
 export function generateStaticParams() {
