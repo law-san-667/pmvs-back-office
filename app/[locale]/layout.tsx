@@ -25,8 +25,28 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "DIARAMA BACK OFFICE",
-  description: "Espace d'administration de DIARAMA",
+  title:
+    "Diarama",
+  description:
+    "Espace d'Administration DIARAMA",
+  openGraph: {
+    title:
+      "Diarama",
+    description:
+      "Espace d'Administration DIARAMA",
+    url: "https://pmvs-web.vercel.app",
+    siteName: "Diarama",
+    images: [
+      {
+        url: "https://pmvs-web.vercel.app/diarama-square-logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Diarama",
+      },
+    ],
+    locale: "fr_FR",
+    type: "website",
+  },
 };
 
 export function generateStaticParams() {
