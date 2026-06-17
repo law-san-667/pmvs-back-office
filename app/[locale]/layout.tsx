@@ -26,12 +26,12 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title:
-    "Diarama",
+    "Dashboard - Diarama",
   description:
     "Espace d'Administration DIARAMA",
   openGraph: {
     title:
-      "Diarama",
+      "Dashboard - Diarama",
     description:
       "Espace d'Administration DIARAMA",
     url: "https://pmvs-web.vercel.app",
