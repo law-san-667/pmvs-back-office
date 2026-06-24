@@ -133,9 +133,7 @@ const clients = [
 
 function StatusBadge({ status }: { status: string }) {
   if (status === "Shipped") {
-    return (
-      <span className="text-xs font-medium text-blue-500">{status}</span>
-    );
+    return <span className="text-xs font-medium text-blue-500">{status}</span>;
   }
   if (status === "En cours") {
     return (
@@ -155,12 +153,12 @@ function StatusBadge({ status }: { status: string }) {
   return <span className="text-xs">{status}</span>;
 }
 
-export default function Page() {
+export default function DashboardHomePage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <div>
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Dashboard</p>
+        <p className="text-muted-foreground text-sm">Dashboard</p>
       </div>
 
       {/* Stats Row */}
@@ -172,7 +170,7 @@ export default function Page() {
             <CardHeader>
               <CardTitle>Ventes dans l&apos;année</CardTitle>
               <CardAction>
-                <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+                <button className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm">
                   Voir tout
                   <ArrowUpRightIcon className="size-4" />
                 </button>
@@ -253,7 +251,7 @@ export default function Page() {
             <CardHeader>
               <CardTitle>Client Total</CardTitle>
               <CardAction>
-                <ArrowUpRightIcon className="size-4 text-muted-foreground" />
+                <ArrowUpRightIcon className="text-muted-foreground size-4" />
               </CardAction>
             </CardHeader>
             <CardContent>
@@ -276,7 +274,7 @@ export default function Page() {
             <CardHeader>
               <CardTitle>Transaction Total</CardTitle>
               <CardAction>
-                <ArrowUpRightIcon className="size-4 text-muted-foreground" />
+                <ArrowUpRightIcon className="text-muted-foreground size-4" />
               </CardAction>
             </CardHeader>
             <CardContent>
@@ -299,7 +297,7 @@ export default function Page() {
             <CardHeader>
               <CardTitle>Total Produit</CardTitle>
               <CardAction>
-                <ArrowUpRightIcon className="size-4 text-muted-foreground" />
+                <ArrowUpRightIcon className="text-muted-foreground size-4" />
               </CardAction>
             </CardHeader>
             <CardContent>
@@ -359,11 +357,11 @@ export default function Page() {
                             alt={order.product}
                             width={48}
                             height={48}
-                            className="rounded-lg bg-muted object-cover"
+                            className="bg-muted rounded-lg object-cover"
                           />
                           <div>
                             <p className="font-medium">{order.product}</p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                               {order.id}
                             </p>
                           </div>
@@ -372,7 +370,7 @@ export default function Page() {
                       <TableCell>
                         <div>
                           <p className="font-medium">{order.clientName}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-muted-foreground text-xs">
                             {order.clientEmail}
                           </p>
                         </div>
@@ -380,7 +378,7 @@ export default function Page() {
                       <TableCell>
                         <div>
                           <p>{order.delivery}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-muted-foreground text-xs">
                             {order.deliveryDetail}
                           </p>
                         </div>
@@ -431,10 +429,10 @@ export default function Page() {
                             alt={product.name}
                             width={48}
                             height={48}
-                            className="rounded-lg bg-muted object-cover"
+                            className="bg-muted rounded-lg object-cover"
                           />
                           <div>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                               {product.sku}
                             </p>
                             <p className="font-medium">{product.name}</p>
@@ -463,14 +461,14 @@ export default function Page() {
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center gap-3 rounded-lg">
-              <div className="flex size-10 items-center justify-center rounded-full bg-muted">
-                <UsersIcon className="size-5 text-muted-foreground" />
+              <div className="bg-muted flex size-10 items-center justify-center rounded-full">
+                <UsersIcon className="text-muted-foreground size-5" />
               </div>
               <div>
                 <p className="text-sm font-medium">
                   Nombre de client enregistré
                 </p>
-                <p className="text-xs text-muted-foreground">320 clients</p>
+                <p className="text-muted-foreground text-xs">320 clients</p>
               </div>
             </div>
             <div className="flex flex-col gap-3">

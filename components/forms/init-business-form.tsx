@@ -39,11 +39,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "@/i18n/navigation";
 import { getBackendErrorMessages } from "@/lib/backend-utils";
 import { getCroppedImg, type CroppedArea } from "@/lib/crop-image";
-import { serializeFile } from "@/lib/serialize-file";
+import { getMutationErrorMessage } from "@/lib/mutation-error";
+import {
+  uploadFileToR2FromBrowser,
+  uploadFilesToR2FromBrowser,
+  type CreateR2Upload,
+} from "@/lib/upload-to-r2";
 import {
   createBusinessInputSchema,
   type CreateBusinessInput,
-  type UploadBusinessFilesInput,
 } from "@/lib/validators/business";
 import { trpc } from "@/server/trpc/client";
 import { AlertCircle, Camera, Pencil, Upload, X } from "lucide-react";
@@ -67,7 +71,7 @@ const LEGAL_DOCUMENT_ACCEPT = {
 };
 
 interface FormData {
-  logo: Blob | null;
+  logo: File | null;
   logoPreview: string | null;
   businessName: string;
   email: string;
@@ -110,30 +114,22 @@ const initialFormData: FormData = {
   legalDocuments: [],
 };
 
-const serializeBlob = (blob: Blob, fallbackName: string) =>
-  serializeFile(
-    blob instanceof File
-      ? blob
-      : new File([blob], fallbackName, {
-          type: blob.type || "application/octet-stream",
-        }),
-  );
-
 const optional = (value: string) => {
   const trimmed = value.trim();
   return trimmed.length ? trimmed : undefined;
 };
 
-const createBusinessFormData = async (
+const buildCreateBusinessPayload = (
   formData: FormData,
-  uploadedFiles: { image?: string; legalDocuments: string[] },
-): Promise<CreateBusinessInput> => {
+  uploadedFiles: { imageUrl?: string; legalDocumentUrls: string[] },
+): CreateBusinessInput => {
   const payload: CreateBusinessInput = {
     name: formData.businessName,
     countryCode: formData.countryCode,
     citySlug: formData.citySlug,
     legalBusiness: formData.isRegularized ?? false,
   };
+
   const optionalFields = {
     description: optional(formData.description),
     whatsappPhone: optional(formData.whatsapp),
@@ -145,11 +141,11 @@ const createBusinessFormData = async (
     address: optional(formData.address),
   } satisfies Partial<CreateBusinessInput>;
 
-  if (uploadedFiles.image) payload.image = uploadedFiles.image;
+  if (uploadedFiles.imageUrl) payload.image = uploadedFiles.imageUrl;
   if (formData.deliveryZones.length)
     payload.deliveryZones = formData.deliveryZones;
-  if (uploadedFiles.legalDocuments.length)
-    payload.legalDocuments = uploadedFiles.legalDocuments;
+  if (uploadedFiles.legalDocumentUrls.length)
+    payload.legalDocuments = uploadedFiles.legalDocumentUrls;
 
   for (const [key, value] of Object.entries(optionalFields)) {
     if (value !== undefined) {
@@ -160,39 +156,17 @@ const createBusinessFormData = async (
   return payload;
 };
 
-const createBusinessUploadData = async (
-  formData: FormData,
-): Promise<UploadBusinessFilesInput> => {
-  const payload: UploadBusinessFilesInput = {};
-  const legalDocuments =
-    formData.isRegularized === true
-      ? await Promise.all(
-          formData.legalDocuments.map((file) => serializeFile(file)),
-        )
-      : [];
-
-  if (formData.logo) {
-    payload.image = await serializeBlob(formData.logo, "business-logo.png");
-  }
-
-  if (legalDocuments.length) {
-    payload.legalDocuments = legalDocuments;
-  }
-
-  return payload;
-};
-
 export default function InitBusinessForm() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [submissionErrors, setSubmissionErrors] = useState<string[]>([]);
-  const uploadBusinessFiles = trpc.businesses.uploadFiles.useMutation({
-    onError: (error) => {
-      setSubmissionErrors(
-        getBackendErrorMessages(error, "Erreur lors de l'envoi des fichiers."),
-      );
-    },
-  });
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const createUploadMutation = trpc.media.createUpload.useMutation();
+  const createUpload: CreateR2Upload = (input) =>
+    createUploadMutation.mutateAsync(input);
+
   const createBusiness = trpc.businesses.create.useMutation({
     onSuccess: () => {
       setSubmissionErrors([]);
@@ -208,6 +182,7 @@ export default function InitBusinessForm() {
       );
     },
   });
+
   const form = useForm<FormData>({
     defaultValues: initialFormData,
   });
@@ -237,6 +212,7 @@ export default function InitBusinessForm() {
       enabled: Boolean(formData.countryCode),
     },
   );
+
   const update = <K extends keyof FormData>(key: K, value: FormData[K]) => {
     form.setValue(key, value as never, {
       shouldDirty: true,
@@ -245,7 +221,6 @@ export default function InitBusinessForm() {
     });
   };
 
-  // Logo dropzone
   const onLogoDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
@@ -295,8 +270,11 @@ export default function InitBusinessForm() {
   const handleCropSave = async () => {
     if (!cropImage || !croppedAreaPixels) return;
     const blob = await getCroppedImg(cropImage, croppedAreaPixels);
+    const file = new File([blob], "business-logo.png", {
+      type: blob.type || "image/png",
+    });
     const preview = URL.createObjectURL(blob);
-    update("logo", blob);
+    update("logo", file);
     update("logoPreview", preview);
     setCropImage(null);
     setCrop({ x: 0, y: 0 });
@@ -315,41 +293,74 @@ export default function InitBusinessForm() {
     if (step < TOTAL_STEPS) setStep(step + 1);
   };
 
-  const isMutating = createBusiness.isPending || uploadBusinessFiles.isPending;
+  const isMutating = createBusiness.isPending || isUploading;
 
   const handleSubmit = async () => {
     if (isMutating) return;
 
     setSubmissionErrors([]);
+    setIsUploading(true);
+    setUploadProgress(0);
 
-    const uploadData = await createBusinessUploadData(formData);
-    let uploadedFiles: { image?: string; legalDocuments: string[] };
     try {
-      uploadedFiles =
-        uploadData.image || uploadData.legalDocuments?.length
-          ? await uploadBusinessFiles.mutateAsync(uploadData)
-          : { legalDocuments: [] };
-    } catch {
-      return;
-    }
-    const payload = await createBusinessFormData(formData, uploadedFiles);
-    const availableCities = cities.data?.items ?? [];
-    const citySlug =
-      payload.citySlug || availableCities[0]?.slug || formData.citySlug;
-    const result = createBusinessInputSchema.safeParse({
-      ...payload,
-      citySlug,
-    });
+      const logoFile = formData.logo ?? undefined;
+      const legalFiles =
+        formData.isRegularized === true ? formData.legalDocuments : [];
 
-    if (!result.success) {
-      setSubmissionErrors(result.error.issues.map((issue) => issue.message));
-      return;
-    }
+      const totalParts = (logoFile ? 1 : 0) + (legalFiles.length ? 1 : 0);
+      let completedParts = 0;
 
-    createBusiness.mutate({
-      ...result.data,
-      citySlug,
-    });
+      const imageUrl = await uploadFileToR2FromBrowser(
+        logoFile,
+        "images",
+        createUpload,
+        (p) => {
+          if (totalParts <= 1) {
+            setUploadProgress(p);
+          } else {
+            setUploadProgress(Math.round(p / totalParts));
+          }
+        },
+      );
+      if (logoFile) completedParts++;
+
+      const legalDocumentUrls = (
+        await uploadFilesToR2FromBrowser(legalFiles, "docs", createUpload, (p) =>
+          setUploadProgress(
+            Math.round(((completedParts * 100 + p) / totalParts) * 1),
+          ),
+        )
+      ).filter((url): url is string => url !== undefined);
+
+      setIsUploading(false);
+      setUploadProgress(100);
+
+      const availableCities = cities.data?.items ?? [];
+      const citySlug =
+        formData.citySlug || availableCities[0]?.slug || "dakar";
+
+      const payload = buildCreateBusinessPayload(formData, {
+        imageUrl,
+        legalDocumentUrls,
+      });
+
+      const result = createBusinessInputSchema.safeParse({
+        ...payload,
+        citySlug,
+      });
+
+      if (!result.success) {
+        setSubmissionErrors(result.error.issues.map((issue) => issue.message));
+        return;
+      }
+
+      createBusiness.mutate({ ...result.data, citySlug });
+    } catch (error) {
+      setIsUploading(false);
+      setSubmissionErrors([
+        getMutationErrorMessage(error, "Erreur lors de l'envoi des fichiers."),
+      ]);
+    }
   };
 
   const geographyErrors = [
@@ -429,7 +440,11 @@ export default function InitBusinessForm() {
           onClick={step === TOTAL_STEPS ? handleSubmit : next}
           disabled={isMutating}
         >
-          {isMutating ? "Création..." : "Continuer"}
+          {isUploading
+            ? `Envoi des fichiers… ${uploadProgress}%`
+            : createBusiness.isPending
+              ? "Création..."
+              : "Continuer"}
         </Button>
       </div>
 
@@ -638,23 +653,6 @@ function Step2({
                 aria-invalid={fieldState.invalid}
                 className="h-12 flex-1"
               />
-              {/* <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="shrink-0 whitespace-nowrap"
-            onClick={() => {
-              if (!navigator.geolocation) return;
-              navigator.geolocation.getCurrentPosition((pos) => {
-                update(
-                  "address",
-                  `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`,
-                );
-              });
-            }}
-          >
-            Ajouter ma localisation
-          </Button> */}
             </div>
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
           </Field>

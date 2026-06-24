@@ -9,7 +9,7 @@ import {
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
-import sharp from "sharp";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const BUCKET_NAME = env.CLOUDFLARE_R2_BUCKET;
 
@@ -28,9 +28,34 @@ export interface UploadResult {
   url?: string;
 }
 
+export interface PresignedUploadResult extends UploadResult {
+  uploadUrl: string;
+}
+
 function normalizePublicUrl(url: string) {
   return url.endsWith("/") ? url.slice(0, -1) : url;
 }
+
+const getFileExtension = (fileName: string, contentType: string) => {
+  const extension = fileName.split(".").pop()?.trim();
+
+  if (extension) {
+    return extension.replace(/[^a-zA-Z0-9]/g, "").toLowerCase() || "bin";
+  }
+
+  return contentType.split("/")[1]?.replace(/[^a-zA-Z0-9]/g, "") || "bin";
+};
+
+const createUploadKey = (
+  fileName: string,
+  contentType: string,
+  dir?: string,
+) => {
+  const fileExtension = getFileExtension(fileName, contentType);
+  const prefix = dir?.replace(/^\/+|\/+$/g, "") || "media";
+
+  return `${prefix}/${fileName.replace(/\//g, "-")}_${crypto.randomUUID()}.${fileExtension}`;
+};
 
 export function getFileFromR2(key: string) {
   if (!env.CLOUDFLARE_R2_PUBLIC_URL)
@@ -71,32 +96,24 @@ export async function deleteFileFromR2(key: string) {
 
 /**
  * Upload a file (image or video) to Cloudflare R2.
- * Images are resized via sharp; videos are stored as-is.
  */
 export async function uploadFileToR2(
   file: Buffer,
   fileName: string,
   contentType: string = "image/jpeg",
-  userId: string,
+  _userId: string,
   dir?: string,
 ): Promise<UploadResult> {
-  const fileExtension = fileName.split(".").pop() || "jpg";
-  const uniqueKey = dir
-    ? `${dir}/${userId}/${crypto.randomUUID()}.${fileExtension}`
-    : `media/${userId}/${crypto.randomUUID()}.${fileExtension}`;
-
-  const isImage = contentType.startsWith("image/");
-
-  const body = isImage
-    ? await sharp(file)
-        .resize({ height: 1920, width: 1440, fit: "cover" })
-        .toBuffer()
-    : file;
+  const uniqueKey = createUploadKey(
+    fileName,
+    contentType,
+    dir ?? (contentType.startsWith("video/") ? "videos" : "images"),
+  );
 
   const params: PutObjectCommandInput = {
     Bucket: BUCKET_NAME,
     Key: uniqueKey,
-    Body: body,
+    Body: file,
     ContentType: contentType,
   };
 
@@ -111,6 +128,26 @@ export async function uploadFileToR2(
     console.error("Error uploading to R2:", error);
     throw new Error("Failed to upload file to R2");
   }
+}
+
+export async function createPresignedR2Upload(
+  fileName: string,
+  contentType: string,
+  dir?: string,
+): Promise<PresignedUploadResult> {
+  const uniqueKey = createUploadKey(fileName, contentType, dir);
+  const command = new PutObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: uniqueKey,
+    ContentType: contentType,
+  });
+  const uploadUrl = await getSignedUrl(r2Client, command, { expiresIn: 300 });
+
+  return {
+    key: uniqueKey,
+    uploadUrl,
+    url: env.CLOUDFLARE_R2_PUBLIC_URL ? getFileFromR2(uniqueKey) : undefined,
+  };
 }
 
 /**

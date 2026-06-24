@@ -1,11 +1,4 @@
-import type { SerializedFile } from "@/lib/serialize-file";
 import z from "zod";
-
-export const serializedFileSchema = z.object({
-  name: z.string().trim().min(1),
-  type: z.string().trim().min(1),
-  base64: z.string().trim().min(1),
-});
 
 export const createBusinessInputSchema = z
   .object({
@@ -35,7 +28,7 @@ export const createBusinessInputSchema = z
     address: z.string().trim().optional(),
     deliveryZones: z.array(z.string().trim().min(1)).optional(),
     legalBusiness: z.boolean().optional(),
-    legalDocuments: z.array(z.string().trim().min(1)).optional(),
+    legalDocuments: z.array(z.url()).optional(),
   })
   .superRefine((input, ctx) => {
     if (input.legalBusiness && !input.legalDocuments?.length) {
@@ -48,13 +41,4 @@ export const createBusinessInputSchema = z
     }
   });
 
-export const uploadBusinessFilesInputSchema = z.object({
-  image: serializedFileSchema.optional(),
-  legalDocuments: z.array(serializedFileSchema).optional(),
-});
-
 export type CreateBusinessInput = z.infer<typeof createBusinessInputSchema>;
-export type UploadBusinessFilesInput = z.infer<
-  typeof uploadBusinessFilesInputSchema
->;
-export type { SerializedFile };

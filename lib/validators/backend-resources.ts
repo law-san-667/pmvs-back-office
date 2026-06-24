@@ -1,6 +1,6 @@
 import z from "zod";
 
-const uuidSchema = z.string().uuid();
+export const uuidSchema = z.uuid();
 const orderSchema = z.enum(["asc", "desc"]);
 const positiveIntSchema = z.number().int().positive();
 
