@@ -51,6 +51,7 @@ export const categoriesInputSchema = z.object({
   order: orderSchema.optional(),
   name: z.string().trim().optional(),
   slug: z.string().trim().optional(),
+  isService: z.boolean().optional(),
   isActive: z.boolean().optional(),
 });
 

@@ -15,6 +15,7 @@ import {
 import {
   CircleHelpIcon,
   FileTextIcon,
+  GavelIcon,
   LayoutDashboardIcon,
   PackageIcon,
   Settings,
@@ -32,6 +33,11 @@ const generalItems = [
     title: "Produits",
     url: "/dashboard/products",
     icon: <PackageIcon />,
+  },
+  {
+    title: "Appels d'offres",
+    url: "/dashboard/tenders",
+    icon: <GavelIcon />,
   },
   {
     title: "Transactions",

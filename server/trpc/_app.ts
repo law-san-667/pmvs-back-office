@@ -4,6 +4,7 @@ import { catalogRouter } from "./_procedures/catalog";
 import { geographyRouter } from "./_procedures/geography";
 import { listingsRouter } from "./_procedures/listings";
 import { mediaRouter } from "./_procedures/media";
+import { tendersRouter } from "./_procedures/tenders";
 import { createTRPCRouter } from "./init";
 
 export const appRouter = createTRPCRouter({
@@ -13,6 +14,7 @@ export const appRouter = createTRPCRouter({
   geography: geographyRouter,
   listings: listingsRouter,
   media: mediaRouter,
+  tenders: tendersRouter,
 });
 
 export type AppRouter = typeof appRouter;

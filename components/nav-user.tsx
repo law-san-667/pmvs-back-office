@@ -43,9 +43,15 @@ export function NavUser() {
   const displayName = getUserDisplayName(user.firstName, user.lastName);
   const initials = getUserInitials(user.firstName, user.lastName);
 
-  const handleLogout = () => {
-    logout();
-    router.replace("/");
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch {
+      // Local credentials are cleared even if the remote session is already invalid.
+    } finally {
+      router.replace("/");
+      router.refresh();
+    }
   };
 
   return (
@@ -105,7 +111,7 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
+            <DropdownMenuItem onClick={() => void handleLogout()}>
               <LogOutIcon />
               Déconnexion
             </DropdownMenuItem>

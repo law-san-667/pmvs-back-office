@@ -398,8 +398,10 @@ export default function ProductsPage() {
                                 <p className="truncate font-bold">
                                   {listing.title}
                                 </p>
-                                <p className="text-sm">Taille: {size}</p>
-                                {!listing.isService && (
+                                {size !== "Variable" && (
+                                  <p className="text-sm">Taille: {size}</p>
+                                )}
+                                {!listing.isService && colorCount > 0 && (
                                   <p className="text-sm">
                                     Couleurs: {colorCount}
                                   </p>

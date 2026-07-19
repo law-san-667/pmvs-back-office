@@ -1,3 +1,5 @@
+import type { LegalBusinessInformation } from "@/lib/validators/business";
+
 export type Country = {
   code: string;
   name: string;
@@ -25,6 +27,7 @@ export type Category = {
   description: string | null;
   icon: string | null;
   sortOrder: number;
+  isService: boolean;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -38,6 +41,7 @@ export type SubCategory = {
   description: string | null;
   icon: string | null;
   sortOrder: number;
+  isService: boolean;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -58,8 +62,21 @@ export type Business = {
   description: string | null;
   countryCode: string;
   citySlug: string;
+  address?: string | null;
+  whatsappPhone?: string | null;
+  contactEmail?: string | null;
+  facebookLink?: string | null;
+  instagramLink?: string | null;
+  orangeMoneyNumber?: string | null;
+  waveNumber?: string | null;
   deliveryZones: string[];
-  legalDocuments: Record<string, string>;
+  legalBusiness: boolean;
+  legalDocuments: string[];
+  legalBusinessInformation: LegalBusinessInformation | null;
+  legalBusinessQuestions: Array<{
+    questionTitle: string;
+    answer: string;
+  }> | null;
   status: BusinessStatus;
   createdAt: string;
   updatedAt: string;

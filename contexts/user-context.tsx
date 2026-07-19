@@ -17,7 +17,7 @@ type UserContextValue = {
   isAuthenticated: boolean;
   isLoading: boolean;
   setUser: (user: PublicUser | null) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 };
 
 const UserContext = createContext<UserContextValue | null>(null);
@@ -25,6 +25,7 @@ const UserContext = createContext<UserContextValue | null>(null);
 const clearAuthCookies = () => {
   Cookies.remove("access_token", { path: "/" });
   Cookies.remove("refresh_token", { path: "/" });
+  Cookies.remove("active_business_id", { path: "/" });
 };
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
@@ -40,7 +41,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     refetchOnWindowFocus: false,
   });
 
-  const { mutate: logoutMutate } = trpc.auth.logout.useMutation();
+  const logoutMutation = trpc.auth.logout.useMutation();
 
   useEffect(() => {
     let isActive = true;
@@ -85,18 +86,18 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     };
   }, [authCheckKey, fetchMe, pathname]);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
     setIsLoading(true);
-    logoutMutate(undefined, {
-      onSettled: () => {
-        clearAuthCookies();
-        setUserState(null);
-        setIsAuthenticated(false);
-        setIsLoading(false);
-        setAuthCheckKey((key) => key + 1);
-      },
-    });
-  }, [logoutMutate]);
+
+    try {
+      await logoutMutation.mutateAsync();
+    } finally {
+      clearAuthCookies();
+      setUserState(null);
+      setIsAuthenticated(false);
+      setIsLoading(false);
+    }
+  }, [logoutMutation]);
 
   const setUser = useCallback((user: PublicUser | null) => {
     setUserState(user);

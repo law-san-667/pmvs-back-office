@@ -1,4 +1,5 @@
 import {
+  type AuthSuccessData,
   type AuthOtpActionData,
   type PublicUser,
   type SignUpData,
@@ -43,6 +44,21 @@ const serializeCookie = (
   return parts.join("; ");
 };
 
+const setAuthCookies = (headers: Headers, result: AuthSuccessData) => {
+  headers.append(
+    "set-cookie",
+    serializeCookie("access_token", result.accessToken, result.expiresIn),
+  );
+  headers.append(
+    "set-cookie",
+    serializeCookie(
+      "refresh_token",
+      result.refreshToken,
+      result.refreshExpiresIn,
+    ),
+  );
+};
+
 export const authRouter = createTRPCRouter({
   me: publicProcedure.query(async ({ ctx }) => {
     if (!ctx.auth.isAuthenticated) {
@@ -55,9 +71,15 @@ export const authRouter = createTRPCRouter({
     .mutation(({ ctx, input }) =>
       callBackend<SignUpData>(ctx.api.post("/signup", input)),
     ),
-  login: publicProcedure.input(loginSchema).mutation(({ ctx, input }) =>
-    callBackend<AuthOtpActionData>(ctx.api.post("/login", input)),
-  ),
+  login: publicProcedure.input(loginSchema).mutation(async ({ ctx, input }) => {
+    const result = await callBackend<AuthSuccessData>(
+      ctx.api.post("/login", input),
+    );
+
+    setAuthCookies(ctx.resHeaders, result);
+
+    return result;
+  }),
   resendOtp: publicProcedure
     .input(resendOtpSchema)
     .mutation(({ ctx, input }) =>
@@ -66,9 +88,7 @@ export const authRouter = createTRPCRouter({
   forgotPassword: publicProcedure
     .input(forgotPasswordSchema)
     .mutation(({ ctx, input }) =>
-      callBackend<AuthOtpActionData>(
-        ctx.api.post("/forgot-password", input),
-      ),
+      callBackend<AuthOtpActionData>(ctx.api.post("/forgot-password", input)),
     ),
   validateOtp: publicProcedure
     .input(validateOtpSchema)
@@ -78,31 +98,27 @@ export const authRouter = createTRPCRouter({
       );
 
       if (isAuthSuccessData(result)) {
-        ctx.resHeaders.append(
-          "set-cookie",
-          serializeCookie("access_token", result.accessToken, result.expiresIn),
-        );
-        ctx.resHeaders.append(
-          "set-cookie",
-          serializeCookie(
-            "refresh_token",
-            result.refreshToken,
-            result.refreshExpiresIn,
-          ),
-        );
+        setAuthCookies(ctx.resHeaders, result);
       }
 
       return result;
     }),
-  logout: publicProcedure.mutation(({ ctx }) => {
-    ctx.resHeaders.append(
-      "set-cookie",
-      serializeCookie("access_token", "", 0),
-    );
-    ctx.resHeaders.append(
-      "set-cookie",
-      serializeCookie("refresh_token", "", 0),
-    );
-    return { success: true };
+  logout: publicProcedure.mutation(async ({ ctx }) => {
+    try {
+      if (ctx.auth.isAuthenticated) {
+        await callBackend<{ message: string }>(ctx.api.post("/logout"));
+      }
+
+      return { success: true };
+    } finally {
+      ctx.resHeaders.append(
+        "set-cookie",
+        serializeCookie("access_token", "", 0),
+      );
+      ctx.resHeaders.append(
+        "set-cookie",
+        serializeCookie("refresh_token", "", 0),
+      );
+    }
   }),
 });

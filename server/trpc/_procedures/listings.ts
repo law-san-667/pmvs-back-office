@@ -13,7 +13,7 @@ export const listingsRouter = createTRPCRouter({
     .input(listingsQuerySchema)
     .query(({ ctx, input }) =>
       callBackend<Listing, "paginated">(
-        ctx.api.get("/listings", { params: input }),
+        ctx.api.get("/listings/business", { params: input }),
         { mode: "paginated" },
       ),
     ),

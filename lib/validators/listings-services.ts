@@ -91,6 +91,10 @@ export const createListingSchema = z.object({
   condition: listingConditionSchema.optional(),
   status: listingStatusSchema.optional(),
   isService: z.boolean().optional(),
+  isFragile: z.boolean().nullable().optional(),
+  validityPeriod: z.number().int().nonnegative().nullable().optional(),
+  origin: z.string().trim().min(1).nullable().optional(),
+  destination: z.array(z.string().trim().min(1)).nullable().optional(),
   // -1 indicates a "sur devis" (price on quote) listing.
   priceAmountMinor: z.number().int().min(-1),
   currency: z.string().trim().min(1).optional(),
@@ -114,6 +118,10 @@ export type Listing = {
   condition: "NEW" | "LIKE_NEW" | "USED" | "REFURBISHED";
   status: "DRAFT" | "PUBLISHED" | "PAUSED" | "SOLD" | "ARCHIVED";
   isService: boolean;
+  isFragile: boolean | null;
+  validityPeriod: number | null;
+  origin: string | null;
+  destination: string[] | null;
   priceAmountMinor: number;
   currency: string;
   quantityAvailable: number;

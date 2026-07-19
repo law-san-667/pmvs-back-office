@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "@/i18n/navigation";
-import { isAuthSuccessData } from "@/lib/backend-utils";
 import { cn } from "@/lib/utils";
 import { loginSchema, type LoginInput } from "@/lib/validators/auth";
 import { trpc } from "@/server/trpc/client";
@@ -21,7 +20,6 @@ import { Controller, useForm, type Resolver } from "react-hook-form";
 import { Facebook } from "../icons/facebook";
 import { Google } from "../icons/google";
 import { PhoneInput } from "../phone-input";
-import OtpStep, { type OtpContext } from "./otp-step";
 
 export default function LoginForm({
   onSwitchToRegister,
@@ -29,7 +27,6 @@ export default function LoginForm({
   onSwitchToRegister: () => void;
 }) {
   const router = useRouter();
-  const [otpContext, setOtpContext] = useState<OtpContext | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const login = trpc.auth.login.useMutation();
@@ -43,41 +40,15 @@ export default function LoginForm({
     setMessage(null);
 
     try {
-      const result = await login.mutateAsync(data);
-
-      setOtpContext({
-        identifier: data.identifier,
-        purpose: "LOGIN",
-      });
-      setMessage(
-        result.otp?.debugCode
-          ? `Code de test: ${result.otp.debugCode}`
-          : result.message,
-      );
+      await login.mutateAsync(data);
+      router.replace("/callback");
+      router.refresh();
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Une erreur est survenue.",
       );
     }
   };
-
-  const handleOtpValidated = (result: unknown) => {
-    if (isAuthSuccessData(result as any)) {
-      router.replace("/callback");
-      router.refresh();
-    }
-  };
-
-  if (otpContext) {
-    return (
-      <OtpStep
-        context={otpContext}
-        initialMessage={message}
-        onBack={() => setOtpContext(null)}
-        onValidated={handleOtpValidated}
-      />
-    );
-  }
 
   return (
     <div className="flex flex-col items-center space-y-8">

@@ -1,0 +1,1 @@
+- [Backend has no bids endpoint](backend-no-bids-endpoint.md) — PMVS backend exposes /tenders only; no bids/soumissions resource

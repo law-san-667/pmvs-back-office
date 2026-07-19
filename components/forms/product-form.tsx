@@ -16,6 +16,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  useComboboxAnchor,
+} from "@/components/ui/combobox";
+import {
   Dialog,
   DialogContent,
   DialogFooter,
@@ -45,6 +57,7 @@ import {
 } from "@/components/ui/select";
 import { useRouter } from "@/i18n/navigation";
 import { getBackendErrorMessages } from "@/lib/backend-utils";
+import countries from "@/lib/countries.json";
 import { getCroppedImgSquare, type CroppedArea } from "@/lib/crop-image";
 import { getMutationErrorMessage } from "@/lib/mutation-error";
 import {
@@ -86,6 +99,11 @@ const CONDITION_LABELS: Record<string, string> = {
 
 const normalizeHexColor = (color: string) => color.trim().toUpperCase();
 
+const COUNTRY_NAME_BY_CODE = Object.fromEntries(
+  countries.map((country) => [country.code, country.name]),
+);
+const COUNTRY_CODES = countries.map((country) => country.code);
+
 type ImageItem = {
   file: File;
   preview: string;
@@ -106,6 +124,10 @@ const productFormSchema = z
     stock: z.string(),
     isService: z.boolean(),
     isPriceOnQuote: z.boolean(),
+    isFragile: z.boolean(),
+    validityPeriod: z.string(),
+    origin: z.string(),
+    destination: z.array(z.string()),
   })
   .superRefine((data, ctx) => {
     if (!data.isPriceOnQuote && data.price.trim() === "") {
@@ -113,6 +135,15 @@ const productFormSchema = z
         code: z.ZodIssueCode.custom,
         path: ["price"],
         message: "Le prix est requis.",
+      });
+    }
+
+    const validityPeriod = data.validityPeriod.trim();
+    if (!data.isService && validityPeriod && !/^\d+$/.test(validityPeriod)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["validityPeriod"],
+        message: "La période de validité doit être un nombre entier positif.",
       });
     }
   });
@@ -132,6 +163,10 @@ const defaultValues: ProductFormData = {
   stock: "",
   isService: false,
   isPriceOnQuote: false,
+  isFragile: false,
+  validityPeriod: "",
+  origin: "",
+  destination: [],
 };
 
 type ExistingImage = {
@@ -171,6 +206,7 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
   const selectedSizes = watchedValues.selectedSizes ?? [];
   const selectedColors = watchedValues.selectedColors ?? [];
 
+  const destinationAnchorRef = useComboboxAnchor();
   const [customColor, setCustomColor] = useState("#000000");
   const [images, setImages] = useState<ImageItem[]>([]);
   const [removedImageUrls, setRemovedImageUrls] = useState<Set<string>>(
@@ -190,11 +226,11 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
   const [croppedAreaPixels, setCroppedAreaPixels] =
     useState<CroppedArea | null>(null);
 
-  // Backend queries
-  const categories = trpc.catalog.categories.useQuery(undefined);
+  // Backend queries — only propose categories matching the listing type.
+  const categories = trpc.catalog.categories.useQuery({ isService });
   const selectedCategory = categories.data?.find((c) => c.id === categoryId);
   const subCategories = trpc.catalog.subCategories.useQuery(
-    { categorySlug: selectedCategory?.slug },
+    { categorySlug: selectedCategory?.slug, isService },
     { enabled: !!selectedCategory?.slug },
   );
 
@@ -234,9 +270,7 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
       categoryId: listing.categoryId,
       subCategoryId: listing.subCategoryId,
       price:
-        listing.priceAmountMinor < 0
-          ? ""
-          : String(listing.priceAmountMinor / 100),
+        listing.priceAmountMinor < 0 ? "" : String(listing.priceAmountMinor),
       currency: listing.currency || "XOF",
       condition: listing.condition,
       selectedSizes:
@@ -248,6 +282,11 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
       stock: listing.quantityAvailable ? String(listing.quantityAvailable) : "",
       isService: listing.isService,
       isPriceOnQuote: listing.priceAmountMinor < 0,
+      isFragile: listing.isFragile ?? false,
+      validityPeriod:
+        listing.validityPeriod != null ? String(listing.validityPeriod) : "",
+      origin: listing.origin ?? "",
+      destination: listing.destination ?? [],
     });
   }, [listingDetail.data, form]);
 
@@ -485,7 +524,7 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
         subCategoryId: data.subCategoryId,
         priceAmountMinor: data.isPriceOnQuote
           ? -1
-          : Math.round(parseFloat(data.price) * 100),
+          : Math.round(parseFloat(data.price)),
         currency: data.isPriceOnQuote ? "XOF" : data.currency,
         condition: data.isService ? undefined : data.condition,
         isService: data.isService,
@@ -495,6 +534,16 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
         specificsSections: data.isService
           ? undefined
           : buildSpecificsSections(data.selectedSizes, data.selectedColors),
+        isFragile: data.isService ? null : data.isFragile,
+        validityPeriod:
+          data.isService || !data.validityPeriod.trim()
+            ? null
+            : parseInt(data.validityPeriod, 10),
+        origin: data.isService || !data.origin ? null : data.origin,
+        destination:
+          data.isService || data.destination.length === 0
+            ? null
+            : data.destination,
       };
 
       if (isEdit && listingId) {
@@ -622,7 +671,17 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
                     <label className="flex items-start gap-3 text-sm">
                       <Checkbox
                         checked={field.value}
-                        onCheckedChange={(value) => field.onChange(!!value)}
+                        onCheckedChange={(value) => {
+                          field.onChange(!!value);
+                          // The category lists change with the listing type,
+                          // so previous selections no longer apply.
+                          form.setValue("categoryId", "", {
+                            shouldValidate: true,
+                          });
+                          form.setValue("subCategoryId", "", {
+                            shouldValidate: true,
+                          });
+                        }}
                       />
                       <span className="grid gap-1">
                         <span className="font-medium">Ceci est un service</span>
@@ -634,6 +693,103 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
                     </label>
                   )}
                 />
+              </CardContent>
+            </Card>
+
+            {/* Delivery abroad */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-bold">
+                  Livraison à l&apos;étranger
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FieldGroup>
+                  <Controller
+                    name="origin"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>Pays d&apos;origine (optionnel)</FieldLabel>
+                        <Combobox
+                          items={COUNTRY_CODES}
+                          itemToStringLabel={(code) =>
+                            COUNTRY_NAME_BY_CODE[code] ?? code
+                          }
+                          value={field.value || null}
+                          onValueChange={(value) => field.onChange(value ?? "")}
+                        >
+                          <ComboboxInput
+                            placeholder="Sélectionner un pays"
+                            showClear
+                            className="w-full"
+                            aria-invalid={fieldState.invalid}
+                          />
+                          <ComboboxContent>
+                            <ComboboxEmpty>Aucun pays trouvé.</ComboboxEmpty>
+                            <ComboboxList>
+                              {countries.map((country) => (
+                                <ComboboxItem
+                                  key={country.code}
+                                  value={country.code}
+                                >
+                                  {country.name}
+                                </ComboboxItem>
+                              ))}
+                            </ComboboxList>
+                          </ComboboxContent>
+                        </Combobox>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+
+                  <Controller
+                    name="destination"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>Pays de destination (optionnel)</FieldLabel>
+                        <Combobox
+                          multiple
+                          items={COUNTRY_CODES}
+                          itemToStringLabel={(code) =>
+                            COUNTRY_NAME_BY_CODE[code] ?? code
+                          }
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <ComboboxChips ref={destinationAnchorRef}>
+                            {field.value.map((code) => (
+                              <ComboboxChip key={code}>
+                                {COUNTRY_NAME_BY_CODE[code] ?? code}
+                              </ComboboxChip>
+                            ))}
+                            <ComboboxChipsInput placeholder="Pays" />
+                          </ComboboxChips>
+                          <ComboboxContent anchor={destinationAnchorRef}>
+                            <ComboboxEmpty>Aucun pays trouvé.</ComboboxEmpty>
+                            <ComboboxList>
+                              {countries.map((country) => (
+                                <ComboboxItem
+                                  key={country.code}
+                                  value={country.code}
+                                >
+                                  {country.name}
+                                </ComboboxItem>
+                              ))}
+                            </ComboboxList>
+                          </ComboboxContent>
+                        </Combobox>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                </FieldGroup>
               </CardContent>
             </Card>
 
@@ -762,140 +918,192 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
           {/* Right column */}
           <div className="flex flex-col gap-4">
             {!isService && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-bold">Détail du produit</CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-5">
-                  {/* Sizes */}
-                  <Controller
-                    name="selectedSizes"
-                    control={form.control}
-                    render={() => (
-                      <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                          <RadioGroupItem value="size" />
-                          <Label>Taille</Label>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {SIZES.map((size) => (
-                            <button
-                              key={size}
-                              type="button"
-                              onClick={() =>
-                                toggleArrayField("selectedSizes", size)
-                              }
-                              className={`flex size-10 items-center justify-center rounded-md border text-sm font-medium transition-colors ${
-                                selectedSizes.includes(size)
-                                  ? "border-primary bg-primary text-primary-foreground"
-                                  : "border-input hover:bg-muted"
-                              }`}
-                            >
-                              {size}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  />
-
-                  {/* Colors */}
-                  <Controller
-                    name="selectedColors"
-                    control={form.control}
-                    render={() => (
-                      <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                          <RadioGroupItem value="color" />
-                          <Label>Couleur du produit</Label>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-3">
-                          {PRESET_COLORS.map((color) => (
-                            <button
-                              key={color.value}
-                              type="button"
-                              onClick={() =>
-                                toggleArrayField("selectedColors", color.value)
-                              }
-                              className={`size-9 rounded-full border-2 transition-all ${
-                                selectedColors.includes(color.value)
-                                  ? "border-primary ring-primary/30 ring-2"
-                                  : "border-transparent"
-                              }`}
-                              style={{ backgroundColor: color.value }}
-                              title={color.name}
-                            >
-                              {color.value === "#FFFFFF" && (
-                                <span className="flex size-full items-center justify-center rounded-full border border-gray-200" />
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                        {/* Custom color picker */}
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="color"
-                            value={customColor}
-                            onChange={(e) => setCustomColor(e.target.value)}
-                            className="border-input size-9 cursor-pointer rounded-md border p-0.5"
-                            title="Couleur personnalisée"
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={addCustomColor}
-                          >
-                            <PlusIcon className="size-3" />
-                            Ajouter couleur
-                          </Button>
-                          {selectedColors
-                            .filter(
-                              (c) => !PRESET_COLORS.some((p) => p.value === c),
-                            )
-                            .map((c) => (
+              <>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-bold">
+                      Détail du produit
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-5">
+                    {/* Sizes */}
+                    <Controller
+                      name="selectedSizes"
+                      control={form.control}
+                      render={() => (
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-2">
+                            <RadioGroupItem value="size" />
+                            <Label>Taille</Label>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {SIZES.map((size) => (
                               <button
-                                key={c}
+                                key={size}
                                 type="button"
                                 onClick={() =>
-                                  toggleArrayField("selectedColors", c)
+                                  toggleArrayField("selectedSizes", size)
                                 }
-                                className="border-primary ring-primary/30 size-9 rounded-full border-2 ring-2"
-                                style={{ backgroundColor: c }}
-                                title={c}
-                              />
+                                className={`flex size-10 items-center justify-center rounded-md border text-sm font-medium transition-colors ${
+                                  selectedSizes.includes(size)
+                                    ? "border-primary bg-primary text-primary-foreground"
+                                    : "border-input hover:bg-muted"
+                                }`}
+                              >
+                                {size}
+                              </button>
                             ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  />
+                      )}
+                    />
 
-                  {/* Condition */}
-                  <Controller
-                    name="condition"
-                    control={form.control}
-                    render={({ field }) => (
-                      <div className="flex flex-col gap-2">
-                        <Label>État du produit</Label>
-                        <div className="flex flex-wrap gap-2">
-                          {listingConditionEnum.map((cond) => (
-                            <Badge
-                              key={cond}
-                              variant={
-                                field.value === cond ? "default" : "outline"
-                              }
-                              className="cursor-pointer rounded-sm px-5 py-3 select-none"
-                              onClick={() => field.onChange(cond)}
+                    {/* Colors */}
+                    <Controller
+                      name="selectedColors"
+                      control={form.control}
+                      render={() => (
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-2">
+                            <RadioGroupItem value="color" />
+                            <Label>Couleur du produit</Label>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-3">
+                            {PRESET_COLORS.map((color) => (
+                              <button
+                                key={color.value}
+                                type="button"
+                                onClick={() =>
+                                  toggleArrayField(
+                                    "selectedColors",
+                                    color.value,
+                                  )
+                                }
+                                className={`size-9 rounded-full border-2 transition-all ${
+                                  selectedColors.includes(color.value)
+                                    ? "border-primary ring-primary/30 ring-2"
+                                    : "border-transparent"
+                                }`}
+                                style={{ backgroundColor: color.value }}
+                                title={color.name}
+                              >
+                                {color.value === "#FFFFFF" && (
+                                  <span className="flex size-full items-center justify-center rounded-full border border-gray-200" />
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                          {/* Custom color picker */}
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={customColor}
+                              onChange={(e) => setCustomColor(e.target.value)}
+                              className="border-input size-9 cursor-pointer rounded-md border p-0.5"
+                              title="Couleur personnalisée"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={addCustomColor}
                             >
-                              {CONDITION_LABELS[cond] ?? cond}
-                            </Badge>
-                          ))}
+                              <PlusIcon className="size-3" />
+                              Ajouter couleur
+                            </Button>
+                            {selectedColors
+                              .filter(
+                                (c) =>
+                                  !PRESET_COLORS.some((p) => p.value === c),
+                              )
+                              .map((c) => (
+                                <button
+                                  key={c}
+                                  type="button"
+                                  onClick={() =>
+                                    toggleArrayField("selectedColors", c)
+                                  }
+                                  className="border-primary ring-primary/30 size-9 rounded-full border-2 ring-2"
+                                  style={{ backgroundColor: c }}
+                                  title={c}
+                                />
+                              ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  />
-                </CardContent>
-              </Card>
+                      )}
+                    />
+
+                    {/* Condition */}
+                    <Controller
+                      name="condition"
+                      control={form.control}
+                      render={({ field }) => (
+                        <div className="flex flex-col gap-2">
+                          <Label>État du produit</Label>
+                          <div className="flex flex-wrap gap-2">
+                            {listingConditionEnum.map((cond) => (
+                              <Badge
+                                key={cond}
+                                variant={
+                                  field.value === cond ? "default" : "outline"
+                                }
+                                className="cursor-pointer rounded-sm px-5 py-3 select-none"
+                                onClick={() => field.onChange(cond)}
+                              >
+                                {CONDITION_LABELS[cond] ?? cond}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    />
+
+                    {/* Fragile */}
+                    <Controller
+                      name="isFragile"
+                      control={form.control}
+                      render={({ field }) => (
+                        <label className="flex items-start gap-3 text-sm">
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={(value) => field.onChange(!!value)}
+                          />
+                          <span className="grid gap-1">
+                            <span className="font-medium">Produit fragile</span>
+                            <span className="text-muted-foreground">
+                              À manipuler avec précaution lors de la livraison.
+                            </span>
+                          </span>
+                        </label>
+                      )}
+                    />
+
+                    {/* Validity period */}
+                    <Controller
+                      name="validityPeriod"
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel>
+                            Période de validité (jours, optionnel)
+                          </FieldLabel>
+                          <Input
+                            {...field}
+                            type="number"
+                            min={0}
+                            aria-invalid={fieldState.invalid}
+                            placeholder="30"
+                            className="w-40"
+                          />
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
+              </>
             )}
 
             {/* Price */}

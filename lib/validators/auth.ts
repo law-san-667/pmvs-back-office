@@ -12,31 +12,39 @@ const otpPurposeSchema = z.enum([
   "VERIFY_PHONE",
 ]);
 
-export const registerSchema = z.object({
-  firstName: z.string().trim().min(1),
-  lastName: z.string().trim().min(1),
-  phoneNumber: z.string().trim().min(6).max(20).optional(),
-  email: z.string().trim().email().optional(),
-  password: z.string().min(8),
-  confirmPassword: z.string().min(8),
-  role: userRoleSchema,
-  device: authDeviceSchema,
-}).superRefine((value, ctx) => {
-  if (!value.email && !value.phoneNumber) {
-    ctx.addIssue({
-      code: "custom",
-      message: "Email or phone number is required.",
-      path: ["phoneNumber"],
-    });
-  }
+export const registerSchema = z
+  .object({
+    firstName: z.string().trim().min(1),
+    lastName: z.string().trim().min(1),
+    phoneNumber: z.string().trim().min(6).max(20).optional(),
+    email: z.string().trim().email().optional(),
+    password: z.string().min(8),
+    confirmPassword: z.string().min(8),
+    role: userRoleSchema,
+    device: authDeviceSchema,
+  })
+  .superRefine((value, ctx) => {
+    if (!value.email && !value.phoneNumber) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Email or phone number is required.",
+        path: ["phoneNumber"],
+      });
+    }
 
-  if (value.password !== value.confirmPassword) {
-    ctx.addIssue({
-      code: "custom",
-      message: "Passwords do not match.",
-      path: ["confirmPassword"],
-    });
-  }
+    if (value.password !== value.confirmPassword) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Passwords do not match.",
+        path: ["confirmPassword"],
+      });
+    }
+  });
+
+export const registerFormSchema = registerSchema.safeExtend({
+  acceptTerms: z.boolean().refine((accepted) => accepted, {
+    message: "Vous devez accepter les CGU pour vous inscrire.",
+  }),
 });
 
 export const loginSchema = z.object({
@@ -100,6 +108,7 @@ export const validateOtpSchema = z
   });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
+export type RegisterFormInput = z.infer<typeof registerFormSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type ResendOtpInput = z.infer<typeof resendOtpSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;

@@ -40,6 +40,7 @@ import { useRouter } from "@/i18n/navigation";
 import { getBackendErrorMessages } from "@/lib/backend-utils";
 import { getCroppedImg, type CroppedArea } from "@/lib/crop-image";
 import { getMutationErrorMessage } from "@/lib/mutation-error";
+import legalBusinessQuestions from "@/lib/questions.json";
 import {
   uploadFileToR2FromBrowser,
   uploadFilesToR2FromBrowser,
@@ -47,7 +48,10 @@ import {
 } from "@/lib/upload-to-r2";
 import {
   createBusinessInputSchema,
+  legalBusinessInformationSchema,
   type CreateBusinessInput,
+  type LegalBusinessInformation,
+  type LegalBusinessType,
 } from "@/lib/validators/business";
 import { trpc } from "@/server/trpc/client";
 import { AlertCircle, Camera, Pencil, Upload, X } from "lucide-react";
@@ -57,7 +61,30 @@ import Cropper from "react-easy-crop";
 import { Controller, useForm, useWatch, type Control } from "react-hook-form";
 import { PhoneInput } from "../phone-input";
 
-const TOTAL_STEPS = 5;
+const BASE_TOTAL_STEPS = 5;
+const LEGAL_TOTAL_STEPS = 9;
+
+const legalBusinessIdentitySchema = legalBusinessInformationSchema.omit({
+  legalRepresentative: true,
+  productionResources: true,
+  productCategories: true,
+  serviceCategories: true,
+  businessTypes: true,
+  otherBusinessType: true,
+  importExportIssues: true,
+  plannedActions: true,
+});
+
+const LEGAL_BUSINESS_TYPES: Array<{
+  value: LegalBusinessType;
+  label: string;
+}> = [
+  { value: "PRODUCER", label: "Producteur" },
+  { value: "EXPORTER", label: "Exportateur" },
+  { value: "IMPORTER", label: "Importateur" },
+  { value: "IMPORTER_EXPORTER", label: "Importateur / Exportateur" },
+  { value: "OTHER", label: "Autre" },
+];
 
 const LEGAL_DOCUMENT_ACCEPT = {
   "image/svg+xml": [".svg"],
@@ -90,6 +117,31 @@ interface FormData {
   waveNumber: string;
   isRegularized: boolean | null;
   legalDocuments: File[];
+  legalAcronym: string;
+  legalCreationYear: string;
+  legalStatus: string;
+  commercialRegisterNumber: string;
+  permanentStaffCount: string;
+  legalAddresses: string;
+  postalAddress: string;
+  headquartersLatitude: string;
+  headquartersLongitude: string;
+  legalWebsite: string;
+  productCategories: string;
+  serviceCategories: string;
+  businessTypes: LegalBusinessType[];
+  otherBusinessType: string;
+  representativeName: string;
+  representativeRole: string;
+  representativeEmail: string;
+  representativeMobilePhone: string;
+  productionDescription: string;
+  workshopAreaM2: string;
+  storeAreaM2: string;
+  outdoorAreaM2: string;
+  importExportIssues: string;
+  plannedActions: string;
+  legalQuestionTitles: string[];
 }
 
 const initialFormData: FormData = {
@@ -112,11 +164,119 @@ const initialFormData: FormData = {
   waveNumber: "",
   isRegularized: null,
   legalDocuments: [],
+  legalAcronym: "",
+  legalCreationYear: "",
+  legalStatus: "",
+  commercialRegisterNumber: "",
+  permanentStaffCount: "",
+  legalAddresses: "",
+  postalAddress: "",
+  headquartersLatitude: "",
+  headquartersLongitude: "",
+  legalWebsite: "",
+  productCategories: "",
+  serviceCategories: "",
+  businessTypes: [],
+  otherBusinessType: "",
+  representativeName: "",
+  representativeRole: "",
+  representativeEmail: "",
+  representativeMobilePhone: "",
+  productionDescription: "",
+  workshopAreaM2: "",
+  storeAreaM2: "",
+  outdoorAreaM2: "",
+  importExportIssues: "",
+  plannedActions: "",
+  legalQuestionTitles: [],
 };
 
 const optional = (value: string) => {
   const trimmed = value.trim();
   return trimmed.length ? trimmed : undefined;
+};
+
+const optionalNumber = (value: string) => {
+  const trimmed = value.trim();
+  return trimmed.length ? Number(trimmed) : undefined;
+};
+
+const stringList = (value: string) => {
+  const values = value
+    .split(/[\n,]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  return values.length ? values : undefined;
+};
+
+const buildLegalBusinessInformation = (
+  formData: FormData,
+): LegalBusinessInformation => {
+  const information: LegalBusinessInformation = {
+    creationYear: Number(formData.legalCreationYear),
+    legalStatus: formData.legalStatus,
+    commercialRegisterNumber: formData.commercialRegisterNumber,
+    legalRepresentative: {
+      name: formData.representativeName,
+      mobilePhone: formData.representativeMobilePhone,
+    },
+  };
+
+  const optionalFields = {
+    acronym: optional(formData.legalAcronym),
+    permanentStaffCount: optionalNumber(formData.permanentStaffCount),
+    addresses: stringList(formData.legalAddresses),
+    postalAddress: optional(formData.postalAddress),
+    website: optional(formData.legalWebsite),
+    productCategories: stringList(formData.productCategories),
+    serviceCategories: stringList(formData.serviceCategories),
+    businessTypes: formData.businessTypes.length
+      ? formData.businessTypes
+      : undefined,
+    otherBusinessType: optional(formData.otherBusinessType),
+    importExportIssues: optional(formData.importExportIssues),
+    plannedActions: optional(formData.plannedActions),
+  } satisfies Partial<LegalBusinessInformation>;
+
+  Object.assign(
+    information,
+    Object.fromEntries(
+      Object.entries(optionalFields).filter(([, value]) => value !== undefined),
+    ),
+  );
+
+  const representativeRole = optional(formData.representativeRole);
+  const representativeEmail = optional(formData.representativeEmail);
+  if (representativeRole) {
+    information.legalRepresentative.role = representativeRole;
+  }
+  if (representativeEmail) {
+    information.legalRepresentative.email = representativeEmail;
+  }
+
+  const latitude = optionalNumber(formData.headquartersLatitude);
+  const longitude = optionalNumber(formData.headquartersLongitude);
+  if (latitude !== undefined && longitude !== undefined) {
+    information.headquartersGeolocation = { latitude, longitude };
+  }
+
+  const productionResources = {
+    description: optional(formData.productionDescription),
+    workshopAreaM2: optionalNumber(formData.workshopAreaM2),
+    storeAreaM2: optionalNumber(formData.storeAreaM2),
+    outdoorAreaM2: optionalNumber(formData.outdoorAreaM2),
+  };
+  const definedProductionResources = Object.fromEntries(
+    Object.entries(productionResources).filter(
+      ([, value]) => value !== undefined,
+    ),
+  );
+  if (Object.keys(definedProductionResources).length) {
+    information.productionResources = definedProductionResources;
+  }
+
+  return information;
 };
 
 const buildCreateBusinessPayload = (
@@ -146,6 +306,13 @@ const buildCreateBusinessPayload = (
     payload.deliveryZones = formData.deliveryZones;
   if (uploadedFiles.legalDocumentUrls.length)
     payload.legalDocuments = uploadedFiles.legalDocumentUrls;
+
+  if (formData.isRegularized === true) {
+    payload.legalBusinessInformation = buildLegalBusinessInformation(formData);
+    payload.legalBusinessQuestions = formData.legalQuestionTitles.map(
+      (questionTitle) => ({ questionTitle, answer: "" }),
+    );
+  }
 
   for (const [key, value] of Object.entries(optionalFields)) {
     if (value !== undefined) {
@@ -187,6 +354,8 @@ export default function InitBusinessForm() {
     defaultValues: initialFormData,
   });
   const formData = useWatch({ control: form.control }) as FormData;
+  const totalSteps =
+    formData.isRegularized === true ? LEGAL_TOTAL_STEPS : BASE_TOTAL_STEPS;
 
   const [cropImage, setCropImage] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -290,7 +459,60 @@ export default function InitBusinessForm() {
 
   const next = () => {
     setSubmissionErrors([]);
-    if (step < TOTAL_STEPS) setStep(step + 1);
+
+    if (
+      step === BASE_TOTAL_STEPS &&
+      formData.isRegularized === true &&
+      formData.legalDocuments.length === 0
+    ) {
+      setSubmissionErrors([
+        "Ajoutez au moins un document légal avant de continuer.",
+      ]);
+      return;
+    }
+
+    if (step === 6) {
+      const hasLatitude = formData.headquartersLatitude.trim().length > 0;
+      const hasLongitude = formData.headquartersLongitude.trim().length > 0;
+
+      if (hasLatitude !== hasLongitude) {
+        setSubmissionErrors([
+          "Renseignez la latitude et la longitude du siège ensemble.",
+        ]);
+        return;
+      }
+
+      const result = legalBusinessIdentitySchema.safeParse(
+        buildLegalBusinessInformation(formData),
+      );
+
+      if (!result.success) {
+        setSubmissionErrors(result.error.issues.map((issue) => issue.message));
+        return;
+      }
+    }
+
+    if (
+      step === 7 &&
+      formData.businessTypes.includes("OTHER") &&
+      formData.otherBusinessType.trim().length === 0
+    ) {
+      setSubmissionErrors(["Précisez l'autre type d'activité."]);
+      return;
+    }
+
+    if (step === 8) {
+      const result = legalBusinessInformationSchema.safeParse(
+        buildLegalBusinessInformation(formData),
+      );
+
+      if (!result.success) {
+        setSubmissionErrors(result.error.issues.map((issue) => issue.message));
+        return;
+      }
+    }
+
+    if (step < totalSteps) setStep((currentStep) => currentStep + 1);
   };
 
   const isMutating = createBusiness.isPending || isUploading;
@@ -299,6 +521,24 @@ export default function InitBusinessForm() {
     if (isMutating) return;
 
     setSubmissionErrors([]);
+
+    if (formData.isRegularized === null) {
+      setSubmissionErrors([
+        "Indiquez si votre business est régularisé avant de continuer.",
+      ]);
+      return;
+    }
+
+    if (
+      formData.isRegularized === true &&
+      formData.legalQuestionTitles.length === 0
+    ) {
+      setSubmissionErrors([
+        "Sélectionnez au moins une question applicable à votre business.",
+      ]);
+      return;
+    }
+
     setIsUploading(true);
     setUploadProgress(0);
 
@@ -325,10 +565,14 @@ export default function InitBusinessForm() {
       if (logoFile) completedParts++;
 
       const legalDocumentUrls = (
-        await uploadFilesToR2FromBrowser(legalFiles, "docs", createUpload, (p) =>
-          setUploadProgress(
-            Math.round(((completedParts * 100 + p) / totalParts) * 1),
-          ),
+        await uploadFilesToR2FromBrowser(
+          legalFiles,
+          "docs",
+          createUpload,
+          (p) =>
+            setUploadProgress(
+              Math.round(((completedParts * 100 + p) / totalParts) * 1),
+            ),
         )
       ).filter((url): url is string => url !== undefined);
 
@@ -336,8 +580,7 @@ export default function InitBusinessForm() {
       setUploadProgress(100);
 
       const availableCities = cities.data?.items ?? [];
-      const citySlug =
-        formData.citySlug || availableCities[0]?.slug || "dakar";
+      const citySlug = formData.citySlug || availableCities[0]?.slug || "dakar";
 
       const payload = buildCreateBusinessPayload(formData, {
         imageUrl,
@@ -372,7 +615,7 @@ export default function InitBusinessForm() {
   return (
     <div className="flex w-full flex-col gap-6">
       <p className="text-muted-foreground text-sm">
-        {step}/{TOTAL_STEPS}
+        {step}/{totalSteps}
       </p>
       {visibleErrors.length > 0 && (
         <div className="border-destructive/30 bg-destructive/5 flex flex-wrap gap-2 rounded-md border p-3">
@@ -422,6 +665,10 @@ export default function InitBusinessForm() {
           removeDocument={removeDocument}
         />
       )}
+      {step === 6 && <Step6 control={form.control} />}
+      {step === 7 && <Step7 control={form.control} formData={formData} />}
+      {step === 8 && <Step8 control={form.control} />}
+      {step === 9 && <Step9 control={form.control} formData={formData} />}
 
       <div className="flex flex-col gap-3">
         {step > 1 && (
@@ -437,7 +684,7 @@ export default function InitBusinessForm() {
         <Button
           size="lg"
           className="h-12! w-full rounded-sm"
-          onClick={step === TOTAL_STEPS ? handleSubmit : next}
+          onClick={step === totalSteps ? handleSubmit : next}
           disabled={isMutating}
         >
           {isUploading
@@ -568,7 +815,13 @@ function Step2({
   isLoadingCities: boolean;
 }) {
   const deliveryZoneAnchorRef = useComboboxAnchor();
+  const countryNameByCode = Object.fromEntries(
+    countries.map((country) => [country.code, country.name]),
+  );
   const cityNameBySlug = new Map(cities.map((city) => [city.slug, city.name]));
+  const cityNameItems = Object.fromEntries(
+    cities.map((city) => [city.slug, city.name]),
+  );
   const citySlugs = cities.map((city) => city.slug);
 
   return (
@@ -580,6 +833,7 @@ function Step2({
           <Field data-invalid={fieldState.invalid}>
             <FieldLabel>Pays</FieldLabel>
             <Select
+              items={countryNameByCode}
               value={field.value}
               onValueChange={(val) => {
                 if (!val) return;
@@ -616,6 +870,7 @@ function Step2({
           <Field data-invalid={fieldState.invalid}>
             <FieldLabel>Ville</FieldLabel>
             <Select
+              items={cityNameItems}
               value={field.value}
               onValueChange={(val) => val && field.onChange(val)}
               disabled={isLoadingCities || cities.length === 0}
@@ -903,6 +1158,377 @@ function Step5({
           </div>
         )}
       </Field>
+    </FieldGroup>
+  );
+}
+
+type LegalStringField =
+  | "legalAcronym"
+  | "legalCreationYear"
+  | "legalStatus"
+  | "commercialRegisterNumber"
+  | "permanentStaffCount"
+  | "legalAddresses"
+  | "postalAddress"
+  | "headquartersLatitude"
+  | "headquartersLongitude"
+  | "legalWebsite"
+  | "productCategories"
+  | "serviceCategories"
+  | "otherBusinessType"
+  | "representativeName"
+  | "representativeRole"
+  | "representativeEmail"
+  | "representativeMobilePhone"
+  | "productionDescription"
+  | "workshopAreaM2"
+  | "storeAreaM2"
+  | "outdoorAreaM2"
+  | "importExportIssues"
+  | "plannedActions";
+
+function LegalInput({
+  control,
+  name,
+  label,
+  type = "text",
+  placeholder,
+}: {
+  control: Control<FormData>;
+  name: LegalStringField;
+  label: string;
+  type?: React.HTMLInputTypeAttribute;
+  placeholder?: string;
+}) {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState }) => (
+        <Field data-invalid={fieldState.invalid}>
+          <FieldLabel>{label}</FieldLabel>
+          <Input
+            {...field}
+            type={type}
+            placeholder={placeholder}
+            aria-invalid={fieldState.invalid}
+            className="h-12"
+          />
+          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+        </Field>
+      )}
+    />
+  );
+}
+
+function LegalTextarea({
+  control,
+  name,
+  label,
+  placeholder,
+}: {
+  control: Control<FormData>;
+  name: LegalStringField;
+  label: string;
+  placeholder?: string;
+}) {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState }) => (
+        <Field data-invalid={fieldState.invalid}>
+          <FieldLabel>{label}</FieldLabel>
+          <Textarea
+            {...field}
+            placeholder={placeholder}
+            aria-invalid={fieldState.invalid}
+          />
+          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+        </Field>
+      )}
+    />
+  );
+}
+
+// ─── Step 6: Legal business information ──────────────────────────────
+
+function Step6({ control }: { control: Control<FormData> }) {
+  return (
+    <div className="max-h-[65vh] overflow-y-auto pr-3">
+      <FieldGroup>
+        <div>
+          <h2 className="font-semibold">Informations juridiques</h2>
+          <p className="text-muted-foreground text-sm">
+            Renseignez les informations officielles de votre entreprise.
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <LegalInput
+            control={control}
+            name="legalAcronym"
+            label="Sigle (optionnel)"
+          />
+          <LegalInput
+            control={control}
+            name="legalCreationYear"
+            label="Année de création"
+            type="number"
+            placeholder="2024"
+          />
+        </div>
+        <LegalInput
+          control={control}
+          name="legalStatus"
+          label="Statut juridique"
+          placeholder="SARL, SA, GIE…"
+        />
+        <LegalInput
+          control={control}
+          name="commercialRegisterNumber"
+          label="Numéro du registre de commerce"
+        />
+        <LegalInput
+          control={control}
+          name="permanentStaffCount"
+          label="Nombre d'employés permanents (optionnel)"
+          type="number"
+        />
+        <LegalTextarea
+          control={control}
+          name="legalAddresses"
+          label="Adresses (optionnel)"
+          placeholder="Une adresse par ligne"
+        />
+        <LegalInput
+          control={control}
+          name="postalAddress"
+          label="Adresse postale (optionnel)"
+        />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <LegalInput
+            control={control}
+            name="headquartersLatitude"
+            label="Latitude du siège (optionnel)"
+            type="number"
+          />
+          <LegalInput
+            control={control}
+            name="headquartersLongitude"
+            label="Longitude du siège (optionnel)"
+            type="number"
+          />
+        </div>
+        <LegalInput
+          control={control}
+          name="legalWebsite"
+          label="Site web (optionnel)"
+          type="url"
+          placeholder="https://example.com"
+        />
+      </FieldGroup>
+    </div>
+  );
+}
+
+// ─── Step 7: Business activities ─────────────────────────────────────
+
+function Step7({
+  control,
+  formData,
+}: {
+  control: Control<FormData>;
+  formData: FormData;
+}) {
+  return (
+    <FieldGroup>
+      <div>
+        <h2 className="font-semibold">Activités de l&apos;entreprise</h2>
+        <p className="text-muted-foreground text-sm">
+          Décrivez les produits, services et activités de votre entreprise.
+        </p>
+      </div>
+      <LegalTextarea
+        control={control}
+        name="productCategories"
+        label="Catégories de produits (optionnel)"
+        placeholder="Séparez les catégories par une virgule ou une ligne"
+      />
+      <LegalTextarea
+        control={control}
+        name="serviceCategories"
+        label="Catégories de services (optionnel)"
+        placeholder="Séparez les catégories par une virgule ou une ligne"
+      />
+      <Controller
+        name="businessTypes"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel>Types d&apos;activité (optionnel)</FieldLabel>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {LEGAL_BUSINESS_TYPES.map((businessType) => (
+                <label
+                  key={businessType.value}
+                  className="flex items-center gap-2 rounded-md border p-3 text-sm"
+                >
+                  <Checkbox
+                    checked={field.value.includes(businessType.value)}
+                    onCheckedChange={(checked) => {
+                      field.onChange(
+                        checked
+                          ? [...field.value, businessType.value]
+                          : field.value.filter(
+                              (value) => value !== businessType.value,
+                            ),
+                      );
+                    }}
+                  />
+                  {businessType.label}
+                </label>
+              ))}
+            </div>
+            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+          </Field>
+        )}
+      />
+      {formData.businessTypes.includes("OTHER") && (
+        <LegalInput
+          control={control}
+          name="otherBusinessType"
+          label="Autre type d'activité"
+        />
+      )}
+      <LegalTextarea
+        control={control}
+        name="importExportIssues"
+        label="Difficultés d'import-export (optionnel)"
+      />
+      <LegalTextarea
+        control={control}
+        name="plannedActions"
+        label="Actions prévues (optionnel)"
+      />
+    </FieldGroup>
+  );
+}
+
+// ─── Step 8: Legal representative and production resources ──────────
+
+function Step8({ control }: { control: Control<FormData> }) {
+  return (
+    <FieldGroup>
+      <div>
+        <h2 className="font-semibold">Représentant et moyens de production</h2>
+        <p className="text-muted-foreground text-sm">
+          Renseignez le représentant légal et les capacités de production.
+        </p>
+      </div>
+      <LegalInput
+        control={control}
+        name="representativeName"
+        label="Nom complet du représentant"
+      />
+      <LegalInput
+        control={control}
+        name="representativeRole"
+        label="Fonction (optionnel)"
+      />
+      <LegalInput
+        control={control}
+        name="representativeEmail"
+        label="Email (optionnel)"
+        type="email"
+      />
+      <LegalInput
+        control={control}
+        name="representativeMobilePhone"
+        label="Téléphone mobile"
+      />
+      <div className="border-t pt-2">
+        <h3 className="font-medium">Moyens de production (optionnel)</h3>
+      </div>
+      <LegalTextarea
+        control={control}
+        name="productionDescription"
+        label="Description des moyens de production"
+      />
+      <div className="grid gap-4 sm:grid-cols-3">
+        <LegalInput
+          control={control}
+          name="workshopAreaM2"
+          label="Atelier (m²)"
+          type="number"
+        />
+        <LegalInput
+          control={control}
+          name="storeAreaM2"
+          label="Magasin (m²)"
+          type="number"
+        />
+        <LegalInput
+          control={control}
+          name="outdoorAreaM2"
+          label="Extérieur (m²)"
+          type="number"
+        />
+      </div>
+    </FieldGroup>
+  );
+}
+
+// ─── Step 9: Applicable legal-business questions ─────────────────────
+
+function Step9({
+  control,
+  formData,
+}: {
+  control: Control<FormData>;
+  formData: FormData;
+}) {
+  return (
+    <FieldGroup>
+      <div>
+        <h2 className="font-semibold">Questions applicables</h2>
+        <p className="text-muted-foreground text-sm">
+          Sélectionnez les questions qui correspondent à votre entreprise. Les
+          réponses pourront être complétées ultérieurement.
+        </p>
+      </div>
+      <p className="text-muted-foreground text-sm">
+        {formData.legalQuestionTitles.length} question(s) sélectionnée(s)
+      </p>
+      <Controller
+        name="legalQuestionTitles"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <div className="max-h-[55vh] space-y-2 overflow-y-auto pr-3">
+              {legalBusinessQuestions.map((question) => (
+                <label
+                  key={question}
+                  className="hover:bg-muted/50 flex cursor-pointer items-start gap-3 rounded-md border p-3 text-sm"
+                >
+                  <Checkbox
+                    className="mt-0.5"
+                    checked={field.value.includes(question)}
+                    onCheckedChange={(checked) => {
+                      field.onChange(
+                        checked
+                          ? [...field.value, question]
+                          : field.value.filter((value) => value !== question),
+                      );
+                    }}
+                  />
+                  <span>{question}</span>
+                </label>
+              ))}
+            </div>
+            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+          </Field>
+        )}
+      />
     </FieldGroup>
   );
 }

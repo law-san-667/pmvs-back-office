@@ -1,5 +1,8 @@
 import type { Business } from "@/lib/backend-resource-types";
-import { createBusinessInputSchema } from "@/lib/validators/business";
+import {
+  createBusinessInputSchema,
+  updateBusinessInputSchema,
+} from "@/lib/validators/business";
 import { callBackend } from "@/server/backend-utils";
 import { createTRPCRouter, privateProcedure } from "../init";
 
@@ -17,6 +20,15 @@ export const businessesRouter = createTRPCRouter({
     .mutation(({ ctx, input }) => {
       return callBackend<Business>(
         ctx.api.post("/businesses", omitUndefined(input)),
+      );
+    }),
+  update: privateProcedure
+    .input(updateBusinessInputSchema)
+    .mutation(({ ctx, input }) => {
+      const { id, ...rest } = input;
+
+      return callBackend<Business>(
+        ctx.api.patch(`/businesses/${id}`, omitUndefined(rest)),
       );
     }),
 });

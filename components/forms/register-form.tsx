@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
   FieldDescription,
@@ -10,8 +11,11 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "@/i18n/navigation";
-import { isAuthSuccessData } from "@/lib/backend-utils";
-import { registerSchema, type RegisterInput } from "@/lib/validators/auth";
+import { isAuthSuccessData, type ValidateOtpData } from "@/lib/backend-utils";
+import {
+  registerFormSchema,
+  type RegisterFormInput,
+} from "@/lib/validators/auth";
 import { trpc } from "@/server/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LockKeyhole, User } from "lucide-react";
@@ -31,8 +35,8 @@ export default function RegisterForm({
 
   const register = trpc.auth.register.useMutation();
 
-  const form = useForm<RegisterInput>({
-    resolver: zodResolver(registerSchema) as Resolver<RegisterInput>,
+  const form = useForm<RegisterFormInput>({
+    resolver: zodResolver(registerFormSchema) as Resolver<RegisterFormInput>,
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -41,16 +45,23 @@ export default function RegisterForm({
       confirmPassword: "",
       role: "SELLER",
       device: "WEB",
+      acceptTerms: false,
     },
   });
 
-  const onSubmit = async (data: RegisterInput) => {
+  const onSubmit = async (data: RegisterFormInput) => {
     setMessage(null);
 
     try {
       const result = await register.mutateAsync({
-        ...data,
+        firstName: data.firstName,
+        lastName: data.lastName,
         phoneNumber: data.phoneNumber || undefined,
+        email: data.email,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+        role: data.role,
+        device: data.device,
       });
 
       const identifier = data.phoneNumber || "";
@@ -68,8 +79,8 @@ export default function RegisterForm({
     }
   };
 
-  const handleOtpValidated = (result: unknown) => {
-    if (isAuthSuccessData(result as any)) {
+  const handleOtpValidated = (result: ValidateOtpData) => {
+    if (isAuthSuccessData(result)) {
       router.replace("/callback");
       router.refresh();
     }
@@ -228,6 +239,32 @@ export default function RegisterForm({
                 )}
               />
             </div>
+
+            <Controller
+              name="acceptTerms"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <label className="flex cursor-pointer items-start gap-3 text-sm leading-5 text-slate-600">
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={(checked) => field.onChange(!!checked)}
+                      onBlur={field.onBlur}
+                      disabled={register.isPending}
+                      aria-invalid={fieldState.invalid}
+                      className="mt-0.5"
+                    />
+                    <span>
+                      J&apos;accepte les Conditions Générales d&apos;Utilisation
+                      (CGU).
+                    </span>
+                  </label>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
           </FieldGroup>
 
           <Field>
