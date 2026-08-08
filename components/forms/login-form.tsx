@@ -15,11 +15,14 @@ import { cn } from "@/lib/utils";
 import { loginSchema, type LoginInput } from "@/lib/validators/auth";
 import { trpc } from "@/server/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { MailIcon, PhoneIcon } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm, type Resolver } from "react-hook-form";
 import { Facebook } from "../icons/facebook";
 import { Google } from "../icons/google";
 import { PhoneInput } from "../phone-input";
+
+type AuthMethod = "email" | "phone";
 
 export default function LoginForm({
   onSwitchToRegister,
@@ -28,6 +31,7 @@ export default function LoginForm({
 }) {
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
+  const [authMethod, setAuthMethod] = useState<AuthMethod>("phone");
 
   const login = trpc.auth.login.useMutation();
 
@@ -50,6 +54,15 @@ export default function LoginForm({
     }
   };
 
+  const changeAuthMethod = (method: AuthMethod) => {
+    if (method === authMethod) return;
+
+    setAuthMethod(method);
+    setMessage(null);
+    form.resetField("identifier", { defaultValue: "" });
+    form.clearErrors("identifier");
+  };
+
   return (
     <div className="flex flex-col items-center space-y-8">
       {message && (
@@ -70,18 +83,73 @@ export default function LoginForm({
                 Entrez vos identifiants pour vous connecter à votre compte.
               </p>
             </div>
+            <div
+              className="bg-muted grid grid-cols-2 rounded-lg p-1"
+              role="group"
+              aria-label="Méthode de connexion"
+            >
+              <Button
+                type="button"
+                variant={authMethod === "phone" ? "outline" : "ghost"}
+                className={cn(
+                  "h-10 shadow-none",
+                  authMethod === "phone" && "bg-background",
+                )}
+                aria-pressed={authMethod === "phone"}
+                disabled={login.isPending}
+                onClick={() => changeAuthMethod("phone")}
+              >
+                <PhoneIcon className="size-4" />
+                Téléphone
+              </Button>
+              <Button
+                type="button"
+                variant={authMethod === "email" ? "outline" : "ghost"}
+                className={cn(
+                  "h-10 shadow-none",
+                  authMethod === "email" && "bg-background",
+                )}
+                aria-pressed={authMethod === "email"}
+                disabled={login.isPending}
+                onClick={() => changeAuthMethod("email")}
+              >
+                <MailIcon className="size-4" />
+                Email
+              </Button>
+            </div>
             <Controller
               name="identifier"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Téléphone</FieldLabel>
-                  <PhoneInput
-                    value={field.value}
-                    onChange={(value) => field.onChange(value)}
-                    defaultCountry="SN"
-                    disabled={login.isPending}
-                  />
+                  <FieldLabel>
+                    {authMethod === "phone"
+                      ? "Numéro de téléphone"
+                      : "Adresse email"}
+                  </FieldLabel>
+                  {authMethod === "phone" ? (
+                    <PhoneInput
+                      key="phone"
+                      value={field.value}
+                      onChange={(value) => field.onChange(value)}
+                      onBlur={field.onBlur}
+                      defaultCountry="SN"
+                      autoComplete="tel"
+                      disabled={login.isPending}
+                    />
+                  ) : (
+                    <Input
+                      {...field}
+                      key="email"
+                      type="email"
+                      inputMode="email"
+                      autoComplete="email"
+                      placeholder="nom@exemple.com"
+                      aria-invalid={fieldState.invalid}
+                      disabled={login.isPending}
+                      className="h-12"
+                    />
+                  )}
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
@@ -97,6 +165,7 @@ export default function LoginForm({
                   <Input
                     {...field}
                     type="password"
+                    autoComplete="current-password"
                     aria-invalid={fieldState.invalid}
                     disabled={login.isPending}
                     className="h-12"

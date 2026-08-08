@@ -8,7 +8,7 @@ import React from "react";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useUser();
+  const { user, isAuthenticated, isLoading } = useUser();
   const [hasCheckedBusiness, setHasCheckedBusiness] = React.useState(false);
 
   const { refetch: fetchBusiness } = trpc.businesses.myBusiness.useQuery(
@@ -24,6 +24,11 @@ export default function AuthCallbackPage() {
       return;
     }
 
+    if (user?.role === "ADMIN") {
+      router.replace("/dashboard/admin");
+      return;
+    }
+
     void fetchBusiness().then(({ data }) => {
       if (data) {
         router.replace("/dashboard");
@@ -32,7 +37,7 @@ export default function AuthCallbackPage() {
       }
       setHasCheckedBusiness(true);
     });
-  }, [isAuthenticated, isLoading, router, fetchBusiness]);
+  }, [isAuthenticated, isLoading, router, fetchBusiness, user?.role]);
 
   if (isLoading || !hasCheckedBusiness) {
     return <IsLoadingScreen text="Authentification en cours..." />;

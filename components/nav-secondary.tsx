@@ -34,7 +34,11 @@ export function NavSecondary({
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
-                isActive={pathname === item.url}
+                isActive={
+                  pathname === item.url ||
+                  (!["/dashboard", "/dashboard/admin"].includes(item.url) &&
+                    pathname.startsWith(`${item.url}/`))
+                }
                 render={<Link href={item.url} />}
               >
                 {item.icon}

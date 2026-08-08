@@ -48,8 +48,17 @@ export const registerFormSchema = registerSchema.safeExtend({
 });
 
 export const loginSchema = z.object({
-  identifier: z.string().trim().min(1),
-  password: z.string().min(1),
+  identifier: z
+    .string()
+    .trim()
+    .min(1, "Renseignez votre email ou votre numéro de téléphone.")
+    .refine(
+      (identifier) =>
+        z.email().safeParse(identifier).success ||
+        /^\+[1-9]\d{5,19}$/.test(identifier),
+      "Entrez une adresse email ou un numéro de téléphone valide.",
+    ),
+  password: z.string().min(1, "Renseignez votre mot de passe."),
   device: authDeviceSchema,
 });
 

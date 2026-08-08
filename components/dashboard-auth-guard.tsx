@@ -3,7 +3,7 @@
 import IsLoadingScreen from "@/components/is-loading-screen";
 import { useBusiness } from "@/contexts/business-context";
 import { useUser } from "@/contexts/user-context";
-import { useRouter } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { useEffect } from "react";
 
 export function DashboardAuthGuard({
@@ -12,10 +12,16 @@ export function DashboardAuthGuard({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { isAuthenticated, isLoading: isUserLoading } = useUser();
+  const pathname = usePathname();
+  const { user, isAuthenticated, isLoading: isUserLoading } = useUser();
   const { business, isLoading: isBusinessLoading } = useBusiness();
 
-  const isLoading = isUserLoading || isBusinessLoading;
+  const isAdmin = user?.role === "ADMIN";
+  const isAdminRoute = pathname.startsWith("/dashboard/admin");
+  const isSellerTransactionRoute = pathname.startsWith(
+    "/dashboard/transactions",
+  );
+  const isLoading = isUserLoading || (!isAdmin && isBusinessLoading);
 
   useEffect(() => {
     if (isLoading) return;
@@ -25,12 +31,41 @@ export function DashboardAuthGuard({
       return;
     }
 
+    if (isAdmin) {
+      if (!isAdminRoute) {
+        router.replace("/dashboard/admin");
+      }
+      return;
+    }
+
+    if (isAdminRoute) {
+      router.replace(business ? "/dashboard" : "/create-business");
+      return;
+    }
+
+    if (isSellerTransactionRoute) {
+      router.replace("/dashboard");
+      return;
+    }
+
     if (!business) {
       router.replace("/create-business");
     }
-  }, [isAuthenticated, business, isLoading, router]);
+  }, [
+    isAuthenticated,
+    business,
+    isAdmin,
+    isAdminRoute,
+    isSellerTransactionRoute,
+    isLoading,
+    router,
+  ]);
 
-  if (isLoading || !isAuthenticated || !business) {
+  const canRender = isAdmin
+    ? isAdminRoute
+    : Boolean(business) && !isAdminRoute && !isSellerTransactionRoute;
+
+  if (isLoading || !isAuthenticated || !canRender) {
     return <IsLoadingScreen text="Chargement..." />;
   }
 

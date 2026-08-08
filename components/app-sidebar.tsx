@@ -13,14 +13,19 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import {
+  Building2Icon,
   CircleHelpIcon,
-  FileTextIcon,
+  CreditCardIcon,
   GavelIcon,
   LayoutDashboardIcon,
+  MapPinnedIcon,
   PackageIcon,
-  Settings,
+  SettingsIcon,
+  ShoppingCartIcon,
+  UserCogIcon,
   Users2Icon,
 } from "lucide-react";
+import { useUser } from "@/contexts/user-context";
 import { NavUser } from "./nav-user";
 
 const generalItems = [
@@ -40,9 +45,9 @@ const generalItems = [
     icon: <GavelIcon />,
   },
   {
-    title: "Transactions",
-    url: "/dashboard/transactions",
-    icon: <FileTextIcon />,
+    title: "Commandes",
+    url: "/dashboard/orders",
+    icon: <ShoppingCartIcon />,
   },
   {
     title: "Clients",
@@ -55,7 +60,7 @@ const toolsItems = [
   {
     title: "Paramètres",
     url: "/dashboard/settings",
-    icon: <Settings />,
+    icon: <SettingsIcon />,
   },
   {
     title: "Aide",
@@ -64,7 +69,63 @@ const toolsItems = [
   },
 ];
 
+const adminItems = [
+  {
+    title: "Tableau de bord",
+    url: "/dashboard/admin",
+    icon: <LayoutDashboardIcon />,
+  },
+  {
+    title: "Configuration",
+    url: "/dashboard/admin/configuration",
+    icon: <MapPinnedIcon />,
+  },
+  {
+    title: "Entreprises",
+    url: "/dashboard/admin/businesses",
+    icon: <Building2Icon />,
+  },
+  {
+    title: "Produits & services",
+    url: "/dashboard/admin/listings",
+    icon: <PackageIcon />,
+  },
+  {
+    title: "Appels d'offres",
+    url: "/dashboard/admin/tenders",
+    icon: <GavelIcon />,
+  },
+  {
+    title: "Commandes",
+    url: "/dashboard/admin/orders",
+    icon: <ShoppingCartIcon />,
+  },
+  {
+    title: "Transactions",
+    url: "/dashboard/admin/transactions",
+    icon: <CreditCardIcon />,
+  },
+  {
+    title: "Membres d'équipe",
+    url: "/dashboard/admin/team-members",
+    icon: <UserCogIcon />,
+  },
+  {
+    title: "Clients",
+    url: "/dashboard/admin/customers",
+    icon: <Users2Icon />,
+  },
+  {
+    title: "Paramètres",
+    url: "/dashboard/admin/settings",
+    icon: <SettingsIcon />,
+  },
+];
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useUser();
+  const isAdmin = user?.role === "ADMIN";
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -82,8 +143,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavSecondary label="Général" items={generalItems} />
-        <NavSecondary label="Outils" items={toolsItems} />
+        <NavSecondary
+          label={isAdmin ? "Administration" : "Général"}
+          items={isAdmin ? adminItems : generalItems}
+        />
+        {!isAdmin && <NavSecondary label="Outils" items={toolsItems} />}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
