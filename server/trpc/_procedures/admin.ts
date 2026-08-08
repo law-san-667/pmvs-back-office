@@ -10,6 +10,12 @@ import type {
   PaymentStatus,
 } from "@/lib/admin-types";
 import type { BusinessStatus } from "@/lib/backend-resource-types";
+import type {
+  Category,
+  City,
+  Country,
+  SubCategory,
+} from "@/lib/backend-resource-types";
 import {
   paginationInputSchema,
   uuidSchema,
@@ -111,6 +117,35 @@ const membersInputSchema = paginationInputSchema.extend({
   status: memberStatusSchema.optional(),
 });
 
+const categoryPayloadSchema = z.object({
+  name: z.string().trim().min(1),
+  slug: z.string().trim().min(1),
+  description: z.string().trim().nullable().optional(),
+  icon: z.string().trim().nullable().optional(),
+  sortOrder: z.number().int().optional(),
+  isService: z.boolean().optional(),
+  isActive: z.boolean().optional(),
+});
+
+const subCategoryPayloadSchema = categoryPayloadSchema.extend({
+  categoryId: uuidSchema,
+});
+
+const countryPayloadSchema = z.object({
+  code: z.string().trim().min(2),
+  name: z.string().trim().min(1),
+  currencyCode: z.string().trim().min(3),
+  phonePrefix: z.string().trim().min(1),
+  isActive: z.boolean().optional(),
+});
+
+const cityPayloadSchema = z.object({
+  countryCode: z.string().trim().min(2),
+  name: z.string().trim().min(1),
+  slug: z.string().trim().min(1),
+  isActive: z.boolean().optional(),
+});
+
 export const adminRouter = createTRPCRouter({
   stats: privateProcedure.query(async ({ ctx }) => {
     const [businesses, listings, tenders, payments, members] =
@@ -187,5 +222,75 @@ export const adminRouter = createTRPCRouter({
         ctx.api.get("/business-members", { params: input }),
         { mode: "paginated" },
       ),
+    ),
+  createCategory: privateProcedure
+    .input(categoryPayloadSchema)
+    .mutation(({ ctx, input }) =>
+      callBackend<Category>(ctx.api.post("/categories", input)),
+    ),
+  updateCategory: privateProcedure
+    .input(categoryPayloadSchema.partial().extend({ id: uuidSchema }))
+    .mutation(({ ctx, input }) => {
+      const { id, ...payload } = input;
+      return callBackend<Category>(ctx.api.patch(`/categories/${id}`, payload));
+    }),
+  deleteCategory: privateProcedure
+    .input(z.object({ id: uuidSchema }))
+    .mutation(({ ctx, input }) =>
+      callBackend<Category>(ctx.api.delete(`/categories/${input.id}`)),
+    ),
+  createSubCategory: privateProcedure
+    .input(subCategoryPayloadSchema)
+    .mutation(({ ctx, input }) =>
+      callBackend<SubCategory>(ctx.api.post("/sub-categories", input)),
+    ),
+  updateSubCategory: privateProcedure
+    .input(subCategoryPayloadSchema.partial().extend({ id: uuidSchema }))
+    .mutation(({ ctx, input }) => {
+      const { id, ...payload } = input;
+      return callBackend<SubCategory>(
+        ctx.api.patch(`/sub-categories/${id}`, payload),
+      );
+    }),
+  deleteSubCategory: privateProcedure
+    .input(z.object({ id: uuidSchema }))
+    .mutation(({ ctx, input }) =>
+      callBackend<SubCategory>(ctx.api.delete(`/sub-categories/${input.id}`)),
+    ),
+  createCountry: privateProcedure
+    .input(countryPayloadSchema)
+    .mutation(({ ctx, input }) =>
+      callBackend<Country>(ctx.api.post("/countries", input)),
+    ),
+  updateCountry: privateProcedure
+    .input(countryPayloadSchema.partial().extend({ code: z.string().min(2) }))
+    .mutation(({ ctx, input }) => {
+      const { code, ...payload } = input;
+      return callBackend<Country>(ctx.api.patch(`/countries/${code}`, payload));
+    }),
+  deleteCountry: privateProcedure
+    .input(z.object({ code: z.string().trim().min(2) }))
+    .mutation(({ ctx, input }) =>
+      callBackend<Country>(ctx.api.delete(`/countries/${input.code}`)),
+    ),
+  createCity: privateProcedure
+    .input(cityPayloadSchema)
+    .mutation(({ ctx, input }) =>
+      callBackend<City>(ctx.api.post("/cities", input)),
+    ),
+  updateCity: privateProcedure
+    .input(
+      cityPayloadSchema.partial().extend({ currentSlug: z.string().min(1) }),
+    )
+    .mutation(({ ctx, input }) => {
+      const { currentSlug, ...payload } = input;
+      return callBackend<City>(
+        ctx.api.patch(`/cities/${currentSlug}`, payload),
+      );
+    }),
+  deleteCity: privateProcedure
+    .input(z.object({ slug: z.string().trim().min(1) }))
+    .mutation(({ ctx, input }) =>
+      callBackend<City>(ctx.api.delete(`/cities/${input.slug}`)),
     ),
 });

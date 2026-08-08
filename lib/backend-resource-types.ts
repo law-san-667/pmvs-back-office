@@ -11,7 +11,6 @@ export type Country = {
 };
 
 export type City = {
-  id: string;
   countryCode: string;
   name: string;
   slug: string;

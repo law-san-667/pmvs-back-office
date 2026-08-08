@@ -2,8 +2,23 @@
 
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminTableState } from "@/components/admin/admin-table-state";
+import {
+  ConfigurationDeleteDialog,
+  type ConfigurationDeleteTarget,
+} from "@/components/admin/configuration-delete-dialog";
+import {
+  ConfigurationEditor,
+  type ConfigurationEditorTarget,
+} from "@/components/admin/configuration-editor";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -15,6 +30,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDate } from "@/lib/seller-dashboard-utils";
 import { trpc } from "@/server/trpc/client";
+import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { useState } from "react";
 
 function ActiveBadge({ active }: { active: boolean }) {
   return (
@@ -32,6 +49,11 @@ function ActiveBadge({ active }: { active: boolean }) {
 }
 
 export default function AdminConfigurationPage() {
+  const utils = trpc.useUtils();
+  const [editorTarget, setEditorTarget] =
+    useState<ConfigurationEditorTarget | null>(null);
+  const [deleteTarget, setDeleteTarget] =
+    useState<ConfigurationDeleteTarget | null>(null);
   const categories = trpc.catalog.categories.useQuery({
     orderBy: "sortOrder",
     order: "asc",
@@ -53,11 +75,24 @@ export default function AdminConfigurationPage() {
     order: "asc",
   });
 
+  const refreshConfiguration = async () => {
+    await Promise.all([
+      utils.catalog.categories.invalidate(),
+      utils.catalog.subCategories.invalidate(),
+      utils.geography.countries.invalidate(),
+      utils.geography.cities.invalidate(),
+    ]);
+  };
+
+  const categoryNames = new Map(
+    categories.data?.map((category) => [category.id, category.name]) ?? [],
+  );
+
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
         title="Configuration"
-        description="Consultez les catégories du catalogue et les zones géographiques disponibles."
+        description="Créez et gérez les catégories du catalogue ainsi que les zones géographiques."
       />
 
       <Tabs defaultValue="categories">
@@ -70,6 +105,19 @@ export default function AdminConfigurationPage() {
 
         <TabsContent value="categories">
           <Card>
+            <CardHeader>
+              <CardTitle>Catégories</CardTitle>
+              <CardAction>
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    setEditorTarget({ kind: "category", value: null })
+                  }
+                >
+                  <PlusIcon className="size-4" /> Ajouter
+                </Button>
+              </CardAction>
+            </CardHeader>
             <CardContent className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -77,8 +125,8 @@ export default function AdminConfigurationPage() {
                     <TableHead>Nom</TableHead>
                     <TableHead>Slug</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead>Ordre</TableHead>
                     <TableHead>Statut</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -101,9 +149,40 @@ export default function AdminConfigurationPage() {
                       <TableCell>
                         {category.isService ? "Service" : "Produit"}
                       </TableCell>
-                      <TableCell>{category.sortOrder}</TableCell>
                       <TableCell>
                         <ActiveBadge active={category.isActive} />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() =>
+                              setEditorTarget({
+                                kind: "category",
+                                value: category,
+                              })
+                            }
+                          >
+                            <PencilIcon className="size-4" />
+                            <span className="sr-only">Modifier</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="hover:text-destructive"
+                            onClick={() =>
+                              setDeleteTarget({
+                                kind: "category",
+                                id: category.id,
+                                label: category.name,
+                              })
+                            }
+                          >
+                            <Trash2Icon className="size-4" />
+                            <span className="sr-only">Supprimer</span>
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -115,6 +194,20 @@ export default function AdminConfigurationPage() {
 
         <TabsContent value="sub-categories">
           <Card>
+            <CardHeader>
+              <CardTitle>Sous-catégories</CardTitle>
+              <CardAction>
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    setEditorTarget({ kind: "subCategory", value: null })
+                  }
+                  disabled={!categories.data?.length}
+                >
+                  <PlusIcon className="size-4" /> Ajouter
+                </Button>
+              </CardAction>
+            </CardHeader>
             <CardContent className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -124,11 +217,12 @@ export default function AdminConfigurationPage() {
                     <TableHead>Slug</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Statut</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   <AdminTableState
-                    colSpan={5}
+                    colSpan={6}
                     isLoading={subCategories.isLoading}
                     error={subCategories.error?.message}
                     isEmpty={!subCategories.data?.length}
@@ -140,8 +234,9 @@ export default function AdminConfigurationPage() {
                       <TableCell className="font-medium">
                         {subCategory.name}
                       </TableCell>
-                      <TableCell className="text-muted-foreground font-mono text-xs">
-                        {subCategory.categoryId.slice(0, 8)}
+                      <TableCell>
+                        {categoryNames.get(subCategory.categoryId) ??
+                          subCategory.categoryId.slice(0, 8)}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {subCategory.slug}
@@ -151,6 +246,38 @@ export default function AdminConfigurationPage() {
                       </TableCell>
                       <TableCell>
                         <ActiveBadge active={subCategory.isActive} />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() =>
+                              setEditorTarget({
+                                kind: "subCategory",
+                                value: subCategory,
+                              })
+                            }
+                          >
+                            <PencilIcon className="size-4" />
+                            <span className="sr-only">Modifier</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="hover:text-destructive"
+                            onClick={() =>
+                              setDeleteTarget({
+                                kind: "subCategory",
+                                id: subCategory.id,
+                                label: subCategory.name,
+                              })
+                            }
+                          >
+                            <Trash2Icon className="size-4" />
+                            <span className="sr-only">Supprimer</span>
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -162,6 +289,19 @@ export default function AdminConfigurationPage() {
 
         <TabsContent value="countries">
           <Card>
+            <CardHeader>
+              <CardTitle>Pays</CardTitle>
+              <CardAction>
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    setEditorTarget({ kind: "country", value: null })
+                  }
+                >
+                  <PlusIcon className="size-4" /> Ajouter
+                </Button>
+              </CardAction>
+            </CardHeader>
             <CardContent className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -171,11 +311,12 @@ export default function AdminConfigurationPage() {
                     <TableHead>Devise</TableHead>
                     <TableHead>Indicatif</TableHead>
                     <TableHead>Statut</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   <AdminTableState
-                    colSpan={5}
+                    colSpan={6}
                     isLoading={countries.isLoading}
                     error={countries.error?.message}
                     isEmpty={!countries.data?.items.length}
@@ -193,6 +334,38 @@ export default function AdminConfigurationPage() {
                       <TableCell>
                         <ActiveBadge active={country.isActive} />
                       </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() =>
+                              setEditorTarget({
+                                kind: "country",
+                                value: country,
+                              })
+                            }
+                          >
+                            <PencilIcon className="size-4" />
+                            <span className="sr-only">Modifier</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="hover:text-destructive"
+                            onClick={() =>
+                              setDeleteTarget({
+                                kind: "country",
+                                code: country.code,
+                                label: country.name,
+                              })
+                            }
+                          >
+                            <Trash2Icon className="size-4" />
+                            <span className="sr-only">Supprimer</span>
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -203,6 +376,18 @@ export default function AdminConfigurationPage() {
 
         <TabsContent value="cities">
           <Card>
+            <CardHeader>
+              <CardTitle>Villes</CardTitle>
+              <CardAction>
+                <Button
+                  size="sm"
+                  onClick={() => setEditorTarget({ kind: "city", value: null })}
+                  disabled={!countries.data?.items.length}
+                >
+                  <PlusIcon className="size-4" /> Ajouter
+                </Button>
+              </CardAction>
+            </CardHeader>
             <CardContent className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -212,11 +397,12 @@ export default function AdminConfigurationPage() {
                     <TableHead>Pays</TableHead>
                     <TableHead>Créée le</TableHead>
                     <TableHead>Statut</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   <AdminTableState
-                    colSpan={5}
+                    colSpan={6}
                     isLoading={cities.isLoading}
                     error={cities.error?.message}
                     isEmpty={!cities.data?.items.length}
@@ -234,6 +420,35 @@ export default function AdminConfigurationPage() {
                       <TableCell>
                         <ActiveBadge active={city.isActive} />
                       </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() =>
+                              setEditorTarget({ kind: "city", value: city })
+                            }
+                          >
+                            <PencilIcon className="size-4" />
+                            <span className="sr-only">Modifier</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="hover:text-destructive"
+                            onClick={() =>
+                              setDeleteTarget({
+                                kind: "city",
+                                slug: city.slug,
+                                label: city.name,
+                              })
+                            }
+                          >
+                            <Trash2Icon className="size-4" />
+                            <span className="sr-only">Supprimer</span>
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -242,6 +457,23 @@ export default function AdminConfigurationPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {editorTarget && (
+        <ConfigurationEditor
+          target={editorTarget}
+          categories={categories.data ?? []}
+          countries={countries.data?.items ?? []}
+          onClose={() => setEditorTarget(null)}
+          onSaved={refreshConfiguration}
+        />
+      )}
+      {deleteTarget && (
+        <ConfigurationDeleteDialog
+          target={deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onDeleted={refreshConfiguration}
+        />
+      )}
     </div>
   );
 }
