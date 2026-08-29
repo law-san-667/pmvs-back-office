@@ -1,4 +1,5 @@
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 import { UserPreferencesProvider } from "@/contexts/user-preferences-context";
 import { UserProvider } from "@/contexts/user-context";
 import { locales } from "@/i18n/config";
@@ -25,15 +26,11 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title:
-    "Dashboard - Diarama",
-  description:
-    "Espace d'Administration DIARAMA",
+  title: "Dashboard - Diarama",
+  description: "Espace d'Administration DIARAMA",
   openGraph: {
-    title:
-      "Dashboard - Diarama",
-    description:
-      "Espace d'Administration DIARAMA",
+    title: "Dashboard - Diarama",
+    description: "Espace d'Administration DIARAMA",
     url: "https://pmvs-web.vercel.app",
     siteName: "Diarama",
     images: [
@@ -81,6 +78,7 @@ export default async function RootLayout({
                     <div className="relative min-h-screen w-full">
                       {children}
                     </div>
+                    <Toaster position="top-right" closeButton />
                   </UserProvider>
                 </UserPreferencesProvider>
               </TooltipProvider>

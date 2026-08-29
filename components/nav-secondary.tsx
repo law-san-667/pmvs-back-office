@@ -8,6 +8,7 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
@@ -21,6 +22,7 @@ export function NavSecondary({
     title: string;
     url: string;
     icon: React.ReactNode;
+    badge?: number;
   }[];
   label?: string;
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
@@ -44,6 +46,11 @@ export function NavSecondary({
                 {item.icon}
                 <span>{item.title}</span>
               </SidebarMenuButton>
+              {Boolean(item.badge) && (
+                <SidebarMenuBadge className="bg-primary text-primary-foreground">
+                  {(item.badge ?? 0) > 99 ? "99+" : item.badge}
+                </SidebarMenuBadge>
+              )}
             </SidebarMenuItem>
           ))}
         </SidebarMenu>

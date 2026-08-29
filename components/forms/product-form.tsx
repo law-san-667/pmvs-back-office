@@ -61,6 +61,8 @@ import countries from "@/lib/countries.json";
 import { getCroppedImgSquare, type CroppedArea } from "@/lib/crop-image";
 import { getMutationErrorMessage } from "@/lib/mutation-error";
 import {
+  existingMediaUrl,
+  uploadFileToR2FromBrowser,
   uploadFilesToR2FromBrowser,
   type CreateR2Upload,
 } from "@/lib/upload-to-r2";
@@ -70,7 +72,14 @@ import {
 } from "@/lib/validators/listings-services";
 import { trpc } from "@/server/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, ImageIcon, PlusIcon, Trash2Icon, X } from "lucide-react";
+import {
+  AlertCircle,
+  ImageIcon,
+  PlusIcon,
+  Trash2Icon,
+  VideoIcon,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -108,6 +117,11 @@ type ImageItem = {
   file: File;
   preview: string;
   cropped: boolean;
+};
+
+type VideoItem = {
+  file: File;
+  preview: string;
 };
 
 const productFormSchema = z
@@ -209,6 +223,8 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
   const destinationAnchorRef = useComboboxAnchor();
   const [customColor, setCustomColor] = useState("#000000");
   const [images, setImages] = useState<ImageItem[]>([]);
+  const [video, setVideo] = useState<VideoItem | null>(null);
+  const [isExistingVideoRemoved, setIsExistingVideoRemoved] = useState(false);
   const [removedImageUrls, setRemovedImageUrls] = useState<Set<string>>(
     new Set(),
   );
@@ -294,6 +310,9 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
   const existingImages = parseExistingImages(listingDetail.data?.images).filter(
     (img) => !removedImageUrls.has(img.url),
   );
+  const existingVideo = isExistingVideoRemoved
+    ? undefined
+    : existingMediaUrl(listingDetail.data?.video);
 
   const createListing = trpc.listings.create.useMutation({
     onSuccess: () => {
@@ -445,10 +464,38 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
     setRemovedImageUrls((prev) => new Set(prev).add(url));
   };
 
+  const onVideoDrop = useCallback((acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (!file) return;
+
+    setVideo((current) => {
+      if (current) URL.revokeObjectURL(current.preview);
+      return { file, preview: URL.createObjectURL(file) };
+    });
+  }, []);
+
+  const removeVideo = () => {
+    setVideo((current) => {
+      if (current) URL.revokeObjectURL(current.preview);
+      return null;
+    });
+  };
+
   const imageDropzone = useDropzone({
     onDrop: onImageDrop,
     accept: { "image/*": [".png", ".jpg", ".jpeg", ".webp"] },
     multiple: true,
+  });
+
+  const videoDropzone = useDropzone({
+    onDrop: onVideoDrop,
+    accept: {
+      "video/mp4": [".mp4"],
+      "video/webm": [".webm"],
+      "video/quicktime": [".mov"],
+    },
+    maxFiles: 1,
+    multiple: false,
   });
 
   const isMutating =
@@ -489,6 +536,7 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
 
     try {
       const imageFiles = images.map((img) => img.file);
+      const mediaFileCount = imageFiles.length + (video ? 1 : 0);
       const uploadedUrls =
         imageFiles.length > 0
           ? (
@@ -496,10 +544,27 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
                 imageFiles,
                 "images",
                 createUpload,
-                setUploadProgress,
+                (progress) =>
+                  setUploadProgress(
+                    Math.round((progress * imageFiles.length) / mediaFileCount),
+                  ),
               )
             ).filter((url): url is string => url !== undefined)
           : [];
+
+      const uploadedVideoUrl = video
+        ? await uploadFileToR2FromBrowser(
+            video.file,
+            "videos",
+            createUpload,
+            (progress) =>
+              setUploadProgress(
+                Math.round(
+                  (imageFiles.length * 100 + progress) / mediaFileCount,
+                ),
+              ),
+          )
+        : undefined;
 
       setIsUploading(false);
       setUploadProgress(100);
@@ -531,6 +596,7 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
         quantityAvailable:
           !data.isService && data.stock ? parseInt(data.stock, 10) : undefined,
         images: listingImages.length > 0 ? listingImages : undefined,
+        video: uploadedVideoUrl ?? existingVideo ?? null,
         specificsSections: data.isService
           ? undefined
           : buildSpecificsSections(data.selectedSizes, data.selectedColors),
@@ -554,7 +620,7 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
     } catch (error) {
       setIsUploading(false);
       setSubmissionErrors([
-        getMutationErrorMessage(error, "Erreur lors de l'envoi des images."),
+        getMutationErrorMessage(error, "Erreur lors de l'envoi des médias."),
       ]);
     }
   };
@@ -1204,11 +1270,11 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
               </CardContent>
             </Card>
 
-            {/* Images */}
+            {/* Images and video */}
             <Card className="bg-muted/30">
               <CardHeader>
                 <CardTitle className="font-bold">
-                  Image de {isService ? "service" : "produit"}
+                  Médias du {isService ? "service" : "produit"}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -1275,6 +1341,56 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
                     </div>
                   ))}
                 </div>
+
+                <div className="mt-6 flex flex-col gap-3">
+                  <div>
+                    <FieldLabel>Vidéo (facultative)</FieldLabel>
+                    <p className="text-muted-foreground mt-1 text-xs">
+                      Une seule vidéo au format MP4, WebM ou MOV.
+                    </p>
+                  </div>
+
+                  {video || existingVideo ? (
+                    <div className="group relative max-w-xl overflow-hidden rounded-lg border bg-black">
+                      <video
+                        src={video?.preview ?? existingVideo}
+                        controls
+                        preload="metadata"
+                        playsInline
+                        className="aspect-video w-full"
+                        aria-label={`Vidéo du ${isService ? "service" : "produit"}`}
+                      >
+                        Votre navigateur ne prend pas en charge la lecture de
+                        vidéos.
+                      </video>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (video) {
+                            removeVideo();
+                          } else {
+                            setIsExistingVideoRemoved(true);
+                          }
+                        }}
+                        className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+                        aria-label="Supprimer la vidéo"
+                      >
+                        <X className="size-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      {...videoDropzone.getRootProps()}
+                      className="border-primary/40 hover:border-primary flex h-32 max-w-xl cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed transition-colors"
+                    >
+                      <input {...videoDropzone.getInputProps()} />
+                      <VideoIcon className="text-primary/60 size-8" />
+                      <span className="text-primary text-xs font-medium">
+                        Ajouter une vidéo
+                      </span>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -1287,7 +1403,7 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
           disabled={isMutating || deleteListing.isPending}
         >
           {isUploading
-            ? `Envoi des images… ${uploadProgress}%`
+            ? `Envoi des médias… ${uploadProgress}%`
             : createListing.isPending
               ? "Création en cours..."
               : updateListing.isPending

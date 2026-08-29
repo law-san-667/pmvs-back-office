@@ -19,6 +19,7 @@ import {
   GavelIcon,
   LayoutDashboardIcon,
   MapPinnedIcon,
+  MessageSquareIcon,
   PackageIcon,
   SettingsIcon,
   ShoppingCartIcon,
@@ -26,6 +27,7 @@ import {
   Users2Icon,
 } from "lucide-react";
 import { useUser } from "@/contexts/user-context";
+import { useMessaging } from "@/contexts/messaging-context";
 import { NavUser } from "./nav-user";
 
 const generalItems = [
@@ -53,6 +55,11 @@ const generalItems = [
     title: "Clients",
     url: "/dashboard/clients",
     icon: <Users2Icon />,
+  },
+  {
+    title: "Messagerie",
+    url: "/dashboard/messages",
+    icon: <MessageSquareIcon />,
   },
 ];
 
@@ -124,7 +131,11 @@ const adminItems = [
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser();
+  const { unreadCount } = useMessaging();
   const isAdmin = user?.role === "ADMIN";
+  const navigationItems = generalItems.map((item) =>
+    item.url === "/dashboard/messages" ? { ...item, badge: unreadCount } : item,
+  );
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -145,7 +156,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavSecondary
           label={isAdmin ? "Administration" : "Général"}
-          items={isAdmin ? adminItems : generalItems}
+          items={isAdmin ? adminItems : navigationItems}
         />
         {!isAdmin && <NavSecondary label="Outils" items={toolsItems} />}
       </SidebarContent>

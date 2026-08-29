@@ -5,6 +5,7 @@ import { catalogRouter } from "./_procedures/catalog";
 import { geographyRouter } from "./_procedures/geography";
 import { listingsRouter } from "./_procedures/listings";
 import { mediaRouter } from "./_procedures/media";
+import { messagingRouter } from "./_procedures/messaging";
 import { ordersRouter } from "./_procedures/orders";
 import { sellerDashboardRouter } from "./_procedures/seller-dashboard";
 import { tendersRouter } from "./_procedures/tenders";
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   geography: geographyRouter,
   listings: listingsRouter,
   media: mediaRouter,
+  messaging: messagingRouter,
   orders: ordersRouter,
   sellerDashboard: sellerDashboardRouter,
   tenders: tendersRouter,

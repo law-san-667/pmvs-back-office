@@ -87,6 +87,7 @@ export const createListingSchema = z.object({
       }),
     )
     .optional(),
+  video: z.url().nullable().optional(),
   specificsSections: listingSpecificsSectionsSchema.optional(),
   condition: listingConditionSchema.optional(),
   status: listingStatusSchema.optional(),
@@ -114,6 +115,7 @@ export type Listing = {
   title: string;
   description: string | null;
   images: unknown;
+  video: string | null;
   specificsSections: ListingSpecificsSection[];
   condition: "NEW" | "LIKE_NEW" | "USED" | "REFURBISHED";
   status: "DRAFT" | "PUBLISHED" | "PAUSED" | "SOLD" | "ARCHIVED";

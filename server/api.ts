@@ -80,7 +80,7 @@ const decodeCookieValue = (value: string) => {
   }
 };
 
-const getBackendBaseUrl = () => {
+export const getBackendBaseUrl = () => {
   const baseUrl =
     backendUrls[env.NEXT_PUBLIC_ENV as keyof typeof backendUrls] ??
     backendUrls.development;
