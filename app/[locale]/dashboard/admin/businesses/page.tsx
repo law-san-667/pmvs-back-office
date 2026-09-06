@@ -4,7 +4,6 @@ import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { AdminTableState } from "@/components/admin/admin-table-state";
 import { BusinessDeleteDialog } from "@/components/admin/business-delete-dialog";
-import { BusinessDetailsSheet } from "@/components/admin/business-details-sheet";
 import { BusinessEditorDialog } from "@/components/admin/business-editor-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +37,7 @@ import {
 } from "@/lib/admin-business-utils";
 import type { AdminBusiness } from "@/lib/admin-types";
 import type { BusinessStatus } from "@/lib/backend-resource-types";
+import { useRouter } from "@/i18n/navigation";
 import { formatDate, getInitials } from "@/lib/seller-dashboard-utils";
 import { trpc } from "@/server/trpc/client";
 import {
@@ -56,11 +56,11 @@ const PAGE_SIZE = 10;
 type StatusFilter = "ALL" | BusinessStatus;
 
 export default function AdminBusinessesPage() {
+  const router = useRouter();
   const utils = trpc.useUtils();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<StatusFilter>("ALL");
-  const [detailsTarget, setDetailsTarget] = useState<AdminBusiness | null>(null);
   const [editorTarget, setEditorTarget] = useState<AdminBusiness | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AdminBusiness | null>(null);
   const deferredSearch = useDeferredValue(search.trim());
@@ -167,7 +167,13 @@ export default function AdminBusinessesPage() {
                 emptyLabel="Aucune entreprise trouvée."
               />
               {businesses.data?.items.map((business) => (
-                <TableRow key={business.id}>
+                <TableRow
+                  key={business.id}
+                  className="cursor-pointer"
+                  onClick={() =>
+                    router.push(`/dashboard/admin/businesses/${business.id}`)
+                  }
+                >
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar>
@@ -207,7 +213,10 @@ export default function AdminBusinessesPage() {
                       {BUSINESS_STATUS_LABELS[business.status]}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell
+                    className="text-right"
+                    onClick={(event) => event.stopPropagation()}
+                  >
                     <DropdownMenu>
                       <DropdownMenuTrigger
                         render={
@@ -222,7 +231,11 @@ export default function AdminBusinessesPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                          onClick={() => setDetailsTarget(business)}
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/admin/businesses/${business.id}`,
+                            )
+                          }
                         >
                           <EyeIcon /> Voir les détails
                         </DropdownMenuItem>
@@ -282,16 +295,6 @@ export default function AdminBusinessesPage() {
         </CardContent>
       </Card>
 
-      {detailsTarget && (
-        <BusinessDetailsSheet
-          business={detailsTarget}
-          onClose={() => setDetailsTarget(null)}
-          onEdit={() => {
-            setEditorTarget(detailsTarget);
-            setDetailsTarget(null);
-          }}
-        />
-      )}
       {editorTarget && (
         <BusinessEditorDialog
           business={editorTarget}

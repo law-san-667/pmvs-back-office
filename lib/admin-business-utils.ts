@@ -15,3 +15,16 @@ export const BUSINESS_STATUS_BADGE_CLASSES: Record<BusinessStatus, string> = {
   SUSPENDED: "border-red-200 bg-red-50 text-red-700",
   DELETED: "border-slate-200 bg-slate-50 text-slate-500",
 };
+
+export const BUSINESS_MEMBER_ROLE_LABELS = {
+  OWNER: "Propriétaire",
+  ADMIN: "Administrateur",
+  MEMBER: "Membre",
+} as const;
+
+export const BUSINESS_MEMBER_STATUS_LABELS = {
+  INVITED: "Invité",
+  ACTIVE: "Actif",
+  SUSPENDED: "Suspendu",
+  REMOVED: "Retiré",
+} as const;

@@ -134,8 +134,21 @@ export default function AdminTeamMembersPage() {
               />
               {members.data?.items.map((member) => (
                 <TableRow key={member.id}>
-                  <TableCell className="font-mono text-xs">
-                    {member.userId}
+                  <TableCell>
+                    {member.user ? (
+                      <div>
+                        <p className="font-medium">
+                          {member.user.firstName} {member.user.lastName}
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                          {member.user.email ??
+                            member.user.phoneNumber ??
+                            member.userId}
+                        </p>
+                      </div>
+                    ) : (
+                      <span className="font-mono text-xs">{member.userId}</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     {businessesById.get(member.businessId) ?? (

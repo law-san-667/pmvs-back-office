@@ -44,6 +44,27 @@ export type BusinessMemberStatus =
   | "SUSPENDED"
   | "REMOVED";
 
+export type UserStatus =
+  | "PENDING_VERIFICATION"
+  | "ACTIVE"
+  | "INACTIVE"
+  | "SUSPENDED"
+  | "DELETED";
+
+export type AdminBusinessMemberUser = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  phoneNumber: string | null;
+  profileImage: string | null;
+  countryCode: string | null;
+  role: string;
+  status: UserStatus;
+  lastLoginAt: string | null;
+  createdAt: string;
+};
+
 export type AdminBusinessMember = {
   id: string;
   businessId: string;
@@ -52,6 +73,7 @@ export type AdminBusinessMember = {
   status: BusinessMemberStatus;
   createdAt: string;
   updatedAt: string;
+  user: AdminBusinessMemberUser | null;
 };
 
 export type {
