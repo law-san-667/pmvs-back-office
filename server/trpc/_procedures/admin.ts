@@ -20,6 +20,7 @@ import {
   paginationInputSchema,
   uuidSchema,
 } from "@/lib/validators/backend-resources";
+import { updateBusinessInputSchema } from "@/lib/validators/business";
 import { callBackend } from "@/server/backend-utils";
 import z from "zod";
 import { createTRPCRouter, privateProcedure } from "../init";
@@ -67,6 +68,11 @@ const businessesInputSchema = paginationInputSchema.extend({
   name: z.string().trim().optional(),
   countryCode: z.string().trim().optional(),
   citySlug: z.string().trim().optional(),
+  status: businessStatusSchema.optional(),
+});
+
+const updateBusinessPayloadSchema = z.object({
+  ...updateBusinessInputSchema.shape,
   status: businessStatusSchema.optional(),
 });
 
@@ -190,6 +196,30 @@ export const adminRouter = createTRPCRouter({
         ctx.api.get("/businesses", { params: input }),
         { mode: "paginated" },
       ),
+    ),
+  business: privateProcedure
+    .input(z.object({ idOrSlug: z.string().trim().min(1) }))
+    .query(({ ctx, input }) =>
+      callBackend<AdminBusiness>(ctx.api.get(`/businesses/${input.idOrSlug}`)),
+    ),
+  updateBusiness: privateProcedure
+    .input(updateBusinessPayloadSchema)
+    .mutation(({ ctx, input }) => {
+      const { id, ...payload } = input;
+
+      return callBackend<AdminBusiness>(
+        ctx.api.patch(
+          `/businesses/${id}`,
+          Object.fromEntries(
+            Object.entries(payload).filter(([, value]) => value !== undefined),
+          ),
+        ),
+      );
+    }),
+  deleteBusiness: privateProcedure
+    .input(z.object({ id: uuidSchema }))
+    .mutation(({ ctx, input }) =>
+      callBackend<AdminBusiness>(ctx.api.delete(`/businesses/${input.id}`)),
     ),
   listings: privateProcedure
     .input(listingsInputSchema)
