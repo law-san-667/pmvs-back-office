@@ -9,10 +9,83 @@ export interface ListingSpecificsSection {
   }[];
 }
 
+export const listingImageKindEnum = ["MAIN", "BACK", "SIDE", "OTHER"] as const;
+export type ListingImageKind = (typeof listingImageKindEnum)[number];
+
 export interface ListingImages {
   order: number;
   url: string;
+  label?: string;
+  kind?: ListingImageKind;
 }
+
+export const listingExposureEnum = ["NATIONAL", "INTERNATIONAL", "BOTH"] as const;
+export const listingAvailabilityChannelEnum = [
+  "WEBSITE",
+  "MARKETPLACE",
+  "OFFLINE",
+  "ALL",
+] as const;
+export const listingStockPolicyEnum = ["ACCEPT_ORDERS", "REFUSE_ORDERS"] as const;
+export const marketPriceTypeEnum = ["B2C", "B2B"] as const;
+
+export type ListingExposure = (typeof listingExposureEnum)[number];
+export type ListingAvailabilityChannel =
+  (typeof listingAvailabilityChannelEnum)[number];
+export type ListingStockPolicy = (typeof listingStockPolicyEnum)[number];
+export type MarketPriceType = (typeof marketPriceTypeEnum)[number];
+
+export interface ListingLogistics {
+  packaging?: string;
+  unit?: string;
+  baseValueMinor?: number;
+  grossWeightKg?: number;
+  widthCm?: number;
+  heightCm?: number;
+  depthCm?: number;
+  weightVolumeRatio?: string;
+  packagingType?: string;
+}
+
+export interface ListingEditorial {
+  history?: string;
+  composition?: string;
+  nutrition?: string;
+  benefits?: string;
+  storage?: string;
+  maintenance?: string;
+  manufacturing?: string;
+}
+
+export interface ListingSeo {
+  title?: string;
+  externalUrl?: string;
+  metaDescription?: string;
+}
+
+export interface ListingCertificate {
+  name: string;
+  url: string;
+}
+
+export type ListingMarketPrice = {
+  id: string;
+  listingId: string;
+  countryCode: string;
+  priceType: MarketPriceType;
+  currency: string;
+  priceAmountMinor: number;
+  vatRatePercent: string | null;
+  vmpCommissionPercent: string | null;
+  ddpPriceAmountMinor: number | null;
+  agentCommissionPercent: string | null;
+  minOrderQuantity: number | null;
+  cartonsPerPallet: number | null;
+  containerType: string | null;
+  unitsPerContainer: number | null;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export const listingConditionEnum = [
   "NEW",
@@ -31,6 +104,70 @@ export const listingStatusEnum = [
 
 const listingConditionSchema = z.enum(listingConditionEnum);
 const listingStatusSchema = z.enum(listingStatusEnum);
+const listingExposureSchema = z.enum(listingExposureEnum);
+const listingAvailabilityChannelSchema = z.enum(listingAvailabilityChannelEnum);
+const listingStockPolicySchema = z.enum(listingStockPolicyEnum);
+
+const percentSchema = z.number().min(0).max(100);
+const optionalText = z.string().trim().nullable().optional();
+const optionalNonNegativeInt = z.number().int().nonnegative().nullable().optional();
+
+export const listingImageSchema: z.ZodType<ListingImages> = z.object({
+  order: z.number(),
+  url: z.string(),
+  label: z.string().trim().optional(),
+  kind: z.enum(listingImageKindEnum).optional(),
+});
+
+const listingLogisticsSchema: z.ZodType<ListingLogistics> = z.object({
+  packaging: z.string().trim().optional(),
+  unit: z.string().trim().optional(),
+  baseValueMinor: z.number().int().nonnegative().optional(),
+  grossWeightKg: z.number().nonnegative().optional(),
+  widthCm: z.number().nonnegative().optional(),
+  heightCm: z.number().nonnegative().optional(),
+  depthCm: z.number().nonnegative().optional(),
+  weightVolumeRatio: z.string().trim().optional(),
+  packagingType: z.string().trim().optional(),
+});
+
+const listingEditorialSchema: z.ZodType<ListingEditorial> = z.object({
+  history: z.string().trim().optional(),
+  composition: z.string().trim().optional(),
+  nutrition: z.string().trim().optional(),
+  benefits: z.string().trim().optional(),
+  storage: z.string().trim().optional(),
+  maintenance: z.string().trim().optional(),
+  manufacturing: z.string().trim().optional(),
+});
+
+const listingSeoSchema: z.ZodType<ListingSeo> = z.object({
+  title: z.string().trim().max(70).optional(),
+  externalUrl: z.url().optional(),
+  metaDescription: z.string().trim().max(160).optional(),
+});
+
+const listingCertificateSchema: z.ZodType<ListingCertificate> = z.object({
+  name: z.string().trim().min(1),
+  url: z.url(),
+});
+
+export const marketPriceInputSchema = z.object({
+  countryCode: z.string().trim().min(2),
+  priceType: z.enum(marketPriceTypeEnum),
+  currency: z.string().trim().min(1).default("XOF"),
+  priceAmountMinor: z.number().int().nonnegative(),
+  vatRatePercent: percentSchema.nullable().optional(),
+  vmpCommissionPercent: percentSchema.nullable().optional(),
+  ddpPriceAmountMinor: optionalNonNegativeInt,
+  agentCommissionPercent: percentSchema.nullable().optional(),
+  minOrderQuantity: optionalNonNegativeInt,
+  cartonsPerPallet: optionalNonNegativeInt,
+  containerType: optionalText,
+  unitsPerContainer: optionalNonNegativeInt,
+});
+
+export type MarketPriceInput = z.infer<typeof marketPriceInputSchema>;
 const listingSpecificsSectionsSchema: z.ZodType<ListingSpecificsSection[]> =
   z.array(
     z.object({
@@ -79,14 +216,7 @@ export const createListingSchema = z.object({
   subCategoryId: uuidSchema,
   title: z.string().trim().min(1),
   description: z.string().nullable().optional(),
-  images: z
-    .array(
-      z.object({
-        order: z.number(),
-        url: z.string(),
-      }),
-    )
-    .optional(),
+  images: z.array(listingImageSchema).optional(),
   video: z.url().nullable().optional(),
   specificsSections: listingSpecificsSectionsSchema.optional(),
   condition: listingConditionSchema.optional(),
@@ -100,6 +230,36 @@ export const createListingSchema = z.object({
   priceAmountMinor: z.number().int().min(-1),
   currency: z.string().trim().min(1).optional(),
   quantityAvailable: z.number().int().positive().optional(),
+  // Commercial offer (both categories)
+  brand: optionalText,
+  model: optionalText,
+  supplierRole: optionalText,
+  productionCapacity: optionalText,
+  leadTime: optionalText,
+  minOrderQuantity: optionalNonNegativeInt,
+  certification: optionalText,
+  incoterm: optionalText,
+  // Enterprise product sheet
+  launchDate: z.string().nullable().optional(),
+  gs1Reference: optionalText,
+  internalReference: optionalText,
+  region: optionalText,
+  exposure: listingExposureSchema.nullable().optional(),
+  shortDescription: optionalText,
+  hsCode: optionalText,
+  ean13: optionalText,
+  cupCode: optionalText,
+  readyToShip: z.boolean().nullable().optional(),
+  availableOn: listingAvailabilityChannelSchema.nullable().optional(),
+  storageLocation: optionalText,
+  outOfStockPolicy: listingStockPolicySchema.nullable().optional(),
+  specialDeliveryTime: optionalText,
+  transporters: optionalText,
+  logistics: listingLogisticsSchema.nullable().optional(),
+  editorial: listingEditorialSchema.nullable().optional(),
+  seo: listingSeoSchema.nullable().optional(),
+  certificates: z.array(listingCertificateSchema).optional(),
+  marketPrices: z.array(marketPriceInputSchema).optional(),
 });
 
 export const updateListingSchema = createListingSchema.partial().extend({
@@ -129,6 +289,35 @@ export type Listing = {
   quantityAvailable: number;
   cities: string[];
   countryCode: string;
+  brand: string | null;
+  model: string | null;
+  supplierRole: string | null;
+  productionCapacity: string | null;
+  leadTime: string | null;
+  minOrderQuantity: number | null;
+  certification: string | null;
+  incoterm: string | null;
+  launchDate: string | null;
+  gs1Reference: string | null;
+  internalReference: string | null;
+  region: string | null;
+  exposure: ListingExposure | null;
+  shortDescription: string | null;
+  hsCode: string | null;
+  ean13: string | null;
+  cupCode: string | null;
+  readyToShip: boolean | null;
+  availableOn: ListingAvailabilityChannel | null;
+  storageLocation: string | null;
+  outOfStockPolicy: ListingStockPolicy | null;
+  specialDeliveryTime: string | null;
+  transporters: string | null;
+  logistics: ListingLogistics | null;
+  editorial: ListingEditorial | null;
+  seo: ListingSeo | null;
+  certificates: ListingCertificate[];
+  marketPrices: ListingMarketPrice[];
+  marketPrice: ListingMarketPrice | null;
   createdAt: string;
   updatedAt: string;
   category: {

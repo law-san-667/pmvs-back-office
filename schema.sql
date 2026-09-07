@@ -165,6 +165,33 @@ CREATE TYPE public.listing_condition AS ENUM (
 ALTER TYPE public.listing_condition OWNER TO postgres;
 
 --
+-- Name: listing_availability_channel; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.listing_availability_channel AS ENUM (
+    'WEBSITE',
+    'MARKETPLACE',
+    'OFFLINE',
+    'ALL'
+);
+
+
+ALTER TYPE public.listing_availability_channel OWNER TO postgres;
+
+--
+-- Name: listing_exposure; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.listing_exposure AS ENUM (
+    'NATIONAL',
+    'INTERNATIONAL',
+    'BOTH'
+);
+
+
+ALTER TYPE public.listing_exposure OWNER TO postgres;
+
+--
 -- Name: listing_status; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -178,6 +205,30 @@ CREATE TYPE public.listing_status AS ENUM (
 
 
 ALTER TYPE public.listing_status OWNER TO postgres;
+
+--
+-- Name: listing_stock_policy; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.listing_stock_policy AS ENUM (
+    'ACCEPT_ORDERS',
+    'REFUSE_ORDERS'
+);
+
+
+ALTER TYPE public.listing_stock_policy OWNER TO postgres;
+
+--
+-- Name: market_price_type; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.market_price_type AS ENUM (
+    'B2C',
+    'B2B'
+);
+
+
+ALTER TYPE public.market_price_type OWNER TO postgres;
 
 --
 -- Name: message_type; Type: TYPE; Schema: public; Owner: postgres
@@ -734,6 +785,33 @@ END) = 1))
 ALTER TABLE public.favorites OWNER TO postgres;
 
 --
+-- Name: listing_market_prices; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.listing_market_prices (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    listing_id uuid NOT NULL,
+    country_code text NOT NULL,
+    price_type public.market_price_type NOT NULL,
+    currency text DEFAULT 'XOF'::text NOT NULL,
+    price_amount_minor integer NOT NULL,
+    vat_rate_percent numeric(5,2),
+    vmp_commission_percent numeric(5,2),
+    ddp_price_amount_minor integer,
+    agent_commission_percent numeric(5,2),
+    min_order_quantity integer,
+    cartons_per_pallet integer,
+    container_type text,
+    units_per_container integer,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT listing_market_prices_price_non_negative_check CHECK ((price_amount_minor >= 0))
+);
+
+
+ALTER TABLE public.listing_market_prices OWNER TO postgres;
+
+--
 -- Name: listings; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -765,6 +843,34 @@ CREATE TABLE public.listings (
     total_rating_score integer DEFAULT 0 NOT NULL,
     review_count integer DEFAULT 0 NOT NULL,
     video text,
+    brand text,
+    model text,
+    supplier_role text,
+    production_capacity text,
+    lead_time text,
+    min_order_quantity integer,
+    certification text,
+    incoterm text,
+    launch_date date,
+    gs1_reference text,
+    internal_reference text,
+    region text,
+    exposure public.listing_exposure,
+    short_description text,
+    hs_code text,
+    ean13 text,
+    cup_code text,
+    ready_to_ship boolean,
+    available_on public.listing_availability_channel,
+    storage_location text,
+    out_of_stock_policy public.listing_stock_policy,
+    special_delivery_time text,
+    transporters text,
+    logistics jsonb,
+    editorial jsonb,
+    seo jsonb,
+    certificates jsonb DEFAULT '[]'::jsonb NOT NULL,
+    CONSTRAINT listings_min_order_quantity_non_negative_check CHECK ((min_order_quantity >= 0)),
     CONSTRAINT listings_quantity_available_positive_check CHECK ((quantity_available > 0)),
     CONSTRAINT listings_review_count_non_negative_check CHECK ((review_count >= 0)),
     CONSTRAINT listings_total_rating_score_non_negative_check CHECK ((total_rating_score >= 0)),
@@ -1289,6 +1395,14 @@ ALTER TABLE ONLY public.favorites
 
 
 --
+-- Name: listing_market_prices listing_market_prices_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.listing_market_prices
+    ADD CONSTRAINT listing_market_prices_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: listings listings_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1774,6 +1888,27 @@ CREATE INDEX listings_is_service_idx ON public.listings USING btree (is_service)
 --
 
 CREATE INDEX listings_price_amount_minor_idx ON public.listings USING btree (price_amount_minor);
+
+
+--
+-- Name: listing_market_prices_country_type_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX listing_market_prices_country_type_idx ON public.listing_market_prices USING btree (country_code, price_type);
+
+
+--
+-- Name: listing_market_prices_listing_country_type_unique_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX listing_market_prices_listing_country_type_unique_idx ON public.listing_market_prices USING btree (listing_id, country_code, price_type);
+
+
+--
+-- Name: listing_market_prices_listing_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX listing_market_prices_listing_id_idx ON public.listing_market_prices USING btree (listing_id);
 
 
 --
@@ -2370,6 +2505,22 @@ ALTER TABLE ONLY public.favorites
 
 ALTER TABLE ONLY public.favorites
     ADD CONSTRAINT favorites_user_id_users_id_fk FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: listing_market_prices listing_market_prices_country_code_countries_code_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.listing_market_prices
+    ADD CONSTRAINT listing_market_prices_country_code_countries_code_fk FOREIGN KEY (country_code) REFERENCES public.countries(code);
+
+
+--
+-- Name: listing_market_prices listing_market_prices_listing_id_listings_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.listing_market_prices
+    ADD CONSTRAINT listing_market_prices_listing_id_listings_id_fk FOREIGN KEY (listing_id) REFERENCES public.listings(id) ON DELETE CASCADE;
 
 
 --
