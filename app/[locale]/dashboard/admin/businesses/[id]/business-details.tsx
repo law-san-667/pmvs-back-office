@@ -32,6 +32,10 @@ import {
   BUSINESS_STATUS_LABELS,
 } from "@/lib/admin-business-utils";
 import type { BusinessStatus } from "@/lib/backend-resource-types";
+import {
+  BUSINESS_CATEGORY_LABELS,
+  isLegalBusinessCategory,
+} from "@/lib/business-categories";
 import { formatDate, getInitials } from "@/lib/seller-dashboard-utils";
 import { trpc } from "@/server/trpc/client";
 import {
@@ -192,8 +196,8 @@ export function BusinessDetails({ id }: { id: string }) {
               value={value.deliveryZones?.join(", ")}
             />
             <Row
-              label="Type"
-              value={value.legalBusiness ? "Formelle" : "Informelle"}
+              label="Catégorisation"
+              value={BUSINESS_CATEGORY_LABELS[value.businessCategory]}
             />
             <Row label="Inscription" value={formatDate(value.createdAt, true)} />
             <Row
@@ -301,6 +305,11 @@ export function BusinessDetails({ id }: { id: string }) {
                 ) : null
               }
             />
+            {!isLegalBusinessCategory(value.businessCategory) && (
+              <p className="text-muted-foreground text-sm">
+                Les personnes physiques ne fournissent pas de dossier légal.
+              </p>
+            )}
             {legalInformation && (
               <>
                 <Row
@@ -320,6 +329,22 @@ export function BusinessDetails({ id }: { id: string }) {
                   value={`${legalInformation.legalRepresentative.name} — ${legalInformation.legalRepresentative.mobilePhone}`}
                 />
                 <Row label="Site web" value={legalInformation.website} />
+                <Row
+                  label="Géolocalisation du siège"
+                  value={
+                    legalInformation.headquartersGeolocation ? (
+                      <a
+                        href={`https://www.openstreetmap.org/?mlat=${legalInformation.headquartersGeolocation.latitude}&mlon=${legalInformation.headquartersGeolocation.longitude}#map=17/${legalInformation.headquartersGeolocation.latitude}/${legalInformation.headquartersGeolocation.longitude}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary underline"
+                      >
+                        {legalInformation.headquartersGeolocation.latitude},{" "}
+                        {legalInformation.headquartersGeolocation.longitude}
+                      </a>
+                    ) : null
+                  }
+                />
               </>
             )}
             {value.legalBusinessQuestions?.map((question) => (

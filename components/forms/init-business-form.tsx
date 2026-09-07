@@ -53,6 +53,15 @@ import {
   type LegalBusinessInformation,
   type LegalBusinessType,
 } from "@/lib/validators/business";
+import type { BusinessCategory } from "@/lib/backend-resource-types";
+import {
+  BUSINESS_CATEGORY_OPTIONS,
+  isLegalBusinessCategory,
+} from "@/lib/business-categories";
+import {
+  HeadquartersGeolocationField,
+  type GeolocationSource,
+} from "@/components/forms/headquarters-geolocation-field";
 import { trpc } from "@/server/trpc/client";
 import { AlertCircle, Camera, Pencil, Upload, X } from "lucide-react";
 import { useCallback, useState } from "react";
@@ -115,7 +124,7 @@ interface FormData {
   websiteLink: string;
   orangeMoneyNumber: string;
   waveNumber: string;
-  isRegularized: boolean | null;
+  businessCategory: BusinessCategory | null;
   legalDocuments: File[];
   legalAcronym: string;
   legalCreationYear: string;
@@ -126,6 +135,8 @@ interface FormData {
   postalAddress: string;
   headquartersLatitude: string;
   headquartersLongitude: string;
+  headquartersAccuracyMeters: string;
+  headquartersSource: GeolocationSource | "";
   legalWebsite: string;
   productCategories: string;
   serviceCategories: string;
@@ -162,7 +173,7 @@ const initialFormData: FormData = {
   websiteLink: "",
   orangeMoneyNumber: "",
   waveNumber: "",
-  isRegularized: null,
+  businessCategory: null,
   legalDocuments: [],
   legalAcronym: "",
   legalCreationYear: "",
@@ -173,6 +184,8 @@ const initialFormData: FormData = {
   postalAddress: "",
   headquartersLatitude: "",
   headquartersLongitude: "",
+  headquartersAccuracyMeters: "",
+  headquartersSource: "",
   legalWebsite: "",
   productCategories: "",
   serviceCategories: "",
@@ -258,7 +271,15 @@ const buildLegalBusinessInformation = (
   const latitude = optionalNumber(formData.headquartersLatitude);
   const longitude = optionalNumber(formData.headquartersLongitude);
   if (latitude !== undefined && longitude !== undefined) {
-    information.headquartersGeolocation = { latitude, longitude };
+    const accuracyMeters = optionalNumber(formData.headquartersAccuracyMeters);
+    information.headquartersGeolocation = {
+      latitude,
+      longitude,
+      ...(accuracyMeters !== undefined ? { accuracyMeters } : {}),
+      ...(formData.headquartersSource
+        ? { source: formData.headquartersSource }
+        : {}),
+    };
   }
 
   const productionResources = {
@@ -287,7 +308,7 @@ const buildCreateBusinessPayload = (
     name: formData.businessName,
     countryCode: formData.countryCode,
     citySlug: formData.citySlug,
-    legalBusiness: formData.isRegularized ?? false,
+    businessCategory: formData.businessCategory ?? "PHYSICAL_PERSON",
   };
 
   const optionalFields = {
@@ -307,7 +328,7 @@ const buildCreateBusinessPayload = (
   if (uploadedFiles.legalDocumentUrls.length)
     payload.legalDocuments = uploadedFiles.legalDocumentUrls;
 
-  if (formData.isRegularized === true) {
+  if (isLegalBusinessCategory(formData.businessCategory)) {
     payload.legalBusinessInformation = buildLegalBusinessInformation(formData);
     payload.legalBusinessQuestions = formData.legalQuestionTitles.map(
       (questionTitle) => ({ questionTitle, answer: "" }),
@@ -354,8 +375,8 @@ export default function InitBusinessForm() {
     defaultValues: initialFormData,
   });
   const formData = useWatch({ control: form.control }) as FormData;
-  const totalSteps =
-    formData.isRegularized === true ? LEGAL_TOTAL_STEPS : BASE_TOTAL_STEPS;
+  const isLegalCategory = isLegalBusinessCategory(formData.businessCategory);
+  const totalSteps = isLegalCategory ? LEGAL_TOTAL_STEPS : BASE_TOTAL_STEPS;
 
   const [cropImage, setCropImage] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -426,7 +447,7 @@ export default function InitBusinessForm() {
     onDrop: onDocumentDrop,
     accept: LEGAL_DOCUMENT_ACCEPT,
     multiple: true,
-    disabled: formData.isRegularized !== true,
+    disabled: !isLegalBusinessCategory(formData.businessCategory),
   });
 
   const onCropComplete = useCallback(
@@ -460,9 +481,14 @@ export default function InitBusinessForm() {
   const next = () => {
     setSubmissionErrors([]);
 
+    if (step === BASE_TOTAL_STEPS && formData.businessCategory === null) {
+      setSubmissionErrors(["Sélectionnez votre catégorisation pour continuer."]);
+      return;
+    }
+
     if (
       step === BASE_TOTAL_STEPS &&
-      formData.isRegularized === true &&
+      isLegalCategory &&
       formData.legalDocuments.length === 0
     ) {
       setSubmissionErrors([
@@ -522,17 +548,14 @@ export default function InitBusinessForm() {
 
     setSubmissionErrors([]);
 
-    if (formData.isRegularized === null) {
+    if (formData.businessCategory === null) {
       setSubmissionErrors([
-        "Indiquez si votre business est régularisé avant de continuer.",
+        "Sélectionnez votre catégorisation avant de continuer.",
       ]);
       return;
     }
 
-    if (
-      formData.isRegularized === true &&
-      formData.legalQuestionTitles.length === 0
-    ) {
+    if (isLegalCategory && formData.legalQuestionTitles.length === 0) {
       setSubmissionErrors([
         "Sélectionnez au moins une question applicable à votre business.",
       ]);
@@ -544,8 +567,7 @@ export default function InitBusinessForm() {
 
     try {
       const logoFile = formData.logo ?? undefined;
-      const legalFiles =
-        formData.isRegularized === true ? formData.legalDocuments : [];
+      const legalFiles = isLegalCategory ? formData.legalDocuments : [];
 
       const totalParts = (logoFile ? 1 : 0) + (legalFiles.length ? 1 : 0);
       let completedParts = 0;
@@ -1084,40 +1106,58 @@ function Step5({
   documentDropzone: ReturnType<typeof useDropzone>;
   removeDocument: (index: number) => void;
 }) {
-  const documentsDisabled = formData.isRegularized !== true;
+  const documentsDisabled = !isLegalBusinessCategory(formData.businessCategory);
   const { getRootProps, getInputProps, isDragActive, isDragReject } =
     documentDropzone;
 
   return (
     <FieldGroup>
       <Controller
-        name="isRegularized"
+        name="businessCategory"
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Etes-vous un business régularisé ?</FieldLabel>
-            <div className="flex items-center gap-4">
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox
-                  checked={field.value === true}
-                  onCheckedChange={() => field.onChange(true)}
-                />
-                Oui
-              </label>
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox
-                  checked={field.value === false}
-                  onCheckedChange={() => field.onChange(false)}
-                />
-                Non
-              </label>
+            <FieldLabel>Sélectionnez votre catégorisation</FieldLabel>
+            <div className="flex flex-col gap-2">
+              {BUSINESS_CATEGORY_OPTIONS.map((option) => (
+                <label
+                  key={option.value}
+                  className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 text-sm transition-colors ${
+                    field.value === option.value
+                      ? "border-primary bg-primary/5"
+                      : "border-input hover:border-primary/40"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="businessCategory"
+                    className="mt-1"
+                    checked={field.value === option.value}
+                    onChange={() => field.onChange(option.value)}
+                  />
+                  <span>
+                    <span className="block font-medium">{option.label}</span>
+                    <span className="text-muted-foreground block text-xs">
+                      {option.description}
+                    </span>
+                  </span>
+                </label>
+              ))}
             </div>
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
           </Field>
         )}
       />
 
-      <Field data-disabled={documentsDisabled}>
+      {documentsDisabled && (
+        <p className="text-muted-foreground text-sm">
+          En tant que personne physique, vous n&apos;avez pas de documents
+          légaux à fournir : vous pouvez finaliser votre inscription à
+          l&apos;étape suivante.
+        </p>
+      )}
+
+      <Field data-disabled={documentsDisabled} hidden={documentsDisabled}>
         <FieldLabel>Documents légaux</FieldLabel>
         <p className="text-muted-foreground text-xs">
           Note : Format photos SVG, PNG, JPG, pdf, word
@@ -1306,20 +1346,44 @@ function Step6({ control }: { control: Control<FormData> }) {
           name="postalAddress"
           label="Adresse postale (optionnel)"
         />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <LegalInput
-            control={control}
-            name="headquartersLatitude"
-            label="Latitude du siège (optionnel)"
-            type="number"
-          />
-          <LegalInput
-            control={control}
-            name="headquartersLongitude"
-            label="Longitude du siège (optionnel)"
-            type="number"
-          />
-        </div>
+        <Controller
+          name="headquartersLatitude"
+          control={control}
+          render={({ field: latitudeField }) => (
+            <Controller
+              name="headquartersLongitude"
+              control={control}
+              render={({ field: longitudeField }) => (
+                <Controller
+                  name="headquartersAccuracyMeters"
+                  control={control}
+                  render={({ field: accuracyField }) => (
+                    <Controller
+                      name="headquartersSource"
+                      control={control}
+                      render={({ field: sourceField }) => (
+                        <HeadquartersGeolocationField
+                          value={{
+                            latitude: latitudeField.value,
+                            longitude: longitudeField.value,
+                            accuracyMeters: accuracyField.value,
+                            source: sourceField.value,
+                          }}
+                          onChange={(next) => {
+                            latitudeField.onChange(next.latitude);
+                            longitudeField.onChange(next.longitude);
+                            accuracyField.onChange(next.accuracyMeters);
+                            sourceField.onChange(next.source);
+                          }}
+                        />
+                      )}
+                    />
+                  )}
+                />
+              )}
+            />
+          )}
+        />
         <LegalInput
           control={control}
           name="legalWebsite"

@@ -1,3 +1,4 @@
+import { isLegalBusinessCategory } from "@/lib/business-categories";
 import z from "zod";
 
 export const legalBusinessTypeSchema = z.enum([
@@ -23,6 +24,8 @@ export const legalBusinessInformationSchema = z.object({
     .object({
       latitude: z.number().min(-90).max(90),
       longitude: z.number().min(-180).max(180),
+      accuracyMeters: z.number().nonnegative().optional(),
+      source: z.enum(["DEVICE", "MAP", "MANUAL"]).optional(),
     })
     .optional(),
   website: z.url("Le site web est invalide.").optional(),
@@ -50,6 +53,12 @@ export const legalBusinessInformationSchema = z.object({
   importExportIssues: z.string().trim().min(1).optional(),
   plannedActions: z.string().trim().min(1).optional(),
 });
+
+export const businessCategorySchema = z.enum([
+  "PHYSICAL_PERSON",
+  "SME",
+  "LARGE_ENTERPRISE",
+]);
 
 export const legalBusinessQuestionSchema = z.object({
   questionTitle: z.string().trim().min(1),
@@ -82,7 +91,7 @@ const businessBaseSchema = z.object({
   citySlug: z.string().trim().min(1, "La ville est requise."),
   address: z.string().trim().optional(),
   deliveryZones: z.array(z.string().trim().min(1)).optional(),
-  legalBusiness: z.boolean().optional(),
+  businessCategory: businessCategorySchema.optional(),
   legalDocuments: z.array(z.url()).optional(),
   legalBusinessInformation: legalBusinessInformationSchema
     .nullable()
@@ -95,7 +104,9 @@ const businessBaseSchema = z.object({
 
 export const createBusinessInputSchema = businessBaseSchema.superRefine(
   (input, ctx) => {
-    if (input.legalBusiness && !input.legalDocuments?.length) {
+    const isLegal = isLegalBusinessCategory(input.businessCategory);
+
+    if (isLegal && !input.legalDocuments?.length) {
       ctx.addIssue({
         code: "custom",
         path: ["legalDocuments"],
@@ -104,7 +115,7 @@ export const createBusinessInputSchema = businessBaseSchema.superRefine(
       });
     }
 
-    if (input.legalBusiness && !input.legalBusinessInformation) {
+    if (isLegal && !input.legalBusinessInformation) {
       ctx.addIssue({
         code: "custom",
         path: ["legalBusinessInformation"],
@@ -113,7 +124,7 @@ export const createBusinessInputSchema = businessBaseSchema.superRefine(
       });
     }
 
-    if (input.legalBusiness && !input.legalBusinessQuestions?.length) {
+    if (isLegal && !input.legalBusinessQuestions?.length) {
       ctx.addIssue({
         code: "custom",
         path: ["legalBusinessQuestions"],
@@ -135,3 +146,4 @@ export type LegalBusinessInformation = z.infer<
   typeof legalBusinessInformationSchema
 >;
 export type LegalBusinessType = z.infer<typeof legalBusinessTypeSchema>;
+export type BusinessCategoryInput = z.infer<typeof businessCategorySchema>;

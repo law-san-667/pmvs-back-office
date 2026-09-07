@@ -37,6 +37,7 @@ import {
 } from "@/lib/admin-business-utils";
 import type { AdminBusiness } from "@/lib/admin-types";
 import type { BusinessStatus } from "@/lib/backend-resource-types";
+import { BUSINESS_CATEGORY_LABELS } from "@/lib/business-categories";
 import { useRouter } from "@/i18n/navigation";
 import { formatDate, getInitials } from "@/lib/seller-dashboard-utils";
 import { trpc } from "@/server/trpc/client";
@@ -151,7 +152,7 @@ export default function AdminBusinessesPage() {
                 <TableHead>Entreprise</TableHead>
                 <TableHead>Localisation</TableHead>
                 <TableHead>Contact</TableHead>
-                <TableHead>Type</TableHead>
+                <TableHead>Catégorisation</TableHead>
                 <TableHead>Inscription</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead className="w-[1%] text-right">Actions</TableHead>
@@ -200,7 +201,7 @@ export default function AdminBusinessesPage() {
                     {business.contactEmail ?? business.whatsappPhone ?? "—"}
                   </TableCell>
                   <TableCell>
-                    {business.legalBusiness ? "Formelle" : "Informelle"}
+                    {BUSINESS_CATEGORY_LABELS[business.businessCategory]}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
                     {formatDate(business.createdAt)}

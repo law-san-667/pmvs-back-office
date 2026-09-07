@@ -53,6 +53,8 @@ export type BusinessStatus =
   | "SUSPENDED"
   | "DELETED";
 
+export type BusinessCategory = "PHYSICAL_PERSON" | "SME" | "LARGE_ENTERPRISE";
+
 export type Business = {
   id: string;
   name: string;
@@ -69,7 +71,7 @@ export type Business = {
   orangeMoneyNumber?: string | null;
   waveNumber?: string | null;
   deliveryZones: string[];
-  legalBusiness: boolean;
+  businessCategory: BusinessCategory;
   legalDocuments: string[];
   legalBusinessInformation: LegalBusinessInformation | null;
   legalBusinessQuestions: Array<{

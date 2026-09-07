@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +14,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { BUSINESS_STATUS_LABELS } from "@/lib/admin-business-utils";
 import type { AdminBusiness } from "@/lib/admin-types";
-import type { BusinessStatus } from "@/lib/backend-resource-types";
+import type {
+  BusinessCategory,
+  BusinessStatus,
+} from "@/lib/backend-resource-types";
+import { BUSINESS_CATEGORY_LABELS } from "@/lib/business-categories";
 import { trpc } from "@/server/trpc/client";
 import { useState, type FormEvent } from "react";
 
@@ -36,7 +39,9 @@ export function BusinessEditorDialog({
   );
   const [address, setAddress] = useState(business.address ?? "");
   const [status, setStatus] = useState<BusinessStatus>(business.status);
-  const [legalBusiness, setLegalBusiness] = useState(business.legalBusiness);
+  const [businessCategory, setBusinessCategory] = useState<BusinessCategory>(
+    business.businessCategory,
+  );
   const update = trpc.admin.updateBusiness.useMutation();
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -50,7 +55,7 @@ export function BusinessEditorDialog({
         contactEmail: contactEmail.trim() || undefined,
         whatsappPhone: whatsappPhone.trim() || undefined,
         address: address.trim() || undefined,
-        legalBusiness,
+        businessCategory,
         status,
       });
       await onSaved();
@@ -137,13 +142,24 @@ export function BusinessEditorDialog({
             </select>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="business-legal"
-              checked={legalBusiness}
-              onCheckedChange={(checked) => setLegalBusiness(checked === true)}
-            />
-            <Label htmlFor="business-legal">Entreprise formelle</Label>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="business-category">Catégorisation</Label>
+            <select
+              id="business-category"
+              value={businessCategory}
+              onChange={(event) =>
+                setBusinessCategory(event.target.value as BusinessCategory)
+              }
+              className="border-input bg-background h-9 rounded-md border px-3 text-sm"
+            >
+              {Object.entries(BUSINESS_CATEGORY_LABELS).map(
+                ([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ),
+              )}
+            </select>
           </div>
 
           {update.error && (
