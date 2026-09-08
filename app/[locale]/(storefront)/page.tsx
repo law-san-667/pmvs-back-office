@@ -1,6 +1,7 @@
 "use client";
 
 import Flag from "@/components/flag";
+import ForgotPasswordForm from "@/components/forms/forgot-password-form";
 import LoginForm from "@/components/forms/login-form";
 import RegisterForm from "@/components/forms/register-form";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import { useRouter } from "@/i18n/navigation";
 import Image from "next/image";
 import React, { useState } from "react";
 
-type AuthMode = "login" | "register";
+type AuthMode = "login" | "register" | "forgot-password";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -44,10 +45,17 @@ export default function AuthPage() {
       </div>
       <div className="grid grid-cols-2 gap-2">
         <div className="mx-auto w-full">
-          {mode === "login" ? (
-            <LoginForm onSwitchToRegister={() => setMode("register")} />
-          ) : (
+          {mode === "login" && (
+            <LoginForm
+              onSwitchToRegister={() => setMode("register")}
+              onForgotPassword={() => setMode("forgot-password")}
+            />
+          )}
+          {mode === "register" && (
             <RegisterForm onSwitchToLogin={() => setMode("login")} />
+          )}
+          {mode === "forgot-password" && (
+            <ForgotPasswordForm onBackToLogin={() => setMode("login")} />
           )}
         </div>
         <div className="w-full">

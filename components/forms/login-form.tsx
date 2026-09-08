@@ -26,8 +26,10 @@ type AuthMethod = "email" | "phone";
 
 export default function LoginForm({
   onSwitchToRegister,
+  onForgotPassword,
 }: {
   onSwitchToRegister: () => void;
+  onForgotPassword: () => void;
 }) {
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
@@ -173,7 +175,8 @@ export default function LoginForm({
                   <div className="flex items-center">
                     <button
                       type="button"
-                      className="ml-auto text-sm underline-offset-4 hover:underline"
+                      onClick={onForgotPassword}
+                      className="ml-auto cursor-pointer text-sm underline-offset-4 hover:underline"
                     >
                       Mot de passe oublié ?
                     </button>
