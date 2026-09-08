@@ -14,19 +14,18 @@ const omitUndefined = <T extends Record<string, unknown>>(input: T) =>
     Object.entries(input).filter(([, value]) => value !== undefined),
   ) as Partial<T>;
 
+/** LawPay only pays suppliers out to Wave, so the service is not a choice. */
+const WAVE_PAYOUT_SERVICE = "Wave Senegal";
+
 const payoutAccountInputSchema = z.object({
   businessId: uuidSchema,
-  service: z.string().trim().min(1),
   destinationNumber: z
     .string()
     .trim()
-    .regex(/^\+?[0-9]{8,15}$/, "Numéro mobile money invalide."),
+    .regex(/^\+?[0-9]{8,15}$/, "Numéro Wave invalide."),
 });
 
 export const businessesRouter = createTRPCRouter({
-  payoutServices: privateProcedure.query(({ ctx }) =>
-    callBackend<string[]>(ctx.api.get("/payout-accounts/services")),
-  ),
   payoutAccount: privateProcedure
     .input(z.object({ businessId: uuidSchema }))
     .query(({ ctx, input }) =>
@@ -40,7 +39,10 @@ export const businessesRouter = createTRPCRouter({
       const { businessId, ...payload } = input;
 
       return callBackend<PayoutAccount>(
-        ctx.api.put(`/businesses/${businessId}/payout-account`, payload),
+        ctx.api.put(`/businesses/${businessId}/payout-account`, {
+          ...payload,
+          service: WAVE_PAYOUT_SERVICE,
+        }),
       );
     }),
   updatePayoutAccountStatus: privateProcedure

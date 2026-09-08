@@ -14,9 +14,10 @@ import { useState } from "react";
 const NUMBER_PATTERN = /^\+?[0-9]{8,15}$/;
 
 /**
- * Where LawPay sends the supplier's share of each sale. Only the business
- * owner (or a platform admin) can read or change it; the API returns the
- * number masked.
+ * The Wave number LawPay sends the supplier's share of each sale to. Only the
+ * business owner (or a platform admin) can read or change it; the API returns
+ * the number masked. Wave is the only operator LawPay pays out to, so there is
+ * no service to pick.
  */
 export function PayoutAccountForm({ businessId }: { businessId: string }) {
   const utils = trpc.useUtils();
@@ -24,11 +25,9 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
     { businessId },
     { retry: false },
   );
-  const services = trpc.businesses.payoutServices.useQuery();
   const upsert = trpc.businesses.upsertPayoutAccount.useMutation();
   const updateStatus = trpc.businesses.updatePayoutAccountStatus.useMutation();
 
-  const [service, setService] = useState("");
   const [destinationNumber, setDestinationNumber] = useState("");
   const [numberError, setNumberError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -36,7 +35,7 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
 
   const isNotConfigured =
     account.error?.data?.code === "NOT_FOUND" || account.error?.message === "Not found.";
-  const isLoading = account.isLoading || services.isLoading;
+  const isLoading = account.isLoading;
   const showForm = isEditing || (!account.data && !isLoading);
   const isPending = upsert.isPending || updateStatus.isPending;
 
@@ -52,21 +51,20 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
     setSuccessMessage(null);
 
     if (!NUMBER_PATTERN.test(destinationNumber.trim())) {
-      setNumberError("Numéro mobile money invalide (8 à 15 chiffres).");
+      setNumberError("Numéro Wave invalide (8 à 15 chiffres).");
       return;
     }
 
     try {
       await upsert.mutateAsync({
         businessId,
-        service: service || services.data?.[0] || "",
         destinationNumber: destinationNumber.trim(),
       });
       await refresh();
       setIsEditing(false);
       setDestinationNumber("");
       setSuccessMessage(
-        "Compte de reversement enregistré. Vos paiements en ligne sont actifs.",
+        "Numéro Wave enregistré. Vos clients peuvent maintenant commander.",
       );
     } catch {
       // Error rendered below.
@@ -95,12 +93,13 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 font-bold">
           <ShieldCheckIcon className="text-primary size-5" />
-          Compte de reversement (LawPay)
+          Compte Wave de reversement (LawPay)
         </CardTitle>
         <p className="text-muted-foreground text-sm">
-          Les paiements en ligne de vos clients vous sont reversés directement
-          sur ce compte mobile money, déduits des frais et de la commission.
-          Sans compte actif, vos produits ne peuvent pas être payés en ligne.
+          Vos clients paient avec Wave, et votre part de chaque vente vous est
+          reversée immédiatement sur ce numéro Wave, déduite des frais et de la
+          commission. Sans compte Wave actif, vos produits ne peuvent pas être
+          commandés.
         </p>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -136,10 +135,7 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  setService(account.data?.service ?? "");
-                  setIsEditing(true);
-                }}
+                onClick={() => setIsEditing(true)}
               >
                 Changer le numéro
               </Button>
@@ -164,11 +160,11 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
 
         {!isLoading && !account.data && !accessDenied && (
           <p className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-            Aucun compte de reversement n&apos;est encore configuré : vos
-            produits ne peuvent pas être payés en ligne. Renseignez l&apos;
-            opérateur et le numéro ci-dessous, puis validez avec le bouton de
-            cette carte — le bouton « Enregistrer les modifications » en bas de
-            page ne sauvegarde pas ces champs.
+            Aucun compte Wave n&apos;est encore configuré : vos produits ne
+            peuvent pas être commandés. Renseignez votre numéro Wave
+            ci-dessous, puis validez avec le bouton de cette carte — le bouton
+            « Enregistrer les modifications » en bas de page ne sauvegarde pas
+            ce champ.
           </p>
         )}
 
@@ -181,26 +177,8 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
         {showForm && !accessDenied && (
           <div className="flex flex-col gap-4">
             <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="payout-service">Opérateur</FieldLabel>
-                <select
-                  id="payout-service"
-                  value={service || services.data?.[0] || ""}
-                  onChange={(event) => setService(event.target.value)}
-                  className="border-input bg-background h-9 rounded-md border px-3 text-sm"
-                  disabled={services.isLoading}
-                >
-                  {(services.data ?? []).map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              </Field>
               <Field data-invalid={Boolean(numberError)}>
-                <FieldLabel htmlFor="payout-number">
-                  Numéro mobile money
-                </FieldLabel>
+                <FieldLabel htmlFor="payout-number">Numéro Wave</FieldLabel>
                 <Input
                   id="payout-number"
                   inputMode="tel"
@@ -217,8 +195,9 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
                   aria-invalid={Boolean(numberError)}
                 />
                 <p className="text-muted-foreground text-xs">
-                  Vérifiez bien ce numéro : c&apos;est lui qui recevra votre
-                  argent. Chaque changement est journalisé.
+                  Le numéro doit être rattaché à un compte Wave : c&apos;est
+                  lui qui recevra votre argent. Chaque changement est
+                  journalisé.
                 </p>
                 {numberError && <FieldError errors={[{ message: numberError }]} />}
               </Field>
@@ -238,15 +217,13 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
               <Button
                 type="button"
                 onClick={() => void submit()}
-                disabled={
-                  isPending || services.isLoading || !destinationNumber.trim()
-                }
+                disabled={isPending || !destinationNumber.trim()}
               >
                 {upsert.isPending
                   ? "Enregistrement..."
                   : account.data
                     ? "Mettre à jour"
-                    : "Activer les paiements en ligne"}
+                    : "Activer les paiements Wave"}
               </Button>
             </div>
           </div>

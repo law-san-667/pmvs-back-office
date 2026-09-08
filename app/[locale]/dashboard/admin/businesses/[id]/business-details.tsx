@@ -288,7 +288,7 @@ export function BusinessDetails({ id }: { id: string }) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Reversements (LawPay)</CardTitle>
+            <CardTitle>Reversements Wave (LawPay)</CardTitle>
           </CardHeader>
           <CardContent>
             {payoutAccount.isLoading && (
@@ -296,8 +296,9 @@ export function BusinessDetails({ id }: { id: string }) {
             )}
             {!payoutAccount.isLoading && !payoutAccount.data && (
               <p className="text-muted-foreground text-sm">
-                Aucun compte de reversement : cette entreprise ne peut pas
-                encore encaisser de paiements en ligne.
+                Aucun compte Wave de reversement : cette entreprise ne peut
+                pas encore recevoir de commandes. Son propriétaire doit
+                renseigner son numéro Wave dans les réglages.
               </p>
             )}
             {payoutAccount.data && (
