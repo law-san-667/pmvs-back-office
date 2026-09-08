@@ -23,6 +23,7 @@ import {
   ORDER_STATUS_LABELS,
   PAYMENT_METHOD_LABELS,
 } from "@/lib/seller-dashboard-utils";
+import { PAYMENT_STATUS_LABELS } from "@/lib/payment-utils";
 import { trpc } from "@/server/trpc/client";
 import {
   ArrowLeftIcon,
@@ -162,8 +163,17 @@ export function OrderDetails({
             <div>
               <p className="text-muted-foreground text-xs">Paiement</p>
               <p className="font-medium">
-                {PAYMENT_METHOD_LABELS[data.paymentMethod]}
+                {data.payment?.providerPaymentMethod ??
+                  PAYMENT_METHOD_LABELS[data.payment?.method ?? data.paymentMethod]}
               </p>
+              {data.payment && (
+                <p className="text-muted-foreground text-xs">
+                  {PAYMENT_STATUS_LABELS[data.payment.status]}
+                  {data.payment.transactionReference
+                    ? ` · ${data.payment.transactionReference}`
+                    : ""}
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>

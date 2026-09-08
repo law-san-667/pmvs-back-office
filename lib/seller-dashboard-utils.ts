@@ -14,6 +14,10 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   CASH: "Paiement à la livraison",
   WAVE: "Wave",
   ORANGE_MONEY: "Orange Money",
+  FREE_MONEY: "Free Money",
+  EXPRESSO: "Expresso",
+  CARD: "Carte bancaire",
+  ONLINE: "Paiement en ligne",
 };
 
 export const formatMoney = (amountMinor: number, currency: string) => {

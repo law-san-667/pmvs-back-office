@@ -72,6 +72,7 @@ export type Business = {
   waveNumber?: string | null;
   deliveryZones: string[];
   businessCategory: BusinessCategory;
+  commissionRatePercent?: string | null;
   legalDocuments: string[];
   legalBusinessInformation: LegalBusinessInformation | null;
   legalBusinessQuestions: Array<{

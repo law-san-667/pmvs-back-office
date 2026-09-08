@@ -7,7 +7,12 @@ import type {
   AdminTender,
   BusinessMemberRole,
   BusinessMemberStatus,
+  LedgerEntry,
+  LedgerSummary,
+  PaymentRecord,
   PaymentStatus,
+  PayoutAccount,
+  PayoutStatus,
 } from "@/lib/admin-types";
 import type { BusinessStatus } from "@/lib/backend-resource-types";
 import type {
@@ -38,9 +43,37 @@ const paymentStatusSchema = z.enum([
   "SUCCEEDED",
   "CANCELLED",
   "ERRORED",
+  "REFUND_PENDING",
+  "REFUNDED",
 ] satisfies [PaymentStatus, ...PaymentStatus[]]);
 
-const paymentMethodSchema = z.enum(["CASH", "WAVE", "ORANGE_MONEY"]);
+const payoutStatusSchema = z.enum([
+  "NOT_APPLICABLE",
+  "PENDING",
+  "PROCESSING",
+  "SUCCEEDED",
+  "FAILED",
+] satisfies [PayoutStatus, ...PayoutStatus[]]);
+
+const paymentMethodSchema = z.enum([
+  "CASH",
+  "WAVE",
+  "ORANGE_MONEY",
+  "FREE_MONEY",
+  "EXPRESSO",
+  "CARD",
+  "ONLINE",
+]);
+
+const ledgerAccountSchema = z.enum([
+  "SALES",
+  "PROVIDER_FEES",
+  "PLATFORM_REVENUE",
+  "SUPPLIER_PAYABLE",
+  "SUPPLIER_PAID",
+  "SUPPLIER_RECEIVABLE",
+  "REFUNDS",
+]);
 
 const memberRoleSchema = z.enum(["OWNER", "ADMIN", "MEMBER"] satisfies [
   BusinessMemberRole,
@@ -74,6 +107,7 @@ const businessesInputSchema = paginationInputSchema.extend({
 const updateBusinessPayloadSchema = z.object({
   ...updateBusinessInputSchema.shape,
   status: businessStatusSchema.optional(),
+  commissionRatePercent: z.number().min(0).max(100).nullable().optional(),
 });
 
 const listingsInputSchema = paginationInputSchema.extend({
@@ -110,9 +144,25 @@ const paymentsInputSchema = paginationInputSchema.extend({
   orderBy: z.enum(["amountMinor", "createdAt", "updatedAt"]).optional(),
   orderId: uuidSchema.optional(),
   payerUserId: uuidSchema.optional(),
+  businessId: uuidSchema.optional(),
   method: paymentMethodSchema.optional(),
   status: paymentStatusSchema.optional(),
+  provider: z.enum(["CASH", "LAWPAY"]).optional(),
+  payoutStatus: payoutStatusSchema.optional(),
   transactionReference: z.string().trim().optional(),
+});
+
+const ledgerEntriesInputSchema = paginationInputSchema.extend({
+  orderBy: z.enum(["createdAt", "amountMinor"]).optional(),
+  businessId: uuidSchema.optional(),
+  paymentId: uuidSchema.optional(),
+  account: ledgerAccountSchema.optional(),
+});
+
+const ledgerSummaryInputSchema = z.object({
+  businessId: uuidSchema.optional(),
+  from: z.string().datetime().optional(),
+  to: z.string().datetime().optional(),
 });
 
 const membersInputSchema = paginationInputSchema.extend({
@@ -243,6 +293,47 @@ export const adminRouter = createTRPCRouter({
       callBackend<AdminPayment, "paginated">(
         ctx.api.get("/payments", { params: input }),
         { mode: "paginated" },
+      ),
+    ),
+  ledgerSummary: privateProcedure
+    .input(ledgerSummaryInputSchema)
+    .query(({ ctx, input }) =>
+      callBackend<LedgerSummary>(
+        ctx.api.get("/payments/ledger/summary", { params: input }),
+      ),
+    ),
+  ledgerEntries: privateProcedure
+    .input(ledgerEntriesInputSchema)
+    .query(({ ctx, input }) =>
+      callBackend<LedgerEntry, "paginated">(
+        ctx.api.get("/payments/ledger/entries", { params: input }),
+        { mode: "paginated" },
+      ),
+    ),
+  syncPayment: privateProcedure
+    .input(z.object({ id: uuidSchema }))
+    .mutation(({ ctx, input }) =>
+      callBackend<PaymentRecord>(ctx.api.post(`/payments/${input.id}/sync`)),
+    ),
+  businessPayoutAccount: privateProcedure
+    .input(z.object({ businessId: uuidSchema }))
+    .query(({ ctx, input }) =>
+      callBackend<PayoutAccount>(
+        ctx.api.get(`/businesses/${input.businessId}/payout-account`),
+      ),
+    ),
+  updateBusinessPayoutAccountStatus: privateProcedure
+    .input(
+      z.object({
+        businessId: uuidSchema,
+        status: z.enum(["ACTIVE", "SUSPENDED"]),
+      }),
+    )
+    .mutation(({ ctx, input }) =>
+      callBackend<PayoutAccount>(
+        ctx.api.patch(`/businesses/${input.businessId}/payout-account/status`, {
+          status: input.status,
+        }),
       ),
     ),
   members: privateProcedure

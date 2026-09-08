@@ -1,5 +1,7 @@
 "use client";
 
+import { PayoutAccountForm } from "@/components/forms/payout-account-form";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -658,6 +660,8 @@ export default function BusinessSettingsForm() {
                 </FieldGroup>
               </CardContent>
             </Card>
+
+            {business && <PayoutAccountForm businessId={business.id} />}
 
             <Card>
               <CardHeader>

@@ -325,7 +325,11 @@ ALTER TYPE public.otp_purpose OWNER TO postgres;
 CREATE TYPE public.payment_method AS ENUM (
     'CASH',
     'WAVE',
-    'ORANGE_MONEY'
+    'ORANGE_MONEY',
+    'FREE_MONEY',
+    'EXPRESSO',
+    'CARD',
+    'ONLINE'
 );
 
 
@@ -339,11 +343,87 @@ CREATE TYPE public.payment_status AS ENUM (
     'PENDING',
     'SUCCEEDED',
     'CANCELLED',
-    'ERRORED'
+    'ERRORED',
+    'REFUND_PENDING',
+    'REFUNDED'
 );
 
 
 ALTER TYPE public.payment_status OWNER TO postgres;
+
+--
+-- Name: payment_provider; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.payment_provider AS ENUM (
+    'CASH',
+    'LAWPAY'
+);
+
+
+ALTER TYPE public.payment_provider OWNER TO postgres;
+
+--
+-- Name: payout_account_status; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.payout_account_status AS ENUM (
+    'ACTIVE',
+    'SUSPENDED'
+);
+
+
+ALTER TYPE public.payout_account_status OWNER TO postgres;
+
+--
+-- Name: payout_status; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.payout_status AS ENUM (
+    'NOT_APPLICABLE',
+    'PENDING',
+    'PROCESSING',
+    'SUCCEEDED',
+    'FAILED'
+);
+
+
+ALTER TYPE public.payout_status OWNER TO postgres;
+
+--
+-- Name: ledger_account; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.ledger_account AS ENUM (
+    'SALES',
+    'PROVIDER_FEES',
+    'PLATFORM_REVENUE',
+    'SUPPLIER_PAYABLE',
+    'SUPPLIER_PAID',
+    'SUPPLIER_RECEIVABLE',
+    'REFUNDS'
+);
+
+
+ALTER TYPE public.ledger_account OWNER TO postgres;
+
+--
+-- Name: ledger_entry_type; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.ledger_entry_type AS ENUM (
+    'SALE',
+    'PROVIDER_FEE',
+    'COMMISSION',
+    'SUPPLIER_PAYABLE',
+    'SUPPLIER_PAYOUT',
+    'REFUND',
+    'REFUND_COMMISSION_REVERSAL',
+    'REFUND_SUPPLIER_RECEIVABLE'
+);
+
+
+ALTER TYPE public.ledger_entry_type OWNER TO postgres;
 
 --
 -- Name: report_status; Type: TYPE; Schema: public; Owner: postgres
@@ -629,9 +709,11 @@ CREATE TABLE public.businesses (
     orange_money_number text,
     wave_number text,
     business_category public.business_category DEFAULT 'PHYSICAL_PERSON'::public.business_category NOT NULL,
+    commission_rate_percent numeric(5,2),
     legal_business_information jsonb,
     legal_business_questions jsonb,
     overall_rating double precision DEFAULT 0 NOT NULL,
+    CONSTRAINT businesses_commission_rate_range_check CHECK (((commission_rate_percent IS NULL) OR ((commission_rate_percent >= (0)::numeric) AND (commission_rate_percent <= (100)::numeric)))),
     CONSTRAINT businesses_overall_rating_range_check CHECK (((overall_rating >= (0)::double precision) AND (overall_rating <= (5)::double precision)))
 );
 
@@ -1017,6 +1099,69 @@ CREATE TABLE public.otps (
 ALTER TABLE public.otps OWNER TO postgres;
 
 --
+-- Name: business_payout_accounts; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.business_payout_accounts (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    business_id uuid NOT NULL,
+    provider public.payment_provider DEFAULT 'LAWPAY'::public.payment_provider NOT NULL,
+    recipient_id text NOT NULL,
+    external_id text NOT NULL,
+    service text NOT NULL,
+    destination_number text NOT NULL,
+    status public.payout_account_status DEFAULT 'ACTIVE'::public.payout_account_status NOT NULL,
+    last_provider_event_at timestamp with time zone,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.business_payout_accounts OWNER TO postgres;
+
+--
+-- Name: ledger_entries; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.ledger_entries (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    payment_id uuid NOT NULL,
+    order_id uuid,
+    business_id uuid,
+    account public.ledger_account NOT NULL,
+    entry_type public.ledger_entry_type NOT NULL,
+    amount_minor integer NOT NULL,
+    currency text NOT NULL,
+    reference text,
+    description text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.ledger_entries OWNER TO postgres;
+
+--
+-- Name: payment_events; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.payment_events (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    payment_id uuid,
+    provider public.payment_provider NOT NULL,
+    event text NOT NULL,
+    provider_transaction_id text,
+    dedupe_key text NOT NULL,
+    signature_valid boolean NOT NULL,
+    payload jsonb NOT NULL,
+    processed boolean DEFAULT false NOT NULL,
+    error text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.payment_events OWNER TO postgres;
+
+--
 -- Name: payments; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1032,9 +1177,25 @@ CREATE TABLE public.payments (
     failure_reason text,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    provider public.payment_provider DEFAULT 'CASH'::public.payment_provider NOT NULL,
+    provider_transaction_id text,
+    provider_status text,
+    provider_payment_method text,
+    payment_url text,
+    expires_at timestamp with time zone,
+    paid_at timestamp with time zone,
+    recipient_id text,
+    application_fee_minor integer DEFAULT 0 NOT NULL,
+    platform_fee_minor integer DEFAULT 0 NOT NULL,
+    payout_amount_minor integer,
+    payout_status public.payout_status DEFAULT 'NOT_APPLICABLE'::public.payout_status NOT NULL,
+    payout_reference text,
+    payout_error text,
+    payout_at timestamp with time zone,
     CONSTRAINT payments_amount_positive_check CHECK ((amount_minor > 0)),
     CONSTRAINT payments_failure_reason_check CHECK ((((status = ANY (ARRAY['CANCELLED'::public.payment_status, 'ERRORED'::public.payment_status])) AND (failure_reason IS NOT NULL)) OR ((status <> ALL (ARRAY['CANCELLED'::public.payment_status, 'ERRORED'::public.payment_status])) AND (failure_reason IS NULL)))),
-    CONSTRAINT payments_transaction_reference_check CHECK ((((method = 'CASH'::public.payment_method) AND (transaction_reference IS NULL)) OR ((method = ANY (ARRAY['WAVE'::public.payment_method, 'ORANGE_MONEY'::public.payment_method])) AND (transaction_reference IS NOT NULL))))
+    CONSTRAINT payments_fees_non_negative_check CHECK (((application_fee_minor >= 0) AND (platform_fee_minor >= 0))),
+    CONSTRAINT payments_transaction_reference_check CHECK ((((method = 'CASH'::public.payment_method) AND (transaction_reference IS NULL)) OR (method <> 'CASH'::public.payment_method)))
 );
 
 
@@ -1464,6 +1625,30 @@ ALTER TABLE ONLY public.orders
 
 ALTER TABLE ONLY public.otps
     ADD CONSTRAINT otps_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: business_payout_accounts business_payout_accounts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.business_payout_accounts
+    ADD CONSTRAINT business_payout_accounts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ledger_entries ledger_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ledger_entries
+    ADD CONSTRAINT ledger_entries_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: payment_events payment_events_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.payment_events
+    ADD CONSTRAINT payment_events_pkey PRIMARY KEY (id);
 
 
 --
@@ -2052,10 +2237,101 @@ CREATE INDEX otps_user_id_idx ON public.otps USING btree (user_id);
 
 
 --
+-- Name: business_payout_accounts_business_id_unique_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX business_payout_accounts_business_id_unique_idx ON public.business_payout_accounts USING btree (business_id);
+
+
+--
+-- Name: business_payout_accounts_recipient_id_unique_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX business_payout_accounts_recipient_id_unique_idx ON public.business_payout_accounts USING btree (recipient_id);
+
+
+--
+-- Name: business_payout_accounts_status_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX business_payout_accounts_status_idx ON public.business_payout_accounts USING btree (status);
+
+
+--
+-- Name: ledger_entries_account_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ledger_entries_account_idx ON public.ledger_entries USING btree (account);
+
+
+--
+-- Name: ledger_entries_business_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ledger_entries_business_id_idx ON public.ledger_entries USING btree (business_id);
+
+
+--
+-- Name: ledger_entries_created_at_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ledger_entries_created_at_idx ON public.ledger_entries USING btree (created_at);
+
+
+--
+-- Name: ledger_entries_payment_entry_account_unique_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX ledger_entries_payment_entry_account_unique_idx ON public.ledger_entries USING btree (payment_id, entry_type, account);
+
+
+--
+-- Name: payment_events_created_at_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX payment_events_created_at_idx ON public.payment_events USING btree (created_at);
+
+
+--
+-- Name: payment_events_dedupe_key_unique_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX payment_events_dedupe_key_unique_idx ON public.payment_events USING btree (dedupe_key);
+
+
+--
+-- Name: payment_events_payment_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX payment_events_payment_id_idx ON public.payment_events USING btree (payment_id);
+
+
+--
+-- Name: payment_events_provider_transaction_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX payment_events_provider_transaction_id_idx ON public.payment_events USING btree (provider_transaction_id);
+
+
+--
 -- Name: payments_created_at_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX payments_created_at_idx ON public.payments USING btree (created_at);
+
+
+--
+-- Name: payments_payout_status_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX payments_payout_status_idx ON public.payments USING btree (payout_status);
+
+
+--
+-- Name: payments_provider_transaction_id_unique_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX payments_provider_transaction_id_unique_idx ON public.payments USING btree (provider_transaction_id);
 
 
 --
@@ -2665,6 +2941,46 @@ ALTER TABLE ONLY public.orders
 
 ALTER TABLE ONLY public.otps
     ADD CONSTRAINT otps_user_id_users_id_fk FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: business_payout_accounts business_payout_accounts_business_id_businesses_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.business_payout_accounts
+    ADD CONSTRAINT business_payout_accounts_business_id_businesses_id_fk FOREIGN KEY (business_id) REFERENCES public.businesses(id) ON DELETE CASCADE;
+
+
+--
+-- Name: ledger_entries ledger_entries_business_id_businesses_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ledger_entries
+    ADD CONSTRAINT ledger_entries_business_id_businesses_id_fk FOREIGN KEY (business_id) REFERENCES public.businesses(id) ON DELETE SET NULL;
+
+
+--
+-- Name: ledger_entries ledger_entries_order_id_orders_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ledger_entries
+    ADD CONSTRAINT ledger_entries_order_id_orders_id_fk FOREIGN KEY (order_id) REFERENCES public.orders(id) ON DELETE SET NULL;
+
+
+--
+-- Name: ledger_entries ledger_entries_payment_id_payments_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ledger_entries
+    ADD CONSTRAINT ledger_entries_payment_id_payments_id_fk FOREIGN KEY (payment_id) REFERENCES public.payments(id) ON DELETE CASCADE;
+
+
+--
+-- Name: payment_events payment_events_payment_id_payments_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.payment_events
+    ADD CONSTRAINT payment_events_payment_id_payments_id_fk FOREIGN KEY (payment_id) REFERENCES public.payments(id) ON DELETE SET NULL;
 
 
 --

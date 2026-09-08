@@ -42,6 +42,9 @@ export function BusinessEditorDialog({
   const [businessCategory, setBusinessCategory] = useState<BusinessCategory>(
     business.businessCategory,
   );
+  const [commissionRate, setCommissionRate] = useState(
+    business.commissionRatePercent ?? "",
+  );
   const update = trpc.admin.updateBusiness.useMutation();
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -57,6 +60,9 @@ export function BusinessEditorDialog({
         address: address.trim() || undefined,
         businessCategory,
         status,
+        commissionRatePercent: commissionRate.trim()
+          ? Number(commissionRate)
+          : null,
       });
       await onSaved();
       onClose();
@@ -160,6 +166,22 @@ export function BusinessEditorDialog({
                 ),
               )}
             </select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="business-commission">
+              Commission plateforme (%) — vide = taux par défaut
+            </Label>
+            <Input
+              id="business-commission"
+              type="number"
+              min={0}
+              max={100}
+              step="0.5"
+              value={commissionRate}
+              onChange={(event) => setCommissionRate(event.target.value)}
+              placeholder="ex. 10"
+            />
           </div>
 
           {update.error && (

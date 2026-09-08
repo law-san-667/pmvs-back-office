@@ -1,5 +1,7 @@
 "use client";
 
+import { AdminPagination } from "@/components/admin/admin-pagination";
+import { AdminTableState } from "@/components/admin/admin-table-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,14 +13,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import {
   Table,
   TableBody,
   TableCell,
@@ -26,391 +20,285 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Link } from "@/i18n/navigation";
+import type { PaymentStatus, PayoutStatus } from "@/lib/admin-types";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  PAYMENT_STATUS_CLASSES,
+  PAYMENT_STATUS_LABELS,
+  PAYOUT_STATUS_CLASSES,
+  PAYOUT_STATUS_LABELS,
+} from "@/lib/payment-utils";
 import {
-  ArrowDownToLineIcon,
+  formatDate,
+  formatMoney,
+  PAYMENT_METHOD_LABELS,
+} from "@/lib/seller-dashboard-utils";
+import { trpc } from "@/server/trpc/client";
+import {
   BanknoteIcon,
   ClockIcon,
   EyeIcon,
-  ReceiptTextIcon,
+  PercentIcon,
   SearchIcon,
-  TrendingUpIcon,
+  WalletIcon,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useDeferredValue, useState } from "react";
 
-type TransactionStatus = "PAID" | "PENDING" | "REFUNDED" | "FAILED";
+const PAGE_SIZE = 10;
 
-type Transaction = {
-  id: string;
-  reference: string;
-  client: string;
-  item: string;
-  method: "Wave" | "Orange Money" | "Carte bancaire" | "Espèces";
-  date: string;
-  amountMinor: number;
-  currency: string;
-  status: TransactionStatus;
-};
+type Filter =
+  | { kind: "all" }
+  | { kind: "status"; status: PaymentStatus }
+  | { kind: "payout"; payoutStatus: PayoutStatus };
 
-const STATUS_LABELS: Record<TransactionStatus, string> = {
-  PAID: "Payée",
-  PENDING: "En attente",
-  REFUNDED: "Remboursée",
-  FAILED: "Échouée",
-};
-
-const STATUS_CLASSES: Record<TransactionStatus, string> = {
-  PAID: "bg-green-500/15 text-green-600",
-  PENDING: "bg-amber-500/15 text-amber-600",
-  REFUNDED: "bg-blue-500/15 text-blue-600",
-  FAILED: "bg-destructive/10 text-destructive",
-};
-
-type FilterTab = "all" | TransactionStatus;
-
-const FILTER_TABS: { value: FilterTab; label: string }[] = [
-  { value: "all", label: "Tout" },
-  { value: "PAID", label: "Payées" },
-  { value: "PENDING", label: "En attente" },
-  { value: "REFUNDED", label: "Remboursées" },
+const FILTERS: { label: string; value: Filter }[] = [
+  { label: "Tout", value: { kind: "all" } },
+  { label: "Payées", value: { kind: "status", status: "SUCCEEDED" } },
+  { label: "En attente", value: { kind: "status", status: "PENDING" } },
+  { label: "Reversées", value: { kind: "payout", payoutStatus: "SUCCEEDED" } },
+  {
+    label: "Reversement échoué",
+    value: { kind: "payout", payoutStatus: "FAILED" },
+  },
+  { label: "Remboursées", value: { kind: "status", status: "REFUNDED" } },
 ];
 
-// Données de démonstration en attendant l'API transactions
-const MOCK_TRANSACTIONS: Transaction[] = [
-  {
-    id: "1",
-    reference: "TX-2025-0148",
-    client: "Awa Ndiaye",
-    item: "Boubou brodé homme",
-    method: "Wave",
-    date: "2025-07-18",
-    amountMinor: 45000,
-    currency: "XOF",
-    status: "PAID",
-  },
-  {
-    id: "2",
-    reference: "TX-2025-0147",
-    client: "Moussa Diop",
-    item: "Sandales en cuir",
-    method: "Orange Money",
-    date: "2025-07-17",
-    amountMinor: 18500,
-    currency: "XOF",
-    status: "PAID",
-  },
-  {
-    id: "3",
-    reference: "TX-2025-0146",
-    client: "Fatou Sall",
-    item: "Robe wax sur mesure",
-    method: "Carte bancaire",
-    date: "2025-07-16",
-    amountMinor: 62000,
-    currency: "XOF",
-    status: "PENDING",
-  },
-  {
-    id: "4",
-    reference: "TX-2025-0145",
-    client: "Ibrahima Fall",
-    item: "Sac à main tissé",
-    method: "Wave",
-    date: "2025-07-15",
-    amountMinor: 27000,
-    currency: "XOF",
-    status: "REFUNDED",
-  },
-  {
-    id: "5",
-    reference: "TX-2025-0144",
-    client: "Aminata Ba",
-    item: "Service de couture — retouches",
-    method: "Espèces",
-    date: "2025-07-14",
-    amountMinor: 8000,
-    currency: "XOF",
-    status: "PAID",
-  },
-  {
-    id: "6",
-    reference: "TX-2025-0143",
-    client: "Cheikh Gueye",
-    item: "Chemise en lin",
-    method: "Orange Money",
-    date: "2025-07-12",
-    amountMinor: 22000,
-    currency: "XOF",
-    status: "FAILED",
-  },
-  {
-    id: "7",
-    reference: "TX-2025-0142",
-    client: "Mariama Sy",
-    item: "Ensemble pagne tissé",
-    method: "Wave",
-    date: "2025-07-10",
-    amountMinor: 54000,
-    currency: "XOF",
-    status: "PAID",
-  },
-];
-
-const formatPrice = (amountMinor: number, currency: string) => {
-  try {
-    return new Intl.NumberFormat("fr-FR", {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 0,
-    }).format(amountMinor);
-  } catch {
-    return `${amountMinor.toLocaleString("fr-FR")} ${currency}`;
-  }
-};
-
-const formatDate = (date: string) =>
-  new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(
-    new Date(date),
+function StatCard({
+  title,
+  value,
+  hint,
+  icon,
+}: {
+  title: string;
+  value: string;
+  hint: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-muted-foreground text-sm font-normal">
+          {title}
+        </CardTitle>
+        <CardAction>
+          <div className="bg-muted text-muted-foreground flex size-9 items-center justify-center rounded-lg">
+            {icon}
+          </div>
+        </CardAction>
+      </CardHeader>
+      <CardContent>
+        <p className="text-2xl font-bold">{value}</p>
+        <p className="text-muted-foreground text-sm">{hint}</p>
+      </CardContent>
+    </Card>
   );
+}
 
 export default function TransactionsPage() {
-  const [activeTab, setActiveTab] = useState<FilterTab>("all");
+  const [filterIndex, setFilterIndex] = useState(0);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const deferredSearch = useDeferredValue(search.trim());
+  const filter = FILTERS[filterIndex].value;
 
-  const filteredTransactions = useMemo(() => {
-    const query = search.trim().toLowerCase();
+  const summary = trpc.sellerDashboard.transactionsSummary.useQuery();
+  const transactions = trpc.sellerDashboard.transactions.useQuery({
+    page,
+    limit: PAGE_SIZE,
+    orderBy: "createdAt",
+    order: "desc",
+    status: filter.kind === "status" ? filter.status : undefined,
+    payoutStatus: filter.kind === "payout" ? filter.payoutStatus : undefined,
+    search: deferredSearch || undefined,
+  });
 
-    return MOCK_TRANSACTIONS.filter((transaction) => {
-      if (activeTab !== "all" && transaction.status !== activeTab) {
-        return false;
-      }
-      if (!query) return true;
-
-      return [transaction.reference, transaction.client, transaction.item]
-        .join(" ")
-        .toLowerCase()
-        .includes(query);
-    });
-  }, [activeTab, search]);
-
-  const totalPaidMinor = MOCK_TRANSACTIONS.filter(
-    (transaction) => transaction.status === "PAID",
-  ).reduce((sum, transaction) => sum + transaction.amountMinor, 0);
-
-  const pendingCount = MOCK_TRANSACTIONS.filter(
-    (transaction) => transaction.status === "PENDING",
-  ).length;
+  // Suppliers almost always trade in one currency; show the first one and
+  // list the others underneath when they exist.
+  const [main, ...others] = summary.data ?? [];
+  const currency = main?.currency ?? "XOF";
 
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-muted-foreground text-sm font-normal">
-              Revenus encaissés
-            </CardTitle>
-            <CardAction>
-              <div className="bg-muted text-muted-foreground flex size-9 items-center justify-center rounded-lg">
-                <BanknoteIcon className="size-5" />
-              </div>
-            </CardAction>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">
-              {formatPrice(totalPaidMinor, "XOF")}
-            </p>
-            <p className="text-muted-foreground flex items-center gap-1 text-sm">
-              <TrendingUpIcon className="size-4 text-green-500" />
-              +12% ce mois-ci
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-muted-foreground text-sm font-normal">
-              Transactions
-            </CardTitle>
-            <CardAction>
-              <div className="bg-muted text-muted-foreground flex size-9 items-center justify-center rounded-lg">
-                <ReceiptTextIcon className="size-5" />
-              </div>
-            </CardAction>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{MOCK_TRANSACTIONS.length}</p>
-            <p className="text-muted-foreground text-sm">
-              Sur les 30 derniers jours
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-muted-foreground text-sm font-normal">
-              En attente
-            </CardTitle>
-            <CardAction>
-              <div className="bg-muted text-muted-foreground flex size-9 items-center justify-center rounded-lg">
-                <ClockIcon className="size-5" />
-              </div>
-            </CardAction>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{pendingCount}</p>
-            <p className="text-muted-foreground text-sm">
-              Paiements à confirmer
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          title="Ventes encaissées"
+          value={formatMoney(main?.grossMinor ?? 0, currency)}
+          hint={`${main?.transactionCount ?? 0} transaction(s) au total`}
+          icon={<BanknoteIcon className="size-5" />}
+        />
+        <StatCard
+          title="Reversé sur votre compte"
+          value={formatMoney(main?.paidOutMinor ?? 0, currency)}
+          hint="Montant net déjà transféré par LawPay"
+          icon={<WalletIcon className="size-5" />}
+        />
+        <StatCard
+          title="Reversements en attente"
+          value={formatMoney(main?.pendingPayoutMinor ?? 0, currency)}
+          hint={
+            main?.failedPayoutMinor
+              ? `${formatMoney(main.failedPayoutMinor, currency)} en échec — contactez le support`
+              : `${main?.pendingCount ?? 0} paiement(s) client en attente`
+          }
+          icon={<ClockIcon className="size-5" />}
+        />
+        <StatCard
+          title="Frais et commissions"
+          value={formatMoney(
+            (main?.platformFeesMinor ?? 0) + (main?.commissionMinor ?? 0),
+            currency,
+          )}
+          hint={`Frais LawPay ${formatMoney(main?.platformFeesMinor ?? 0, currency)} · commission ${formatMoney(main?.commissionMinor ?? 0, currency)}`}
+          icon={<PercentIcon className="size-5" />}
+        />
       </div>
+
+      {others.length > 0 && (
+        <p className="text-muted-foreground text-sm">
+          Autres devises :{" "}
+          {others
+            .map(
+              (row) =>
+                `${row.currency} — encaissé ${formatMoney(row.grossMinor, row.currency)}, reversé ${formatMoney(row.paidOutMinor, row.currency)}`,
+            )
+            .join(" · ")}
+        </p>
+      )}
 
       <Card>
         <CardHeader>
           <CardTitle>
-            Historique des transactions ({filteredTransactions.length})
+            Historique des transactions ({transactions.data?.total ?? 0})
           </CardTitle>
           <CardAction>
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
-                <Input
-                  placeholder="Recherche..."
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  className="h-8 w-48 pl-8"
-                />
-              </div>
-              <Button size="sm" variant="outline">
-                <ArrowDownToLineIcon className="size-4" />
-                Exporter
-              </Button>
+            <div className="relative">
+              <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+              <Input
+                placeholder="Référence..."
+                value={search}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setPage(1);
+                }}
+                className="h-8 w-48 pl-8"
+              />
             </div>
           </CardAction>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <div className="flex gap-2">
-            {FILTER_TABS.map((tab) => (
+        <CardContent className="flex flex-col gap-4 overflow-x-auto">
+          <div className="flex flex-wrap gap-2">
+            {FILTERS.map((item, index) => (
               <Button
-                key={tab.value}
+                key={item.label}
                 size="sm"
-                variant={activeTab === tab.value ? "default" : "outline"}
-                onClick={() => setActiveTab(tab.value)}
+                variant={filterIndex === index ? "default" : "outline"}
+                onClick={() => {
+                  setFilterIndex(index);
+                  setPage(1);
+                }}
               >
-                {tab.label}
+                {item.label}
               </Button>
             ))}
           </div>
 
           <Table>
             <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="text-muted-foreground font-normal">
-                  Référence
-                </TableHead>
-                <TableHead className="text-muted-foreground font-normal">
-                  Client
-                </TableHead>
-                <TableHead className="text-muted-foreground font-normal">
-                  Produit / Service
-                </TableHead>
-                <TableHead className="text-muted-foreground font-normal">
-                  Moyen de paiement
-                </TableHead>
-                <TableHead className="text-muted-foreground font-normal">
-                  Date
-                </TableHead>
-                <TableHead className="text-muted-foreground font-normal">
-                  Montant
-                </TableHead>
-                <TableHead className="text-muted-foreground font-normal">
-                  Statut
-                </TableHead>
-                <TableHead className="text-muted-foreground font-normal">
-                  Actions
-                </TableHead>
+              <TableRow>
+                <TableHead>Référence</TableHead>
+                <TableHead>Client</TableHead>
+                <TableHead>Moyen</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Montant</TableHead>
+                <TableHead>Net reversé</TableHead>
+                <TableHead>Paiement</TableHead>
+                <TableHead>Reversement</TableHead>
+                <TableHead className="w-[1%]">Commande</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredTransactions.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="h-40 text-center">
-                    <div className="flex flex-col items-center gap-2 text-sm">
-                      <ReceiptTextIcon className="text-muted-foreground size-9" />
-                      <p className="font-medium">Aucune transaction trouvée.</p>
-                      <p className="text-muted-foreground">
-                        Ajustez votre recherche ou vos filtres.
-                      </p>
-                    </div>
+              <AdminTableState
+                colSpan={9}
+                isLoading={transactions.isLoading}
+                error={transactions.error?.message}
+                isEmpty={!transactions.data?.items.length}
+                loadingLabel="Chargement des transactions..."
+                emptyLabel="Aucune transaction trouvée."
+              />
+              {transactions.data?.items.map((transaction) => (
+                <TableRow key={transaction.id}>
+                  <TableCell className="font-medium">
+                    {transaction.transactionReference ??
+                      (transaction.provider === "CASH"
+                        ? "Espèces"
+                        : transaction.id.slice(0, 8).toUpperCase())}
+                  </TableCell>
+                  <TableCell>
+                    {transaction.payer.firstName} {transaction.payer.lastName}
+                  </TableCell>
+                  <TableCell>
+                    {transaction.providerPaymentMethod ??
+                      PAYMENT_METHOD_LABELS[transaction.method]}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground whitespace-nowrap">
+                    {formatDate(transaction.paidAt ?? transaction.createdAt)}
+                  </TableCell>
+                  <TableCell className="font-bold">
+                    {formatMoney(transaction.amountMinor, transaction.currency)}
+                  </TableCell>
+                  <TableCell>
+                    {transaction.payoutAmountMinor !== null
+                      ? formatMoney(
+                          transaction.payoutAmountMinor,
+                          transaction.currency,
+                        )
+                      : "—"}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className={PAYMENT_STATUS_CLASSES[transaction.status]}
+                    >
+                      {PAYMENT_STATUS_LABELS[transaction.status]}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {transaction.payoutStatus === "NOT_APPLICABLE" ? (
+                      <span className="text-muted-foreground">—</span>
+                    ) : (
+                      <Badge
+                        variant="outline"
+                        className={
+                          PAYOUT_STATUS_CLASSES[transaction.payoutStatus]
+                        }
+                        title={transaction.payoutError ?? undefined}
+                      >
+                        {PAYOUT_STATUS_LABELS[transaction.payoutStatus]}
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      render={
+                        <Link href={`/dashboard/orders/${transaction.orderId}`} />
+                      }
+                      aria-label="Voir la commande"
+                    >
+                      <EyeIcon className="size-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
-              ) : (
-                filteredTransactions.map((transaction) => (
-                  <TableRow
-                    key={transaction.id}
-                    className="hover:bg-transparent"
-                  >
-                    <TableCell className="font-medium">
-                      {transaction.reference}
-                    </TableCell>
-                    <TableCell>{transaction.client}</TableCell>
-                    <TableCell className="text-muted-foreground max-w-56 truncate">
-                      {transaction.item}
-                    </TableCell>
-                    <TableCell>{transaction.method}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {formatDate(transaction.date)}
-                    </TableCell>
-                    <TableCell className="font-bold">
-                      {formatPrice(transaction.amountMinor, transaction.currency)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={STATUS_CLASSES[transaction.status]}>
-                        {STATUS_LABELS[transaction.status]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Tooltip>
-                        <TooltipTrigger
-                          render={
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              className="text-foreground"
-                            />
-                          }
-                        >
-                          <EyeIcon className="size-4" />
-                          <span className="sr-only">Voir le détail</span>
-                        </TooltipTrigger>
-                        <TooltipContent>Voir le détail</TooltipContent>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
+              ))}
             </TableBody>
           </Table>
 
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious text="" href="#" aria-disabled />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#" isActive>
-                  1
-                </PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext text="" href="#" aria-disabled />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+          <AdminPagination
+            page={page}
+            totalPages={transactions.data?.totalPages ?? 1}
+            onPageChange={setPage}
+          />
         </CardContent>
       </Card>
     </div>

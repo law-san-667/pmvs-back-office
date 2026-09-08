@@ -7,7 +7,35 @@ export type OrderStatus =
   | "CANCELLED"
   | "REFUNDED";
 
-export type PaymentMethod = "CASH" | "WAVE" | "ORANGE_MONEY";
+export type PaymentMethod =
+  | "CASH"
+  | "WAVE"
+  | "ORANGE_MONEY"
+  | "FREE_MONEY"
+  | "EXPRESSO"
+  | "CARD"
+  | "ONLINE";
+
+/** Buyer-safe payment attached to an order. */
+export type OrderPayment = {
+  id: string;
+  method: PaymentMethod;
+  status:
+    | "PENDING"
+    | "SUCCEEDED"
+    | "CANCELLED"
+    | "ERRORED"
+    | "REFUND_PENDING"
+    | "REFUNDED";
+  provider: "CASH" | "LAWPAY";
+  amountMinor: number;
+  currency: string;
+  transactionReference: string | null;
+  providerPaymentMethod: string | null;
+  paymentUrl: string | null;
+  expiresAt: string | null;
+  paidAt: string | null;
+};
 
 export type ShippingAddress = {
   recipientName: string;
@@ -71,6 +99,7 @@ export type BusinessOrder = {
   };
   items: OrderItem[];
   statusHistory: OrderStatusHistory[];
+  payment?: OrderPayment | null;
   buyer?: SellerCustomerSummary;
 };
 
@@ -123,4 +152,22 @@ export type SellerStats = {
       }>;
     }>;
   };
+};
+
+export type SellerTransaction = import("./admin-types").PaymentRecord & {
+  order: Omit<BusinessOrder, "business" | "items" | "statusHistory">;
+  payer: Pick<SellerCustomerSummary, "id" | "firstName" | "lastName">;
+};
+
+export type SellerTransactionsSummary = {
+  currency: string;
+  grossMinor: number;
+  platformFeesMinor: number;
+  commissionMinor: number;
+  paidOutMinor: number;
+  pendingPayoutMinor: number;
+  failedPayoutMinor: number;
+  refundedMinor: number;
+  transactionCount: number;
+  pendingCount: number;
 };

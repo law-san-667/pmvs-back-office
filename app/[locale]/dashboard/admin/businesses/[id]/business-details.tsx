@@ -37,6 +37,7 @@ import {
   isLegalBusinessCategory,
 } from "@/lib/business-categories";
 import { formatDate, getInitials } from "@/lib/seller-dashboard-utils";
+import { PAYOUT_ACCOUNT_STATUS_LABELS } from "@/lib/payment-utils";
 import { trpc } from "@/server/trpc/client";
 import {
   ArrowLeftIcon,
@@ -77,6 +78,12 @@ export function BusinessDetails({ id }: { id: string }) {
     { enabled: Boolean(business.data?.slug) },
   );
   const updateStatus = trpc.admin.updateBusiness.useMutation();
+  const payoutAccount = trpc.admin.businessPayoutAccount.useQuery(
+    { businessId: id },
+    { enabled: Boolean(business.data), retry: false },
+  );
+  const updatePayoutStatus =
+    trpc.admin.updateBusinessPayoutAccountStatus.useMutation();
 
   const refresh = async () => {
     await Promise.all([
@@ -274,6 +281,85 @@ export function BusinessDetails({ id }: { id: string }) {
                   label="Compte créé le"
                   value={formatDate(owner.user.createdAt)}
                 />
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Reversements (LawPay)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {payoutAccount.isLoading && (
+              <p className="text-muted-foreground text-sm">Chargement...</p>
+            )}
+            {!payoutAccount.isLoading && !payoutAccount.data && (
+              <p className="text-muted-foreground text-sm">
+                Aucun compte de reversement : cette entreprise ne peut pas
+                encore encaisser de paiements en ligne.
+              </p>
+            )}
+            {payoutAccount.data && (
+              <>
+                <Row label="Opérateur" value={payoutAccount.data.service} />
+                <Row label="Numéro" value={payoutAccount.data.destinationNumber} />
+                <Row
+                  label="Statut"
+                  value={PAYOUT_ACCOUNT_STATUS_LABELS[payoutAccount.data.status]}
+                />
+                <Row
+                  label="Identifiant LawPay"
+                  value={payoutAccount.data.recipientId}
+                />
+                <Row
+                  label="Dernier évènement"
+                  value={
+                    payoutAccount.data.lastProviderEventAt
+                      ? formatDate(payoutAccount.data.lastProviderEventAt, true)
+                      : null
+                  }
+                />
+                <Row
+                  label="Commission"
+                  value={
+                    value.commissionRatePercent != null
+                      ? `${value.commissionRatePercent} %`
+                      : "Taux plateforme par défaut"
+                  }
+                />
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant={
+                      payoutAccount.data.status === "ACTIVE"
+                        ? "destructive"
+                        : "default"
+                    }
+                    disabled={updatePayoutStatus.isPending}
+                    onClick={() =>
+                      void updatePayoutStatus
+                        .mutateAsync({
+                          businessId: id,
+                          status:
+                            payoutAccount.data?.status === "ACTIVE"
+                              ? "SUSPENDED"
+                              : "ACTIVE",
+                        })
+                        .then(() => payoutAccount.refetch())
+                        .catch(() => undefined)
+                    }
+                  >
+                    {payoutAccount.data.status === "ACTIVE"
+                      ? "Suspendre les reversements"
+                      : "Réactiver les reversements"}
+                  </Button>
+                </div>
+                {updatePayoutStatus.error && (
+                  <p className="text-destructive mt-2 text-sm">
+                    {updatePayoutStatus.error.message}
+                  </p>
+                )}
               </>
             )}
           </CardContent>

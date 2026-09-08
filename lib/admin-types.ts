@@ -13,9 +13,24 @@ export type AdminDashboardStats = {
   totalTeamMembers: number;
 };
 
-export type PaymentStatus = "PENDING" | "SUCCEEDED" | "CANCELLED" | "ERRORED";
+export type PaymentStatus =
+  | "PENDING"
+  | "SUCCEEDED"
+  | "CANCELLED"
+  | "ERRORED"
+  | "REFUND_PENDING"
+  | "REFUNDED";
 
-export type AdminPayment = {
+export type PaymentProvider = "CASH" | "LAWPAY";
+
+export type PayoutStatus =
+  | "NOT_APPLICABLE"
+  | "PENDING"
+  | "PROCESSING"
+  | "SUCCEEDED"
+  | "FAILED";
+
+export type PaymentRecord = {
   id: string;
   orderId: string;
   payerUserId: string;
@@ -25,8 +40,94 @@ export type AdminPayment = {
   currency: string;
   transactionReference: string | null;
   failureReason: string | null;
+  provider: PaymentProvider;
+  providerTransactionId: string | null;
+  providerStatus: string | null;
+  providerPaymentMethod: string | null;
+  paymentUrl: string | null;
+  expiresAt: string | null;
+  paidAt: string | null;
+  recipientId: string | null;
+  applicationFeeMinor: number;
+  platformFeeMinor: number;
+  payoutAmountMinor: number | null;
+  payoutStatus: PayoutStatus;
+  payoutReference: string | null;
+  payoutError: string | null;
+  payoutAt: string | null;
   createdAt: string;
   updatedAt: string;
+};
+
+export type LedgerAccount =
+  | "SALES"
+  | "PROVIDER_FEES"
+  | "PLATFORM_REVENUE"
+  | "SUPPLIER_PAYABLE"
+  | "SUPPLIER_PAID"
+  | "SUPPLIER_RECEIVABLE"
+  | "REFUNDS";
+
+export type LedgerEntryType =
+  | "SALE"
+  | "PROVIDER_FEE"
+  | "COMMISSION"
+  | "SUPPLIER_PAYABLE"
+  | "SUPPLIER_PAYOUT"
+  | "REFUND"
+  | "REFUND_COMMISSION_REVERSAL"
+  | "REFUND_SUPPLIER_RECEIVABLE";
+
+export type LedgerEntry = {
+  id: string;
+  paymentId: string;
+  orderId: string | null;
+  businessId: string | null;
+  account: LedgerAccount;
+  entryType: LedgerEntryType;
+  amountMinor: number;
+  currency: string;
+  reference: string | null;
+  description: string | null;
+  createdAt: string;
+};
+
+export type LedgerSummary = {
+  balances: Array<{
+    account: LedgerAccount;
+    currency: string;
+    balanceMinor: number;
+    entryCount: number;
+  }>;
+  payments: {
+    total: number;
+    succeeded: number;
+    pending: number;
+    failed: number;
+    refunded: number;
+    payoutsPending: number;
+    payoutsFailed: number;
+  };
+};
+
+export type PayoutAccountStatus = "ACTIVE" | "SUSPENDED";
+
+export type PayoutAccount = {
+  id: string;
+  businessId: string;
+  provider: PaymentProvider;
+  recipientId: string;
+  externalId: string;
+  service: string;
+  /** Masked by the API: only the last 4 digits. */
+  destinationNumber: string;
+  status: PayoutAccountStatus;
+  lastProviderEventAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminPayment = PaymentRecord & {
   order: Omit<BusinessOrder, "business" | "items" | "statusHistory">;
   payer: {
     id: string;
