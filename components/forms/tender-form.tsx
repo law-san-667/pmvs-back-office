@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Combobox,
   ComboboxContent,
@@ -110,6 +111,8 @@ const tenderFormSchema = z
       .min(1, "La date limite de soumission est requise."),
     evaluationDeadline: z.string(),
     requirements: z.string(),
+    // Not enforced yet: the bidding terms page does not exist.
+    acceptedBiddingTerms: z.boolean(),
   })
   .superRefine((data, ctx) => {
     const min = data.budgetMin.trim();
@@ -157,6 +160,7 @@ const defaultValues: TenderFormData = {
   submissionDeadline: "",
   evaluationDeadline: "",
   requirements: "",
+  acceptedBiddingTerms: false,
 };
 
 export default function TenderForm({ tenderId }: { tenderId?: string }) {
@@ -234,6 +238,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
       submissionDeadline: toDatetimeLocal(tender.submissionDeadline),
       evaluationDeadline: toDatetimeLocal(tender.evaluationDeadline),
       requirements,
+      acceptedBiddingTerms: false,
     });
   }, [tenderDetail.data, form]);
 
@@ -780,9 +785,26 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
           </div>
         </div>
 
+        <Controller
+          name="acceptedBiddingTerms"
+          control={form.control}
+          render={({ field }) => (
+            <label className="mt-6 flex items-start gap-3 text-sm">
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={(checked) => field.onChange(checked === true)}
+              />
+              <span>
+                Je déclare avoir lu et accepté les conditions
+                d&apos;enchérissement.
+              </span>
+            </label>
+          )}
+        />
+
         <Button
           type="submit"
-          className="mt-6 h-14 w-full text-base"
+          className="mt-4 h-14 w-full text-base"
           disabled={isMutating || deleteTender.isPending}
         >
           {createTender.isPending
