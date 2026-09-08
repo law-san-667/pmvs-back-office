@@ -9,7 +9,7 @@ import { getBackendErrorMessages } from "@/lib/backend-utils";
 import { PAYOUT_ACCOUNT_STATUS_LABELS } from "@/lib/payment-utils";
 import { trpc } from "@/server/trpc/client";
 import { ShieldCheckIcon } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 
 const NUMBER_PATTERN = /^\+?[0-9]{8,15}$/;
 
@@ -32,6 +32,7 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
   const [destinationNumber, setDestinationNumber] = useState("");
   const [numberError, setNumberError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const isNotConfigured =
     account.error?.data?.code === "NOT_FOUND" || account.error?.message === "Not found.";
@@ -41,9 +42,14 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
 
   const refresh = () => utils.businesses.payoutAccount.invalidate({ businessId });
 
-  const submit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  /**
+   * Not a <form>: this card is rendered inside the business settings form, and
+   * a nested form makes one click submit both — the settings PATCH used to run
+   * instead of this mutation, so the payout number was silently dropped.
+   */
+  const submit = async () => {
     setNumberError(null);
+    setSuccessMessage(null);
 
     if (!NUMBER_PATTERN.test(destinationNumber.trim())) {
       setNumberError("Numéro mobile money invalide (8 à 15 chiffres).");
@@ -59,6 +65,9 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
       await refresh();
       setIsEditing(false);
       setDestinationNumber("");
+      setSuccessMessage(
+        "Compte de reversement enregistré. Vos paiements en ligne sont actifs.",
+      );
     } catch {
       // Error rendered below.
     }
@@ -149,8 +158,28 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
           </div>
         )}
 
+        {isLoading && (
+          <p className="text-muted-foreground text-sm">Chargement...</p>
+        )}
+
+        {!isLoading && !account.data && !accessDenied && (
+          <p className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+            Aucun compte de reversement n&apos;est encore configuré : vos
+            produits ne peuvent pas être payés en ligne. Renseignez l&apos;
+            opérateur et le numéro ci-dessous, puis validez avec le bouton de
+            cette carte — le bouton « Enregistrer les modifications » en bas de
+            page ne sauvegarde pas ces champs.
+          </p>
+        )}
+
+        {successMessage && (
+          <p className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">
+            {successMessage}
+          </p>
+        )}
+
         {showForm && !accessDenied && (
-          <form onSubmit={submit} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4">
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="payout-service">Opérateur</FieldLabel>
@@ -178,6 +207,13 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
                   placeholder="77xxxxxxx"
                   value={destinationNumber}
                   onChange={(event) => setDestinationNumber(event.target.value)}
+                  onKeyDown={(event) => {
+                    // Enter would otherwise submit the surrounding business
+                    // settings form instead of saving the payout account.
+                    if (event.key !== "Enter") return;
+                    event.preventDefault();
+                    void submit();
+                  }}
                   aria-invalid={Boolean(numberError)}
                 />
                 <p className="text-muted-foreground text-xs">
@@ -199,7 +235,13 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
                   Annuler
                 </Button>
               )}
-              <Button type="submit" disabled={isPending || services.isLoading}>
+              <Button
+                type="button"
+                onClick={() => void submit()}
+                disabled={
+                  isPending || services.isLoading || !destinationNumber.trim()
+                }
+              >
                 {upsert.isPending
                   ? "Enregistrement..."
                   : account.data
@@ -207,7 +249,7 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
                     : "Activer les paiements en ligne"}
               </Button>
             </div>
-          </form>
+          </div>
         )}
 
         {mutationError && (
