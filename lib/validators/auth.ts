@@ -17,7 +17,11 @@ export const registerSchema = z
     firstName: z.string().trim().min(1),
     lastName: z.string().trim().min(1),
     phoneNumber: z.string().trim().min(6).max(20).optional(),
-    email: z.string().trim().email().optional(),
+    // Optional on the form: an empty input must not fail the email check.
+  email: z
+    .union([z.literal(""), z.string().trim().email("Adresse email invalide.")])
+    .optional()
+    .transform((value) => value || undefined),
     password: z.string().min(8),
     confirmPassword: z.string().min(8),
     role: userRoleSchema,

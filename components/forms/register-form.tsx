@@ -18,7 +18,7 @@ import {
 } from "@/lib/validators/auth";
 import { trpc } from "@/server/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LockKeyhole, User } from "lucide-react";
+import { LockKeyhole, Mail, User } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm, type Resolver } from "react-hook-form";
 import { PhoneInput } from "../phone-input";
@@ -41,6 +41,7 @@ export default function RegisterForm({
       firstName: "",
       lastName: "",
       phoneNumber: "",
+      email: "",
       password: "",
       confirmPassword: "",
       role: "SELLER",
@@ -181,6 +182,35 @@ export default function RegisterForm({
                     defaultCountry="SN"
                     disabled={register.isPending}
                   />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="email"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Email (optionnel)</FieldLabel>
+                  <div className="flex items-center overflow-hidden rounded-[18px] border border-[#dce7f3] bg-white shadow-[0_12px_30px_-24px_rgba(38,88,132,0.7)]">
+                    <div className="inline-flex items-center px-4">
+                      <Mail className="size-4 text-slate-300" />
+                    </div>
+                    <Input
+                      {...field}
+                      value={field.value ?? ""}
+                      type="email"
+                      inputMode="email"
+                      autoComplete="email"
+                      placeholder="nom@exemple.com"
+                      aria-invalid={fieldState.invalid}
+                      disabled={register.isPending}
+                      className="h-12 flex-1 rounded-none border-0 bg-transparent px-0 pr-4 text-base shadow-none ring-0 focus-visible:ring-0"
+                    />
+                  </div>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
