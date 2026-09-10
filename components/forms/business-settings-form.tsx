@@ -376,7 +376,7 @@ export default function BusinessSettingsForm() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Nom du Business</FieldLabel>
+                        <FieldLabel>Nom de votre Activité ou métier</FieldLabel>
                         <Input
                           {...field}
                           aria-invalid={fieldState.invalid}
@@ -395,7 +395,10 @@ export default function BusinessSettingsForm() {
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel>Description</FieldLabel>
-                        <Textarea {...field} aria-invalid={fieldState.invalid} />
+                        <Textarea
+                          {...field}
+                          aria-invalid={fieldState.invalid}
+                        />
                         {fieldState.invalid && (
                           <FieldError errors={[fieldState.error]} />
                         )}
@@ -549,15 +552,10 @@ export default function BusinessSettingsForm() {
                             />
                           </ComboboxChips>
                           <ComboboxContent anchor={deliveryZoneAnchorRef}>
-                            <ComboboxEmpty>
-                              Aucune ville trouvée.
-                            </ComboboxEmpty>
+                            <ComboboxEmpty>Aucune ville trouvée.</ComboboxEmpty>
                             <ComboboxList>
                               {cityItems.map((city) => (
-                                <ComboboxItem
-                                  key={city.slug}
-                                  value={city.slug}
-                                >
+                                <ComboboxItem key={city.slug} value={city.slug}>
                                   {city.name}
                                 </ComboboxItem>
                               ))}
@@ -674,9 +672,7 @@ export default function BusinessSettingsForm() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>
-                          Numéro Orange Money (optionnel)
-                        </FieldLabel>
+                        <FieldLabel>Numéro Orange Money (optionnel)</FieldLabel>
                         <PhoneInput
                           value={field.value}
                           onChange={(value) => field.onChange(value || "")}

@@ -1,67 +1,67 @@
 "use client";
 
+import {
+    HeadquartersGeolocationField,
+    type GeolocationSource,
+} from "@/components/forms/headquarters-geolocation-field";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Combobox,
-  ComboboxChip,
-  ComboboxChips,
-  ComboboxChipsInput,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxItem,
-  ComboboxList,
-  useComboboxAnchor,
+    Combobox,
+    ComboboxChip,
+    ComboboxChips,
+    ComboboxChipsInput,
+    ComboboxContent,
+    ComboboxEmpty,
+    ComboboxItem,
+    ComboboxList,
+    useComboboxAnchor,
 } from "@/components/ui/combobox";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
+    Field,
+    FieldError,
+    FieldGroup,
+    FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "@/i18n/navigation";
+import type { BusinessCategory } from "@/lib/backend-resource-types";
 import { getBackendErrorMessages } from "@/lib/backend-utils";
+import {
+    BUSINESS_CATEGORY_OPTIONS,
+    isLegalBusinessCategory,
+} from "@/lib/business-categories";
 import { getCroppedImg, type CroppedArea } from "@/lib/crop-image";
 import { getMutationErrorMessage } from "@/lib/mutation-error";
 import legalBusinessQuestions from "@/lib/questions.json";
 import {
-  uploadFileToR2FromBrowser,
-  uploadFilesToR2FromBrowser,
-  type CreateR2Upload,
+    uploadFileToR2FromBrowser,
+    uploadFilesToR2FromBrowser,
+    type CreateR2Upload,
 } from "@/lib/upload-to-r2";
 import {
-  createBusinessInputSchema,
-  legalBusinessInformationSchema,
-  type CreateBusinessInput,
-  type LegalBusinessInformation,
-  type LegalBusinessType,
+    createBusinessInputSchema,
+    legalBusinessInformationSchema,
+    type CreateBusinessInput,
+    type LegalBusinessInformation,
+    type LegalBusinessType,
 } from "@/lib/validators/business";
-import type { BusinessCategory } from "@/lib/backend-resource-types";
-import {
-  BUSINESS_CATEGORY_OPTIONS,
-  isLegalBusinessCategory,
-} from "@/lib/business-categories";
-import {
-  HeadquartersGeolocationField,
-  type GeolocationSource,
-} from "@/components/forms/headquarters-geolocation-field";
 import { trpc } from "@/server/trpc/client";
 import { AlertCircle, Camera, Pencil, Upload, X } from "lucide-react";
 import { useCallback, useState } from "react";
@@ -482,7 +482,9 @@ export default function InitBusinessForm() {
     setSubmissionErrors([]);
 
     if (step === BASE_TOTAL_STEPS && formData.businessCategory === null) {
-      setSubmissionErrors(["Sélectionnez votre catégorisation pour continuer."]);
+      setSubmissionErrors([
+        "Sélectionnez votre catégorisation pour continuer.",
+      ]);
       return;
     }
 
@@ -793,7 +795,7 @@ function Step1({
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Nom du Business</FieldLabel>
+            <FieldLabel>Nom de votre Activité ou métier</FieldLabel>
             <Input
               {...field}
               aria-invalid={fieldState.invalid}

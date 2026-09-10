@@ -4,6 +4,7 @@ import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminTableState } from "@/components/admin/admin-table-state";
 import { BusinessDeleteDialog } from "@/components/admin/business-delete-dialog";
 import { BusinessEditorDialog } from "@/components/admin/business-editor-dialog";
+import { BusinessQualityCard } from "@/components/admin/business-quality-card";
 import IsLoadingScreen from "@/components/is-loading-screen";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -444,6 +445,8 @@ export function BusinessDetails({ id }: { id: string }) {
           </CardContent>
         </Card>
       </div>
+
+      <BusinessQualityCard businessId={value.id} />
 
       <Card>
         <CardHeader>

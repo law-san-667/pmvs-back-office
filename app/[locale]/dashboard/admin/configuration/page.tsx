@@ -10,6 +10,7 @@ import {
   ConfigurationEditor,
   type ConfigurationEditorTarget,
 } from "@/components/admin/configuration-editor";
+import { QualityThresholdsForm } from "@/components/admin/quality-thresholds-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -92,7 +93,7 @@ export default function AdminConfigurationPage() {
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
         title="Configuration"
-        description="Créez et gérez les catégories du catalogue ainsi que les zones géographiques."
+        description="Catégories du catalogue, zones géographiques et normes de qualité appliquées aux fournisseurs."
       />
 
       <Tabs defaultValue="categories">
@@ -101,7 +102,12 @@ export default function AdminConfigurationPage() {
           <TabsTrigger value="sub-categories">Sous-catégories</TabsTrigger>
           <TabsTrigger value="countries">Pays</TabsTrigger>
           <TabsTrigger value="cities">Villes</TabsTrigger>
+          <TabsTrigger value="quality">Normes de qualité</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="quality">
+          <QualityThresholdsForm />
+        </TabsContent>
 
         <TabsContent value="categories">
           <Card>

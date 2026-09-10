@@ -13,6 +13,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import {
+  AwardIcon,
   Building2Icon,
   CircleHelpIcon,
   CreditCardIcon,
@@ -112,6 +113,11 @@ const adminItems = [
     title: "Transactions",
     url: "/dashboard/admin/transactions",
     icon: <CreditCardIcon />,
+  },
+  {
+    title: "Qualité fournisseurs",
+    url: "/dashboard/admin/quality",
+    icon: <AwardIcon />,
   },
   {
     title: "Utilisateurs",

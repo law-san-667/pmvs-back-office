@@ -152,6 +152,92 @@ export type UserStatus =
   | "SUSPENDED"
   | "DELETED";
 
+// ─── Supplier quality ─────────────────────────────────────────────────────────
+
+export type QualityThresholds = {
+  maxNegativeFeedbackRate: number;
+  minResponseRate: number;
+  maxReturnRate: number;
+  maxCancellationRate: number;
+  maxStockOutRate: number;
+  maxShippingDelayDays: number;
+  minOnTimeShippingRate: number;
+  minStockPerProduct: number;
+  evaluationWindowDays: number;
+};
+
+export type QualityThresholdsResponse = {
+  thresholds: QualityThresholds;
+  updatedAt: string | null;
+};
+
+export type QualityKpiKey =
+  | "negativeFeedback"
+  | "responseRate"
+  | "returnRate"
+  | "cancellationRate"
+  | "shippingDelay"
+  | "minimumStock";
+
+export type QualityCheckKey =
+  | "prohibitedProductsEnforced"
+  | "admissibleCategoriesDefined"
+  | "productQualityVerified";
+
+export type QualityKpi = {
+  key: QualityKpiKey;
+  value: number | null;
+  unit: "percent" | "days" | "count";
+  threshold: number;
+  direction: "max" | "min";
+  /** null = not enough data to judge. */
+  met: boolean | null;
+  sampleSize: number;
+  details: Record<string, number | null>;
+};
+
+export type QualityEvaluation = {
+  prohibitedProductsEnforced: boolean;
+  admissibleCategoriesDefined: boolean;
+  productQualityVerified: boolean;
+  notes: string | null;
+  evaluatedByUserId: string | null;
+  evaluatedAt: string | null;
+  isCertified: boolean;
+  certifiedByUserId: string | null;
+  certifiedAt: string | null;
+};
+
+export type BusinessQuality = {
+  businessId: string;
+  businessName: string;
+  windowDays: number;
+  kpis: QualityKpi[];
+  evaluation: QualityEvaluation;
+  pendingReports: number;
+  score: number;
+  metCount: number;
+  judgedCount: number;
+  totalCount: number;
+  computedAt: string;
+};
+
+export type QualityRankingRow = {
+  rank: number;
+  businessId: string;
+  businessName: string;
+  businessSlug: string | null;
+  businessImage: string | null;
+  businessStatus: string;
+  score: number;
+  metCount: number;
+  judgedCount: number;
+  totalCount: number;
+  isCertified: boolean;
+  certifiedAt: string | null;
+  pendingReports: number;
+};
+
 /** A back-office account: platform staff, never a client or a seller. */
 export type StaffRole = "ADMIN" | "MODERATOR" | "OPERATOR";
 

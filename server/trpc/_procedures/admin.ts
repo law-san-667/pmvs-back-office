@@ -1,6 +1,9 @@
 import type {
   AdminAccount,
   AdminBusiness,
+  BusinessQuality,
+  QualityRankingRow,
+  QualityThresholdsResponse,
   AdminBusinessMember,
   AdminDashboardStats,
   AdminListing,
@@ -31,6 +34,12 @@ import {
   createAdminInputSchema,
 } from "@/lib/validators/admins";
 import { updateBusinessInputSchema } from "@/lib/validators/business";
+import {
+  businessCertificationInputSchema,
+  businessEvaluationInputSchema,
+  qualityRankingInputSchema,
+  qualityThresholdsInputSchema,
+} from "@/lib/validators/quality";
 import { callBackend } from "@/server/backend-utils";
 import z from "zod";
 import { createTRPCRouter, privateProcedure } from "../init";
@@ -208,6 +217,49 @@ const cityPayloadSchema = z.object({
 });
 
 export const adminRouter = createTRPCRouter({
+  // ─── Supplier quality ──────────────────────────────────────────────────────
+  qualityThresholds: privateProcedure.query(({ ctx }) =>
+    callBackend<QualityThresholdsResponse>(ctx.api.get("/quality/thresholds")),
+  ),
+  updateQualityThresholds: privateProcedure
+    .input(qualityThresholdsInputSchema)
+    .mutation(({ ctx, input }) =>
+      callBackend<QualityThresholdsResponse>(
+        ctx.api.put("/quality/thresholds", input),
+      ),
+    ),
+  qualityRanking: privateProcedure
+    .input(qualityRankingInputSchema.optional())
+    .query(({ ctx, input }) =>
+      callBackend<QualityRankingRow, "paginated">(
+        ctx.api.get("/quality/ranking", { params: input }),
+        { mode: "paginated" },
+      ),
+    ),
+  businessQuality: privateProcedure
+    .input(z.object({ businessId: uuidSchema }))
+    .query(({ ctx, input }) =>
+      callBackend<BusinessQuality>(
+        ctx.api.get(`/businesses/${input.businessId}/quality`),
+      ),
+    ),
+  updateBusinessEvaluation: privateProcedure
+    .input(businessEvaluationInputSchema)
+    .mutation(({ ctx, input }) => {
+      const { businessId, ...payload } = input;
+      return callBackend<BusinessQuality>(
+        ctx.api.put(`/businesses/${businessId}/quality/evaluation`, payload),
+      );
+    }),
+  updateBusinessCertification: privateProcedure
+    .input(businessCertificationInputSchema)
+    .mutation(({ ctx, input }) =>
+      callBackend<BusinessQuality>(
+        ctx.api.patch(`/businesses/${input.businessId}/quality/certification`, {
+          isCertified: input.isCertified,
+        }),
+      ),
+    ),
   /** Back-office accounts: list and create. Admin-only on the API too. */
   admins: privateProcedure
     .input(adminsInputSchema.optional())
