@@ -102,6 +102,16 @@ export const listingStatusEnum = [
   "ARCHIVED",
 ] as const;
 
+export const listingModerationStatusEnum = [
+  "PENDING",
+  "APPROVED",
+  "REJECTED",
+] as const;
+
+export type ListingModerationStatus =
+  (typeof listingModerationStatusEnum)[number];
+
+
 const listingConditionSchema = z.enum(listingConditionEnum);
 const listingStatusSchema = z.enum(listingStatusEnum);
 const listingExposureSchema = z.enum(listingExposureEnum);
@@ -279,6 +289,11 @@ export type Listing = {
   specificsSections: ListingSpecificsSection[];
   condition: "NEW" | "LIKE_NEW" | "USED" | "REFURBISHED";
   status: "DRAFT" | "PUBLISHED" | "PAUSED" | "SOLD" | "ARCHIVED";
+  moderationStatus: ListingModerationStatus;
+  moderationReason: string | null;
+  moderatedByUserId: string | null;
+  moderatedAt: string | null;
+  submittedForReviewAt: string | null;
   isService: boolean;
   isFragile: boolean | null;
   validityPeriod: number | null;

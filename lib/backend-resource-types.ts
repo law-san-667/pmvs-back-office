@@ -105,6 +105,8 @@ export type ExtendedCategoryAndSubCategory = {
   subCategory: { name: string };
 };
 
+export type ListingModerationStatus = "PENDING" | "APPROVED" | "REJECTED";
+
 export type Listing = {
   id: string;
   businessId: string;
@@ -115,6 +117,11 @@ export type Listing = {
   specificsSections: ListingSpecificsSection[];
   condition: ListingCondition;
   status: ListingStatus;
+  moderationStatus: ListingModerationStatus;
+  moderationReason: string | null;
+  moderatedByUserId: string | null;
+  moderatedAt: string | null;
+  submittedForReviewAt: string | null;
   priceAmountMinor: number;
   isService: boolean;
   currency: string;

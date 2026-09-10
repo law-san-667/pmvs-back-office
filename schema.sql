@@ -192,6 +192,19 @@ CREATE TYPE public.listing_exposure AS ENUM (
 ALTER TYPE public.listing_exposure OWNER TO postgres;
 
 --
+-- Name: listing_moderation_status; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.listing_moderation_status AS ENUM (
+    'PENDING',
+    'APPROVED',
+    'REJECTED'
+);
+
+
+ALTER TYPE public.listing_moderation_status OWNER TO postgres;
+
+--
 -- Name: listing_status; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -952,6 +965,11 @@ CREATE TABLE public.listings (
     editorial jsonb,
     seo jsonb,
     certificates jsonb DEFAULT '[]'::jsonb NOT NULL,
+    moderation_status public.listing_moderation_status DEFAULT 'PENDING'::public.listing_moderation_status NOT NULL,
+    moderation_reason text,
+    moderated_by_user_id uuid,
+    moderated_at timestamp with time zone,
+    submitted_for_review_at timestamp with time zone,
     CONSTRAINT listings_min_order_quantity_non_negative_check CHECK ((min_order_quantity >= 0)),
     CONSTRAINT listings_quantity_available_positive_check CHECK ((quantity_available > 0)),
     CONSTRAINT listings_review_count_non_negative_check CHECK ((review_count >= 0)),
@@ -2097,6 +2115,20 @@ CREATE INDEX listing_market_prices_listing_id_idx ON public.listing_market_price
 
 
 --
+-- Name: listings_moderation_queue_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX listings_moderation_queue_idx ON public.listings USING btree (moderation_status, submitted_for_review_at);
+
+
+--
+-- Name: listings_moderation_status_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX listings_moderation_status_idx ON public.listings USING btree (moderation_status);
+
+
+--
 -- Name: listings_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -2797,6 +2829,14 @@ ALTER TABLE ONLY public.listing_market_prices
 
 ALTER TABLE ONLY public.listing_market_prices
     ADD CONSTRAINT listing_market_prices_listing_id_listings_id_fk FOREIGN KEY (listing_id) REFERENCES public.listings(id) ON DELETE CASCADE;
+
+
+--
+-- Name: listings listings_moderated_by_user_id_users_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.listings
+    ADD CONSTRAINT listings_moderated_by_user_id_users_id_fk FOREIGN KEY (moderated_by_user_id) REFERENCES public.users(id) ON DELETE SET NULL;
 
 
 --

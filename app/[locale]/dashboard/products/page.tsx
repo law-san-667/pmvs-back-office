@@ -44,6 +44,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Link, useRouter } from "@/i18n/navigation";
+import { Badge } from "@/components/ui/badge";
+import {
+  MODERATION_STATUS_CLASSES,
+  MODERATION_STATUS_LABELS,
+} from "@/lib/moderation-utils";
 import type { Listing } from "@/lib/validators/listings-services";
 import { trpc } from "@/server/trpc/client";
 import {
@@ -398,6 +403,17 @@ export default function ProductsPage() {
                                 <p className="truncate font-bold">
                                   {listing.title}
                                 </p>
+                                <Badge
+                                  variant="outline"
+                                  className={`mt-0.5 ${MODERATION_STATUS_CLASSES[listing.moderationStatus]}`}
+                                  title={listing.moderationReason ?? undefined}
+                                >
+                                  {
+                                    MODERATION_STATUS_LABELS[
+                                      listing.moderationStatus
+                                    ]
+                                  }
+                                </Badge>
                                 {size !== "Variable" && (
                                   <p className="text-sm">Taille: {size}</p>
                                 )}

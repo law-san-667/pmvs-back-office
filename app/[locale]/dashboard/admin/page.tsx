@@ -17,6 +17,7 @@ import {
     CreditCardIcon,
     GavelIcon,
     PackageIcon,
+    ShieldAlertIcon,
     ShoppingCartIcon,
     UserCogIcon,
 } from "lucide-react";
@@ -62,6 +63,7 @@ const metricDefinitions = [
 
 export default function AdminDashboardPage() {
   const stats = trpc.admin.stats.useQuery();
+  const moderation = trpc.admin.moderationSummary.useQuery();
 
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
@@ -69,6 +71,19 @@ export default function AdminDashboardPage() {
         title="Tableau de bord"
         description="Vue d’ensemble de l’activité et des ressources de la plateforme."
       />
+
+      {(moderation.data?.pending ?? 0) > 0 && (
+        <Link
+          href="/dashboard/admin/listings"
+          className="border-amber-200 bg-amber-50 flex items-center justify-between gap-4 rounded-lg border p-4 text-sm text-amber-900"
+        >
+          <span className="flex items-center gap-2">
+            <ShieldAlertIcon className="size-5" />
+            {moderation.data?.pending} annonce(s) en attente de validation.
+          </span>
+          <span className="font-medium underline">Ouvrir la modération</span>
+        </Link>
+      )}
 
       {stats.isError && (
         <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-4 text-sm">

@@ -124,6 +124,12 @@ const updateBusinessPayloadSchema = z.object({
   commissionRatePercent: z.number().min(0).max(100).nullable().optional(),
 });
 
+const listingModerationStatusSchema = z.enum([
+  "PENDING",
+  "APPROVED",
+  "REJECTED",
+]);
+
 const listingsInputSchema = paginationInputSchema.extend({
   orderBy: z
     .enum(["title", "priceAmountMinor", "createdAt", "updatedAt"])
@@ -136,6 +142,7 @@ const listingsInputSchema = paginationInputSchema.extend({
   status: z
     .enum(["DRAFT", "PUBLISHED", "PAUSED", "SOLD", "ARCHIVED"])
     .optional(),
+  moderationStatus: listingModerationStatusSchema.optional(),
   countryCode: z.string().trim().optional(),
 });
 
@@ -350,6 +357,31 @@ export const adminRouter = createTRPCRouter({
         { mode: "paginated" },
       ),
     ),
+  listing: privateProcedure
+    .input(z.object({ id: uuidSchema }))
+    .query(({ ctx, input }) =>
+      callBackend<AdminListing>(ctx.api.get(`/listings/${input.id}`)),
+    ),
+  moderationSummary: privateProcedure.query(({ ctx }) =>
+    callBackend<{ pending: number; approved: number; rejected: number }>(
+      ctx.api.get("/listings/moderation/summary"),
+    ),
+  ),
+  moderateListing: privateProcedure
+    .input(
+      z.object({
+        id: uuidSchema,
+        status: z.enum(["APPROVED", "REJECTED"]),
+        reason: z.string().trim().min(1).max(1000).nullable().optional(),
+      }),
+    )
+    .mutation(({ ctx, input }) => {
+      const { id, ...payload } = input;
+
+      return callBackend<AdminListing>(
+        ctx.api.patch(`/listings/${id}/moderation`, payload),
+      );
+    }),
   tenders: privateProcedure
     .input(tendersInputSchema)
     .query(({ ctx, input }) =>
