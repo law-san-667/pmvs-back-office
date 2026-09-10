@@ -69,13 +69,13 @@ export default function AdminTeamMembersPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Membres d’équipe"
-        description="Membres associés aux entreprises et rôles qui leur sont attribués."
+        title="Utilisateurs"
+        description="Utilisateurs associés aux entreprises et rôles qui leur sont attribués."
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Membres ({members.data?.total ?? 0})</CardTitle>
+          <CardTitle>Utilisateurs ({members.data?.total ?? 0})</CardTitle>
           <CardAction>
             <div className="flex items-center gap-2">
               <select
@@ -129,8 +129,8 @@ export default function AdminTeamMembersPage() {
                 isLoading={members.isLoading}
                 error={members.error?.message}
                 isEmpty={!members.data?.items.length}
-                loadingLabel="Chargement des membres..."
-                emptyLabel="Aucun membre trouvé."
+                loadingLabel="Chargement des utilisateurs..."
+                emptyLabel="Aucun utilisateur trouvé."
               />
               {members.data?.items.map((member) => (
                 <TableRow key={member.id}>

@@ -54,7 +54,7 @@ const metricDefinitions = [
   },
   {
     key: "totalTeamMembers" as const,
-    title: "Membres d’équipe",
+    title: "Utilisateurs",
     href: "/dashboard/admin/team-members",
     icon: UserCogIcon,
   },

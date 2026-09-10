@@ -1,4 +1,5 @@
 import type {
+  AdminAccount,
   AdminBusiness,
   AdminBusinessMember,
   AdminDashboardStats,
@@ -25,6 +26,10 @@ import {
   paginationInputSchema,
   uuidSchema,
 } from "@/lib/validators/backend-resources";
+import {
+  adminsInputSchema,
+  createAdminInputSchema,
+} from "@/lib/validators/admins";
 import { updateBusinessInputSchema } from "@/lib/validators/business";
 import { callBackend } from "@/server/backend-utils";
 import z from "zod";
@@ -203,6 +208,20 @@ const cityPayloadSchema = z.object({
 });
 
 export const adminRouter = createTRPCRouter({
+  /** Back-office accounts: list and create. Admin-only on the API too. */
+  admins: privateProcedure
+    .input(adminsInputSchema.optional())
+    .query(({ ctx, input }) =>
+      callBackend<AdminAccount, "paginated">(
+        ctx.api.get("/admins", { params: input }),
+        { mode: "paginated" },
+      ),
+    ),
+  createAdmin: privateProcedure
+    .input(createAdminInputSchema)
+    .mutation(({ ctx, input }) =>
+      callBackend<AdminAccount>(ctx.api.post("/admins", input)),
+    ),
   stats: privateProcedure.query(async ({ ctx }) => {
     const [businesses, listings, tenders, payments, members] =
       await Promise.all([

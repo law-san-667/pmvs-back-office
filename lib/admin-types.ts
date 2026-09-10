@@ -152,6 +152,23 @@ export type UserStatus =
   | "SUSPENDED"
   | "DELETED";
 
+/** A back-office account: platform staff, never a client or a seller. */
+export type StaffRole = "ADMIN" | "MODERATOR" | "OPERATOR";
+
+export type AdminAccount = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  phoneNumber: string | null;
+  profileImage: string | null;
+  role: StaffRole;
+  status: UserStatus;
+  lastLoginAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type AdminBusinessMemberUser = {
   id: string;
   firstName: string;

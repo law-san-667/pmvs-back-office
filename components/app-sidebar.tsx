@@ -22,6 +22,7 @@ import {
   MessageSquareIcon,
   PackageIcon,
   SettingsIcon,
+  ShieldCheckIcon,
   ShoppingCartIcon,
   UserCogIcon,
   Users2Icon,
@@ -113,7 +114,7 @@ const adminItems = [
     icon: <CreditCardIcon />,
   },
   {
-    title: "Membres d'équipe",
+    title: "Utilisateurs",
     url: "/dashboard/admin/team-members",
     icon: <UserCogIcon />,
   },
@@ -121,6 +122,11 @@ const adminItems = [
     title: "Clients",
     url: "/dashboard/admin/customers",
     icon: <Users2Icon />,
+  },
+  {
+    title: "Administrateurs",
+    url: "/dashboard/admin/administrators",
+    icon: <ShieldCheckIcon />,
   },
   {
     title: "Paramètres",
