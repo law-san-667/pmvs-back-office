@@ -2,29 +2,29 @@
 
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardAction,
+    CardContent,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@/i18n/navigation";
 import { trpc } from "@/server/trpc/client";
 import {
-  ArrowUpRightIcon,
-  Building2Icon,
-  CreditCardIcon,
-  GavelIcon,
-  PackageIcon,
-  ShoppingCartIcon,
-  UserCogIcon,
+    ArrowUpRightIcon,
+    Building2Icon,
+    CreditCardIcon,
+    GavelIcon,
+    PackageIcon,
+    ShoppingCartIcon,
+    UserCogIcon,
 } from "lucide-react";
 
 const metricDefinitions = [
   {
     key: "totalBusinesses" as const,
-    title: "Entreprises",
+    title: "Fournisseurs",
     href: "/dashboard/admin/businesses",
     icon: Building2Icon,
   },

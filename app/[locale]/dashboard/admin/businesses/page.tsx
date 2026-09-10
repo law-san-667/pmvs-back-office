@@ -9,47 +9,47 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardAction,
+    CardContent,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "@/components/ui/table";
+import { useRouter } from "@/i18n/navigation";
 import {
-  BUSINESS_STATUS_BADGE_CLASSES,
-  BUSINESS_STATUS_LABELS,
+    BUSINESS_STATUS_BADGE_CLASSES,
+    BUSINESS_STATUS_LABELS,
 } from "@/lib/admin-business-utils";
 import type { AdminBusiness } from "@/lib/admin-types";
 import type { BusinessStatus } from "@/lib/backend-resource-types";
 import { BUSINESS_CATEGORY_LABELS } from "@/lib/business-categories";
-import { useRouter } from "@/i18n/navigation";
 import { formatDate, getInitials } from "@/lib/seller-dashboard-utils";
 import { trpc } from "@/server/trpc/client";
 import {
-  BanIcon,
-  CheckCircle2Icon,
-  EyeIcon,
-  MoreHorizontalIcon,
-  PencilIcon,
-  RotateCcwIcon,
-  SearchIcon,
-  Trash2Icon,
+    BanIcon,
+    CheckCircle2Icon,
+    EyeIcon,
+    MoreHorizontalIcon,
+    PencilIcon,
+    RotateCcwIcon,
+    SearchIcon,
+    Trash2Icon,
 } from "lucide-react";
 import { useDeferredValue, useState } from "react";
 
@@ -98,13 +98,13 @@ export default function AdminBusinessesPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Entreprises"
+        title="Fournisseurs"
         description="Consultez toutes les entreprises enregistrées, validez-les et gérez leur statut."
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Entreprises ({businesses.data?.total ?? 0})</CardTitle>
+          <CardTitle>Fournisseurs ({businesses.data?.total ?? 0})</CardTitle>
           <CardAction>
             <div className="flex items-center gap-2">
               <select
@@ -248,7 +248,9 @@ export default function AdminBusinessesPage() {
                         <DropdownMenuSeparator />
                         {business.status !== "ACTIVE" && (
                           <DropdownMenuItem
-                            onClick={() => void changeStatus(business, "ACTIVE")}
+                            onClick={() =>
+                              void changeStatus(business, "ACTIVE")
+                            }
                           >
                             <CheckCircle2Icon />
                             {business.status === "PENDING_VERIFICATION"

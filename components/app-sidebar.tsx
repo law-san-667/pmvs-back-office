@@ -5,31 +5,31 @@ import * as React from "react";
 
 import { NavSecondary } from "@/components/nav-secondary";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import {
-  AwardIcon,
-  Building2Icon,
-  CircleHelpIcon,
-  CreditCardIcon,
-  GavelIcon,
-  LayoutDashboardIcon,
-  MapPinnedIcon,
-  MessageSquareIcon,
-  PackageIcon,
-  SettingsIcon,
-  ShieldCheckIcon,
-  ShoppingCartIcon,
-  UserCogIcon,
-  Users2Icon,
-} from "lucide-react";
-import { useUser } from "@/contexts/user-context";
 import { useMessaging } from "@/contexts/messaging-context";
+import { useUser } from "@/contexts/user-context";
+import {
+    AwardIcon,
+    Building2Icon,
+    CircleHelpIcon,
+    CreditCardIcon,
+    GavelIcon,
+    LayoutDashboardIcon,
+    MapPinnedIcon,
+    MessageSquareIcon,
+    PackageIcon,
+    SettingsIcon,
+    ShieldCheckIcon,
+    ShoppingCartIcon,
+    UserCogIcon,
+    Users2Icon,
+} from "lucide-react";
 import { NavUser } from "./nav-user";
 
 const generalItems = [
@@ -90,7 +90,7 @@ const adminItems = [
     icon: <MapPinnedIcon />,
   },
   {
-    title: "Entreprises",
+    title: "Fournisseurs",
     url: "/dashboard/admin/businesses",
     icon: <Building2Icon />,
   },
