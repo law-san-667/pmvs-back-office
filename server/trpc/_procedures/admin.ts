@@ -20,6 +20,11 @@ import type {
 } from "@/lib/admin-types";
 import type { BusinessStatus } from "@/lib/backend-resource-types";
 import type {
+  DiagnosticsOverview,
+  RequestLogDetail,
+  RequestLogSummary,
+} from "@/lib/diagnostics-types";
+import type {
   Category,
   City,
   Country,
@@ -43,6 +48,25 @@ import {
 import { callBackend } from "@/server/backend-utils";
 import z from "zod";
 import { createTRPCRouter, privateProcedure } from "../init";
+
+const diagnosticsRangeSchema = z.object({
+  from: z.string().datetime({ offset: true }).optional(),
+  to: z.string().datetime({ offset: true }).optional(),
+});
+
+const requestLogsInputSchema = paginationInputSchema
+  .extend(diagnosticsRangeSchema.shape)
+  .extend({
+    orderBy: z.enum(["createdAt", "durationMs", "status"]).optional(),
+    search: z.string().trim().min(1).optional(),
+    method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]).optional(),
+    status: z.number().int().min(100).max(599).optional(),
+    statusClass: z.enum(["2xx", "3xx", "4xx", "5xx"]).optional(),
+    route: z.string().trim().min(1).optional(),
+    userId: uuidSchema.optional(),
+    ip: z.string().trim().min(1).optional(),
+    reqId: z.string().trim().min(1).optional(),
+  });
 
 const businessStatusSchema = z.enum([
   "PENDING_VERIFICATION",
@@ -224,6 +248,29 @@ const cityPayloadSchema = z.object({
 });
 
 export const adminRouter = createTRPCRouter({
+  /** Diagnostics: request history and health. Admin-only on the API too. */
+  diagnosticsOverview: privateProcedure
+    .input(diagnosticsRangeSchema)
+    .query(({ ctx, input }) =>
+      callBackend<DiagnosticsOverview>(
+        ctx.api.get("/diagnostics/overview", { params: input }),
+      ),
+    ),
+  diagnosticsRequests: privateProcedure
+    .input(requestLogsInputSchema)
+    .query(({ ctx, input }) =>
+      callBackend<RequestLogSummary, "paginated">(
+        ctx.api.get("/diagnostics/requests", { params: input }),
+        { mode: "paginated" },
+      ),
+    ),
+  diagnosticsRequest: privateProcedure
+    .input(z.object({ id: uuidSchema }))
+    .query(({ ctx, input }) =>
+      callBackend<RequestLogDetail>(
+        ctx.api.get(`/diagnostics/requests/${input.id}`),
+      ),
+    ),
   // ─── Supplier quality ──────────────────────────────────────────────────────
   qualityThresholds: privateProcedure.query(({ ctx }) =>
     callBackend<QualityThresholdsResponse>(ctx.api.get("/quality/thresholds")),

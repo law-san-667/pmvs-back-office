@@ -15,6 +15,7 @@ import {
 import { useMessaging } from "@/contexts/messaging-context";
 import { useUser } from "@/contexts/user-context";
 import {
+    ActivityIcon,
     AwardIcon,
     Building2Icon,
     CircleHelpIcon,
@@ -133,6 +134,11 @@ const adminItems = [
     title: "Administrateurs",
     url: "/dashboard/admin/administrators",
     icon: <ShieldCheckIcon />,
+  },
+  {
+    title: "Diagnostic",
+    url: "/dashboard/admin/diagnostics",
+    icon: <ActivityIcon />,
   },
   {
     title: "Paramètres",
