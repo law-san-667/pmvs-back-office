@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useUser } from "@/contexts/user-context";
 import { useRouter } from "@/i18n/navigation";
-import Image from "next/image";
 import React, { useState } from "react";
 
 type AuthMode = "login" | "register" | "forgot-password";
@@ -58,18 +57,54 @@ export default function AuthPage() {
             <ForgotPasswordForm onBackToLogin={() => setMode("login")} />
           )}
         </div>
-        <div className="w-full">
-          <Image
-            src="/auth/auth-image.png"
-            alt="Illustration promotionnelle"
-            width={904}
-            height={982}
-            className="h-auto w-full"
-            priority
-          />
-        </div>
+        <WelcomePanel />
       </div>
       </div>
     </section>
+  );
+}
+
+const SUPPLIER_PROFILES = [
+  "Producteur d'un bien ou Prestataire de service",
+  "Exportateur",
+  "Commerçant en gros, en demi-gros ou au détail",
+  "Adjudicateur",
+];
+
+const ADMIN_LEVELS = [
+  "Niveau Central (chef de file : Diarama MBA consulting SARL)",
+  "Niveau National (Points Focaux Nationaux : Organismes d'Appui au Commerce)",
+  "Niveau sous-régional (Point Focal Régional : ZLECAF)",
+];
+
+function WelcomePanel() {
+  return (
+    <div className="bg-primary/5 flex w-full flex-col justify-center gap-8 rounded-2xl p-10">
+      <h2 className="text-primary text-3xl font-bold">
+        Soyez les bienvenus !
+      </h2>
+
+      <div className="space-y-3">
+        <h3 className="text-lg font-semibold">
+          À l&apos;Interface des fournisseurs
+        </h3>
+        <ul className="text-muted-foreground list-disc space-y-1 pl-5">
+          {SUPPLIER_PROFILES.map((profile) => (
+            <li key={profile}>{profile}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="space-y-3">
+        <h3 className="text-lg font-semibold">
+          Et à l&apos;Interface des administrateurs
+        </h3>
+        <ul className="text-muted-foreground list-disc space-y-1 pl-5">
+          {ADMIN_LEVELS.map((level) => (
+            <li key={level}>{level}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
