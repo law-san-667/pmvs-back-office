@@ -39,6 +39,7 @@ import {
   listingStockPolicyEnum,
   type Listing,
   type ListingAvailabilityChannel,
+  type ListingBrand,
   type ListingCertificate,
   type ListingExposure,
   type ListingSpecificsSection,
@@ -390,6 +391,16 @@ type ManagedCertificate = {
   url?: string;
   file?: File;
 };
+
+/** A brand row: name plus a logo already online or still to upload. */
+type ManagedBrand = {
+  key: string;
+  name: string;
+  logoUrl?: string;
+  logoFile?: File;
+};
+
+const MAX_BRANDS = 4;
 
 // ─── Small field helpers ─────────────────────────────────────────────────────
 
@@ -1023,14 +1034,93 @@ function Step2({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
 
 // ─── Step 3: Description et certifications ───────────────────────────────────
 
+function BrandsCard({
+  brands,
+  onChange,
+}: {
+  brands: ManagedBrand[];
+  onChange: (brands: ManagedBrand[]) => void;
+}) {
+  const update = (key: string, patch: Partial<ManagedBrand>) =>
+    onChange(brands.map((b) => (b.key === key ? { ...b, ...patch } : b)));
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="font-bold">
+          Marques et propriété intellectuelle (le cas échéant)
+        </CardTitle>
+        <p className="text-muted-foreground text-sm">
+          Jusqu&apos;à {MAX_BRANDS} marques, chacune avec son logo.
+        </p>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3">
+        {brands.map((brand, index) => (
+          <div
+            key={brand.key}
+            className="grid items-center gap-2 rounded-md border px-3 py-2 sm:grid-cols-[1fr_auto_auto]"
+          >
+            <Input
+              value={brand.name}
+              onChange={(event) => update(brand.key, { name: event.target.value })}
+              placeholder={`Marque ${index + 1}`}
+              className="h-8"
+            />
+            <label className="text-primary cursor-pointer text-xs whitespace-nowrap underline">
+              {brand.logoFile
+                ? brand.logoFile.name
+                : brand.logoUrl
+                  ? "Changer le logo"
+                  : "Logo de la marque"}
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/svg+xml"
+                className="sr-only"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) update(brand.key, { logoFile: file, logoUrl: undefined });
+                }}
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => onChange(brands.filter((b) => b.key !== brand.key))}
+              aria-label="Retirer la marque"
+            >
+              <X className="text-muted-foreground size-4" />
+            </button>
+          </div>
+        ))}
+        {brands.length < MAX_BRANDS && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-fit"
+            onClick={() =>
+              onChange([...brands, { key: `brand-new-${Date.now()}`, name: "" }])
+            }
+          >
+            Ajouter une marque
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function Step3({
   form,
+  brands,
+  onChangeBrands,
   certificates,
   onAddCertificates,
   onRenameCertificate,
   onRemoveCertificate,
 }: {
   form: UseFormReturn<EnterpriseFormData>;
+  brands: ManagedBrand[];
+  onChangeBrands: (brands: ManagedBrand[]) => void;
   certificates: ManagedCertificate[];
   onAddCertificates: (files: File[]) => void;
   onRenameCertificate: (key: string, name: string) => void;
@@ -1045,6 +1135,8 @@ function Step3({
 
   return (
     <div className="flex flex-col gap-4">
+      <BrandsCard brands={brands} onChange={onChangeBrands} />
+
       <Card>
         <CardHeader>
           <CardTitle className="font-bold">
@@ -1286,6 +1378,13 @@ export default function EnterpriseProductForm({
   const [step, setStep] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [brands, setBrands] = useState<ManagedBrand[]>(() =>
+    (listing?.brands ?? []).map((brand, index) => ({
+      key: `brand-${index}`,
+      name: brand.name,
+      logoUrl: brand.logoUrl,
+    })),
+  );
   const [certificates, setCertificates] = useState<ManagedCertificate[]>(
     () =>
       listing?.certificates.map((certificate) => ({
@@ -1363,6 +1462,28 @@ export default function EnterpriseProductForm({
       const urlByKey = new Map(
         pendingCertificates.map((c, index) => [c.key, certificateUrls[index]]),
       );
+
+      const pendingLogos = brands.filter((b) => b.logoFile);
+      const logoUrls = pendingLogos.length
+        ? await uploadFilesToR2FromBrowser(
+            pendingLogos.map((b) => b.logoFile as File),
+            "images",
+            createUpload,
+            () => undefined,
+          )
+        : [];
+      const logoByKey = new Map(
+        pendingLogos.map((b, index) => [b.key, logoUrls[index]]),
+      );
+      const brandsPayload = brands
+        .filter((brand) => brand.name.trim())
+        .map((brand) => {
+          const logoUrl = brand.logoUrl ?? logoByKey.get(brand.key);
+          return {
+            name: brand.name.trim(),
+            ...(logoUrl ? { logoUrl } : {}),
+          } satisfies ListingBrand;
+        });
       const certificatePayload = certificates
         .map((certificate) => {
           const url = certificate.url ?? urlByKey.get(certificate.key);
@@ -1487,6 +1608,7 @@ export default function EnterpriseProductForm({
           metaDescription: optionalText(data.seoMetaDescription) ?? undefined,
         }),
         certificates: certificatePayload,
+        brands: brandsPayload,
         marketPrices,
       };
 
@@ -1570,6 +1692,8 @@ export default function EnterpriseProductForm({
         {step === 2 && (
           <Step3
             form={form}
+            brands={brands}
+            onChangeBrands={setBrands}
             certificates={certificates}
             onAddCertificates={addCertificates}
             onRenameCertificate={(key, name) =>

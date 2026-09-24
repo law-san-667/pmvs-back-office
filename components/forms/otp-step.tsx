@@ -143,7 +143,7 @@ export default function OtpStep({
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel>Code de validation</FieldLabel>
                   <InputOTP
-                    maxLength={6}
+                    maxLength={4}
                     value={field.value}
                     onChange={field.onChange}
                     disabled={isPending}
@@ -154,8 +154,6 @@ export default function OtpStep({
                       <InputOTPSlot index={1} />
                       <InputOTPSlot index={2} />
                       <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
                     </InputOTPGroup>
                   </InputOTP>
                   {fieldState.invalid && (

@@ -12,6 +12,13 @@ const otpPurposeSchema = z.enum([
   "VERIFY_PHONE",
 ]);
 
+/** Client rule: at least 6 characters, one uppercase letter and one digit. */
+export const passwordSchema = z
+  .string()
+  .min(6, "Le mot de passe doit contenir au moins 6 caractères.")
+  .regex(/\p{Lu}/u, "Le mot de passe doit contenir une majuscule.")
+  .regex(/\d/, "Le mot de passe doit contenir un chiffre.");
+
 export const registerSchema = z
   .object({
     firstName: z.string().trim().min(1),
@@ -22,10 +29,11 @@ export const registerSchema = z
     .union([z.literal(""), z.string().trim().email("Adresse email invalide.")])
     .optional()
     .transform((value) => value || undefined),
-    password: z.string().min(8),
-    confirmPassword: z.string().min(8),
+    password: passwordSchema,
+    confirmPassword: z.string().min(1, "Confirmez votre mot de passe."),
     role: userRoleSchema,
     device: authDeviceSchema,
+    captchaToken: z.string().min(1).optional(),
   })
   .superRefine((value, ctx) => {
     if (!value.email && !value.phoneNumber) {
@@ -81,10 +89,10 @@ export const validateOtpSchema = z
   .object({
     identifier: z.string().trim().min(1),
     purpose: otpPurposeSchema,
-    code: z.string().trim().length(6),
+    code: z.string().trim().length(4),
     device: authDeviceSchema,
-    newPassword: z.string().min(8).optional(),
-    confirmPassword: z.string().min(8).optional(),
+    newPassword: passwordSchema.optional(),
+    confirmPassword: z.string().min(1).optional(),
   })
   .superRefine((value, ctx) => {
     if (value.purpose !== "PASSWORD_RESET") {

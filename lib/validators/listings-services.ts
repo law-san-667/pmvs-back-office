@@ -68,6 +68,17 @@ export interface ListingCertificate {
   url: string;
 }
 
+/** Brands and IP attached to a product (the specification allows four). */
+export interface ListingBrand {
+  name: string;
+  logoUrl?: string;
+}
+
+export const listingBrandSchema: z.ZodType<ListingBrand> = z.object({
+  name: z.string().trim().min(1),
+  logoUrl: z.url().optional(),
+});
+
 export type ListingMarketPrice = {
   id: string;
   listingId: string;
@@ -269,6 +280,7 @@ export const createListingSchema = z.object({
   editorial: listingEditorialSchema.nullable().optional(),
   seo: listingSeoSchema.nullable().optional(),
   certificates: z.array(listingCertificateSchema).optional(),
+  brands: z.array(listingBrandSchema).max(4).optional(),
   marketPrices: z.array(marketPriceInputSchema).optional(),
 });
 
@@ -331,6 +343,7 @@ export type Listing = {
   editorial: ListingEditorial | null;
   seo: ListingSeo | null;
   certificates: ListingCertificate[];
+  brands: ListingBrand[];
   marketPrices: ListingMarketPrice[];
   marketPrice: ListingMarketPrice | null;
   createdAt: string;

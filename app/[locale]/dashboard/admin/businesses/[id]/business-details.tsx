@@ -37,6 +37,11 @@ import {
   BUSINESS_CATEGORY_LABELS,
   isLegalBusinessCategory,
 } from "@/lib/business-categories";
+import {
+  BUSINESS_SIZE_LABELS,
+  getBusinessSizeClass,
+  LEGAL_BUSINESS_TYPE_LABELS,
+} from "@/lib/validators/business";
 import { formatDate, getInitials } from "@/lib/seller-dashboard-utils";
 import { PAYOUT_ACCOUNT_STATUS_LABELS } from "@/lib/payment-utils";
 import { trpc } from "@/server/trpc/client";
@@ -413,6 +418,33 @@ export function BusinessDetails({ id }: { id: string }) {
                   value={legalInformation.creationYear}
                 />
                 <Row
+                  label="NIF"
+                  value={legalInformation.taxIdentificationNumber}
+                />
+                <Row
+                  label="Effectif permanent"
+                  value={
+                    legalInformation.permanentStaffCount !== undefined
+                      ? `${legalInformation.permanentStaffCount}${
+                          getBusinessSizeClass(legalInformation.permanentStaffCount)
+                            ? ` — ${BUSINESS_SIZE_LABELS[getBusinessSizeClass(legalInformation.permanentStaffCount)!]}`
+                            : ""
+                        }`
+                      : null
+                  }
+                />
+                <Row
+                  label="Types de fournisseur"
+                  value={legalInformation.businessTypes
+                    ?.map((type) =>
+                      type === "OTHER" && legalInformation.otherBusinessType
+                        ? legalInformation.otherBusinessType
+                        : LEGAL_BUSINESS_TYPE_LABELS[type],
+                    )
+                    .join(", ")}
+                />
+                <Row label="Code postal" value={legalInformation.postalCode} />
+                <Row
                   label="Représentant légal"
                   value={`${legalInformation.legalRepresentative.name} — ${legalInformation.legalRepresentative.mobilePhone}`}
                 />
@@ -430,6 +462,106 @@ export function BusinessDetails({ id }: { id: string }) {
                         {legalInformation.headquartersGeolocation.latitude},{" "}
                         {legalInformation.headquartersGeolocation.longitude}
                       </a>
+                    ) : null
+                  }
+                />
+              </>
+            )}
+            {legalInformation?.bankDetails && (
+              <>
+                <div className="border-t pt-2 text-sm font-medium">Banque</div>
+                <Row label="Banque" value={legalInformation.bankDetails.bankName} />
+                <Row label="Adresse" value={legalInformation.bankDetails.bankAddress} />
+                <Row
+                  label="Compte / passerelle"
+                  value={legalInformation.bankDetails.paymentAccount}
+                />
+              </>
+            )}
+            {legalInformation?.keyPersons?.length ? (
+              <>
+                <div className="border-t pt-2 text-sm font-medium">Personnes-clés</div>
+                {legalInformation.keyPersons.map((person, index) => (
+                  <Row
+                    key={index}
+                    label={person.position ?? `Personne ${index + 1}`}
+                    value={[
+                      `${person.title ?? ""} ${person.firstName} ${person.lastName}`.trim(),
+                      person.mobilePhone,
+                      person.email,
+                      person.idNumber ? `ID ${person.idNumber}` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  />
+                ))}
+              </>
+            ) : null}
+            {legalInformation?.contacts?.length ? (
+              <>
+                <div className="border-t pt-2 text-sm font-medium">Contacts</div>
+                {legalInformation.contacts.map((contact, index) => (
+                  <Row
+                    key={index}
+                    label={`${contact.title ?? ""} ${contact.fullName}`.trim()}
+                    value={[contact.email, contact.mobilePhone, contact.landlinePhone]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  />
+                ))}
+              </>
+            ) : null}
+            {legalInformation?.complianceDocuments && (
+              <>
+                <div className="border-t pt-2 text-sm font-medium">
+                  Documents de conformité
+                </div>
+                <Row
+                  label="Acte de constitution"
+                  value={
+                    legalInformation.complianceDocuments.incorporationDeedUrl ? (
+                      <a
+                        href={legalInformation.complianceDocuments.incorporationDeedUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary underline"
+                      >
+                        Voir le document
+                      </a>
+                    ) : null
+                  }
+                />
+                <Row
+                  label="Scan du passeport"
+                  value={
+                    legalInformation.complianceDocuments.passportScanUrl ? (
+                      <a
+                        href={legalInformation.complianceDocuments.passportScanUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary underline"
+                      >
+                        Voir le document
+                      </a>
+                    ) : null
+                  }
+                />
+                <Row
+                  label="Photos MPME"
+                  value={
+                    legalInformation.complianceDocuments.photoUrls?.length ? (
+                      <div className="flex flex-wrap gap-2">
+                        {legalInformation.complianceDocuments.photoUrls.map((url) => (
+                          <a key={url} href={url} target="_blank" rel="noreferrer">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={url}
+                              alt=""
+                              className="size-16 rounded-md object-cover"
+                            />
+                          </a>
+                        ))}
+                      </div>
                     ) : null
                   }
                 />

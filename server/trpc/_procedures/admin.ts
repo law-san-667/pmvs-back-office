@@ -37,7 +37,9 @@ import {
 import {
   adminsInputSchema,
   createAdminInputSchema,
+  verifyAdminInputSchema,
 } from "@/lib/validators/admins";
+import type { OtpDelivery } from "@/lib/backend-utils";
 import { updateBusinessInputSchema } from "@/lib/validators/business";
 import {
   businessCertificationInputSchema,
@@ -326,7 +328,16 @@ export const adminRouter = createTRPCRouter({
   createAdmin: privateProcedure
     .input(createAdminInputSchema)
     .mutation(({ ctx, input }) =>
-      callBackend<AdminAccount>(ctx.api.post("/admins", input)),
+      callBackend<{ admin: AdminAccount; otp: OtpDelivery }>(
+        ctx.api.post("/admins", input),
+      ),
+    ),
+  verifyAdmin: privateProcedure
+    .input(verifyAdminInputSchema)
+    .mutation(({ ctx, input }) =>
+      callBackend<{ message: string }>(
+        ctx.api.post(`/admins/${input.id}/verify`, { code: input.code }),
+      ),
     ),
   stats: privateProcedure.query(async ({ ctx }) => {
     const [businesses, listings, tenders, payments, members] =

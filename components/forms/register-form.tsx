@@ -1,5 +1,6 @@
 "use client";
 
+import CaptchaField from "@/components/captcha-field";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -34,6 +35,8 @@ export default function RegisterForm({
   const [message, setMessage] = useState<string | null>(null);
 
   const register = trpc.auth.register.useMutation();
+  // Undefined until the visitor solves the captcha, and again when it expires.
+  const [captchaToken, setCaptchaToken] = useState<string | undefined>();
 
   const form = useForm<RegisterFormInput>({
     resolver: zodResolver(registerFormSchema) as Resolver<RegisterFormInput>,
@@ -63,6 +66,7 @@ export default function RegisterForm({
         confirmPassword: data.confirmPassword,
         role: data.role,
         device: data.device,
+        captchaToken,
       });
 
       const identifier = data.phoneNumber || "";
@@ -111,10 +115,12 @@ export default function RegisterForm({
           <FieldGroup>
             <div className="space-y-4">
               <h1 className="max-w-md text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
-                Inscrivez-vous
+                Créez votre compte fournisseur
               </h1>
               <p className="max-w-md text-lg leading-8 text-slate-500">
-                Entrez vos identifiants pour vous créer un compte.
+                Pour publier vos produits et services, répondre aux appels
+                d&apos;offres et gérer vos ventes. Les acheteurs
+                s&apos;inscrivent dans l&apos;espace acheteur.
               </p>
             </div>
 
@@ -296,6 +302,8 @@ export default function RegisterForm({
               )}
             />
           </FieldGroup>
+
+          <CaptchaField onToken={setCaptchaToken} />
 
           <Field>
             <Button

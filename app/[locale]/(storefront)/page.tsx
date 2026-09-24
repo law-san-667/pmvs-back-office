@@ -1,6 +1,7 @@
 "use client";
 
 import Flag from "@/components/flag";
+import SpaceBanner from "@/components/auth/space-banner";
 import ForgotPasswordForm from "@/components/forms/forgot-password-form";
 import LoginForm from "@/components/forms/login-form";
 import RegisterForm from "@/components/forms/register-form";
@@ -11,15 +12,28 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useUser } from "@/contexts/user-context";
 import { useRouter } from "@/i18n/navigation";
-import React, { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import React, { Suspense, useState } from "react";
 
 type AuthMode = "login" | "register" | "forgot-password";
 
+// `useSearchParams` (the `?mode=register` cross-space link) needs Suspense.
 export default function AuthPage() {
+  return (
+    <Suspense>
+      <AuthContent />
+    </Suspense>
+  );
+}
+
+function AuthContent() {
   const router = useRouter();
   const { isAuthenticated } = useUser();
+  const searchParams = useSearchParams();
 
-  const [mode, setMode] = useState<AuthMode>("login");
+  const [mode, setMode] = useState<AuthMode>(
+    searchParams.get("mode") === "register" ? "register" : "login",
+  );
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -44,6 +58,9 @@ export default function AuthPage() {
       </div>
       <div className="grid grid-cols-2 gap-2">
         <div className="mx-auto w-full">
+          <div className="mx-auto w-full max-w-md">
+            <SpaceBanner mode={mode === "register" ? "register" : "login"} />
+          </div>
           {mode === "login" && (
             <LoginForm
               onSwitchToRegister={() => setMode("register")}

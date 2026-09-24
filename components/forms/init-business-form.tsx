@@ -58,9 +58,13 @@ import {
 import {
     createBusinessInputSchema,
     legalBusinessInformationSchema,
+    BUSINESS_SIZE_LABELS,
+    getBusinessSizeClass,
+    LEGAL_BUSINESS_TYPE_LABELS,
     type CreateBusinessInput,
     type LegalBusinessInformation,
     type LegalBusinessType,
+    type PersonTitle,
 } from "@/lib/validators/business";
 import { trpc } from "@/server/trpc/client";
 import { AlertCircle, Camera, Pencil, Upload, X } from "lucide-react";
@@ -71,7 +75,7 @@ import { Controller, useForm, useWatch, type Control } from "react-hook-form";
 import { PhoneInput } from "../phone-input";
 
 const BASE_TOTAL_STEPS = 5;
-const LEGAL_TOTAL_STEPS = 9;
+const LEGAL_TOTAL_STEPS = 10;
 
 const legalBusinessIdentitySchema = legalBusinessInformationSchema.omit({
   legalRepresentative: true,
@@ -84,16 +88,48 @@ const legalBusinessIdentitySchema = legalBusinessInformationSchema.omit({
   plannedActions: true,
 });
 
-const LEGAL_BUSINESS_TYPES: Array<{
-  value: LegalBusinessType;
-  label: string;
-}> = [
-  { value: "PRODUCER", label: "Producteur" },
-  { value: "EXPORTER", label: "Exportateur" },
-  { value: "IMPORTER", label: "Importateur" },
-  { value: "IMPORTER_EXPORTER", label: "Importateur / Exportateur" },
-  { value: "OTHER", label: "Autre" },
-];
+const LEGAL_BUSINESS_TYPES = (
+  Object.entries(LEGAL_BUSINESS_TYPE_LABELS) as [LegalBusinessType, string][]
+).map(([value, label]) => ({ value, label }));
+
+const OTHER_QUESTION = "Autres questions (précisez)";
+const PERSON_TITLES: PersonTitle[] = ["M.", "Mme", "Mlle"];
+
+const emptyKeyPerson = (): KeyPersonForm => ({
+  title: "M.",
+  firstName: "",
+  lastName: "",
+  idNumber: "",
+  position: "",
+  mobilePhone: "",
+  email: "",
+});
+
+const emptyContact = (): ContactForm => ({
+  title: "M.",
+  fullName: "",
+  email: "",
+  landlinePhone: "",
+  mobilePhone: "",
+});
+
+type KeyPersonForm = {
+  title: PersonTitle;
+  firstName: string;
+  lastName: string;
+  idNumber: string;
+  position: string;
+  mobilePhone: string;
+  email: string;
+};
+
+type ContactForm = {
+  title: PersonTitle;
+  fullName: string;
+  email: string;
+  landlinePhone: string;
+  mobilePhone: string;
+};
 
 const LEGAL_DOCUMENT_ACCEPT = {
   "image/svg+xml": [".svg"],
@@ -153,6 +189,18 @@ interface FormData {
   importExportIssues: string;
   plannedActions: string;
   legalQuestionTitles: string[];
+  otherQuestionsAnswer: string;
+  // Client specification additions
+  taxIdentificationNumber: string;
+  postalCode: string;
+  bankName: string;
+  bankAddress: string;
+  paymentAccount: string;
+  keyPersons: KeyPersonForm[];
+  contacts: ContactForm[];
+  incorporationDeed: File | null;
+  passportScan: File | null;
+  businessPhotos: File[];
 }
 
 const initialFormData: FormData = {
@@ -202,6 +250,17 @@ const initialFormData: FormData = {
   importExportIssues: "",
   plannedActions: "",
   legalQuestionTitles: [],
+  otherQuestionsAnswer: "",
+  taxIdentificationNumber: "",
+  postalCode: "",
+  bankName: "",
+  bankAddress: "",
+  paymentAccount: "",
+  keyPersons: [emptyKeyPerson(), emptyKeyPerson()],
+  contacts: [emptyContact(), emptyContact()],
+  incorporationDeed: null,
+  passportScan: null,
+  businessPhotos: [],
 };
 
 const optional = (value: string) => {
@@ -221,6 +280,14 @@ const stringList = (value: string) => {
     .filter(Boolean);
 
   return values.length ? values : undefined;
+};
+
+/** Drops empty keys; returns undefined when nothing is left. */
+const cleanObject = <T extends Record<string, unknown>>(value: T) => {
+  const entries = Object.entries(value).filter(
+    ([, item]) => item !== undefined && item !== "",
+  );
+  return entries.length ? (Object.fromEntries(entries) as T) : undefined;
 };
 
 const buildLegalBusinessInformation = (
@@ -250,6 +317,33 @@ const buildLegalBusinessInformation = (
     otherBusinessType: optional(formData.otherBusinessType),
     importExportIssues: optional(formData.importExportIssues),
     plannedActions: optional(formData.plannedActions),
+    taxIdentificationNumber: optional(formData.taxIdentificationNumber),
+    postalCode: optional(formData.postalCode),
+    bankDetails: cleanObject({
+      bankName: optional(formData.bankName),
+      bankAddress: optional(formData.bankAddress),
+      paymentAccount: optional(formData.paymentAccount),
+    }),
+    keyPersons: formData.keyPersons
+      .filter((person) => person.firstName.trim() || person.lastName.trim())
+      .map((person) => ({
+        title: person.title,
+        firstName: person.firstName.trim(),
+        lastName: person.lastName.trim(),
+        idNumber: optional(person.idNumber),
+        position: optional(person.position),
+        mobilePhone: optional(person.mobilePhone),
+        email: optional(person.email),
+      })),
+    contacts: formData.contacts
+      .filter((contact) => contact.fullName.trim())
+      .map((contact) => ({
+        title: contact.title,
+        fullName: contact.fullName.trim(),
+        email: optional(contact.email),
+        landlinePhone: optional(contact.landlinePhone),
+        mobilePhone: optional(contact.mobilePhone),
+      })),
   } satisfies Partial<LegalBusinessInformation>;
 
   Object.assign(
@@ -300,9 +394,17 @@ const buildLegalBusinessInformation = (
   return information;
 };
 
+type UploadedFiles = {
+  imageUrl?: string;
+  legalDocumentUrls: string[];
+  incorporationDeedUrl?: string;
+  passportScanUrl?: string;
+  businessPhotoUrls: string[];
+};
+
 const buildCreateBusinessPayload = (
   formData: FormData,
-  uploadedFiles: { imageUrl?: string; legalDocumentUrls: string[] },
+  uploadedFiles: UploadedFiles,
 ): CreateBusinessInput => {
   const payload: CreateBusinessInput = {
     name: formData.businessName,
@@ -329,9 +431,25 @@ const buildCreateBusinessPayload = (
     payload.legalDocuments = uploadedFiles.legalDocumentUrls;
 
   if (isLegalBusinessCategory(formData.businessCategory)) {
-    payload.legalBusinessInformation = buildLegalBusinessInformation(formData);
+    const information = buildLegalBusinessInformation(formData);
+    const complianceDocuments = cleanObject({
+      incorporationDeedUrl: uploadedFiles.incorporationDeedUrl,
+      passportScanUrl: uploadedFiles.passportScanUrl,
+      photoUrls: uploadedFiles.businessPhotoUrls.length
+        ? uploadedFiles.businessPhotoUrls
+        : undefined,
+    });
+    if (complianceDocuments) information.complianceDocuments = complianceDocuments;
+    payload.legalBusinessInformation = information;
     payload.legalBusinessQuestions = formData.legalQuestionTitles.map(
-      (questionTitle) => ({ questionTitle, answer: "" }),
+      (questionTitle) => ({
+        questionTitle,
+        // Only "Autres questions" carries free text; the rest are ticks.
+        answer:
+          questionTitle === OTHER_QUESTION
+            ? formData.otherQuestionsAnswer.trim()
+            : "",
+      }),
     );
   }
 
@@ -540,7 +658,41 @@ export default function InitBusinessForm() {
       }
     }
 
+    if (
+      step === 9 &&
+      formData.legalQuestionTitles.includes(OTHER_QUESTION) &&
+      formData.otherQuestionsAnswer.trim().length === 0
+    ) {
+      setSubmissionErrors(["Précisez vos autres questions."]);
+      return;
+    }
+
     if (step < totalSteps) setStep((currentStep) => currentStep + 1);
+  };
+
+  /** Client specification: at least two contacts and three business photos. */
+  const validateComplianceStep = () => {
+    const errors: string[] = [];
+    const namedContacts = formData.contacts.filter((contact) =>
+      contact.fullName.trim(),
+    );
+    if (namedContacts.length < 2) {
+      errors.push("Indiquez au moins deux contacts dans l'entreprise.");
+    }
+    const namedPersons = formData.keyPersons.filter(
+      (person) => person.firstName.trim() || person.lastName.trim(),
+    );
+    if (
+      namedPersons.some(
+        (person) => !person.firstName.trim() || !person.lastName.trim(),
+      )
+    ) {
+      errors.push("Chaque personne-clé renseignée doit avoir un prénom et un nom.");
+    }
+    if (formData.businessPhotos.length < 3) {
+      errors.push("Ajoutez au moins trois photos de votre entreprise.");
+    }
+    return errors;
   };
 
   const isMutating = createBusiness.isPending || isUploading;
@@ -562,6 +714,14 @@ export default function InitBusinessForm() {
         "Sélectionnez au moins une question applicable à votre business.",
       ]);
       return;
+    }
+
+    if (isLegalCategory) {
+      const complianceErrors = validateComplianceStep();
+      if (complianceErrors.length) {
+        setSubmissionErrors(complianceErrors);
+        return;
+      }
     }
 
     setIsUploading(true);
@@ -600,6 +760,35 @@ export default function InitBusinessForm() {
         )
       ).filter((url): url is string => url !== undefined);
 
+      // Typed compliance files (client specification). Progress already
+      // reached 100 for the parts above; these are uploaded after.
+      const [incorporationDeedUrl, passportScanUrl] = isLegalCategory
+        ? await Promise.all([
+            uploadFileToR2FromBrowser(
+              formData.incorporationDeed ?? undefined,
+              "docs",
+              createUpload,
+              () => undefined,
+            ),
+            uploadFileToR2FromBrowser(
+              formData.passportScan ?? undefined,
+              "docs",
+              createUpload,
+              () => undefined,
+            ),
+          ])
+        : [undefined, undefined];
+      const businessPhotoUrls = isLegalCategory
+        ? (
+            await uploadFilesToR2FromBrowser(
+              formData.businessPhotos,
+              "images",
+              createUpload,
+              () => undefined,
+            )
+          ).filter((url): url is string => url !== undefined)
+        : [];
+
       setIsUploading(false);
       setUploadProgress(100);
 
@@ -607,6 +796,9 @@ export default function InitBusinessForm() {
       const citySlug = formData.citySlug || availableCities[0]?.slug || "dakar";
 
       const payload = buildCreateBusinessPayload(formData, {
+        incorporationDeedUrl,
+        passportScanUrl,
+        businessPhotoUrls,
         imageUrl,
         legalDocumentUrls,
       });
@@ -693,6 +885,7 @@ export default function InitBusinessForm() {
       {step === 7 && <Step7 control={form.control} formData={formData} />}
       {step === 8 && <Step8 control={form.control} />}
       {step === 9 && <Step9 control={form.control} formData={formData} />}
+      {step === 10 && <Step10 control={form.control} formData={formData} />}
 
       <div className="flex flex-col gap-3">
         {step > 1 && (
@@ -1227,7 +1420,13 @@ type LegalStringField =
   | "storeAreaM2"
   | "outdoorAreaM2"
   | "importExportIssues"
-  | "plannedActions";
+  | "plannedActions"
+  | "otherQuestionsAnswer"
+  | "taxIdentificationNumber"
+  | "postalCode"
+  | "bankName"
+  | "bankAddress"
+  | "paymentAccount";
 
 function LegalInput({
   control,
@@ -1326,28 +1525,39 @@ function Step6({ control }: { control: Control<FormData> }) {
           label="Statut juridique"
           placeholder="SARL, SA, GIE…"
         />
-        <LegalInput
-          control={control}
-          name="commercialRegisterNumber"
-          label="Numéro du registre de commerce"
-        />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <LegalInput
+            control={control}
+            name="commercialRegisterNumber"
+            label="Numéro du registre de commerce"
+          />
+          <LegalInput
+            control={control}
+            name="taxIdentificationNumber"
+            label="Numéro d'identification fiscale (NIF)"
+          />
+        </div>
         <LegalInput
           control={control}
           name="permanentStaffCount"
-          label="Nombre d'employés permanents (optionnel)"
+          label="Effectif permanent"
           type="number"
         />
+        <BusinessSizeHint control={control} />
         <LegalTextarea
           control={control}
           name="legalAddresses"
           label="Adresses (optionnel)"
           placeholder="Une adresse par ligne"
         />
-        <LegalInput
-          control={control}
-          name="postalAddress"
-          label="Adresse postale (optionnel)"
-        />
+        <div className="grid gap-4 sm:grid-cols-[1fr_10rem]">
+          <LegalInput
+            control={control}
+            name="postalAddress"
+            label="Adresse postale (optionnel)"
+          />
+          <LegalInput control={control} name="postalCode" label="Code postal" />
+        </div>
         <Controller
           name="headquartersLatitude"
           control={control}
@@ -1595,6 +1805,381 @@ function Step9({
           </Field>
         )}
       />
+      {formData.legalQuestionTitles.includes(OTHER_QUESTION) && (
+        <LegalTextarea
+          control={control}
+          name="otherQuestionsAnswer"
+          label="Autres questions (précisez)"
+          placeholder="Vos autres questions sur l'exportation ou l'importation"
+        />
+      )}
     </FieldGroup>
+  );
+}
+
+/** Live MPME size class from the headcount, as defined by the client. */
+function BusinessSizeHint({ control }: { control: Control<FormData> }) {
+  const staffCount = useWatch({ control, name: "permanentStaffCount" });
+  const sizeClass = getBusinessSizeClass(
+    staffCount.trim() ? Number(staffCount) : null,
+  );
+
+  if (!sizeClass) return null;
+
+  return (
+    <p className="text-muted-foreground -mt-2 text-xs">
+      Classification MPME : <strong>{BUSINESS_SIZE_LABELS[sizeClass]}</strong>.
+      Indicatif : votre catégorisation reste celle choisie à l&apos;étape
+      précédente.
+    </p>
+  );
+}
+
+// ─── Step 10: Bank, key persons, contacts, compliance documents ──────
+
+const PHOTO_ACCEPT = {
+  "image/png": [".png"],
+  "image/jpeg": [".jpg", ".jpeg"],
+};
+
+function SingleFileField({
+  label,
+  hint,
+  file,
+  onChange,
+  accept,
+}: {
+  label: string;
+  hint?: string;
+  file: File | null;
+  onChange: (file: File | null) => void;
+  accept: Record<string, string[]>;
+}) {
+  const dropzone = useDropzone({
+    onDrop: (files) => files[0] && onChange(files[0]),
+    accept,
+    multiple: false,
+  });
+
+  return (
+    <Field>
+      <FieldLabel>{label}</FieldLabel>
+      {hint && <p className="text-muted-foreground text-xs">{hint}</p>}
+      {file ? (
+        <div className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
+          <span className="truncate">{file.name}</span>
+          <button type="button" onClick={() => onChange(null)} aria-label="Retirer">
+            <X className="text-muted-foreground size-4" />
+          </button>
+        </div>
+      ) : (
+        <div
+          {...dropzone.getRootProps()}
+          className="border-muted-foreground/25 bg-muted/30 hover:border-primary/40 flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed p-3 text-sm"
+        >
+          <input {...dropzone.getInputProps()} />
+          <Upload className="text-muted-foreground/50 size-4" />
+          <span className="text-muted-foreground">Téléchargez le fichier</span>
+        </div>
+      )}
+    </Field>
+  );
+}
+
+function PersonTitleSelect({
+  value,
+  onChange,
+}: {
+  value: PersonTitle;
+  onChange: (value: PersonTitle) => void;
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(event) => onChange(event.target.value as PersonTitle)}
+      className="border-input bg-background h-9 rounded-md border px-2 text-sm"
+      aria-label="Titre"
+    >
+      {PERSON_TITLES.map((title) => (
+        <option key={title} value={title}>
+          {title}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function Step10({
+  control,
+  formData,
+}: {
+  control: Control<FormData>;
+  formData: FormData;
+}) {
+  const photosDropzone = useDropzone({
+    accept: PHOTO_ACCEPT,
+    multiple: true,
+    onDrop: () => undefined,
+  });
+
+  return (
+    <div className="max-h-[65vh] overflow-y-auto pr-3">
+      <FieldGroup>
+        <div>
+          <h2 className="font-semibold">Banque, personnes-clés et contacts</h2>
+          <p className="text-muted-foreground text-sm">
+            Coordonnées bancaires, les deux personnes-clés de l&apos;entreprise
+            et au moins deux contacts.
+          </p>
+        </div>
+
+        <div className="border-t pt-2">
+          <h3 className="font-medium">Coordonnées de la banque</h3>
+        </div>
+        <LegalInput control={control} name="bankName" label="Nom de la banque" />
+        <LegalInput
+          control={control}
+          name="bankAddress"
+          label="Adresse de la banque"
+        />
+        <LegalInput
+          control={control}
+          name="paymentAccount"
+          label="Compte de paiement ou passerelle de paiement utilisée"
+          placeholder="IBAN, numéro de compte, ou nom de la passerelle"
+        />
+
+        <div className="border-t pt-2">
+          <h3 className="font-medium">Personnes-clés (2)</h3>
+          <p className="text-muted-foreground text-xs">
+            Directeur, gestionnaire ou personne en charge des exportations.
+          </p>
+        </div>
+        <Controller
+          name="keyPersons"
+          control={control}
+          render={({ field }) => (
+            <div className="grid gap-4 md:grid-cols-2">
+              {field.value.map((person, index) => {
+                const update = (patch: Partial<KeyPersonForm>) =>
+                  field.onChange(
+                    field.value.map((item, i) =>
+                      i === index ? { ...item, ...patch } : item,
+                    ),
+                  );
+                return (
+                  <div key={index} className="flex flex-col gap-2 rounded-md border p-3">
+                    <p className="text-sm font-medium">Personne-clé {index + 1}</p>
+                    <PersonTitleSelect
+                      value={person.title}
+                      onChange={(title) => update({ title })}
+                    />
+                    <Input
+                      placeholder="Prénom"
+                      value={person.firstName}
+                      onChange={(e) => update({ firstName: e.target.value })}
+                    />
+                    <Input
+                      placeholder="Nom"
+                      value={person.lastName}
+                      onChange={(e) => update({ lastName: e.target.value })}
+                    />
+                    <Input
+                      placeholder="Passeport / N° d'identité"
+                      value={person.idNumber}
+                      onChange={(e) => update({ idNumber: e.target.value })}
+                    />
+                    <Input
+                      placeholder="Poste"
+                      value={person.position}
+                      onChange={(e) => update({ position: e.target.value })}
+                    />
+                    <Input
+                      placeholder="Mobile"
+                      type="tel"
+                      value={person.mobilePhone}
+                      onChange={(e) => update({ mobilePhone: e.target.value })}
+                    />
+                    <Input
+                      placeholder="E-mail"
+                      type="email"
+                      value={person.email}
+                      onChange={(e) => update({ email: e.target.value })}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        />
+
+        <div className="border-t pt-2">
+          <h3 className="font-medium">Contacts dans l&apos;entreprise</h3>
+          <p className="text-muted-foreground text-xs">Au moins deux contacts.</p>
+        </div>
+        <Controller
+          name="contacts"
+          control={control}
+          render={({ field }) => (
+            <div className="flex flex-col gap-3">
+              {field.value.map((contact, index) => {
+                const update = (patch: Partial<ContactForm>) =>
+                  field.onChange(
+                    field.value.map((item, i) =>
+                      i === index ? { ...item, ...patch } : item,
+                    ),
+                  );
+                return (
+                  <div
+                    key={index}
+                    className="grid items-center gap-2 rounded-md border p-3 sm:grid-cols-[5rem_1fr_1fr]"
+                  >
+                    <PersonTitleSelect
+                      value={contact.title}
+                      onChange={(title) => update({ title })}
+                    />
+                    <Input
+                      placeholder="Nom complet"
+                      value={contact.fullName}
+                      onChange={(e) => update({ fullName: e.target.value })}
+                    />
+                    <Input
+                      placeholder="Email"
+                      type="email"
+                      value={contact.email}
+                      onChange={(e) => update({ email: e.target.value })}
+                    />
+                    <span className="hidden sm:block" />
+                    <Input
+                      placeholder="Téléphone fixe"
+                      type="tel"
+                      value={contact.landlinePhone}
+                      onChange={(e) => update({ landlinePhone: e.target.value })}
+                    />
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Téléphone mobile"
+                        type="tel"
+                        value={contact.mobilePhone}
+                        onChange={(e) => update({ mobilePhone: e.target.value })}
+                      />
+                      {field.value.length > 2 && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            field.onChange(field.value.filter((_, i) => i !== index))
+                          }
+                          aria-label="Retirer le contact"
+                        >
+                          <X className="text-muted-foreground size-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+              {field.value.length < 4 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-fit"
+                  onClick={() => field.onChange([...field.value, emptyContact()])}
+                >
+                  Ajouter un contact
+                </Button>
+              )}
+            </div>
+          )}
+        />
+
+        <div className="border-t pt-2">
+          <h3 className="font-medium">Documents de conformité</h3>
+          <p className="text-muted-foreground text-xs">
+            Vérifiez que les copies numérisées sont lisibles.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Controller
+            name="incorporationDeed"
+            control={control}
+            render={({ field }) => (
+              <SingleFileField
+                label="Acte de constitution"
+                file={field.value}
+                onChange={field.onChange}
+                accept={LEGAL_DOCUMENT_ACCEPT}
+              />
+            )}
+          />
+          <Controller
+            name="passportScan"
+            control={control}
+            render={({ field }) => (
+              <SingleFileField
+                label="Scan du passeport"
+                hint="Du signataire / responsable"
+                file={field.value}
+                onChange={field.onChange}
+                accept={LEGAL_DOCUMENT_ACCEPT}
+              />
+            )}
+          />
+        </div>
+        <Controller
+          name="businessPhotos"
+          control={control}
+          render={({ field }) => (
+            <Field>
+              <FieldLabel>Photos de l&apos;entreprise (MPME)</FieldLabel>
+              <p className="text-muted-foreground text-xs">
+                Au moins 3 photos, 800 × 800 px minimum, JPG ou PNG.
+                {formData.businessPhotos.length > 0 &&
+                  ` ${formData.businessPhotos.length} photo(s) ajoutée(s).`}
+              </p>
+              <div
+                {...photosDropzone.getRootProps({
+                  onDrop: undefined,
+                })}
+                onClick={photosDropzone.getRootProps().onClick}
+                className="border-muted-foreground/25 bg-muted/30 hover:border-primary/40 flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed p-3 text-sm"
+              >
+                <input
+                  {...photosDropzone.getInputProps({
+                    onChange: (event) => {
+                      const files = Array.from(event.target.files ?? []);
+                      if (files.length) field.onChange([...field.value, ...files]);
+                    },
+                  })}
+                />
+                <Camera className="text-muted-foreground/50 size-4" />
+                <span className="text-muted-foreground">Ajouter des photos</span>
+              </div>
+              {field.value.length > 0 && (
+                <div className="flex flex-col gap-1 pt-1">
+                  {field.value.map((file, index) => (
+                    <div
+                      key={`${file.name}-${index}`}
+                      className="flex items-center justify-between rounded-md border px-3 py-1.5 text-sm"
+                    >
+                      <span className="truncate">{file.name}</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          field.onChange(field.value.filter((_, i) => i !== index))
+                        }
+                        aria-label="Retirer la photo"
+                      >
+                        <X className="text-muted-foreground size-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Field>
+          )}
+        />
+      </FieldGroup>
+    </div>
   );
 }

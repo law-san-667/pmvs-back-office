@@ -1,13 +1,79 @@
 import { isLegalBusinessCategory } from "@/lib/business-categories";
 import z from "zod";
 
+/** Supplier types from the client's account-opening specification. */
 export const legalBusinessTypeSchema = z.enum([
   "PRODUCER",
+  "SERVICE_PROVIDER",
   "EXPORTER",
   "IMPORTER",
   "IMPORTER_EXPORTER",
+  "WHOLESALER",
+  "SEMI_WHOLESALER",
+  "RETAILER",
+  "SOLE_PROPRIETOR",
+  "CONTRACTING_AUTHORITY",
   "OTHER",
 ]);
+
+export const LEGAL_BUSINESS_TYPE_LABELS: Record<
+  z.infer<typeof legalBusinessTypeSchema>,
+  string
+> = {
+  PRODUCER: "Producteur",
+  SERVICE_PROVIDER: "Prestataire de service",
+  EXPORTER: "Exportateur",
+  IMPORTER: "Importateur",
+  IMPORTER_EXPORTER: "Importateur-exportateur",
+  WHOLESALER: "Grossiste",
+  SEMI_WHOLESALER: "Demi-grossiste",
+  RETAILER: "Détaillant",
+  SOLE_PROPRIETOR: "Entreprise individuelle",
+  CONTRACTING_AUTHORITY: "Adjudicateur",
+  OTHER: "Autre (précisez)",
+};
+
+export const personTitleSchema = z.enum(["M.", "Mme", "Mlle"]);
+const optionalTrimmed = z.string().trim().min(1).optional();
+
+export const businessKeyPersonSchema = z.object({
+  title: personTitleSchema.optional(),
+  firstName: z.string().trim().min(1, "Le prénom est requis."),
+  lastName: z.string().trim().min(1, "Le nom est requis."),
+  idNumber: optionalTrimmed,
+  position: optionalTrimmed,
+  mobilePhone: optionalTrimmed,
+  email: z.email("Email invalide.").optional(),
+});
+
+export const businessContactSchema = z.object({
+  title: personTitleSchema.optional(),
+  fullName: z.string().trim().min(1, "Le nom complet est requis."),
+  email: z.email("Email invalide.").optional(),
+  landlinePhone: optionalTrimmed,
+  mobilePhone: optionalTrimmed,
+});
+
+/**
+ * MPME size class by permanent headcount (client specification): micro 0-5,
+ * small 6-20, medium 21-100, large above 100.
+ */
+export const getBusinessSizeClass = (permanentStaffCount?: number | null) => {
+  if (permanentStaffCount === undefined || permanentStaffCount === null) {
+    return null;
+  }
+  if (permanentStaffCount <= 5) return "MICRO" as const;
+  if (permanentStaffCount <= 20) return "SMALL" as const;
+  if (permanentStaffCount <= 100) return "MEDIUM" as const;
+  return "LARGE" as const;
+};
+
+export const BUSINESS_SIZE_LABELS = {
+  MICRO: "Micro-entreprise (0 à 5 employés)",
+  SMALL: "Petite entreprise (6 à 20 employés)",
+  MEDIUM: "Moyenne entreprise (21 à 100 employés)",
+  LARGE: "Grande entreprise (plus de 100 employés)",
+} as const;
 
 export const legalBusinessInformationSchema = z.object({
   acronym: z.string().trim().min(1).optional(),
@@ -17,7 +83,9 @@ export const legalBusinessInformationSchema = z.object({
     .string()
     .trim()
     .min(1, "Le numéro du registre de commerce est requis."),
+  taxIdentificationNumber: optionalTrimmed,
   permanentStaffCount: z.number().int().nonnegative().optional(),
+  postalCode: optionalTrimmed,
   addresses: z.array(z.string().trim().min(1)).optional(),
   postalAddress: z.string().trim().min(1).optional(),
   headquartersGeolocation: z
@@ -33,6 +101,22 @@ export const legalBusinessInformationSchema = z.object({
   serviceCategories: z.array(z.string().trim().min(1)).optional(),
   businessTypes: z.array(legalBusinessTypeSchema).optional(),
   otherBusinessType: z.string().trim().min(1).optional(),
+  bankDetails: z
+    .object({
+      bankName: optionalTrimmed,
+      bankAddress: optionalTrimmed,
+      paymentAccount: optionalTrimmed,
+    })
+    .optional(),
+  keyPersons: z.array(businessKeyPersonSchema).max(2).optional(),
+  contacts: z.array(businessContactSchema).optional(),
+  complianceDocuments: z
+    .object({
+      incorporationDeedUrl: z.url().optional(),
+      passportScanUrl: z.url().optional(),
+      photoUrls: z.array(z.url()).optional(),
+    })
+    .optional(),
   legalRepresentative: z.object({
     name: z.string().trim().min(1, "Le nom du représentant légal est requis."),
     role: z.string().trim().min(1).optional(),
@@ -147,3 +231,6 @@ export type LegalBusinessInformation = z.infer<
 >;
 export type LegalBusinessType = z.infer<typeof legalBusinessTypeSchema>;
 export type BusinessCategoryInput = z.infer<typeof businessCategorySchema>;
+export type BusinessKeyPerson = z.infer<typeof businessKeyPersonSchema>;
+export type BusinessContact = z.infer<typeof businessContactSchema>;
+export type PersonTitle = z.infer<typeof personTitleSchema>;
