@@ -55,25 +55,31 @@ export default function AdminConfigurationPage() {
     useState<ConfigurationEditorTarget | null>(null);
   const [deleteTarget, setDeleteTarget] =
     useState<ConfigurationDeleteTarget | null>(null);
+  // This screen activates and deactivates these rows, so it asks for all of
+  // them; everywhere else the API returns the active ones only.
   const categories = trpc.catalog.categories.useQuery({
     orderBy: "sortOrder",
     order: "asc",
+    isActive: "all",
   });
   const subCategories = trpc.catalog.subCategories.useQuery({
     orderBy: "sortOrder",
     order: "asc",
+    isActive: "all",
   });
   const countries = trpc.geography.countries.useQuery({
     page: 1,
     limit: 100,
     orderBy: "name",
     order: "asc",
+    isActive: "all",
   });
   const cities = trpc.geography.cities.useQuery({
     page: 1,
     limit: 100,
     orderBy: "name",
     order: "asc",
+    isActive: "all",
   });
 
   const refreshConfiguration = async () => {

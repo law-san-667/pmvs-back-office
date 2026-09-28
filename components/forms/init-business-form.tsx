@@ -503,7 +503,6 @@ export default function InitBusinessForm() {
     useState<CroppedArea | null>(null);
 
   const countries = trpc.geography.countries.useQuery({
-    isActive: true,
     limit: 100,
     order: "asc",
     orderBy: "name",
@@ -511,7 +510,6 @@ export default function InitBusinessForm() {
   const cities = trpc.geography.countryCities.useQuery(
     {
       code: formData.countryCode,
-      isActive: true,
       limit: 100,
       order: "asc",
       orderBy: "name",

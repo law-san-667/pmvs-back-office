@@ -1,5 +1,11 @@
 import z from "zod";
 
+/**
+ * Reference data is hidden once deactivated: the API returns the active rows
+ * by default, so only the admin screens pass "all" to manage them.
+ */
+const activeFilterSchema = z.enum(["true", "false", "all"]).optional();
+
 export const uuidSchema = z.uuid();
 const orderSchema = z.enum(["asc", "desc"]);
 const positiveIntSchema = z.number().int().positive();
@@ -25,7 +31,7 @@ export const countriesInputSchema = paginationInputSchema.extend({
   code: z.string().trim().optional(),
   name: z.string().trim().optional(),
   currencyCode: z.string().trim().optional(),
-  isActive: z.boolean().optional(),
+  isActive: activeFilterSchema,
 });
 
 export const citiesInputSchema = paginationInputSchema.extend({
@@ -35,7 +41,7 @@ export const citiesInputSchema = paginationInputSchema.extend({
   countryCode: z.string().trim().min(2).optional(),
   name: z.string().trim().optional(),
   slug: z.string().trim().optional(),
-  isActive: z.boolean().optional(),
+  isActive: activeFilterSchema,
 });
 
 export const countryCitiesInputSchema = citiesInputSchema
@@ -52,7 +58,7 @@ export const categoriesInputSchema = z.object({
   name: z.string().trim().optional(),
   slug: z.string().trim().optional(),
   isService: z.boolean().optional(),
-  isActive: z.boolean().optional(),
+  isActive: activeFilterSchema,
 });
 
 export const subCategoriesInputSchema = categoriesInputSchema.extend({

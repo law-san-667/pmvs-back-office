@@ -145,7 +145,6 @@ export default function BusinessSettingsForm() {
   }, [business, form]);
 
   const countries = trpc.geography.countries.useQuery({
-    isActive: true,
     limit: 100,
     order: "asc",
     orderBy: "name",
@@ -153,7 +152,6 @@ export default function BusinessSettingsForm() {
   const cities = trpc.geography.countryCities.useQuery(
     {
       code: countryCode,
-      isActive: true,
       limit: 100,
       order: "asc",
       orderBy: "name",
