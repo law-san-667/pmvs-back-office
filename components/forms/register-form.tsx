@@ -11,8 +11,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "@/i18n/navigation";
-import { isAuthSuccessData, type ValidateOtpData } from "@/lib/backend-utils";
+import type { PendingOtp } from "@/lib/pending-otp";
 import {
   registerFormSchema,
   type RegisterFormInput,
@@ -23,15 +22,14 @@ import { LockKeyhole, Mail, User } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm, type Resolver } from "react-hook-form";
 import { PhoneInput } from "../phone-input";
-import OtpStep, { type OtpContext } from "./otp-step";
 
 export default function RegisterForm({
   onSwitchToLogin,
+  onOtpRequired,
 }: {
   onSwitchToLogin: () => void;
+  onOtpRequired: (otp: PendingOtp, message: string) => void;
 }) {
-  const router = useRouter();
-  const [otpContext, setOtpContext] = useState<OtpContext | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const register = trpc.auth.register.useMutation();
@@ -69,10 +67,8 @@ export default function RegisterForm({
         captchaToken,
       });
 
-      const identifier = data.phoneNumber || "";
-
-      setOtpContext({ identifier, purpose: "REGISTER" });
-      setMessage(
+      onOtpRequired(
+        { identifier: data.phoneNumber || data.email || "", purpose: "REGISTER" },
         result.otp.debugCode
           ? `Code de test: ${result.otp.debugCode}`
           : "Un code de validation vous a été envoyé.",
@@ -83,24 +79,6 @@ export default function RegisterForm({
       );
     }
   };
-
-  const handleOtpValidated = (result: ValidateOtpData) => {
-    if (isAuthSuccessData(result)) {
-      router.replace("/callback");
-      router.refresh();
-    }
-  };
-
-  if (otpContext) {
-    return (
-      <OtpStep
-        context={otpContext}
-        initialMessage={message}
-        onBack={() => setOtpContext(null)}
-        onValidated={handleOtpValidated}
-      />
-    );
-  }
 
   return (
     <div className="flex flex-col items-center space-y-8">

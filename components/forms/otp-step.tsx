@@ -109,7 +109,7 @@ export default function OtpStep({
       setMessage(
         result.otp?.debugCode
           ? `Code de test: ${result.otp.debugCode}`
-          : result.message,
+          : "Un nouveau code vous a été envoyé.",
       );
     } catch (error) {
       setMessage(

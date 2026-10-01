@@ -11,10 +11,12 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "@/i18n/navigation";
+import { clearPendingOtp, type PendingOtp } from "@/lib/pending-otp";
 import { cn } from "@/lib/utils";
 import { loginSchema, type LoginInput } from "@/lib/validators/auth";
 import { trpc } from "@/server/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { TRPCClientError } from "@trpc/client";
 import { MailIcon, PhoneIcon } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm, type Resolver } from "react-hook-form";
@@ -24,18 +26,27 @@ import { PhoneInput } from "../phone-input";
 
 type AuthMethod = "email" | "phone";
 
+// Le backend répond 403 à un compte non validé, une fois le mot de passe vérifié.
+const isPendingVerificationError = (error: unknown) =>
+  error instanceof TRPCClientError &&
+  error.data?.code === "FORBIDDEN" &&
+  /pending verification/i.test(error.message);
+
 export default function LoginForm({
   onSwitchToRegister,
   onForgotPassword,
+  onOtpRequired,
 }: {
   onSwitchToRegister: () => void;
   onForgotPassword: () => void;
+  onOtpRequired: (otp: PendingOtp, message: string) => void;
 }) {
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
   const [authMethod, setAuthMethod] = useState<AuthMethod>("phone");
 
   const login = trpc.auth.login.useMutation();
+  const resendOtp = trpc.auth.resendOtp.useMutation();
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema) as Resolver<LoginInput>,
@@ -47,8 +58,35 @@ export default function LoginForm({
 
     try {
       await login.mutateAsync(data);
+      clearPendingOtp();
       router.replace("/callback");
       router.refresh();
+    } catch (error) {
+      if (isPendingVerificationError(error)) {
+        await sendVerificationCode(data.identifier);
+        return;
+      }
+
+      setMessage(
+        error instanceof Error ? error.message : "Une erreur est survenue.",
+      );
+    }
+  };
+
+  const sendVerificationCode = async (identifier: string) => {
+    try {
+      const result = await resendOtp.mutateAsync({
+        identifier,
+        purpose: "REGISTER",
+        device: "WEB",
+      });
+
+      onOtpRequired(
+        { identifier, purpose: "REGISTER" },
+        result.otp?.debugCode
+          ? `Votre compte n'est pas encore validé. Code de test: ${result.otp.debugCode}`
+          : "Votre compte n'est pas encore validé. Un nouveau code vous a été envoyé.",
+      );
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Une erreur est survenue.",
@@ -193,9 +231,11 @@ export default function LoginForm({
                 type="submit"
                 size="lg"
                 className="h-12"
-                disabled={login.isPending}
+                disabled={login.isPending || resendOtp.isPending}
               >
-                {login.isPending ? "Connexion..." : "Se connecter"}
+                {login.isPending || resendOtp.isPending
+                  ? "Connexion..."
+                  : "Se connecter"}
               </Button>
             </Field>
             <FieldSeparator>Ou</FieldSeparator>

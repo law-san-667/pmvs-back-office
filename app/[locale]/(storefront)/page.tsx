@@ -4,6 +4,7 @@ import Flag from "@/components/flag";
 import SpaceBanner from "@/components/auth/space-banner";
 import ForgotPasswordForm from "@/components/forms/forgot-password-form";
 import LoginForm from "@/components/forms/login-form";
+import OtpStep from "@/components/forms/otp-step";
 import RegisterForm from "@/components/forms/register-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +13,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useUser } from "@/contexts/user-context";
 import { useRouter } from "@/i18n/navigation";
+import { isAuthSuccessData, type ValidateOtpData } from "@/lib/backend-utils";
+import {
+  clearPendingOtp,
+  savePendingOtp,
+  usePendingOtp,
+  type PendingOtp,
+} from "@/lib/pending-otp";
 import { useSearchParams } from "next/navigation";
 import React, { Suspense, useState } from "react";
 
@@ -34,6 +42,33 @@ function AuthContent() {
   const [mode, setMode] = useState<AuthMode>(
     searchParams.get("mode") === "register" ? "register" : "login",
   );
+  // Survit au rechargement : tant qu'une validation est en cours, on la reprend.
+  const pendingOtp = usePendingOtp();
+  const [otpMessage, setOtpMessage] = useState<string | null>(null);
+
+  const startOtp = (otp: PendingOtp, message: string) => {
+    setOtpMessage(message);
+    savePendingOtp(otp);
+  };
+
+  const leaveOtp = () => {
+    clearPendingOtp();
+    setOtpMessage(null);
+    setMode("login");
+  };
+
+  const handleOtpValidated = (result: ValidateOtpData) => {
+    clearPendingOtp();
+
+    if (isAuthSuccessData(result)) {
+      router.replace("/callback");
+      router.refresh();
+      return;
+    }
+
+    setOtpMessage(null);
+    setMode("login");
+  };
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -61,16 +96,32 @@ function AuthContent() {
           <div className="mx-auto w-full max-w-md">
             <SpaceBanner mode={mode === "register" ? "register" : "login"} />
           </div>
-          {mode === "login" && (
-            <LoginForm
-              onSwitchToRegister={() => setMode("register")}
-              onForgotPassword={() => setMode("forgot-password")}
+          {pendingOtp ? (
+            <OtpStep
+              key={`${pendingOtp.purpose}:${pendingOtp.identifier}`}
+              context={pendingOtp}
+              initialMessage={otpMessage}
+              onBack={leaveOtp}
+              onValidated={handleOtpValidated}
             />
+          ) : (
+            <>
+              {mode === "login" && (
+                <LoginForm
+                  onSwitchToRegister={() => setMode("register")}
+                  onForgotPassword={() => setMode("forgot-password")}
+                  onOtpRequired={startOtp}
+                />
+              )}
+              {mode === "register" && (
+                <RegisterForm
+                  onSwitchToLogin={() => setMode("login")}
+                  onOtpRequired={startOtp}
+                />
+              )}
+            </>
           )}
-          {mode === "register" && (
-            <RegisterForm onSwitchToLogin={() => setMode("login")} />
-          )}
-          {mode === "forgot-password" && (
+          {!pendingOtp && mode === "forgot-password" && (
             <ForgotPasswordForm onBackToLogin={() => setMode("login")} />
           )}
         </div>

@@ -21,9 +21,14 @@ export const passwordSchema = z
 
 export const registerSchema = z
   .object({
-    firstName: z.string().trim().min(1),
-    lastName: z.string().trim().min(1),
-    phoneNumber: z.string().trim().min(6).max(20).optional(),
+    firstName: z.string().trim().min(1, "Veuillez saisir votre prénom."),
+    lastName: z.string().trim().min(1, "Veuillez saisir votre nom."),
+    phoneNumber: z
+      .string()
+      .trim()
+      .min(6, "Numéro de téléphone invalide.")
+      .max(20, "Numéro de téléphone invalide.")
+      .optional(),
     // Optional on the form: an empty input must not fail the email check.
   email: z
     .union([z.literal(""), z.string().trim().email("Adresse email invalide.")])
@@ -39,7 +44,7 @@ export const registerSchema = z
     if (!value.email && !value.phoneNumber) {
       ctx.addIssue({
         code: "custom",
-        message: "Email or phone number is required.",
+        message: "Veuillez saisir un numéro de téléphone ou une adresse email.",
         path: ["phoneNumber"],
       });
     }
@@ -47,7 +52,7 @@ export const registerSchema = z
     if (value.password !== value.confirmPassword) {
       ctx.addIssue({
         code: "custom",
-        message: "Passwords do not match.",
+        message: "Les mots de passe ne correspondent pas.",
         path: ["confirmPassword"],
       });
     }
@@ -81,7 +86,10 @@ export const resendOtpSchema = z.object({
 });
 
 export const forgotPasswordSchema = z.object({
-  identifier: z.string().trim().min(1),
+  identifier: z
+    .string()
+    .trim()
+    .min(1, "Veuillez saisir votre email ou votre numéro de téléphone."),
   device: authDeviceSchema,
 });
 
@@ -89,10 +97,10 @@ export const validateOtpSchema = z
   .object({
     identifier: z.string().trim().min(1),
     purpose: otpPurposeSchema,
-    code: z.string().trim().length(4),
+    code: z.string().trim().length(4, "Le code doit contenir 4 chiffres."),
     device: authDeviceSchema,
     newPassword: passwordSchema.optional(),
-    confirmPassword: z.string().min(1).optional(),
+    confirmPassword: z.string().optional(),
   })
   .superRefine((value, ctx) => {
     if (value.purpose !== "PASSWORD_RESET") {
@@ -102,7 +110,7 @@ export const validateOtpSchema = z
     if (!value.newPassword) {
       ctx.addIssue({
         code: "custom",
-        message: "New password is required for password reset.",
+        message: "Veuillez saisir un nouveau mot de passe.",
         path: ["newPassword"],
       });
     }
@@ -110,7 +118,7 @@ export const validateOtpSchema = z
     if (!value.confirmPassword) {
       ctx.addIssue({
         code: "custom",
-        message: "Confirm password is required for password reset.",
+        message: "Veuillez confirmer le mot de passe.",
         path: ["confirmPassword"],
       });
     }
@@ -122,7 +130,7 @@ export const validateOtpSchema = z
     ) {
       ctx.addIssue({
         code: "custom",
-        message: "Passwords do not match.",
+        message: "Les mots de passe ne correspondent pas.",
         path: ["confirmPassword"],
       });
     }
