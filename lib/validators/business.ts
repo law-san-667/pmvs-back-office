@@ -4,6 +4,7 @@ import z from "zod";
 /** Supplier types from the client's account-opening specification. */
 export const legalBusinessTypeSchema = z.enum([
   "PRODUCER",
+  "TRANSFORMER",
   "SERVICE_PROVIDER",
   "EXPORTER",
   "IMPORTER",
@@ -21,6 +22,7 @@ export const LEGAL_BUSINESS_TYPE_LABELS: Record<
   string
 > = {
   PRODUCER: "Producteur",
+  TRANSFORMER: "Transformateur",
   SERVICE_PROVIDER: "Prestataire de service",
   EXPORTER: "Exportateur",
   IMPORTER: "Importateur",

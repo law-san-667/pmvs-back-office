@@ -3,6 +3,7 @@
 import Image from "next/image";
 import * as React from "react";
 
+import { BRAND_TAGLINE } from "@/components/brand/brand-mark";
 import { NavSecondary } from "@/components/nav-secondary";
 import {
     Sidebar,
@@ -168,6 +169,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="p-2"
               priority
             />
+            <p className="px-2 pb-1 text-xs leading-tight font-semibold text-slate-600 group-data-[collapsible=icon]:hidden">
+              {BRAND_TAGLINE}
+            </p>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

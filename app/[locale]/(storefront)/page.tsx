@@ -1,5 +1,6 @@
 "use client";
 
+import BrandMark from "@/components/brand/brand-mark";
 import Flag from "@/components/flag";
 import SpaceBanner from "@/components/auth/space-banner";
 import ForgotPasswordForm from "@/components/forms/forgot-password-form";
@@ -79,7 +80,8 @@ function AuthContent() {
   return (
     <section className="flex items-center justify-center h-screen">
       <div className="container mx-auto space-y-8 pt-8">
-      <div className="flex items-center justify-center">
+      <div className="flex flex-wrap items-center justify-center gap-4">
+        <BrandMark />
         <DropdownMenu>
           <DropdownMenuTrigger
             render={

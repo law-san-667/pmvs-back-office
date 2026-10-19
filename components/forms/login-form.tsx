@@ -7,9 +7,9 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
-  FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { BUYER_APP_URL } from "@/config/spaces";
 import { useRouter } from "@/i18n/navigation";
 import { clearPendingOtp, type PendingOtp } from "@/lib/pending-otp";
 import { cn } from "@/lib/utils";
@@ -20,8 +20,6 @@ import { TRPCClientError } from "@trpc/client";
 import { MailIcon, PhoneIcon } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm, type Resolver } from "react-hook-form";
-import { Facebook } from "../icons/facebook";
-import { Google } from "../icons/google";
 import { PhoneInput } from "../phone-input";
 
 type AuthMethod = "email" | "phone";
@@ -120,8 +118,8 @@ export default function LoginForm({
             <div className="flex flex-col items-center gap-1 text-center">
               <h1 className="text-2xl font-bold">Content de vous revoir !</h1>
               <p className="text-muted-foreground text-sm text-balance">
-                Entrez vos identifiants pour vous connecter à votre compte
-                fournisseur.
+                Entrez votre numéro de téléphone WhatsApp ou votre adresse
+                électronique pour vous connecter à votre compte.
               </p>
             </div>
             <div
@@ -141,7 +139,7 @@ export default function LoginForm({
                 onClick={() => changeAuthMethod("phone")}
               >
                 <PhoneIcon className="size-4" />
-                Téléphone
+                Téléphone WhatsApp
               </Button>
               <Button
                 type="button"
@@ -155,7 +153,7 @@ export default function LoginForm({
                 onClick={() => changeAuthMethod("email")}
               >
                 <MailIcon className="size-4" />
-                Email
+                Adresse électronique
               </Button>
             </div>
             <Controller
@@ -165,8 +163,8 @@ export default function LoginForm({
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel>
                     {authMethod === "phone"
-                      ? "Numéro de téléphone"
-                      : "Adresse email"}
+                      ? "Téléphone WhatsApp"
+                      : "Adresse électronique"}
                   </FieldLabel>
                   {authMethod === "phone" ? (
                     <PhoneInput
@@ -238,26 +236,7 @@ export default function LoginForm({
                   : "Se connecter"}
               </Button>
             </Field>
-            <FieldSeparator>Ou</FieldSeparator>
             <Field>
-              <Button
-                variant="outline"
-                size="lg"
-                className="h-12"
-                type="button"
-              >
-                <Google /> Continuer avec Google
-              </Button>
-
-              <Button
-                variant="outline"
-                size="lg"
-                className="h-12"
-                type="button"
-              >
-                <Facebook /> Continuer avec Facebook
-              </Button>
-
               <FieldDescription className="text-center">
                 Vous n&apos;avez pas de compte ?{" "}
                 <button
@@ -269,6 +248,28 @@ export default function LoginForm({
                 </button>
               </FieldDescription>
             </Field>
+            <div className="bg-muted/40 text-muted-foreground space-y-2 rounded-lg border px-4 py-3 text-xs">
+              <p>
+                <span className="text-destructive font-semibold">
+                  Attention :
+                </span>{" "}
+                vos identifiants correspondent à ceux que vous avez utilisés
+                pour vous inscrire.
+              </p>
+              <p>
+                En cliquant sur « Se connecter », vous déclarez avoir lu et
+                accepté les{" "}
+                <a
+                  href={`${BUYER_APP_URL}/fr/cgu`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary underline"
+                >
+                  conditions générales d&apos;utilisation
+                </a>{" "}
+                sur Diarama et le règlement concernant la confidentialité.
+              </p>
+            </div>
           </FieldGroup>
         </form>
       </div>

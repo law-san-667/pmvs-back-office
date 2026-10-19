@@ -134,6 +134,7 @@ export default function AdminConfigurationPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Code</TableHead>
                     <TableHead>Nom</TableHead>
                     <TableHead>Slug</TableHead>
                     <TableHead>Type</TableHead>
@@ -143,7 +144,7 @@ export default function AdminConfigurationPage() {
                 </TableHeader>
                 <TableBody>
                   <AdminTableState
-                    colSpan={5}
+                    colSpan={6}
                     isLoading={categories.isLoading}
                     error={categories.error?.message}
                     isEmpty={!categories.data?.length}
@@ -152,6 +153,9 @@ export default function AdminConfigurationPage() {
                   />
                   {categories.data?.map((category) => (
                     <TableRow key={category.id}>
+                      <TableCell className="text-muted-foreground tabular-nums">
+                        {category.code ?? "-"}
+                      </TableCell>
                       <TableCell className="font-medium">
                         {category.name}
                       </TableCell>
@@ -224,6 +228,7 @@ export default function AdminConfigurationPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Code</TableHead>
                     <TableHead>Nom</TableHead>
                     <TableHead>Catégorie</TableHead>
                     <TableHead>Slug</TableHead>
@@ -234,7 +239,7 @@ export default function AdminConfigurationPage() {
                 </TableHeader>
                 <TableBody>
                   <AdminTableState
-                    colSpan={6}
+                    colSpan={7}
                     isLoading={subCategories.isLoading}
                     error={subCategories.error?.message}
                     isEmpty={!subCategories.data?.length}
@@ -243,6 +248,9 @@ export default function AdminConfigurationPage() {
                   />
                   {subCategories.data?.map((subCategory) => (
                     <TableRow key={subCategory.id}>
+                      <TableCell className="text-muted-foreground tabular-nums">
+                        {subCategory.code ?? "-"}
+                      </TableCell>
                       <TableCell className="font-medium">
                         {subCategory.name}
                       </TableCell>

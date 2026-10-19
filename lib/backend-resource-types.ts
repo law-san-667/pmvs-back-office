@@ -22,6 +22,8 @@ export type City = {
 export type Category = {
   id: string;
   name: string;
+  /** EBOPS 2010 code, services only. */
+  code: string | null;
   slug: string;
   description: string | null;
   icon: string | null;
@@ -36,6 +38,8 @@ export type SubCategory = {
   id: string;
   categoryId: string;
   name: string;
+  /** EBOPS 2010 code, services only. */
+  code: string | null;
   slug: string;
   description: string | null;
   icon: string | null;
@@ -154,6 +158,7 @@ export type Tender = {
   subCategoryId: string;
   title: string;
   description: string | null;
+  image: string | null;
   type: TenderType;
   status: TenderStatus;
   budgetMinMinor: number | null;
@@ -163,6 +168,7 @@ export type Tender = {
   documents: unknown;
   location: string | null;
   countryCode: string;
+  opensAt: string | null;
   submissionDeadline: string;
   evaluationDeadline: string | null;
   awardedAt: string | null;

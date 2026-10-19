@@ -45,6 +45,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { useBusiness } from "@/contexts/business-context";
 import { useRouter } from "@/i18n/navigation";
 import { getBackendErrorMessages } from "@/lib/backend-utils";
+import {
+  uploadFileToR2FromBrowser,
+  type CreateR2Upload,
+} from "@/lib/upload-to-r2";
 import countries from "@/lib/countries.json";
 import {
   tenderStatusEnum,
@@ -53,7 +57,7 @@ import {
 import { trpc } from "@/server/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Trash2Icon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
@@ -106,6 +110,7 @@ const tenderFormSchema = z
     currency: z.string().min(1),
     location: z.string(),
     countryCode: z.string().min(2, "Le pays est requis."),
+    opensAt: z.string(),
     submissionDeadline: z
       .string()
       .min(1, "La date limite de soumission est requise."),
@@ -157,6 +162,7 @@ const defaultValues: TenderFormData = {
   currency: "XOF",
   location: "",
   countryCode: "",
+  opensAt: "",
   submissionDeadline: "",
   evaluationDeadline: "",
   requirements: "",
@@ -172,6 +178,14 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
   const currentUser = trpc.auth.me.useQuery();
 
   const [submissionErrors, setSubmissionErrors] = useState<string[]>([]);
+  // Card picture: a new file to upload, or the one already saved.
+  const [imageFile, setImageFile] = useState<File>();
+  // undefined: keep the tender's saved picture; null: removed.
+  const [imageOverride, setImageOverride] = useState<string | null>();
+  const [isUploading, setIsUploading] = useState(false);
+  const createUploadMutation = trpc.media.createUpload.useMutation();
+  const createUpload: CreateR2Upload = (input) =>
+    createUploadMutation.mutateAsync(input);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const form = useForm<TenderFormData>({
@@ -235,6 +249,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
       currency: tender.currency || "XOF",
       location: tender.location ?? "",
       countryCode: tender.countryCode,
+      opensAt: toDatetimeLocal(tender.opensAt),
       submissionDeadline: toDatetimeLocal(tender.submissionDeadline),
       evaluationDeadline: toDatetimeLocal(tender.evaluationDeadline),
       requirements,
@@ -294,9 +309,25 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
     },
   });
 
-  const isMutating = createTender.isPending || updateTender.isPending;
+  const savedImage =
+    imageOverride !== undefined
+      ? imageOverride
+      : (tenderDetail.data?.image ?? null);
+  const imagePreview = useMemo(
+    () => (imageFile ? URL.createObjectURL(imageFile) : undefined),
+    [imageFile],
+  );
+  useEffect(
+    () => () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    },
+    [imagePreview],
+  );
 
-  const onSubmit = (data: TenderFormData) => {
+  const isMutating =
+    isUploading || createTender.isPending || updateTender.isPending;
+
+  const onSubmit = async (data: TenderFormData) => {
     if (isMutating) return;
 
     const publisherUserId = currentUser.data?.id;
@@ -315,6 +346,21 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
       return;
     }
 
+    let image = savedImage;
+    if (imageFile) {
+      try {
+        setIsUploading(true);
+        image =
+          (await uploadFileToR2FromBrowser(imageFile, "images", createUpload)) ??
+          null;
+      } catch {
+        setSubmissionErrors(["L'envoi de la photo a échoué. Réessayez."]);
+        return;
+      } finally {
+        setIsUploading(false);
+      }
+    }
+
     const payload = {
       publisherUserId,
       publisherBusinessId: business?.id ?? null,
@@ -322,6 +368,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
       subCategoryId: data.subCategoryId,
       title: data.title.trim(),
       description: data.description.trim() ? data.description.trim() : null,
+      image,
       type: data.type,
       status: data.status,
       budgetMinMinor: data.budgetMin.trim()
@@ -334,6 +381,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
       requirements: data.requirements.trim() ? data.requirements.trim() : null,
       location: data.location.trim() ? data.location.trim() : null,
       countryCode: data.countryCode,
+      opensAt: fromDatetimeLocal(data.opensAt),
       submissionDeadline,
       evaluationDeadline: fromDatetimeLocal(data.evaluationDeadline),
     };
@@ -433,6 +481,45 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                       </Field>
                     )}
                   />
+
+                  <Field>
+                    <FieldLabel htmlFor="tender-image">
+                      Photo (optionnel)
+                    </FieldLabel>
+                    {(imageFile || savedImage) && (
+                      <div className="flex items-center gap-3">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={imagePreview ?? savedImage ?? undefined}
+                          alt="Aperçu de la photo"
+                          className="h-20 w-32 rounded-md border object-cover"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setImageFile(undefined);
+                            setImageOverride(null);
+                          }}
+                        >
+                          Retirer
+                        </Button>
+                      </div>
+                    )}
+                    <Input
+                      id="tender-image"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={(event) =>
+                        setImageFile(event.target.files?.[0] ?? undefined)
+                      }
+                    />
+                    <p className="text-muted-foreground text-xs">
+                      Affichée sur la carte de l&apos;appel d&apos;offres. À
+                      défaut, le logo de votre structure est utilisé.
+                    </p>
+                  </Field>
 
                   <Controller
                     name="type"
@@ -750,11 +837,24 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
               <CardContent>
                 <FieldGroup>
                   <Controller
+                    name="opensAt"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Field>
+                        <FieldLabel>
+                          Date d&apos;ouverture du marché (optionnel)
+                        </FieldLabel>
+                        <Input {...field} type="datetime-local" />
+                      </Field>
+                    )}
+                  />
+
+                  <Controller
                     name="submissionDeadline"
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Date limite de soumission</FieldLabel>
+                        <FieldLabel>Date de clôture du marché</FieldLabel>
                         <Input
                           {...field}
                           type="datetime-local"
