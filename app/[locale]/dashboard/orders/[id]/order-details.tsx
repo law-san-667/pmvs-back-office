@@ -25,6 +25,7 @@ import {
 } from "@/lib/seller-dashboard-utils";
 import { PAYMENT_STATUS_LABELS } from "@/lib/payment-utils";
 import { trpc } from "@/server/trpc/client";
+import { OrderActions } from "./order-actions";
 import {
   ArrowLeftIcon,
   CalendarIcon,
@@ -81,7 +82,11 @@ export function OrderDetails({
               "Cette commande n’existe pas ou vous n’avez pas accès à ses détails."}
           </p>
         </div>
-        <Button variant="outline" render={<Link href={ordersHref} />}>
+        <Button
+          variant="outline"
+          nativeButton={false}
+          render={<Link href={ordersHref} />}
+        >
           <ArrowLeftIcon className="size-4" /> Retour aux commandes
         </Button>
       </div>
@@ -107,7 +112,11 @@ export function OrderDetails({
             Cette commande n’est pas liée à l’entreprise active.
           </p>
         </div>
-        <Button variant="outline" render={<Link href={ordersHref} />}>
+        <Button
+          variant="outline"
+          nativeButton={false}
+          render={<Link href={ordersHref} />}
+        >
           <ArrowLeftIcon className="size-4" /> Retour aux commandes
         </Button>
       </div>
@@ -123,6 +132,7 @@ export function OrderDetails({
           <Button
             variant="outline"
             size="icon"
+            nativeButton={false}
             render={<Link href={ordersHref} />}
           >
             <ArrowLeftIcon className="size-4" />
@@ -140,9 +150,15 @@ export function OrderDetails({
             </p>
           </div>
         </div>
-        <p className="text-2xl font-bold">
-          {formatMoney(businessTotal, data.currency)}
-        </p>
+        <div className="flex flex-col items-end gap-3">
+          <p className="text-2xl font-bold">
+            {formatMoney(businessTotal, data.currency)}
+          </p>
+          <OrderActions
+            orderId={data.id}
+            allowedStatuses={data.allowedStatuses ?? []}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -164,7 +180,9 @@ export function OrderDetails({
               <p className="text-muted-foreground text-xs">Paiement</p>
               <p className="font-medium">
                 {data.payment?.providerPaymentMethod ??
-                  PAYMENT_METHOD_LABELS[data.payment?.method ?? data.paymentMethod]}
+                  PAYMENT_METHOD_LABELS[
+                    data.payment?.method ?? data.paymentMethod
+                  ]}
               </p>
               {data.payment && (
                 <p className="text-muted-foreground text-xs">
@@ -187,6 +205,13 @@ export function OrderDetails({
                   ? `${address.city}, ${address.countryCode}`
                   : "Non renseignée"}
               </p>
+              {(data.carrier || data.trackingNumber) && (
+                <p className="text-muted-foreground text-xs">
+                  {[data.carrier, data.trackingNumber]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>

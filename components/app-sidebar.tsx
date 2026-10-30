@@ -21,6 +21,7 @@ import {
     Building2Icon,
     CircleHelpIcon,
     CreditCardIcon,
+    FileTextIcon,
     GavelIcon,
     LayoutDashboardIcon,
     MapPinnedIcon,
@@ -29,6 +30,7 @@ import {
     SettingsIcon,
     ShieldCheckIcon,
     ShoppingCartIcon,
+    StoreIcon,
     UserCogIcon,
     Users2Icon,
 } from "lucide-react";
@@ -87,6 +89,11 @@ const adminItems = [
     icon: <LayoutDashboardIcon />,
   },
   {
+    title: "Contenus",
+    url: "/dashboard/admin/content",
+    icon: <FileTextIcon />,
+  },
+  {
     title: "Configuration",
     url: "/dashboard/admin/configuration",
     icon: <MapPinnedIcon />,
@@ -135,6 +142,11 @@ const adminItems = [
     title: "Administrateurs",
     url: "/dashboard/admin/administrators",
     icon: <ShieldCheckIcon />,
+  },
+  {
+    title: "Opérateurs",
+    url: "/dashboard/admin/operators",
+    icon: <StoreIcon />,
   },
   {
     title: "Diagnostic",

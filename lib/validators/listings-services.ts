@@ -251,6 +251,7 @@ export const createListingSchema = z.object({
   priceAmountMinor: z.number().int().min(-1),
   currency: z.string().trim().min(1).optional(),
   quantityAvailable: z.number().int().positive().optional(),
+  lowStockThreshold: z.number().int().nonnegative().nullable().optional(),
   // Commercial offer (both categories)
   brand: optionalText,
   model: optionalText,
@@ -314,6 +315,7 @@ export type Listing = {
   priceAmountMinor: number;
   currency: string;
   quantityAvailable: number;
+  lowStockThreshold?: number | null;
   cities: string[];
   countryCode: string;
   brand: string | null;

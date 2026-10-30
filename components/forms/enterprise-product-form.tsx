@@ -180,6 +180,7 @@ const enterpriseFormSchema = z.object({
   availableOn: z.enum(["", ...listingAvailabilityChannelEnum]),
   storageLocation: z.string(),
   stock: integerString("Quantité invalide."),
+  lowStockThreshold: integerString("Seuil invalide."),
   leadTime: z.string(),
   outOfStockPolicy: z.enum(["", ...listingStockPolicyEnum]),
   specialDeliveryTime: z.string(),
@@ -257,6 +258,7 @@ const emptyValues: EnterpriseFormData = {
   availableOn: "",
   storageLocation: "",
   stock: "",
+  lowStockThreshold: "",
   leadTime: "",
   outOfStockPolicy: "",
   specialDeliveryTime: "",
@@ -337,6 +339,8 @@ const toFormValues = (listing: Listing): EnterpriseFormData => {
     availableOn: listing.availableOn ?? "",
     storageLocation: listing.storageLocation ?? "",
     stock: listing.quantityAvailable ? str(listing.quantityAvailable) : "",
+    lowStockThreshold:
+      listing.lowStockThreshold != null ? str(listing.lowStockThreshold) : "",
     leadTime: listing.leadTime ?? "",
     outOfStockPolicy: listing.outOfStockPolicy ?? "",
     specialDeliveryTime: listing.specialDeliveryTime ?? "",
@@ -372,6 +376,7 @@ const STEP_FIELDS: FieldPath<EnterpriseFormData>[][] = [
     "heightCm",
     "depthCm",
     "stock",
+    "lowStockThreshold",
   ],
   [],
   ["variants", "seoTitle", "seoExternalUrl", "seoMetaDescription"],
@@ -1003,6 +1008,13 @@ function Step2({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
               />
               <TextField
                 control={control}
+                name="lowStockThreshold"
+                label="Alerte de stock bas"
+                placeholder="Être prévenu à partir de… unités"
+                type="number"
+              />
+              <TextField
+                control={control}
                 name="leadTime"
                 label={
                   readyToShip
@@ -1555,6 +1567,10 @@ export default function EnterpriseProductForm({
           !data.isService && data.stock.trim()
             ? parseInt(data.stock, 10)
             : undefined,
+        lowStockThreshold:
+          !data.isService && data.lowStockThreshold.trim()
+            ? parseInt(data.lowStockThreshold, 10)
+            : null,
         images: uploaded.images.length > 0 ? uploaded.images : undefined,
         video: uploaded.video,
         specificsSections,

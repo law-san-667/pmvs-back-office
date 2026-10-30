@@ -267,7 +267,13 @@ export default function BusinessSettingsForm() {
   };
 
   const deliveryZoneAnchorRef = useComboboxAnchor();
-  const countryItems = countries.data?.items ?? [];
+  // Only the countries open to suppliers, plus the business's own country so
+  // the current value still shows if that country was closed since.
+  const countryItems = (countries.data?.items ?? []).filter(
+    (country) =>
+      country.supplierRegistrationOpen !== false ||
+      country.code === business?.countryCode,
+  );
   const countryNameByCode = Object.fromEntries(
     countryItems.map((country) => [country.code, country.name]),
   );

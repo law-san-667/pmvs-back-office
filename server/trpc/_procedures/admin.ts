@@ -240,6 +240,9 @@ const countryPayloadSchema = z.object({
   currencyCode: z.string().trim().min(3),
   phonePrefix: z.string().trim().min(1),
   isActive: z.boolean().optional(),
+  isOapi: z.boolean().optional(),
+  deploymentPhase: z.number().int().min(1).max(3).nullable().optional(),
+  supplierRegistrationOpen: z.boolean().optional(),
 });
 
 const cityPayloadSchema = z.object({

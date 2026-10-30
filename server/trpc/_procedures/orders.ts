@@ -40,4 +40,21 @@ export const ordersRouter = createTRPCRouter({
     .query(({ ctx, input }) =>
       callBackend<BusinessOrder>(ctx.api.get(`/orders/${input.id}`)),
     ),
+  /** Seller (or operator / admin) moves the order to its next status. */
+  updateStatus: privateProcedure
+    .input(
+      z.object({
+        id: uuidSchema,
+        status: orderStatusSchema,
+        note: z.string().trim().max(1000).nullable().optional(),
+        trackingNumber: z.string().trim().max(100).nullable().optional(),
+        carrier: z.string().trim().max(100).nullable().optional(),
+      }),
+    )
+    .mutation(({ ctx, input }) => {
+      const { id, ...payload } = input;
+      return callBackend<BusinessOrder>(
+        ctx.api.patch(`/orders/${id}/status`, payload),
+      );
+    }),
 });

@@ -96,6 +96,11 @@ const productFormSchema = z
     selectedSizes: z.array(z.string()),
     selectedColors: z.array(z.string()),
     stock: z.string(),
+    lowStockThreshold: z
+      .string()
+      .refine((value) => !value.trim() || /^\d+$/.test(value.trim()), {
+        message: "Seuil invalide.",
+      }),
     isService: z.boolean(),
     isPriceOnQuote: z.boolean(),
     isFragile: z.boolean(),
@@ -153,6 +158,7 @@ const emptyValues: ProductFormData = {
   selectedSizes: [],
   selectedColors: [],
   stock: "",
+  lowStockThreshold: "",
   isService: false,
   isPriceOnQuote: false,
   isFragile: false,
@@ -191,6 +197,8 @@ const toFormValues = (listing: Listing): ProductFormData => ({
       String(item.value ?? item.label),
     ) ?? [],
   stock: listing.quantityAvailable ? String(listing.quantityAvailable) : "",
+  lowStockThreshold:
+    listing.lowStockThreshold != null ? String(listing.lowStockThreshold) : "",
   isService: listing.isService,
   isPriceOnQuote: listing.priceAmountMinor < 0,
   isFragile: listing.isFragile ?? false,
@@ -363,6 +371,10 @@ export default function IndividualProductForm({
         isService: data.isService,
         quantityAvailable:
           !data.isService && data.stock ? parseInt(data.stock, 10) : undefined,
+        lowStockThreshold:
+          !data.isService && data.lowStockThreshold.trim()
+            ? parseInt(data.lowStockThreshold, 10)
+            : null,
         images: uploaded.images.length > 0 ? uploaded.images : undefined,
         video: uploaded.video,
         specificsSections: data.isService
@@ -697,17 +709,33 @@ export default function IndividualProductForm({
                 <CardHeader>
                   <CardTitle className="font-bold">Gestion du stock</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="flex flex-wrap gap-4">
                   <Controller
                     name="stock"
                     control={form.control}
                     render={({ field }) => (
-                      <Field>
+                      <Field className="w-auto">
                         <FieldLabel>Stock disponible</FieldLabel>
                         <Input
                           {...field}
                           type="number"
                           placeholder="0"
+                          className="w-40"
+                        />
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name="lowStockThreshold"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field className="w-auto" data-invalid={fieldState.invalid}>
+                        <FieldLabel>Alerte de stock bas</FieldLabel>
+                        <Input
+                          {...field}
+                          type="number"
+                          min={0}
+                          placeholder="Ex. 5"
                           className="w-40"
                         />
                       </Field>

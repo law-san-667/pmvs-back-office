@@ -78,8 +78,8 @@ function AuthContent() {
   }, [isAuthenticated, router]);
 
   return (
-    <section className="flex items-center justify-center h-screen">
-      <div className="container mx-auto space-y-8 pt-8">
+    <section className="flex min-h-screen items-center justify-center py-8">
+      <div className="container mx-auto space-y-8">
       <div className="flex flex-wrap items-center justify-center gap-4">
         <BrandMark />
         <DropdownMenu>

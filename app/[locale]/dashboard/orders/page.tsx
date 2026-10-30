@@ -209,6 +209,7 @@ export default function OrdersPage() {
                       <Button
                         variant="ghost"
                         size="icon-sm"
+                        nativeButton={false}
                         render={<Link href={`/dashboard/orders/${order.id}`} />}
                       >
                         <EyeIcon className="size-4" />

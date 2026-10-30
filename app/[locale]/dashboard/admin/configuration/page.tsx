@@ -330,13 +330,16 @@ export default function AdminConfigurationPage() {
                     <TableHead>Code</TableHead>
                     <TableHead>Devise</TableHead>
                     <TableHead>Indicatif</TableHead>
+                    <TableHead>OAPI</TableHead>
+                    <TableHead>Phase</TableHead>
+                    <TableHead>Fournisseurs</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   <AdminTableState
-                    colSpan={6}
+                    colSpan={9}
                     isLoading={countries.isLoading}
                     error={countries.error?.message}
                     isEmpty={!countries.data?.items.length}
@@ -351,6 +354,13 @@ export default function AdminConfigurationPage() {
                       <TableCell>{country.code}</TableCell>
                       <TableCell>{country.currencyCode}</TableCell>
                       <TableCell>{country.phonePrefix}</TableCell>
+                      <TableCell>{country.isOapi ? "Oui" : "Non"}</TableCell>
+                      <TableCell>{country.deploymentPhase ?? "-"}</TableCell>
+                      <TableCell>
+                        {country.supplierRegistrationOpen
+                          ? "Inscriptions ouvertes"
+                          : "Fermé"}
+                      </TableCell>
                       <TableCell>
                         <ActiveBadge active={country.isActive} />
                       </TableCell>

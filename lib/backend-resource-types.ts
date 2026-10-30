@@ -6,6 +6,12 @@ export type Country = {
   currencyCode: string;
   phonePrefix: string;
   isActive: boolean;
+  /** OAPI member: the "Pays" menu groups countries by it. */
+  isOapi?: boolean;
+  /** Rollout phase: 1 = Senegal and neighbours, 2 = ECOWAS, 3 = others. */
+  deploymentPhase?: number | null;
+  /** Suppliers may register a business in this country. */
+  supplierRegistrationOpen?: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -130,6 +136,7 @@ export type Listing = {
   isService: boolean;
   currency: string;
   quantityAvailable: number;
+  lowStockThreshold?: number | null;
   cities: string[];
   countryCode: string;
   createdAt: string;

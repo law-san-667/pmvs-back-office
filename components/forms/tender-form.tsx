@@ -50,10 +50,7 @@ import {
   type CreateR2Upload,
 } from "@/lib/upload-to-r2";
 import countries from "@/lib/countries.json";
-import {
-  tenderStatusEnum,
-  tenderTypeEnum,
-} from "@/lib/validators/tenders";
+import { tenderStatusEnum, tenderTypeEnum } from "@/lib/validators/tenders";
 import { trpc } from "@/server/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Trash2Icon } from "lucide-react";
@@ -351,8 +348,11 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
       try {
         setIsUploading(true);
         image =
-          (await uploadFileToR2FromBrowser(imageFile, "images", createUpload)) ??
-          null;
+          (await uploadFileToR2FromBrowser(
+            imageFile,
+            "images",
+            createUpload,
+          )) ?? null;
       } catch {
         setSubmissionErrors(["L'envoi de la photo a échoué. Réessayez."]);
         return;
@@ -398,9 +398,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold">
-            {isEdit
-              ? "Modifier un appel d'offres"
-              : "Créer un appel d'offres"}
+            {isEdit ? "Modifier un appel d'offres" : "Créer un appel d'offres"}
           </h1>
           <p className="text-muted-foreground text-sm">
             {isEdit
@@ -454,7 +452,9 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Titre de l&apos;appel d&apos;offres</FieldLabel>
+                        <FieldLabel>
+                          Titre de l&apos;appel d&apos;offres
+                        </FieldLabel>
                         <Input
                           {...field}
                           aria-invalid={fieldState.invalid}
@@ -549,7 +549,6 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                       </Field>
                     )}
                   />
-
                 </FieldGroup>
               </CardContent>
             </Card>
@@ -572,9 +571,9 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                           onValueChange={(val) => {
                             if (!val) return;
                             field.onChange(val);
-                            form.setValue("subCategoryId", "", {
-                              shouldValidate: true,
-                            });
+                            // Reset without validating: "required" would show
+                            // before the user had a chance to pick one.
+                            form.setValue("subCategoryId", "");
                           }}
                           disabled={categories.isLoading}
                         >
@@ -819,10 +818,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                     render={({ field }) => (
                       <Field>
                         <FieldLabel>Lieu (optionnel)</FieldLabel>
-                        <Input
-                          {...field}
-                          placeholder="Ex: Dakar, Plateau"
-                        />
+                        <Input {...field} placeholder="Ex: Dakar, Plateau" />
                       </Field>
                     )}
                   />

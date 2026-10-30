@@ -7,7 +7,9 @@ import { Separator } from "@/components/ui/separator";
 import { useUser } from "@/contexts/user-context";
 import { useMessaging } from "@/contexts/messaging-context";
 import { Link } from "@/i18n/navigation";
-import { BellIcon, MailIcon, SearchIcon } from "lucide-react";
+import { MailIcon, SearchIcon } from "lucide-react";
+import { NotificationsBell } from "@/components/notifications-bell";
+import { OperatorBusinessSwitcher } from "@/components/operator-business-switcher";
 
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Administrateur",
@@ -42,6 +44,7 @@ export function SiteHeader() {
         </div>
 
         <div className="flex items-center gap-1">
+          <OperatorBusinessSwitcher />
           <Button
             variant="secondary"
             size="icon-sm"
@@ -61,9 +64,7 @@ export function SiteHeader() {
               </span>
             )}
           </Button>
-          <Button variant="secondary" size="icon-sm" className="bg-zinc-100">
-            <BellIcon className="size-4" />
-          </Button>
+          <NotificationsBell />
           <Separator
             orientation="vertical"
             className="mx-2 h-6 data-vertical:self-auto"

@@ -297,6 +297,13 @@ function CountryEditor({
   const [currencyCode, setCurrencyCode] = useState(value?.currencyCode ?? "");
   const [phonePrefix, setPhonePrefix] = useState(value?.phonePrefix ?? "");
   const [isActive, setIsActive] = useState(value?.isActive ?? true);
+  const [isOapi, setIsOapi] = useState(value?.isOapi ?? false);
+  const [deploymentPhase, setDeploymentPhase] = useState(
+    value?.deploymentPhase ? String(value.deploymentPhase) : "",
+  );
+  const [supplierRegistrationOpen, setSupplierRegistrationOpen] = useState(
+    value?.supplierRegistrationOpen ?? false,
+  );
   const create = trpc.admin.createCountry.useMutation();
   const update = trpc.admin.updateCountry.useMutation();
   const mutation = value ? update : create;
@@ -308,6 +315,9 @@ function CountryEditor({
       currencyCode: currencyCode.toUpperCase(),
       phonePrefix,
       isActive,
+      isOapi,
+      deploymentPhase: deploymentPhase ? Number(deploymentPhase) : null,
+      supplierRegistrationOpen,
     };
 
     try {
@@ -376,11 +386,37 @@ function CountryEditor({
               required
             />
           </div>
+          <div className="grid gap-2">
+            <Label htmlFor="country-phase">Phase de déploiement</Label>
+            <select
+              id="country-phase"
+              value={deploymentPhase}
+              onChange={(event) => setDeploymentPhase(event.target.value)}
+              className="border-input bg-background h-9 rounded-md border px-3 text-sm"
+            >
+              <option value="">Non définie</option>
+              <option value="1">Phase 1 : Sénégal et pays frontaliers</option>
+              <option value="2">Phase 2 : CEDEAO</option>
+              <option value="3">Phase 3 : autres pays</option>
+            </select>
+          </div>
           <BooleanField
             id="country-active"
-            label="Pays actif"
+            label="Pays affiché sur la plateforme"
             checked={isActive}
             onCheckedChange={setIsActive}
+          />
+          <BooleanField
+            id="country-oapi"
+            label="Membre de l'OAPI"
+            checked={isOapi}
+            onCheckedChange={setIsOapi}
+          />
+          <BooleanField
+            id="country-supplier-open"
+            label="Inscriptions de fournisseurs ouvertes"
+            checked={supplierRegistrationOpen}
+            onCheckedChange={setSupplierRegistrationOpen}
           />
           <FormError message={mutation.error?.message} />
           <DialogFooter>

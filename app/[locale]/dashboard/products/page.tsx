@@ -118,7 +118,11 @@ const formatPrice = (amountMinor: number, currency: string) => {
 
 const getListingStatus = (listing: Listing) => {
   if (listing.isService) return "-";
-  return listing.quantityAvailable > 0 ? "Stock" : "Rupture";
+  if (listing.quantityAvailable === 0) return "Rupture";
+  return listing.lowStockThreshold != null &&
+    listing.quantityAvailable <= listing.lowStockThreshold
+    ? "Stock bas"
+    : "Stock";
 };
 
 const getVisiblePages = (currentPage: number, totalPages: number) => {
@@ -440,6 +444,10 @@ export default function ProductsPage() {
                             {status === "Stock" ? (
                               <span className="font-medium text-green-500">
                                 Stock
+                              </span>
+                            ) : status === "Stock bas" ? (
+                              <span className="font-medium text-amber-600">
+                                Stock bas ({listing.quantityAvailable})
                               </span>
                             ) : status === "Rupture" ? (
                               <span className="text-muted-foreground">

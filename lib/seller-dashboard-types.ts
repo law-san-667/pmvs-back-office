@@ -89,6 +89,10 @@ export type BusinessOrder = {
   currency: string;
   shippingAddress: ShippingAddress | null;
   notes: string | null;
+  trackingNumber?: string | null;
+  carrier?: string | null;
+  /** Statuses the caller may move the order to now. */
+  allowedStatuses?: OrderStatus[];
   createdAt: string;
   updatedAt: string;
   business: {

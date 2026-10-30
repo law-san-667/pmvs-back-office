@@ -12,6 +12,7 @@ type ChatSocket = Socket<
     "message:new": (message: DirectMessage) => void;
     "conversation:created": () => void;
     "conversation:read": () => void;
+    "notification:new": () => void;
   },
   {
     "conversation:join": (
@@ -101,6 +102,10 @@ export function useMessagingSocket(
         });
         socket.on("conversation:read", () => {
           void utils.messaging.conversations.invalidate();
+        });
+        // In-app notifications share the connection: refresh the bell.
+        socket.on("notification:new", () => {
+          void utils.notifications.invalidate();
         });
 
         scheduleTicketRefresh(ticket.expiresIn);

@@ -32,6 +32,8 @@ export const countriesInputSchema = paginationInputSchema.extend({
   name: z.string().trim().optional(),
   currencyCode: z.string().trim().optional(),
   isActive: activeFilterSchema,
+  /** Countries where suppliers may register a business. */
+  supplierRegistrationOpen: z.enum(["true", "false"]).optional(),
 });
 
 export const citiesInputSchema = paginationInputSchema.extend({

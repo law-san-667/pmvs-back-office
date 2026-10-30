@@ -502,10 +502,12 @@ export default function InitBusinessForm() {
   const [croppedAreaPixels, setCroppedAreaPixels] =
     useState<CroppedArea | null>(null);
 
+  // Supplier sign-up opens country by country (the client's rollout phases).
   const countries = trpc.geography.countries.useQuery({
     limit: 100,
     order: "asc",
     orderBy: "name",
+    supplierRegistrationOpen: "true",
   });
   const cities = trpc.geography.countryCities.useQuery(
     {
