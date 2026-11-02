@@ -1,0 +1,56 @@
+{
+  "paymentStatus": {
+    "PENDING": "Pending",
+    "SUCCEEDED": "Paid",
+    "CANCELLED": "Cancelled",
+    "ERRORED": "Failed",
+    "REFUND_PENDING": "Refund in progress",
+    "REFUNDED": "Refunded"
+  },
+  "payoutStatus": {
+    "NOT_APPLICABLE": "—",
+    "PENDING": "Payout pending",
+    "PROCESSING": "Payout in progress",
+    "SUCCEEDED": "Paid out",
+    "FAILED": "Payout failed",
+    "ON_HOLD": "On hold until approval"
+  },
+  "filters": {
+    "all": "All",
+    "paid": "Paid",
+    "pending": "Pending",
+    "paidOut": "Paid out",
+    "payoutFailed": "Payout failed",
+    "refunded": "Refunded"
+  },
+  "stats": {
+    "sales": "Sales collected",
+    "salesHint": "{count, plural, one {# transaction in total} other {# transactions in total}}",
+    "paidOut": "Paid out to your account",
+    "paidOutHint": "Net amount already transferred by LawPay",
+    "pendingPayouts": "Pending payouts",
+    "failedHint": "{amount} failed — contact support",
+    "pendingHint": "{count, plural, one {# customer payment pending} other {# customer payments pending}}",
+    "fees": "Fees and commissions",
+    "feesHint": "LawPay fees {fees} · commission {commission}"
+  },
+  "otherCurrencies": "Other currencies: {list}",
+  "otherCurrency": "{currency} — collected {gross}, paid out {paidOut}",
+  "history": "Transaction history ({count})",
+  "searchPlaceholder": "Reference...",
+  "columns": {
+    "reference": "Reference",
+    "client": "Customer",
+    "method": "Method",
+    "date": "Date",
+    "amount": "Amount",
+    "netPaidOut": "Net paid out",
+    "payment": "Payment",
+    "payout": "Payout",
+    "order": "Order"
+  },
+  "loading": "Loading transactions...",
+  "empty": "No transactions found.",
+  "cash": "Cash",
+  "viewOrder": "View order"
+}

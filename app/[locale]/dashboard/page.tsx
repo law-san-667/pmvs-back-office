@@ -39,48 +39,32 @@ import {
   ShoppingBagIcon,
   UsersIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { intlLocale } from "@/i18n/config";
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
-
-const MONTH_LABELS = [
-  "Jan",
-  "Fév",
-  "Mar",
-  "Avr",
-  "Mai",
-  "Juin",
-  "Juil",
-  "Août",
-  "Sept",
-  "Oct",
-  "Nov",
-  "Déc",
-];
-
-const chartConfig = {
-  revenue: {
-    label: "Chiffre d’affaires",
-    color: "var(--color-primary)",
-  },
-};
 
 function MetricCard({
   title,
+  linkLabel,
   value,
   icon,
   href,
 }: {
   title: string;
+  linkLabel: string;
   value: number | undefined;
   icon: React.ReactNode;
   href: string;
 }) {
+  const locale = useLocale();
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardAction>
-          <Link href={href} aria-label={`Voir ${title.toLowerCase()}`}>
+          <Link href={href} aria-label={linkLabel}>
             <ArrowUpRightIcon className="text-muted-foreground size-4" />
           </Link>
         </CardAction>
@@ -90,7 +74,7 @@ function MetricCard({
           <Skeleton className="h-9 w-20" />
         ) : (
           <p className="text-3xl font-bold text-[#3B9AE1]">
-            {value.toLocaleString("fr-FR")}
+            {value.toLocaleString(intlLocale(locale))}
           </p>
         )}
         <div className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-full">
@@ -119,6 +103,23 @@ function ProductImage({ images, title }: { images: unknown; title: string }) {
 }
 
 export default function DashboardHomePage() {
+  const t = useTranslations("dashboard");
+  const locale = useLocale();
+  const monthLabels = useMemo(() => {
+    const format = new Intl.DateTimeFormat(intlLocale(locale), {
+      month: "short",
+      timeZone: "UTC",
+    });
+    return Array.from({ length: 12 }, (_, index) =>
+      format.format(new Date(Date.UTC(2024, index, 1))),
+    );
+  }, [locale]);
+  const chartConfig = {
+    revenue: {
+      label: t("revenue"),
+      color: "var(--color-primary)",
+    },
+  };
   const year = new Date().getFullYear();
   const [requestedCurrency, setRequestedCurrency] = useState<string | null>(
     null,
@@ -142,7 +143,7 @@ export default function DashboardHomePage() {
     revenueSeries[0];
   const activeCurrency = activeSeries?.currency ?? "XOF";
   const chartData = (activeSeries?.months ?? []).map((month) => ({
-    month: MONTH_LABELS[month.month - 1],
+    month: monthLabels[month.month - 1],
     revenue: month.totalAmountMinor,
   }));
   const yearlyRevenue = (activeSeries?.months ?? []).reduce(
@@ -153,29 +154,27 @@ export default function DashboardHomePage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <div>
-        <h1 className="text-2xl font-bold">Tableau de bord</h1>
-        <p className="text-muted-foreground text-sm">
-          Vue d’ensemble de l’activité de votre entreprise
-        </p>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <p className="text-muted-foreground text-sm">{t("subtitle")}</p>
       </div>
 
       {stats.isError && (
         <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-4 text-sm">
-          Impossible de charger les statistiques : {stats.error.message}
+          {t("statsError", { message: stats.error.message })}
         </div>
       )}
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.7fr)_minmax(300px,1fr)]">
         <Card>
           <CardHeader>
-            <CardTitle>Chiffre d’affaires {year}</CardTitle>
+            <CardTitle>{t("revenueYear", { year })}</CardTitle>
             {revenueSeries.length > 1 && (
               <CardAction>
                 <select
                   value={activeCurrency}
                   onChange={(event) => setRequestedCurrency(event.target.value)}
                   className="border-input bg-background h-8 rounded-md border px-2 text-sm"
-                  aria-label="Devise du graphique"
+                  aria-label={t("chartCurrency")}
                 >
                   {revenueSeries.map((series) => (
                     <option key={series.currency} value={series.currency}>
@@ -192,7 +191,7 @@ export default function DashboardHomePage() {
             ) : (
               <>
                 <p className="mb-3 text-2xl font-bold">
-                  {formatMoney(yearlyRevenue, activeCurrency)}
+                  {formatMoney(yearlyRevenue, activeCurrency, locale)}
                 </p>
                 <ChartContainer
                   config={chartConfig}
@@ -235,7 +234,7 @@ export default function DashboardHomePage() {
                       content={
                         <ChartTooltipContent
                           formatter={(value) =>
-                            formatMoney(Number(value), activeCurrency)
+                            formatMoney(Number(value), activeCurrency, locale)
                           }
                         />
                       }
@@ -256,25 +255,29 @@ export default function DashboardHomePage() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <MetricCard
-            title="Clients"
+            title={t("metrics.customers")}
+            linkLabel={t("metrics.customersLink")}
             value={stats.data?.totalCustomers}
             icon={<UsersIcon className="size-5" />}
             href="/dashboard/clients"
           />
           <MetricCard
-            title="Commandes"
+            title={t("metrics.orders")}
+            linkLabel={t("metrics.ordersLink")}
             value={stats.data?.totalOrders}
             icon={<ReceiptTextIcon className="size-5" />}
             href="/dashboard/orders"
           />
           <MetricCard
-            title="Produits"
+            title={t("metrics.products")}
+            linkLabel={t("metrics.productsLink")}
             value={stats.data?.totalProducts}
             icon={<PackageIcon className="size-5" />}
             href="/dashboard/products"
           />
           <MetricCard
-            title="Articles vendus"
+            title={t("metrics.sold")}
+            linkLabel={t("metrics.soldLink")}
             value={stats.data?.totalSold}
             icon={<ShoppingBagIcon className="size-5" />}
             href="/dashboard/orders"
@@ -286,13 +289,13 @@ export default function DashboardHomePage() {
         <div className="flex min-w-0 flex-col gap-4">
           <Card>
             <CardHeader>
-              <CardTitle>Dernières commandes</CardTitle>
+              <CardTitle>{t("recentOrders.title")}</CardTitle>
               <CardAction>
                 <Link
                   href="/dashboard/orders"
                   className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm"
                 >
-                  Voir tout <ArrowUpRightIcon className="size-4" />
+                  {t("recentOrders.seeAll")} <ArrowUpRightIcon className="size-4" />
                 </Link>
               </CardAction>
             </CardHeader>
@@ -300,18 +303,18 @@ export default function DashboardHomePage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Commande</TableHead>
-                    <TableHead>Client</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Statut</TableHead>
+                    <TableHead>{t("recentOrders.order")}</TableHead>
+                    <TableHead>{t("recentOrders.customer")}</TableHead>
+                    <TableHead>{t("recentOrders.date")}</TableHead>
+                    <TableHead>{t("recentOrders.total")}</TableHead>
+                    <TableHead>{t("recentOrders.status")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {recentOrders.isLoading ? (
                     <TableRow>
                       <TableCell colSpan={5} className="h-32 text-center">
-                        Chargement des commandes...
+                        {t("recentOrders.loading")}
                       </TableCell>
                     </TableRow>
                   ) : recentOrders.isError ? (
@@ -320,13 +323,13 @@ export default function DashboardHomePage() {
                         colSpan={5}
                         className="text-destructive h-32 text-center"
                       >
-                        Impossible de charger les commandes.
+                        {t("recentOrders.error")}
                       </TableCell>
                     </TableRow>
                   ) : !recentOrders.data?.length ? (
                     <TableRow>
                       <TableCell colSpan={5} className="h-32 text-center">
-                        Aucune commande pour le moment.
+                        {t("recentOrders.empty")}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -344,12 +347,13 @@ export default function DashboardHomePage() {
                             >
                               <ProductImage
                                 images={firstItem?.listing.images}
-                                title={firstItem?.listing.title ?? "Commande"}
+                                title={firstItem?.listing.title ?? t("recentOrders.order")}
                               />
                               <div>
                                 <p className="font-medium">
-                                  {order.items.length} article
-                                  {order.items.length > 1 ? "s" : ""}
+                                  {t("recentOrders.items", {
+                                    count: order.items.length,
+                                  })}
                                 </p>
                                 <p className="text-muted-foreground text-xs">
                                   {getOrderReference(order.id)}
@@ -357,16 +361,16 @@ export default function DashboardHomePage() {
                               </div>
                             </Link>
                           </TableCell>
-                          <TableCell>
-                            <p className="font-medium">{customerName}</p>
-                            <p className="text-muted-foreground text-xs">
+                          <TableCell className="max-w-56">
+                            <p className="truncate font-medium">{customerName}</p>
+                            <p dir="auto" className="text-muted-foreground truncate text-xs">
                               {order.buyer.email ??
                                 order.buyer.phoneNumber ??
                                 "—"}
                             </p>
                           </TableCell>
                           <TableCell className="whitespace-nowrap">
-                            {new Intl.DateTimeFormat("fr-FR", {
+                            {new Intl.DateTimeFormat(intlLocale(locale), {
                               dateStyle: "medium",
                             }).format(new Date(order.createdAt))}
                           </TableCell>
@@ -374,6 +378,7 @@ export default function DashboardHomePage() {
                             {formatMoney(
                               order.totalAmountMinor,
                               order.currency,
+                              locale,
                             )}
                           </TableCell>
                           <TableCell>
@@ -390,13 +395,13 @@ export default function DashboardHomePage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Produits les plus vendus</CardTitle>
+              <CardTitle>{t("bestSelling.title")}</CardTitle>
               <CardAction>
                 <Link
                   href="/dashboard/products"
                   className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm"
                 >
-                  Produits <ArrowUpRightIcon className="size-4" />
+                  {t("bestSelling.products")} <ArrowUpRightIcon className="size-4" />
                 </Link>
               </CardAction>
             </CardHeader>
@@ -404,17 +409,17 @@ export default function DashboardHomePage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Produit</TableHead>
-                    <TableHead>Vendus</TableHead>
-                    <TableHead>Commandes</TableHead>
-                    <TableHead>Chiffre d’affaires</TableHead>
+                    <TableHead>{t("bestSelling.product")}</TableHead>
+                    <TableHead>{t("bestSelling.sold")}</TableHead>
+                    <TableHead>{t("bestSelling.orders")}</TableHead>
+                    <TableHead>{t("revenue")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {bestSelling.isLoading ? (
                     <TableRow>
                       <TableCell colSpan={4} className="h-32 text-center">
-                        Chargement des produits...
+                        {t("bestSelling.loading")}
                       </TableCell>
                     </TableRow>
                   ) : bestSelling.isError ? (
@@ -423,13 +428,13 @@ export default function DashboardHomePage() {
                         colSpan={4}
                         className="text-destructive h-32 text-center"
                       >
-                        Impossible de charger les meilleures ventes.
+                        {t("bestSelling.error")}
                       </TableCell>
                     </TableRow>
                   ) : !bestSelling.data?.length ? (
                     <TableRow>
                       <TableCell colSpan={4} className="h-32 text-center">
-                        Les produits livrés apparaîtront ici.
+                        {t("bestSelling.empty")}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -450,6 +455,7 @@ export default function DashboardHomePage() {
                           {formatMoney(
                             item.totalRevenueMinor,
                             item.product.currency,
+                            locale,
                           )}
                         </TableCell>
                       </TableRow>
@@ -463,9 +469,9 @@ export default function DashboardHomePage() {
 
         <Card className="h-fit">
           <CardHeader>
-            <CardTitle>Clients récents</CardTitle>
+            <CardTitle>{t("recentCustomers.title")}</CardTitle>
             <CardAction>
-              <Link href="/dashboard/clients" aria-label="Voir les clients">
+              <Link href="/dashboard/clients" aria-label={t("recentCustomers.seeAll")}>
                 <ArrowUpRightIcon className="text-muted-foreground size-4" />
               </Link>
             </CardAction>
@@ -480,11 +486,11 @@ export default function DashboardHomePage() {
               ))
             ) : customers.isError ? (
               <p className="text-destructive text-sm">
-                Impossible de charger les clients.
+                {t("recentCustomers.error")}
               </p>
             ) : !customers.data?.items.length ? (
               <p className="text-muted-foreground text-sm">
-                Aucun client pour le moment.
+                {t("recentCustomers.empty")}
               </p>
             ) : (
               customers.data.items.map((customer) => {
@@ -500,8 +506,9 @@ export default function DashboardHomePage() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{name}</p>
                       <p className="text-muted-foreground text-xs">
-                        {customer.totalOrders} commande
-                        {customer.totalOrders > 1 ? "s" : ""}
+                        {t("recentCustomers.orders", {
+                          count: customer.totalOrders,
+                        })}
                       </p>
                     </div>
                   </div>

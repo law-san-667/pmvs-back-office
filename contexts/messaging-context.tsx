@@ -17,6 +17,7 @@ import {
   useEffect,
   useMemo,
 } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 type MessagingContextValue = {
@@ -32,6 +33,7 @@ type MessagingContextValue = {
 const MessagingContext = createContext<MessagingContextValue | null>(null);
 
 export function MessagingProvider({ children }: { children: React.ReactNode }) {
+  const t = useTranslations("messages");
   const router = useRouter();
   const { user } = useUser();
   const { businessId } = useBusiness();
@@ -61,22 +63,22 @@ export function MessagingProvider({ children }: { children: React.ReactNode }) {
 
       const senderName =
         `${message.sender.firstName} ${message.sender.lastName}`.trim() ||
-        "Un client";
+        t("notification.someone");
       const preview =
         message.content.length > 120
           ? `${message.content.slice(0, 117)}…`
           : message.content;
 
-      toast(`Nouveau message de ${senderName}`, {
+      toast(t("notification.title", { name: senderName }), {
         id: message.id,
         description: preview,
         action: {
-          label: "Voir",
+          label: t("notification.view"),
           onClick: () => router.push("/dashboard/messages"),
         },
       });
     },
-    [router, user?.id],
+    [router, t, user?.id],
   );
 
   const { isConnected, joinConversation, sendMessage } = useMessagingSocket(

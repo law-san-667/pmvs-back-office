@@ -1,0 +1,86 @@
+{
+  "brand": {
+    "tagline": "السوق الافتراضية الإفريقية"
+  },
+  "sidebar": {
+    "general": "عام",
+    "tools": "الأدوات",
+    "administration": "الإدارة"
+  },
+  "items": {
+    "dashboard": "لوحة التحكم",
+    "products": "المنتجات",
+    "tenders": "طلبات العروض",
+    "tenderOpportunities": "الرد على طلبات العروض",
+    "orders": "الطلبات",
+    "invoices": "الفواتير",
+    "promotions": "العروض الترويجية",
+    "documents": "المستندات",
+    "traffic": "إحصاءات الزيارات",
+    "reports": "التقارير",
+    "vendability": "قابلية البيع",
+    "advertising": "الإعلانات الترويجية",
+    "afterSales": "الإرجاع والنزاعات",
+    "clients": "العملاء",
+    "messages": "الرسائل",
+    "support": "الدعم",
+    "settings": "الإعدادات",
+    "training": "التدريب",
+    "help": "المساعدة",
+    "admin": {
+      "dashboard": "لوحة التحكم",
+      "content": "المحتويات",
+      "configuration": "التهيئة",
+      "businesses": "المورّدون",
+      "listings": "المنتجات والخدمات",
+      "listingsToReview": "إعلانات بانتظار التحقق",
+      "tenders": "طلبات العروض",
+      "orders": "الطلبات",
+      "payouts": "المدفوعات ودفعات البائعين",
+      "transactions": "المعاملات",
+      "quality": "جودة المورّدين",
+      "traffic": "الزيارات والتحويل",
+      "reports": "التقارير",
+      "vendability": "قابلية البيع",
+      "training": "التدريب",
+      "marketing": "رسائل التسويق",
+      "teamMembers": "المستخدمون",
+      "moderation": "الإشراف",
+      "advertising": "الإعلانات الترويجية",
+      "afterSales": "الإرجاع والنزاعات",
+      "support": "خدمة العملاء",
+      "customers": "العملاء",
+      "administrators": "المسؤولون",
+      "operators": "المشغّلون",
+      "compliance": "الامتثال",
+      "monitoring": "المراقبة",
+      "diagnostics": "التشخيص",
+      "settings": "الإعدادات"
+    }
+  },
+  "header": {
+    "search": "بحث...",
+    "messages": "الرسائل",
+    "unreadMessages": "{count, plural, zero {لا رسائل غير مقروءة} one {رسالة واحدة غير مقروءة} two {رسالتان غير مقروءتين} few {# رسائل غير مقروءة} many {# رسالة غير مقروءة} other {# رسالة غير مقروءة}}"
+  },
+  "roles": {
+    "ADMIN": "مسؤول",
+    "SELLER": "بائع",
+    "CLIENT": "عميل",
+    "MODERATOR": "مشرف",
+    "OPERATOR": "مشغّل"
+  },
+  "user": {
+    "account": "حسابي",
+    "notifications": "الإشعارات",
+    "language": "اللغة",
+    "logout": "تسجيل الخروج"
+  },
+  "operator": {
+    "noShop": "لا يوجد متجر مخصّص",
+    "openError": "تعذّر فتح هذا المتجر.",
+    "actingFor": "أنت تعمل لحساب",
+    "managedShop": "المتجر المُدار",
+    "chooseShop": "اختر متجرًا"
+  }
+}

@@ -1,4 +1,8 @@
+import { intlLocale } from "@/i18n/config";
 import type { OrderStatus, PaymentMethod } from "./seller-dashboard-types";
+
+// French labels for the admin screens (which stay French); supplier screens
+// translate the status codes with their own messages.
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   PENDING: "En attente",
@@ -18,22 +22,29 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   EXPRESSO: "Expresso",
   CARD: "Carte bancaire",
   ONLINE: "Paiement en ligne",
+  OFFLINE: "Virement ou dépôt",
+  MTN_MOMO: "MTN Mobile Money",
+  MOOV_MONEY: "Moov Money",
 };
 
-export const formatMoney = (amountMinor: number, currency: string) => {
+export const formatMoney = (
+  amountMinor: number,
+  currency: string,
+  locale = "fr",
+) => {
   try {
-    return new Intl.NumberFormat("fr-FR", {
+    return new Intl.NumberFormat(intlLocale(locale), {
       style: "currency",
       currency,
       maximumFractionDigits: 0,
     }).format(amountMinor);
   } catch {
-    return `${amountMinor.toLocaleString("fr-FR")} ${currency}`;
+    return `${amountMinor.toLocaleString(intlLocale(locale))} ${currency}`;
   }
 };
 
-export const formatDate = (date: string, withTime = false) =>
-  new Intl.DateTimeFormat("fr-FR", {
+export const formatDate = (date: string, withTime = false, locale = "fr") =>
+  new Intl.DateTimeFormat(intlLocale(locale), {
     dateStyle: "medium",
     ...(withTime ? { timeStyle: "short" as const } : {}),
   }).format(new Date(date));
@@ -72,5 +83,6 @@ export const getVisiblePages = (currentPage: number, totalPages: number) => {
   return Array.from({ length: 5 }, (_, index) => start + index);
 };
 
+/** "#3EE53124", kept in this order inside Arabic text (left-to-right isolate). */
 export const getOrderReference = (id: string) =>
-  `#${id.slice(0, 8).toUpperCase()}`;
+  `\u2066#${id.slice(0, 8).toUpperCase()}\u2069`;

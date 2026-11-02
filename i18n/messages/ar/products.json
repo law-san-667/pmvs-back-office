@@ -1,0 +1,48 @@
+{
+  "addProduct": "إضافة منتج",
+  "importExport": "استيراد / تصدير (Excel)",
+  "listTitle": "قائمة المنتجات والخدمات ({count})",
+  "searchPlaceholder": "بحث...",
+  "tabs": {
+    "all": "الكل",
+    "products": "المنتجات",
+    "services": "الخدمات"
+  },
+  "deleteSelection": "حذف المحدد ({count})",
+  "selectAll": "تحديد الكل",
+  "select": "تحديد {title}",
+  "columns": {
+    "product": "المنتج",
+    "price": "السعر",
+    "sold": "المبيعات",
+    "status": "الحالة",
+    "actions": "الإجراءات"
+  },
+  "loading": "جارٍ تحميل المنتجات...",
+  "loadError": "تعذّر تحميل المنتجات.",
+  "empty": "لم يُعثر على أي منتج أو خدمة.",
+  "emptyHint": "عدّل بحثك أو أضف عنصرًا جديدًا.",
+  "moderation": {
+    "PENDING": "بانتظار المصادقة",
+    "APPROVED": "تمت المصادقة",
+    "REJECTED": "مرفوض"
+  },
+  "size": "المقاس: {size}",
+  "colors": "الألوان: {count}",
+  "onQuote": "حسب عرض الأسعار",
+  "stock": {
+    "inStock": "متوفر",
+    "low": "مخزون منخفض ({quantity})",
+    "out": "نفاد المخزون"
+  },
+  "edit": "تعديل",
+  "delete": "حذف",
+  "bestSellers": "الأكثر مبيعًا",
+  "noSales": "لا توجد مبيعات مسجلة",
+  "noSalesHint": "ستظهر هنا المنتجات الأكثر مبيعًا.",
+  "deleteTitle": "تأكيد الحذف",
+  "deleteBulk": "هل تريد فعلًا حذف {count, plural, zero {# عنصر} one {عنصر واحد} two {عنصرين} few {# عناصر} many {# عنصرًا} other {# عنصر}}؟ لا يمكن التراجع عن هذا الإجراء.",
+  "deleteOne": "هل تريد فعلًا حذف «{title}»؟ لا يمكن التراجع عن هذا الإجراء.",
+  "cancel": "إلغاء",
+  "deleting": "جارٍ الحذف..."
+}

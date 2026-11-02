@@ -19,6 +19,7 @@ import {
 import { trpc } from "@/server/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LockKeyhole, Mail, User } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Controller, useForm, type Resolver } from "react-hook-form";
 import { PhoneInput } from "../phone-input";
@@ -30,6 +31,9 @@ export default function RegisterForm({
   onSwitchToLogin: () => void;
   onOtpRequired: (otp: PendingOtp, message: string) => void;
 }) {
+  const t = useTranslations("auth.register");
+  const tOtp = useTranslations("auth.otp");
+  const tErrors = useTranslations("errors");
   const [message, setMessage] = useState<string | null>(null);
 
   const register = trpc.auth.register.useMutation();
@@ -70,13 +74,11 @@ export default function RegisterForm({
       onOtpRequired(
         { identifier: data.phoneNumber || data.email || "", purpose: "REGISTER" },
         result.otp.debugCode
-          ? `Code de test: ${result.otp.debugCode}`
-          : "Un code de validation vous a été envoyé.",
+          ? tOtp("testCode", { code: result.otp.debugCode })
+          : t("codeSent"),
       );
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Une erreur est survenue.",
-      );
+      setMessage(error instanceof Error ? error.message : tErrors("generic"));
     }
   };
 
@@ -93,12 +95,10 @@ export default function RegisterForm({
           <FieldGroup>
             <div className="space-y-4">
               <h1 className="max-w-md text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
-                Créez votre compte fournisseur
+                {t("title")}
               </h1>
               <p className="max-w-md text-lg leading-8 text-slate-500">
-                Pour publier vos produits et services, répondre aux appels
-                d&apos;offres et gérer vos ventes. Les acheteurs
-                s&apos;inscrivent dans l&apos;espace acheteur.
+                {t("intro")}
               </p>
             </div>
 
@@ -108,7 +108,7 @@ export default function RegisterForm({
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Prénom</FieldLabel>
+                    <FieldLabel>{t("firstName")}</FieldLabel>
                     <div className="flex items-center overflow-hidden rounded-[18px] border border-[#dce7f3] bg-white shadow-[0_12px_30px_-24px_rgba(38,88,132,0.7)]">
                       <div className="inline-flex items-center px-4">
                         <User className="size-4 text-slate-300" />
@@ -116,9 +116,9 @@ export default function RegisterForm({
                       <Input
                         {...field}
                         aria-invalid={fieldState.invalid}
-                        placeholder="Jean"
+                        placeholder={t("firstNamePlaceholder")}
                         disabled={register.isPending}
-                        className="h-12 flex-1 rounded-none border-0 bg-transparent px-0 pr-4 text-base shadow-none ring-0 focus-visible:ring-0"
+                        className="h-12 flex-1 rounded-none border-0 bg-transparent px-0 pe-4 text-base shadow-none ring-0 focus-visible:ring-0"
                       />
                     </div>
                     {fieldState.invalid && (
@@ -133,7 +133,7 @@ export default function RegisterForm({
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Nom</FieldLabel>
+                    <FieldLabel>{t("lastName")}</FieldLabel>
                     <div className="flex items-center overflow-hidden rounded-[18px] border border-[#dce7f3] bg-white shadow-[0_12px_30px_-24px_rgba(38,88,132,0.7)]">
                       <div className="inline-flex items-center px-4">
                         <User className="size-4 text-slate-300" />
@@ -141,9 +141,9 @@ export default function RegisterForm({
                       <Input
                         {...field}
                         aria-invalid={fieldState.invalid}
-                        placeholder="Dupont"
+                        placeholder={t("lastNamePlaceholder")}
                         disabled={register.isPending}
-                        className="h-12 flex-1 rounded-none border-0 bg-transparent px-0 pr-4 text-base shadow-none ring-0 focus-visible:ring-0"
+                        className="h-12 flex-1 rounded-none border-0 bg-transparent px-0 pe-4 text-base shadow-none ring-0 focus-visible:ring-0"
                       />
                     </div>
                     {fieldState.invalid && (
@@ -159,7 +159,7 @@ export default function RegisterForm({
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Numéro de téléphone</FieldLabel>
+                  <FieldLabel>{t("phone")}</FieldLabel>
                   <PhoneInput
                     value={field.value}
                     onChange={(value) => field.onChange(value)}
@@ -178,7 +178,7 @@ export default function RegisterForm({
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Email (optionnel)</FieldLabel>
+                  <FieldLabel>{t("emailOptional")}</FieldLabel>
                   <div className="flex items-center overflow-hidden rounded-[18px] border border-[#dce7f3] bg-white shadow-[0_12px_30px_-24px_rgba(38,88,132,0.7)]">
                     <div className="inline-flex items-center px-4">
                       <Mail className="size-4 text-slate-300" />
@@ -189,10 +189,10 @@ export default function RegisterForm({
                       type="email"
                       inputMode="email"
                       autoComplete="email"
-                      placeholder="nom@exemple.com"
+                      placeholder={t("emailPlaceholder")}
                       aria-invalid={fieldState.invalid}
                       disabled={register.isPending}
-                      className="h-12 flex-1 rounded-none border-0 bg-transparent px-0 pr-4 text-base shadow-none ring-0 focus-visible:ring-0"
+                      className="h-12 flex-1 rounded-none border-0 bg-transparent px-0 pe-4 text-base shadow-none ring-0 focus-visible:ring-0"
                     />
                   </div>
                   {fieldState.invalid && (
@@ -208,7 +208,7 @@ export default function RegisterForm({
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Mot de passe</FieldLabel>
+                    <FieldLabel>{t("password")}</FieldLabel>
                     <div className="flex items-center overflow-hidden rounded-[18px] border border-[#dce7f3] bg-white shadow-[0_12px_30px_-24px_rgba(38,88,132,0.7)]">
                       <div className="inline-flex items-center px-4">
                         <LockKeyhole className="size-4 text-slate-300" />
@@ -218,7 +218,7 @@ export default function RegisterForm({
                         type="password"
                         aria-invalid={fieldState.invalid}
                         disabled={register.isPending}
-                        className="h-12 flex-1 rounded-none border-0 bg-transparent px-0 pr-4 text-base shadow-none ring-0 focus-visible:ring-0"
+                        className="h-12 flex-1 rounded-none border-0 bg-transparent px-0 pe-4 text-base shadow-none ring-0 focus-visible:ring-0"
                       />
                     </div>
                     {fieldState.invalid && (
@@ -233,7 +233,7 @@ export default function RegisterForm({
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Confirmation</FieldLabel>
+                    <FieldLabel>{t("confirmPassword")}</FieldLabel>
                     <div className="flex items-center overflow-hidden rounded-[18px] border border-[#dce7f3] bg-white shadow-[0_12px_30px_-24px_rgba(38,88,132,0.7)]">
                       <div className="inline-flex items-center px-4">
                         <LockKeyhole className="size-4 text-slate-300" />
@@ -243,7 +243,7 @@ export default function RegisterForm({
                         type="password"
                         aria-invalid={fieldState.invalid}
                         disabled={register.isPending}
-                        className="h-12 flex-1 rounded-none border-0 bg-transparent px-0 pr-4 text-base shadow-none ring-0 focus-visible:ring-0"
+                        className="h-12 flex-1 rounded-none border-0 bg-transparent px-0 pe-4 text-base shadow-none ring-0 focus-visible:ring-0"
                       />
                     </div>
                     {fieldState.invalid && (
@@ -268,10 +268,7 @@ export default function RegisterForm({
                       aria-invalid={fieldState.invalid}
                       className="mt-0.5"
                     />
-                    <span>
-                      J&apos;accepte les Conditions Générales d&apos;Utilisation
-                      (CGU).
-                    </span>
+                    <span>{t("acceptTerms")}</span>
                   </label>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -289,20 +286,23 @@ export default function RegisterForm({
               disabled={register.isPending}
               className="flex h-12 w-full items-center justify-center rounded-[18px] bg-[#4390cf] text-lg font-medium text-white shadow-[0_24px_40px_-24px_rgba(67,144,207,0.95)] transition-colors hover:bg-[#317dbb] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {register.isPending ? "Inscription..." : "S'inscrire"}
+              {register.isPending ? t("submitting") : t("submit")}
             </Button>
           </Field>
 
           <Field>
             <FieldDescription className="text-center">
-              Vous avez déjà un compte ?{" "}
-              <button
-                type="button"
-                onClick={onSwitchToLogin}
-                className="text-primary cursor-pointer font-semibold hover:underline"
-              >
-                Connectez-vous
-              </button>
+              {t.rich("haveAccount", {
+                login: (chunks) => (
+                  <button
+                    type="button"
+                    onClick={onSwitchToLogin}
+                    className="text-primary cursor-pointer font-semibold hover:underline"
+                  >
+                    {chunks}
+                  </button>
+                ),
+              })}
             </FieldDescription>
           </Field>
         </form>

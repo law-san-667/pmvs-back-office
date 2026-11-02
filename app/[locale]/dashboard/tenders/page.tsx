@@ -45,35 +45,23 @@ import {
 } from "@/components/ui/tooltip";
 import { useBusiness } from "@/contexts/business-context";
 import { Link, useRouter } from "@/i18n/navigation";
-import type { Tender, TenderStatus, TenderType } from "@/lib/backend-resource-types";
+import type { Tender, TenderStatus } from "@/lib/backend-resource-types";
+import { formatAmount } from "@/lib/payment-utils";
+import { formatDate } from "@/lib/utils";
 import { trpc } from "@/server/trpc/client";
 import {
   FileSignatureIcon,
   GavelIcon,
+  InboxIcon,
   PencilIcon,
   PlusIcon,
   SearchIcon,
   Trash2Icon,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 const PAGE_SIZE = 10;
-
-const TYPE_LABELS: Record<TenderType, string> = {
-  SUPPLY: "Fourniture",
-  SERVICE: "Service",
-  WORKS: "Travaux",
-  INTELLECTUAL_SERVICE: "Prestation intellectuelle",
-};
-
-const STATUS_LABELS: Record<TenderStatus, string> = {
-  DRAFT: "Brouillon",
-  OPEN: "Ouvert",
-  EVALUATION: "En évaluation",
-  AWARDED: "Attribué",
-  CLOSED: "Clôturé",
-  CANCELLED: "Annulé",
-};
 
 const STATUS_CLASSES: Record<TenderStatus, string> = {
   DRAFT: "bg-muted text-muted-foreground",
@@ -84,36 +72,30 @@ const STATUS_CLASSES: Record<TenderStatus, string> = {
   CANCELLED: "bg-destructive/15 text-destructive",
 };
 
-const formatBudget = (tender: Tender) => {
+const formatBudget = (
+  tender: Tender,
+  locale: string,
+  range: (min: string, max: string) => string,
+) => {
   const { budgetMinMinor, budgetMaxMinor, currency } = tender;
   if (budgetMinMinor == null && budgetMaxMinor == null) return "—";
 
-  const format = (value: number) => {
-    try {
-      return new Intl.NumberFormat("fr-FR", {
-        style: "currency",
-        currency,
-        maximumFractionDigits: 0,
-      }).format(value);
-    } catch {
-      return `${value.toLocaleString("fr-FR")} ${currency}`;
-    }
-  };
+  const format = (value: number) => formatAmount(value, currency, locale);
 
   if (budgetMinMinor != null && budgetMaxMinor != null) {
-    return `${format(budgetMinMinor)} – ${format(budgetMaxMinor)}`;
+    return range(format(budgetMinMinor), format(budgetMaxMinor));
   }
   return format((budgetMinMinor ?? budgetMaxMinor) as number);
 };
 
-const formatDeadline = (iso: string) => {
+const formatDeadline = (iso: string, locale: string) => {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat("fr-FR", {
+  return formatDate(date, locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
-  }).format(date);
+  });
 };
 
 const getVisiblePages = (currentPage: number, totalPages: number) => {
@@ -128,6 +110,8 @@ const getVisiblePages = (currentPage: number, totalPages: number) => {
 type DeleteTarget = { id: string; title: string };
 
 export default function TendersPage() {
+  const t = useTranslations("tenders");
+  const locale = useLocale();
   const router = useRouter();
   const utils = trpc.useUtils();
   const { businessId, isLoading: isBusinessLoading } = useBusiness();
@@ -179,7 +163,7 @@ export default function TendersPage() {
 
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_340px]">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="flex flex-col gap-4">
           <Link href="/dashboard/tenders/new">
             <Button
@@ -187,21 +171,21 @@ export default function TendersPage() {
               className="h-14 w-full border-dashed text-base"
             >
               <PlusIcon className="size-5" />
-              Créer un appel d&apos;offres
+              {t("list.create")}
             </Button>
           </Link>
 
           <Card>
             <CardHeader>
-              <CardTitle>Mes appels d&apos;offres ({totalTenders})</CardTitle>
+              <CardTitle>{t("list.title", { count: totalTenders })}</CardTitle>
               <CardAction>
                 <div className="relative">
-                  <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+                  <SearchIcon className="text-muted-foreground absolute start-2.5 top-1/2 size-4 -translate-y-1/2" />
                   <Input
-                    placeholder="Recherche..."
+                    placeholder={t("list.searchPlaceholder")}
                     value={search}
                     onChange={(event) => updateSearch(event.target.value)}
-                    className="h-8 w-48 pl-8"
+                    className="h-8 w-48 ps-8"
                   />
                 </div>
               </CardAction>
@@ -211,22 +195,22 @@ export default function TendersPage() {
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
                     <TableHead className="text-muted-foreground font-normal">
-                      Appel d&apos;offres
+                      {t("list.columns.tender")}
                     </TableHead>
                     <TableHead className="text-muted-foreground font-normal">
-                      Type
+                      {t("list.columns.type")}
                     </TableHead>
                     <TableHead className="text-muted-foreground font-normal">
-                      Budget
+                      {t("list.columns.budget")}
                     </TableHead>
                     <TableHead className="text-muted-foreground font-normal">
-                      Date limite
+                      {t("list.columns.deadline")}
                     </TableHead>
                     <TableHead className="text-muted-foreground font-normal">
-                      Statut
+                      {t("list.columns.status")}
                     </TableHead>
                     <TableHead className="text-muted-foreground font-normal">
-                      Actions
+                      {t("list.columns.actions")}
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -236,7 +220,7 @@ export default function TendersPage() {
                       <TableCell colSpan={6} className="h-32 text-center">
                         <div className="text-muted-foreground flex items-center justify-center gap-2 text-sm">
                           <Spinner />
-                          Chargement des appels d&apos;offres...
+                          {t("list.loading")}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -245,9 +229,7 @@ export default function TendersPage() {
                       <TableCell colSpan={6} className="h-32 text-center">
                         <div className="flex flex-col items-center gap-2 text-sm">
                           <GavelIcon className="text-muted-foreground size-8" />
-                          <p className="font-medium">
-                            Impossible de charger les appels d&apos;offres.
-                          </p>
+                          <p className="font-medium">{t("list.loadError")}</p>
                           <p className="text-muted-foreground">
                             {tenders.error.message}
                           </p>
@@ -259,12 +241,9 @@ export default function TendersPage() {
                       <TableCell colSpan={6} className="h-40 text-center">
                         <div className="flex flex-col items-center gap-2 text-sm">
                           <GavelIcon className="text-muted-foreground size-9" />
-                          <p className="font-medium">
-                            Aucun appel d&apos;offres trouvé.
-                          </p>
+                          <p className="font-medium">{t("list.emptyTitle")}</p>
                           <p className="text-muted-foreground">
-                            Créez votre premier appel d&apos;offres pour
-                            recevoir des soumissions.
+                            {t("list.emptyText")}
                           </p>
                         </div>
                       </TableCell>
@@ -287,24 +266,49 @@ export default function TendersPage() {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="rounded-sm">
-                            {TYPE_LABELS[tender.type]}
+                            {t(`type.${tender.type}`)}
                           </Badge>
                         </TableCell>
                         <TableCell className="font-medium">
-                          {formatBudget(tender)}
+                          {formatBudget(tender, locale, (min, max) =>
+                            t("list.budgetRange", { min, max }),
+                          )}
                         </TableCell>
                         <TableCell>
-                          {formatDeadline(tender.submissionDeadline)}
+                          {formatDeadline(tender.submissionDeadline, locale)}
                         </TableCell>
                         <TableCell>
                           <span
                             className={`rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_CLASSES[tender.status]}`}
                           >
-                            {STATUS_LABELS[tender.status]}
+                            {t(`status.${tender.status}`)}
                           </span>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
+                            <Tooltip>
+                              <TooltipTrigger
+                                render={
+                                  <Button
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    className="text-foreground"
+                                    onClick={() =>
+                                      router.push(
+                                        `/dashboard/tenders/${tender.id}/responses`,
+                                      )
+                                    }
+                                  />
+                                }
+                              >
+                                <InboxIcon className="size-4" />
+                                <span className="sr-only">
+                                  {t("list.bids")}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>{t("list.bids")}</TooltipContent>
+                            </Tooltip>
+
                             <Tooltip>
                               <TooltipTrigger
                                 render={
@@ -321,9 +325,11 @@ export default function TendersPage() {
                                 }
                               >
                                 <PencilIcon className="size-4" />
-                                <span className="sr-only">Modifier</span>
+                                <span className="sr-only">
+                                  {t("list.edit")}
+                                </span>
                               </TooltipTrigger>
-                              <TooltipContent>Modifier</TooltipContent>
+                              <TooltipContent>{t("list.edit")}</TooltipContent>
                             </Tooltip>
 
                             <Tooltip>
@@ -343,9 +349,13 @@ export default function TendersPage() {
                                 }
                               >
                                 <Trash2Icon className="size-4" />
-                                <span className="sr-only">Supprimer</span>
+                                <span className="sr-only">
+                                  {t("list.delete")}
+                                </span>
                               </TooltipTrigger>
-                              <TooltipContent>Supprimer</TooltipContent>
+                              <TooltipContent>
+                                {t("list.delete")}
+                              </TooltipContent>
                             </Tooltip>
                           </div>
                         </TableCell>
@@ -422,7 +432,9 @@ export default function TendersPage() {
 
         <Card className="h-fit">
           <CardHeader>
-            <CardTitle className="font-bold">Mes soumissions</CardTitle>
+            <CardTitle className="font-bold">
+              {t("submissions.title")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="border-border/70 flex min-h-64 flex-col items-center justify-center gap-3 rounded-lg border border-dashed px-6 py-10 text-center">
@@ -430,10 +442,9 @@ export default function TendersPage() {
                 <FileSignatureIcon className="size-6" />
               </div>
               <div className="space-y-1">
-                <p className="font-medium">Aucune soumission</p>
+                <p className="font-medium">{t("submissions.emptyTitle")}</p>
                 <p className="text-muted-foreground text-sm">
-                  Les soumissions que vous déposez sur les appels d&apos;offres
-                  apparaîtront ici.
+                  {t("submissions.emptyText")}
                 </p>
               </div>
             </div>
@@ -449,14 +460,14 @@ export default function TendersPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogTitle>{t("deleteDialog.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {`Voulez-vous vraiment supprimer « ${deleteTarget?.title} » ? Cette action est irréversible.`}
+              {t("deleteDialog.text", { title: deleteTarget?.title ?? "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleteTender.isPending}>
-              Annuler
+              {t("deleteDialog.cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
@@ -466,7 +477,9 @@ export default function TendersPage() {
                 confirmDelete();
               }}
             >
-              {deleteTender.isPending ? "Suppression..." : "Supprimer"}
+              {deleteTender.isPending
+                ? t("deleteDialog.deleting")
+                : t("deleteDialog.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

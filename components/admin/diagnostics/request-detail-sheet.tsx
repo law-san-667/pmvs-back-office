@@ -89,13 +89,13 @@ function JsonBlock({ value, empty }: { value: unknown; empty: string }) {
       <Button
         size="icon-sm"
         variant="ghost"
-        className="absolute top-1 right-1"
+        className="absolute top-1 end-1"
         onClick={() => void copy(text, "Contenu")}
         aria-label="Copier"
       >
         <CopyIcon />
       </Button>
-      <pre className="bg-muted max-h-[50vh] overflow-auto rounded-md p-3 pr-10 font-mono text-xs leading-relaxed whitespace-pre-wrap break-all">
+      <pre className="bg-muted max-h-[50vh] overflow-auto rounded-md p-3 pe-10 font-mono text-xs leading-relaxed whitespace-pre-wrap break-all">
         {text}
       </pre>
     </div>

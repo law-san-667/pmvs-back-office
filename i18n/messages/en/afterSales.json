@@ -1,0 +1,54 @@
+{
+  "reason": {
+    "NOT_RECEIVED": "Order not received",
+    "DAMAGED": "Damaged item",
+    "NOT_AS_DESCRIBED": "Not as described in the listing",
+    "WRONG_ITEM": "Wrong item",
+    "OTHER": "Other problem"
+  },
+  "status": {
+    "OPEN": "Awaiting the seller",
+    "SUPPLIER_ACCEPTED": "Accepted by the seller",
+    "ESCALATED": "Under review by Diarama",
+    "RESOLVED": "Resolved",
+    "CANCELLED": "Withdrawn"
+  },
+  "resolution": {
+    "REFUND_FULL": "Full refund",
+    "REFUND_PARTIAL": "Partial refund",
+    "REPLACEMENT": "Replacement",
+    "NO_REFUND": "No refund",
+    "partialAmount": "Partial refund of {amount}"
+  },
+  "card": {
+    "dispute": "Dispute",
+    "returnRequest": "Return request",
+    "summary": "{reason} · {status}",
+    "photo": "Attached photo",
+    "supplierResponse": "Seller's reply: {response}",
+    "decision": "Decision: <b>{resolution}</b>",
+    "decisionWithNote": "Decision: <b>{resolution}</b> — {note}",
+    "failed": "Failed.",
+    "deadline": "Reply before {date}; otherwise the Diarama team will decide.",
+    "yourAnswer": "Your reply",
+    "refuse": "Refuse",
+    "refused": "Refusal sent to the Diarama team.",
+    "accept": "Accept",
+    "accepted": "Request accepted.",
+    "decisionLabel": "Decision",
+    "decisionReason": "Reason for the decision",
+    "decisionPlaceholder": "Reason shared with the buyer and the seller",
+    "refundHint": "The payment is recorded as refunded (credit note issued, seller's share cancelled). Refund the buyer by bank transfer or mobile money.",
+    "decided": "Decision saved.",
+    "resolve": "Decide",
+    "refundAmount": "Amount refunded ({currency})",
+    "partialRefundHint": "The amount is taken from the seller's share and the commission in proportion; a partial credit note is issued. Refund the buyer outside the platform."
+  },
+  "page": {
+    "title": "Returns and disputes",
+    "description": "Reply within 72 hours: after that, the Diarama team decides. The order share is only paid out once the case is closed.",
+    "loading": "Loading…",
+    "empty": "No returns or disputes.",
+    "order": "Order {reference}"
+  }
+}

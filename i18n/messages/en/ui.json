@@ -1,0 +1,16 @@
+{
+  "close": "Close",
+  "pagination": "Pagination",
+  "previous": "Previous",
+  "next": "Next",
+  "previousPage": "Go to previous page",
+  "nextPage": "Go to next page",
+  "morePages": "More pages",
+  "sidebar": "Sidebar",
+  "sidebarDescription": "Displays the mobile sidebar.",
+  "toggleSidebar": "Toggle sidebar",
+  "commandTitle": "Command palette",
+  "commandDescription": "Search for a command to run…",
+  "breadcrumb": "Breadcrumb",
+  "more": "More"
+}

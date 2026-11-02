@@ -68,7 +68,7 @@ export default function AdminContentPage() {
                 type="button"
                 onClick={() => setSelectedId(page.id)}
                 className={cn(
-                  "hover:bg-muted flex items-center justify-between gap-2 rounded-md px-3 py-2 text-left text-sm",
+                  "hover:bg-muted flex items-center justify-between gap-2 rounded-md px-3 py-2 text-start text-sm",
                   selected?.id === page.id && "bg-muted font-medium",
                 )}
               >

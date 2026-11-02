@@ -24,17 +24,11 @@ import {
   type ListingImages,
 } from "@/lib/validators/listings-services";
 import { ImageIcon, VideoIcon, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import Cropper from "react-easy-crop";
-
-export const IMAGE_KIND_LABELS: Record<ListingImageKind, string> = {
-  MAIN: "Photo principale",
-  BACK: "Photo de dos",
-  SIDE: "Photo de côté",
-  OTHER: "Autre photo",
-};
 
 /** An image attached to the listing: already uploaded (`url`) or pending (`file`). */
 export type ManagedImage = {
@@ -306,16 +300,20 @@ export function useListingMedia(initial?: {
 
 export type ListingMedia = ReturnType<typeof useListingMedia>;
 
+/** What the listing is, for the media titles. */
+export type ListingMediaSubject = "product" | "service";
+
 export function ListingMediaFields({
   media,
   withLabels = false,
-  subject = "produit",
+  subject = "product",
 }: {
   media: ListingMedia;
   /** Show the photo type and image name (keywords) under each image. */
   withLabels?: boolean;
-  subject?: string;
+  subject?: ListingMediaSubject;
 }) {
+  const t = useTranslations("productForm.media");
   const { images, video, existingVideo, imageDropzone, videoDropzone } = media;
 
   return (
@@ -328,7 +326,7 @@ export function ListingMediaFields({
           <input {...imageDropzone.getInputProps()} />
           <ImageIcon className="text-primary/60 size-8" />
           <span className="text-primary text-xs font-medium">
-            Ajouter une image
+            {t("addImage")}
           </span>
         </div>
 
@@ -338,7 +336,7 @@ export function ListingMediaFields({
               {image.file ? (
                 <Image
                   src={image.preview}
-                  alt={image.label || `Image ${index + 1}`}
+                  alt={image.label || t("imageAlt", { number: index + 1 })}
                   fill
                   className="cursor-pointer object-cover"
                   onClick={() => media.openCrop(image.key)}
@@ -347,21 +345,23 @@ export function ListingMediaFields({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={image.preview}
-                  alt={image.label || `Image existante ${index + 1}`}
+                  alt={
+                    image.label || t("existingImageAlt", { number: index + 1 })
+                  }
                   className="size-full object-cover"
                 />
               )}
               <button
                 type="button"
                 onClick={() => media.removeImage(image.key)}
-                className="absolute top-1 right-1 flex size-5 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70"
-                aria-label="Retirer l'image"
+                className="absolute top-1 end-1 flex size-5 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70"
+                aria-label={t("removeImage")}
               >
                 <X className="size-3" />
               </button>
               {image.file && !image.cropped && (
-                <div className="bg-destructive/80 absolute right-0 bottom-0 left-0 py-0.5 text-center text-[10px] text-white">
-                  Non recadré
+                <div className="bg-destructive/80 absolute end-0 bottom-0 start-0 py-0.5 text-center text-[10px] text-white">
+                  {t("notCropped")}
                 </div>
               )}
             </div>
@@ -375,11 +375,11 @@ export function ListingMediaFields({
                     })
                   }
                   className="border-input bg-background h-8 rounded-md border px-2 text-xs"
-                  aria-label="Type de photo"
+                  aria-label={t("photoType")}
                 >
                   {listingImageKindEnum.map((kind) => (
                     <option key={kind} value={kind}>
-                      {IMAGE_KIND_LABELS[kind]}
+                      {t(`imageKind.${kind}`)}
                     </option>
                   ))}
                 </select>
@@ -388,7 +388,7 @@ export function ListingMediaFields({
                   onChange={(event) =>
                     media.updateImage(image.key, { label: event.target.value })
                   }
-                  placeholder="Nom / mots-clés"
+                  placeholder={t("imageLabelPlaceholder")}
                   className="h-8 text-xs"
                 />
               </>
@@ -399,9 +399,9 @@ export function ListingMediaFields({
 
       <div className="mt-6 flex flex-col gap-3">
         <div>
-          <FieldLabel>Vidéo (facultative)</FieldLabel>
+          <FieldLabel>{t("video")}</FieldLabel>
           <p className="text-muted-foreground mt-1 text-xs">
-            Une seule vidéo au format MP4, WebM ou MOV.
+            {t("videoHint")}
           </p>
         </div>
 
@@ -413,15 +413,15 @@ export function ListingMediaFields({
               preload="metadata"
               playsInline
               className="aspect-video w-full"
-              aria-label={`Vidéo du ${subject}`}
+              aria-label={t("videoLabel", { subject })}
             >
-              Votre navigateur ne prend pas en charge la lecture de vidéos.
+              {t("videoUnsupported")}
             </video>
             <button
               type="button"
               onClick={media.removeVideo}
-              className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
-              aria-label="Supprimer la vidéo"
+              className="absolute top-2 end-2 flex size-7 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+              aria-label={t("removeVideo")}
             >
               <X className="size-4" />
             </button>
@@ -434,7 +434,7 @@ export function ListingMediaFields({
             <input {...videoDropzone.getInputProps()} />
             <VideoIcon className="text-primary/60 size-8" />
             <span className="text-primary text-xs font-medium">
-              Ajouter une vidéo
+              {t("addVideo")}
             </span>
           </div>
         )}
@@ -446,14 +446,16 @@ export function ListingMediaFields({
 export function ListingMediaCard(props: {
   media: ListingMedia;
   withLabels?: boolean;
-  subject?: string;
+  subject?: ListingMediaSubject;
   hint?: string;
 }) {
+  const t = useTranslations("productForm.media");
+
   return (
     <Card className="bg-muted/30">
       <CardHeader>
         <CardTitle className="font-bold">
-          Médias du {props.subject ?? "produit"}
+          {t("title", { subject: props.subject ?? "product" })}
         </CardTitle>
         {props.hint && (
           <p className="text-muted-foreground text-sm">{props.hint}</p>
@@ -467,13 +469,14 @@ export function ListingMediaCard(props: {
 }
 
 export function ListingCropDialog({ media }: { media: ListingMedia }) {
+  const t = useTranslations("productForm.media");
   const { crop } = media;
 
   return (
     <Dialog open={crop.target !== null} onOpenChange={(o) => !o && crop.close()}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Recadrer l&apos;image (carré)</DialogTitle>
+          <DialogTitle>{t("cropTitle")}</DialogTitle>
         </DialogHeader>
         <div className="relative h-72 w-full">
           {crop.target && (
@@ -492,9 +495,9 @@ export function ListingCropDialog({ media }: { media: ListingMedia }) {
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={crop.close}>
-            Annuler
+            {t("cancel")}
           </Button>
-          <Button onClick={() => void crop.save()}>Enregistrer</Button>
+          <Button onClick={() => void crop.save()}>{t("save")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -1,3 +1,5 @@
+import { uploadText } from "@/lib/upload-to-r2";
+
 export interface CroppedArea {
   x: number;
   y: number;
@@ -40,7 +42,7 @@ export async function getCroppedImgSquare(
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (blob) resolve(blob);
-      else reject(new Error("Canvas is empty"));
+      else reject(new Error(uploadText("cropFailed")));
     }, "image/png");
   });
 }
@@ -81,7 +83,7 @@ export async function getCroppedImg(
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (blob) resolve(blob);
-      else reject(new Error("Canvas is empty"));
+      else reject(new Error(uploadText("cropFailed")));
     }, "image/png");
   });
 }

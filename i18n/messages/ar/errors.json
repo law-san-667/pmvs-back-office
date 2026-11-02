@@ -1,0 +1,7 @@
+{
+  "generic": "حدث خطأ.",
+  "authRequired": "يلزم تسجيل الدخول.",
+  "backendFailed": "فشل الطلب إلى الخادم.",
+  "unexpected": "حدث خطأ غير متوقع.",
+  "waveNumberInvalid": "رقم Wave غير صالح."
+}

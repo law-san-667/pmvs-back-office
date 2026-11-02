@@ -1,4 +1,7 @@
 import { env } from "@/config/env/server";
+// French "upload" texts: the tRPC error formatter gives them in the visitor's
+// language (server/trpc/init.ts).
+import uploadErrors from "@/i18n/messages/fr/upload.json";
 import type {
   DeleteObjectCommandInput,
   PutObjectCommandInput,
@@ -59,7 +62,7 @@ const createUploadKey = (
 
 export function getFileFromR2(key: string) {
   if (!env.CLOUDFLARE_R2_PUBLIC_URL)
-    throw new Error("Missing CLOUDFLARE_R2_PUBLIC_URL");
+    throw new Error(uploadErrors.publicUrlMissing);
 
   return `${normalizePublicUrl(env.CLOUDFLARE_R2_PUBLIC_URL)}/${key}`;
 }
@@ -73,7 +76,7 @@ export async function getObjectToBuffer(key: string): Promise<Buffer> {
   const response = await r2Client.send(command);
   const body = response.Body;
 
-  if (!body) throw new Error("Empty R2 object");
+  if (!body) throw new Error(uploadErrors.uploadFailed);
 
   const bytes = await body.transformToByteArray();
   return Buffer.from(bytes);
@@ -90,7 +93,7 @@ export async function deleteFileFromR2(key: string) {
     return true;
   } catch (error) {
     console.error("Error deleting file from R2:", error);
-    throw new Error("Failed to delete file from R2");
+    throw new Error(uploadErrors.deleteFailed);
   }
 }
 
@@ -126,7 +129,7 @@ export async function uploadFileToR2(
     };
   } catch (error) {
     console.error("Error uploading to R2:", error);
-    throw new Error("Failed to upload file to R2");
+    throw new Error(uploadErrors.uploadFailed);
   }
 }
 

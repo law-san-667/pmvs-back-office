@@ -159,7 +159,7 @@ export function BusinessDetails({ id }: { id: string }) {
         >
           {BUSINESS_STATUS_LABELS[value.status]}
         </Badge>
-        <div className="ml-auto flex flex-wrap gap-2">
+        <div className="ms-auto flex flex-wrap gap-2">
           {value.status !== "ACTIVE" && (
             <Button
               disabled={updateStatus.isPending}
@@ -446,7 +446,13 @@ export function BusinessDetails({ id }: { id: string }) {
                 <Row label="Code postal" value={legalInformation.postalCode} />
                 <Row
                   label="Représentant légal"
-                  value={`${legalInformation.legalRepresentative.name} — ${legalInformation.legalRepresentative.mobilePhone}`}
+                  value={
+                    // Shops created before this field existed have no legal representative.
+                    legalInformation.legalRepresentative &&
+                    [legalInformation.legalRepresentative.name, legalInformation.legalRepresentative.mobilePhone]
+                      .filter(Boolean)
+                      .join(" — ")
+                  }
                 />
                 <Row label="Site web" value={legalInformation.website} />
                 <Row

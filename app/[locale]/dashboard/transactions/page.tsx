@@ -23,16 +23,12 @@ import {
 import { Link } from "@/i18n/navigation";
 import type { PaymentStatus, PayoutStatus } from "@/lib/admin-types";
 import {
+  formatAmount,
   PAYMENT_STATUS_CLASSES,
-  PAYMENT_STATUS_LABELS,
   PAYOUT_STATUS_CLASSES,
-  PAYOUT_STATUS_LABELS,
 } from "@/lib/payment-utils";
-import {
-  formatDate,
-  formatMoney,
-  PAYMENT_METHOD_LABELS,
-} from "@/lib/seller-dashboard-utils";
+import { formatDate } from "@/lib/utils";
+import { useLocale, useTranslations } from "next-intl";
 import { trpc } from "@/server/trpc/client";
 import {
   BanknoteIcon,
@@ -51,16 +47,19 @@ type Filter =
   | { kind: "status"; status: PaymentStatus }
   | { kind: "payout"; payoutStatus: PayoutStatus };
 
-const FILTERS: { label: string; value: Filter }[] = [
-  { label: "Tout", value: { kind: "all" } },
-  { label: "Payées", value: { kind: "status", status: "SUCCEEDED" } },
-  { label: "En attente", value: { kind: "status", status: "PENDING" } },
-  { label: "Reversées", value: { kind: "payout", payoutStatus: "SUCCEEDED" } },
+const FILTERS: {
+  label: "all" | "paid" | "pending" | "paidOut" | "payoutFailed" | "refunded";
+  value: Filter;
+}[] = [
+  { label: "all", value: { kind: "all" } },
+  { label: "paid", value: { kind: "status", status: "SUCCEEDED" } },
+  { label: "pending", value: { kind: "status", status: "PENDING" } },
+  { label: "paidOut", value: { kind: "payout", payoutStatus: "SUCCEEDED" } },
   {
-    label: "Reversement échoué",
+    label: "payoutFailed",
     value: { kind: "payout", payoutStatus: "FAILED" },
   },
-  { label: "Remboursées", value: { kind: "status", status: "REFUNDED" } },
+  { label: "refunded", value: { kind: "status", status: "REFUNDED" } },
 ];
 
 function StatCard({
@@ -95,6 +94,11 @@ function StatCard({
 }
 
 export default function TransactionsPage() {
+  const t = useTranslations("transactions");
+  const tOrders = useTranslations("orders");
+  const locale = useLocale();
+  const formatMoney = (amountMinor: number, currency: string) =>
+    formatAmount(amountMinor, currency, locale);
   const [filterIndex, setFilterIndex] = useState(0);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -121,66 +125,75 @@ export default function TransactionsPage() {
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          title="Ventes encaissées"
+          title={t("stats.sales")}
           value={formatMoney(main?.grossMinor ?? 0, currency)}
-          hint={`${main?.transactionCount ?? 0} transaction(s) au total`}
+          hint={t("stats.salesHint", { count: main?.transactionCount ?? 0 })}
           icon={<BanknoteIcon className="size-5" />}
         />
         <StatCard
-          title="Reversé sur votre compte"
+          title={t("stats.paidOut")}
           value={formatMoney(main?.paidOutMinor ?? 0, currency)}
-          hint="Montant net déjà transféré par LawPay"
+          hint={t("stats.paidOutHint")}
           icon={<WalletIcon className="size-5" />}
         />
         <StatCard
-          title="Reversements en attente"
+          title={t("stats.pendingPayouts")}
           value={formatMoney(main?.pendingPayoutMinor ?? 0, currency)}
           hint={
             main?.failedPayoutMinor
-              ? `${formatMoney(main.failedPayoutMinor, currency)} en échec — contactez le support`
-              : `${main?.pendingCount ?? 0} paiement(s) client en attente`
+              ? t("stats.failedHint", {
+                  amount: formatMoney(main.failedPayoutMinor, currency),
+                })
+              : t("stats.pendingHint", { count: main?.pendingCount ?? 0 })
           }
           icon={<ClockIcon className="size-5" />}
         />
         <StatCard
-          title="Frais et commissions"
+          title={t("stats.fees")}
           value={formatMoney(
             (main?.platformFeesMinor ?? 0) + (main?.commissionMinor ?? 0),
             currency,
           )}
-          hint={`Frais LawPay ${formatMoney(main?.platformFeesMinor ?? 0, currency)} · commission ${formatMoney(main?.commissionMinor ?? 0, currency)}`}
+          hint={t("stats.feesHint", {
+            fees: formatMoney(main?.platformFeesMinor ?? 0, currency),
+            commission: formatMoney(main?.commissionMinor ?? 0, currency),
+          })}
           icon={<PercentIcon className="size-5" />}
         />
       </div>
 
       {others.length > 0 && (
         <p className="text-muted-foreground text-sm">
-          Autres devises :{" "}
-          {others
-            .map(
-              (row) =>
-                `${row.currency} — encaissé ${formatMoney(row.grossMinor, row.currency)}, reversé ${formatMoney(row.paidOutMinor, row.currency)}`,
-            )
-            .join(" · ")}
+          {t("otherCurrencies", {
+            list: others
+              .map((row) =>
+                t("otherCurrency", {
+                  currency: row.currency,
+                  gross: formatMoney(row.grossMinor, row.currency),
+                  paidOut: formatMoney(row.paidOutMinor, row.currency),
+                }),
+              )
+              .join(" · "),
+          })}
         </p>
       )}
 
       <Card>
         <CardHeader>
           <CardTitle>
-            Historique des transactions ({transactions.data?.total ?? 0})
+            {t("history", { count: transactions.data?.total ?? 0 })}
           </CardTitle>
           <CardAction>
             <div className="relative">
-              <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+              <SearchIcon className="text-muted-foreground absolute start-2.5 top-1/2 size-4 -translate-y-1/2" />
               <Input
-                placeholder="Référence..."
+                placeholder={t("searchPlaceholder")}
                 value={search}
                 onChange={(event) => {
                   setSearch(event.target.value);
                   setPage(1);
                 }}
-                className="h-8 w-48 pl-8"
+                className="h-8 w-48 ps-8"
               />
             </div>
           </CardAction>
@@ -197,7 +210,7 @@ export default function TransactionsPage() {
                   setPage(1);
                 }}
               >
-                {item.label}
+                {t(`filters.${item.label}`)}
               </Button>
             ))}
           </div>
@@ -205,15 +218,15 @@ export default function TransactionsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Référence</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>Moyen</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Montant</TableHead>
-                <TableHead>Net reversé</TableHead>
-                <TableHead>Paiement</TableHead>
-                <TableHead>Reversement</TableHead>
-                <TableHead className="w-[1%]">Commande</TableHead>
+                <TableHead>{t("columns.reference")}</TableHead>
+                <TableHead>{t("columns.client")}</TableHead>
+                <TableHead>{t("columns.method")}</TableHead>
+                <TableHead>{t("columns.date")}</TableHead>
+                <TableHead>{t("columns.amount")}</TableHead>
+                <TableHead>{t("columns.netPaidOut")}</TableHead>
+                <TableHead>{t("columns.payment")}</TableHead>
+                <TableHead>{t("columns.payout")}</TableHead>
+                <TableHead className="w-[1%]">{t("columns.order")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -222,15 +235,15 @@ export default function TransactionsPage() {
                 isLoading={transactions.isLoading}
                 error={transactions.error?.message}
                 isEmpty={!transactions.data?.items.length}
-                loadingLabel="Chargement des transactions..."
-                emptyLabel="Aucune transaction trouvée."
+                loadingLabel={t("loading")}
+                emptyLabel={t("empty")}
               />
               {transactions.data?.items.map((transaction) => (
                 <TableRow key={transaction.id}>
                   <TableCell className="font-medium">
                     {transaction.transactionReference ??
                       (transaction.provider === "CASH"
-                        ? "Espèces"
+                        ? t("cash")
                         : transaction.id.slice(0, 8).toUpperCase())}
                   </TableCell>
                   <TableCell>
@@ -238,10 +251,14 @@ export default function TransactionsPage() {
                   </TableCell>
                   <TableCell>
                     {transaction.providerPaymentMethod ??
-                      PAYMENT_METHOD_LABELS[transaction.method]}
+                      tOrders(`paymentMethod.${transaction.method}`)}
                   </TableCell>
                   <TableCell className="text-muted-foreground whitespace-nowrap">
-                    {formatDate(transaction.paidAt ?? transaction.createdAt)}
+                    {formatDate(
+                      transaction.paidAt ?? transaction.createdAt,
+                      locale,
+                      { dateStyle: "medium" },
+                    )}
                   </TableCell>
                   <TableCell className="font-bold">
                     {formatMoney(transaction.amountMinor, transaction.currency)}
@@ -259,7 +276,7 @@ export default function TransactionsPage() {
                       variant="outline"
                       className={PAYMENT_STATUS_CLASSES[transaction.status]}
                     >
-                      {PAYMENT_STATUS_LABELS[transaction.status]}
+                      {t(`paymentStatus.${transaction.status}`)}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -273,7 +290,7 @@ export default function TransactionsPage() {
                         }
                         title={transaction.payoutError ?? undefined}
                       >
-                        {PAYOUT_STATUS_LABELS[transaction.payoutStatus]}
+                        {t(`payoutStatus.${transaction.payoutStatus}`)}
                       </Badge>
                     )}
                   </TableCell>
@@ -282,9 +299,11 @@ export default function TransactionsPage() {
                       variant="ghost"
                       size="icon-sm"
                       render={
-                        <Link href={`/dashboard/orders/${transaction.orderId}`} />
+                        <Link
+                          href={`/dashboard/orders/${transaction.orderId}`}
+                        />
                       }
-                      aria-label="Voir la commande"
+                      aria-label={t("viewOrder")}
                     >
                       <EyeIcon className="size-4" />
                     </Button>

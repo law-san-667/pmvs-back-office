@@ -1,4 +1,8 @@
 import z from "zod";
+import { msg } from "./messages";
+
+// Messages are keys of the "auth" messages, translated where the form shows
+// them (FieldError, useValidationMessage).
 
 const authDeviceSchema = z.enum(["WEB", "MOBILE"]).default("WEB");
 const userRoleSchema = z
@@ -15,27 +19,27 @@ const otpPurposeSchema = z.enum([
 /** Client rule: at least 6 characters, one uppercase letter and one digit. */
 export const passwordSchema = z
   .string()
-  .min(6, "Le mot de passe doit contenir au moins 6 caractères.")
-  .regex(/\p{Lu}/u, "Le mot de passe doit contenir une majuscule.")
-  .regex(/\d/, "Le mot de passe doit contenir un chiffre.");
+  .min(6, msg("auth.errors.passwordMin"))
+  .regex(/\p{Lu}/u, msg("auth.errors.passwordUppercase"))
+  .regex(/\d/, msg("auth.errors.passwordDigit"));
 
 export const registerSchema = z
   .object({
-    firstName: z.string().trim().min(1, "Veuillez saisir votre prénom."),
-    lastName: z.string().trim().min(1, "Veuillez saisir votre nom."),
+    firstName: z.string().trim().min(1, msg("auth.errors.firstNameRequired")),
+    lastName: z.string().trim().min(1, msg("auth.errors.lastNameRequired")),
     phoneNumber: z
       .string()
       .trim()
-      .min(6, "Numéro de téléphone invalide.")
-      .max(20, "Numéro de téléphone invalide.")
+      .min(6, msg("auth.errors.phoneInvalid"))
+      .max(20, msg("auth.errors.phoneInvalid"))
       .optional(),
     // Optional on the form: an empty input must not fail the email check.
   email: z
-    .union([z.literal(""), z.string().trim().email("Adresse email invalide.")])
+    .union([z.literal(""), z.string().trim().email(msg("auth.errors.emailInvalid"))])
     .optional()
     .transform((value) => value || undefined),
     password: passwordSchema,
-    confirmPassword: z.string().min(1, "Confirmez votre mot de passe."),
+    confirmPassword: z.string().min(1, msg("auth.errors.confirmPasswordRequired")),
     role: userRoleSchema,
     device: authDeviceSchema,
     captchaToken: z.string().min(1).optional(),
@@ -44,7 +48,7 @@ export const registerSchema = z
     if (!value.email && !value.phoneNumber) {
       ctx.addIssue({
         code: "custom",
-        message: "Veuillez saisir un numéro de téléphone ou une adresse email.",
+        message: msg("auth.errors.phoneOrEmailRequired"),
         path: ["phoneNumber"],
       });
     }
@@ -52,7 +56,7 @@ export const registerSchema = z
     if (value.password !== value.confirmPassword) {
       ctx.addIssue({
         code: "custom",
-        message: "Les mots de passe ne correspondent pas.",
+        message: msg("auth.errors.passwordsMismatch"),
         path: ["confirmPassword"],
       });
     }
@@ -60,7 +64,7 @@ export const registerSchema = z
 
 export const registerFormSchema = registerSchema.safeExtend({
   acceptTerms: z.boolean().refine((accepted) => accepted, {
-    message: "Vous devez accepter les CGU pour vous inscrire.",
+    message: msg("auth.errors.acceptTermsRequired"),
   }),
 });
 
@@ -68,14 +72,14 @@ export const loginSchema = z.object({
   identifier: z
     .string()
     .trim()
-    .min(1, "Renseignez votre email ou votre numéro de téléphone.")
+    .min(1, msg("auth.errors.identifierRequired"))
     .refine(
       (identifier) =>
         z.email().safeParse(identifier).success ||
         /^\+[1-9]\d{5,19}$/.test(identifier),
-      "Entrez une adresse email ou un numéro de téléphone valide.",
+      msg("auth.errors.identifierInvalid"),
     ),
-  password: z.string().min(1, "Renseignez votre mot de passe."),
+  password: z.string().min(1, msg("auth.errors.passwordRequired")),
   device: authDeviceSchema,
 });
 
@@ -89,7 +93,7 @@ export const forgotPasswordSchema = z.object({
   identifier: z
     .string()
     .trim()
-    .min(1, "Veuillez saisir votre email ou votre numéro de téléphone."),
+    .min(1, msg("auth.errors.recoveryIdentifierRequired")),
   device: authDeviceSchema,
 });
 
@@ -97,7 +101,7 @@ export const validateOtpSchema = z
   .object({
     identifier: z.string().trim().min(1),
     purpose: otpPurposeSchema,
-    code: z.string().trim().length(4, "Le code doit contenir 4 chiffres."),
+    code: z.string().trim().length(4, msg("auth.errors.codeLength")),
     device: authDeviceSchema,
     newPassword: passwordSchema.optional(),
     confirmPassword: z.string().optional(),
@@ -110,7 +114,7 @@ export const validateOtpSchema = z
     if (!value.newPassword) {
       ctx.addIssue({
         code: "custom",
-        message: "Veuillez saisir un nouveau mot de passe.",
+        message: msg("auth.errors.newPasswordRequired"),
         path: ["newPassword"],
       });
     }
@@ -118,7 +122,7 @@ export const validateOtpSchema = z
     if (!value.confirmPassword) {
       ctx.addIssue({
         code: "custom",
-        message: "Veuillez confirmer le mot de passe.",
+        message: msg("auth.errors.newPasswordConfirmRequired"),
         path: ["confirmPassword"],
       });
     }
@@ -130,7 +134,7 @@ export const validateOtpSchema = z
     ) {
       ctx.addIssue({
         code: "custom",
-        message: "Les mots de passe ne correspondent pas.",
+        message: msg("auth.errors.passwordsMismatch"),
         path: ["confirmPassword"],
       });
     }

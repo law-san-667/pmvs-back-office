@@ -93,7 +93,7 @@ export default function AdminQualityPage() {
                 <TableHead>Normes</TableHead>
                 <TableHead>Certification</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead className="w-[1%] text-right">Détail</TableHead>
+                <TableHead className="w-[1%] text-end">Détail</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -178,7 +178,7 @@ export default function AdminQualityPage() {
                         row.businessStatus}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-end">
                     <Button
                       variant="ghost"
                       size="sm"

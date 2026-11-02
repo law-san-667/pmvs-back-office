@@ -1,0 +1,56 @@
+{
+  "paymentStatus": {
+    "PENDING": "En attente",
+    "SUCCEEDED": "Payée",
+    "CANCELLED": "Annulée",
+    "ERRORED": "Échouée",
+    "REFUND_PENDING": "Remboursement en cours",
+    "REFUNDED": "Remboursée"
+  },
+  "payoutStatus": {
+    "NOT_APPLICABLE": "—",
+    "PENDING": "Reversement en attente",
+    "PROCESSING": "Reversement en cours",
+    "SUCCEEDED": "Reversé",
+    "FAILED": "Reversement échoué",
+    "ON_HOLD": "Retenu jusqu’à validation"
+  },
+  "filters": {
+    "all": "Tout",
+    "paid": "Payées",
+    "pending": "En attente",
+    "paidOut": "Reversées",
+    "payoutFailed": "Reversement échoué",
+    "refunded": "Remboursées"
+  },
+  "stats": {
+    "sales": "Ventes encaissées",
+    "salesHint": "{count, plural, one {# transaction au total} other {# transactions au total}}",
+    "paidOut": "Reversé sur votre compte",
+    "paidOutHint": "Montant net déjà transféré par LawPay",
+    "pendingPayouts": "Reversements en attente",
+    "failedHint": "{amount} en échec — contactez le support",
+    "pendingHint": "{count, plural, one {# paiement client en attente} other {# paiements client en attente}}",
+    "fees": "Frais et commissions",
+    "feesHint": "Frais LawPay {fees} · commission {commission}"
+  },
+  "otherCurrencies": "Autres devises : {list}",
+  "otherCurrency": "{currency} — encaissé {gross}, reversé {paidOut}",
+  "history": "Historique des transactions ({count})",
+  "searchPlaceholder": "Référence...",
+  "columns": {
+    "reference": "Référence",
+    "client": "Client",
+    "method": "Moyen",
+    "date": "Date",
+    "amount": "Montant",
+    "netPaidOut": "Net reversé",
+    "payment": "Paiement",
+    "payout": "Reversement",
+    "order": "Commande"
+  },
+  "loading": "Chargement des transactions...",
+  "empty": "Aucune transaction trouvée.",
+  "cash": "Espèces",
+  "viewOrder": "Voir la commande"
+}

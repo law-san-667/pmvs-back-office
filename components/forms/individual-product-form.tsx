@@ -3,15 +3,14 @@
 import Tiptap from "@/components/editor/tiptap";
 import {
   CategorySelects,
-  CONDITION_LABELS,
   COUNTRY_CODES,
-  COUNTRY_NAME_BY_CODE,
   CountryCombobox,
   ListingDeleteDialog,
   optionalInt,
   optionalText,
   richTextOrNull,
   SubmissionErrors,
+  useCountryName,
   useListingMutations,
 } from "@/components/forms/listing-form-shared";
 import {
@@ -58,6 +57,7 @@ import {
 import countries from "@/lib/countries.json";
 import { getMutationErrorMessage } from "@/lib/mutation-error";
 import type { CreateR2Upload } from "@/lib/upload-to-r2";
+import { msg } from "@/lib/validators/messages";
 import {
   listingConditionEnum,
   type Listing,
@@ -66,6 +66,7 @@ import {
 import { trpc } from "@/server/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, Trash2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
@@ -73,23 +74,23 @@ import { z } from "zod";
 const SIZES = ["S", "XS", "M", "L", "XL", "XXL", "XXXL"] as const;
 
 const PRESET_COLORS = [
-  { name: "Noir", value: "#000000" },
-  { name: "Blanc", value: "#FFFFFF" },
-  { name: "Rouge", value: "#EF4444" },
-  { name: "Jaune", value: "#EAB308" },
-  { name: "Vert", value: "#22C55E" },
-  { name: "Bleu", value: "#3B82F6" },
-  { name: "Violet", value: "#A855F7" },
+  { name: "black", value: "#000000" },
+  { name: "white", value: "#FFFFFF" },
+  { name: "red", value: "#EF4444" },
+  { name: "yellow", value: "#EAB308" },
+  { name: "green", value: "#22C55E" },
+  { name: "blue", value: "#3B82F6" },
+  { name: "purple", value: "#A855F7" },
 ] as const;
 
 const normalizeHexColor = (color: string) => color.trim().toUpperCase();
 
 const productFormSchema = z
   .object({
-    title: z.string().trim().min(1, "Le nom du produit est requis."),
+    title: z.string().trim().min(1, msg("productForm.errors.titleRequired")),
     description: z.string().optional(),
-    categoryId: z.string().min(1, "La catégorie est requise."),
-    subCategoryId: z.string().min(1, "La sous-catégorie est requise."),
+    categoryId: z.string().min(1, msg("productForm.errors.categoryRequired")),
+    subCategoryId: z.string().min(1, msg("productForm.errors.subCategoryRequired")),
     price: z.string(),
     currency: z.string().min(1),
     condition: z.enum(listingConditionEnum),
@@ -99,7 +100,7 @@ const productFormSchema = z
     lowStockThreshold: z
       .string()
       .refine((value) => !value.trim() || /^\d+$/.test(value.trim()), {
-        message: "Seuil invalide.",
+        message: msg("productForm.errors.thresholdInvalid"),
       }),
     isService: z.boolean(),
     isPriceOnQuote: z.boolean(),
@@ -122,7 +123,7 @@ const productFormSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["price"],
-        message: "Le prix est requis.",
+        message: msg("productForm.errors.priceRequired"),
       });
     }
 
@@ -131,7 +132,7 @@ const productFormSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["validityPeriod"],
-        message: "La période de validité doit être un nombre entier positif.",
+        message: msg("productForm.errors.validityPeriodInvalid"),
       });
     }
 
@@ -140,7 +141,7 @@ const productFormSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["minOrderQuantity"],
-        message: "La commande minimum doit être un nombre entier positif.",
+        message: msg("productForm.errors.minOrderInvalid"),
       });
     }
   });
@@ -287,6 +288,10 @@ export default function IndividualProductForm({
 }: {
   listing?: Listing;
 }) {
+  const t = useTranslations("productForm.individual");
+  const tShared = useTranslations("productForm.shared");
+  const tCondition = useTranslations("productForm.condition");
+  const countryName = useCountryName();
   const isEdit = !!listing;
 
   const form = useForm<ProductFormData>({
@@ -296,6 +301,7 @@ export default function IndividualProductForm({
 
   const watchedValues = useWatch({ control: form.control }) as ProductFormData;
   const isService = watchedValues.isService ?? false;
+  const subject = isService ? "service" : "product";
   const isPriceOnQuote = watchedValues.isPriceOnQuote ?? false;
   const selectedSizes = watchedValues.selectedSizes ?? [];
   const selectedColors = watchedValues.selectedColors ?? [];
@@ -408,7 +414,7 @@ export default function IndividualProductForm({
     } catch (error) {
       setIsUploading(false);
       setSubmissionErrors([
-        getMutationErrorMessage(error, "Erreur lors de l'envoi des médias."),
+        getMutationErrorMessage(error, t("uploadError")),
       ]);
     }
   };
@@ -418,14 +424,10 @@ export default function IndividualProductForm({
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold">
-            {isEdit
-              ? "Modifier un produit ou service"
-              : "Ajouter un produit ou service"}
+            {isEdit ? t("editTitle") : t("newTitle")}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {isEdit
-              ? "Mettez à jour les informations de cet article de votre boutique"
-              : "Ajouter un nouveau produit ou service à votre boutique"}
+            {isEdit ? t("editSubtitle") : t("newSubtitle")}
           </p>
         </div>
 
@@ -437,7 +439,7 @@ export default function IndividualProductForm({
             onClick={() => setDeleteDialogOpen(true)}
           >
             <Trash2Icon className="size-4" />
-            Supprimer
+            {t("delete")}
           </Button>
         )}
       </div>
@@ -450,7 +452,9 @@ export default function IndividualProductForm({
           <div className="flex flex-col gap-4">
             <Card>
               <CardHeader>
-                <CardTitle className="font-bold">Nom et Description</CardTitle>
+                <CardTitle className="font-bold">
+                  {t("nameAndDescription")}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <FieldGroup>
@@ -459,17 +463,11 @@ export default function IndividualProductForm({
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>
-                          Nom du {isService ? "service" : "produit"}
-                        </FieldLabel>
+                        <FieldLabel>{t("nameLabel", { subject })}</FieldLabel>
                         <Input
                           {...field}
                           aria-invalid={fieldState.invalid}
-                          placeholder={
-                            isService
-                              ? "Ceci est un nom d'un service"
-                              : "Ceci est un nom d'un produit"
-                          }
+                          placeholder={t("namePlaceholder", { subject })}
                         />
                         {fieldState.invalid && (
                           <FieldError errors={[fieldState.error]} />
@@ -482,12 +480,12 @@ export default function IndividualProductForm({
                     <TextField
                       control={form.control}
                       name="model"
-                      label="Modèle (optionnel)"
+                      label={t("model")}
                     />
                     <TextField
                       control={form.control}
                       name="brand"
-                      label="Marque (optionnel)"
+                      label={t("brand")}
                     />
                   </div>
 
@@ -497,7 +495,7 @@ export default function IndividualProductForm({
                     render={({ field }) => (
                       <Field>
                         <FieldLabel>
-                          Description du {isService ? "service" : "produit"}
+                          {t("descriptionLabel", { subject })}
                         </FieldLabel>
                         <Tiptap
                           description={field.value ?? ""}
@@ -513,7 +511,7 @@ export default function IndividualProductForm({
 
             <Card>
               <CardHeader>
-                <CardTitle className="font-bold">Type d&apos;annonce</CardTitle>
+                <CardTitle className="font-bold">{t("listingType")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Controller
@@ -536,10 +534,9 @@ export default function IndividualProductForm({
                         }}
                       />
                       <span className="grid gap-1">
-                        <span className="font-medium">Ceci est un service</span>
+                        <span className="font-medium">{t("isService")}</span>
                         <span className="text-muted-foreground">
-                          Les détails de produit comme la taille, la couleur,
-                          l&apos;état et le stock seront ignorés.
+                          {t("isServiceHint")}
                         </span>
                       </span>
                     </label>
@@ -550,7 +547,7 @@ export default function IndividualProductForm({
 
             <Card>
               <CardHeader>
-                <CardTitle className="font-bold">Catégorie</CardTitle>
+                <CardTitle className="font-bold">{t("category")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CategorySelects
@@ -578,9 +575,7 @@ export default function IndividualProductForm({
 
             <Card>
               <CardHeader>
-                <CardTitle className="font-bold">
-                  Livraison à l&apos;étranger
-                </CardTitle>
+                <CardTitle className="font-bold">{t("abroad")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <FieldGroup>
@@ -589,7 +584,7 @@ export default function IndividualProductForm({
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Pays d&apos;origine (optionnel)</FieldLabel>
+                        <FieldLabel>{t("origin")}</FieldLabel>
                         <CountryCombobox
                           value={field.value}
                           onChange={field.onChange}
@@ -607,33 +602,31 @@ export default function IndividualProductForm({
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Pays de destination (optionnel)</FieldLabel>
+                        <FieldLabel>{t("destination")}</FieldLabel>
                         <Combobox
                           multiple
                           items={COUNTRY_CODES}
-                          itemToStringLabel={(code) =>
-                            COUNTRY_NAME_BY_CODE[code] ?? code
-                          }
+                          itemToStringLabel={countryName}
                           value={field.value}
                           onValueChange={field.onChange}
                         >
                           <ComboboxChips ref={destinationAnchorRef}>
                             {field.value.map((code) => (
                               <ComboboxChip key={code}>
-                                {COUNTRY_NAME_BY_CODE[code] ?? code}
+                                {countryName(code)}
                               </ComboboxChip>
                             ))}
-                            <ComboboxChipsInput placeholder="Pays" />
+                            <ComboboxChipsInput placeholder={t("countriesPlaceholder")} />
                           </ComboboxChips>
                           <ComboboxContent anchor={destinationAnchorRef}>
-                            <ComboboxEmpty>Aucun pays trouvé.</ComboboxEmpty>
+                            <ComboboxEmpty>{tShared("noCountry")}</ComboboxEmpty>
                             <ComboboxList>
                               {countries.map((country) => (
                                 <ComboboxItem
                                   key={country.code}
                                   value={country.code}
                                 >
-                                  {country.name}
+                                  {countryName(country.code)}
                                 </ComboboxItem>
                               ))}
                             </ComboboxList>
@@ -651,10 +644,11 @@ export default function IndividualProductForm({
 
             <Card>
               <CardHeader>
-                <CardTitle className="font-bold">Offre commerciale</CardTitle>
+                <CardTitle className="font-bold">
+                  {t("commercialOffer")}
+                </CardTitle>
                 <p className="text-muted-foreground text-sm">
-                  Informations complémentaires affichées aux acheteurs
-                  professionnels.
+                  {t("commercialOfferHint")}
                 </p>
               </CardHeader>
               <CardContent>
@@ -662,43 +656,43 @@ export default function IndividualProductForm({
                   <TextField
                     control={form.control}
                     name="supplierRole"
-                    label="Rôle pour ce produit (optionnel)"
-                    placeholder="Producteur, revendeur, importateur…"
+                    label={t("supplierRole")}
+                    placeholder={t("supplierRolePlaceholder")}
                   />
                   <div className="grid gap-4 sm:grid-cols-2">
                     <TextField
                       control={form.control}
                       name="productionCapacity"
-                      label="Capacité de production (optionnel)"
-                      placeholder="500 unités / mois"
+                      label={t("productionCapacity")}
+                      placeholder={t("productionCapacityPlaceholder")}
                     />
                     <TextField
                       control={form.control}
                       name="leadTime"
-                      label="Délai de livraison (optionnel)"
-                      placeholder="7 jours"
+                      label={t("leadTime")}
+                      placeholder={t("leadTimePlaceholder")}
                     />
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <TextField
                       control={form.control}
                       name="minOrderQuantity"
-                      label="Commande minimum (optionnel)"
+                      label={t("minOrderQuantity")}
                       type="number"
                       placeholder="10"
                     />
                     <TextField
                       control={form.control}
                       name="incoterm"
-                      label="Incoterms (optionnel)"
+                      label={t("incoterm")}
                       placeholder="EXW, FOB, CIF…"
                     />
                   </div>
                   <TextField
                     control={form.control}
                     name="certification"
-                    label="Certification (optionnel)"
-                    placeholder="Bio, ISO 9001…"
+                    label={t("certification")}
+                    placeholder={t("certificationPlaceholder")}
                   />
                 </FieldGroup>
               </CardContent>
@@ -707,7 +701,9 @@ export default function IndividualProductForm({
             {!isService && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-bold">Gestion du stock</CardTitle>
+                  <CardTitle className="font-bold">
+                    {t("stockManagement")}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-4">
                   <Controller
@@ -715,7 +711,7 @@ export default function IndividualProductForm({
                     control={form.control}
                     render={({ field }) => (
                       <Field className="w-auto">
-                        <FieldLabel>Stock disponible</FieldLabel>
+                        <FieldLabel>{t("stock")}</FieldLabel>
                         <Input
                           {...field}
                           type="number"
@@ -730,12 +726,12 @@ export default function IndividualProductForm({
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field className="w-auto" data-invalid={fieldState.invalid}>
-                        <FieldLabel>Alerte de stock bas</FieldLabel>
+                        <FieldLabel>{t("lowStock")}</FieldLabel>
                         <Input
                           {...field}
                           type="number"
                           min={0}
-                          placeholder="Ex. 5"
+                          placeholder={t("lowStockPlaceholder")}
                           className="w-40"
                         />
                       </Field>
@@ -751,7 +747,9 @@ export default function IndividualProductForm({
             {!isService && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-bold">Détail du produit</CardTitle>
+                  <CardTitle className="font-bold">
+                    {t("productDetail")}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-5">
                   <Controller
@@ -761,7 +759,7 @@ export default function IndividualProductForm({
                       <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2">
                           <RadioGroupItem value="size" />
-                          <Label>Taille</Label>
+                          <Label>{t("size")}</Label>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {SIZES.map((size) => (
@@ -792,7 +790,7 @@ export default function IndividualProductForm({
                       <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2">
                           <RadioGroupItem value="color" />
-                          <Label>Couleur du produit</Label>
+                          <Label>{t("color")}</Label>
                         </div>
                         <div className="flex flex-wrap items-center gap-3">
                           {PRESET_COLORS.map((color) => (
@@ -808,7 +806,7 @@ export default function IndividualProductForm({
                                   : "border-transparent"
                               }`}
                               style={{ backgroundColor: color.value }}
-                              title={color.name}
+                              title={t(`colors.${color.name}`)}
                             >
                               {color.value === "#FFFFFF" && (
                                 <span className="flex size-full items-center justify-center rounded-full border border-gray-200" />
@@ -822,7 +820,7 @@ export default function IndividualProductForm({
                             value={customColor}
                             onChange={(e) => setCustomColor(e.target.value)}
                             className="border-input size-9 cursor-pointer rounded-md border p-0.5"
-                            title="Couleur personnalisée"
+                            title={t("customColor")}
                           />
                           <Button
                             type="button"
@@ -831,7 +829,7 @@ export default function IndividualProductForm({
                             onClick={addCustomColor}
                           >
                             <PlusIcon className="size-3" />
-                            Ajouter couleur
+                            {t("addColor")}
                           </Button>
                           {selectedColors
                             .filter(
@@ -859,7 +857,7 @@ export default function IndividualProductForm({
                     control={form.control}
                     render={({ field }) => (
                       <div className="flex flex-col gap-2">
-                        <Label>État du produit</Label>
+                        <Label>{t("condition")}</Label>
                         <div className="flex flex-wrap gap-2">
                           {listingConditionEnum.map((cond) => (
                             <Badge
@@ -870,7 +868,7 @@ export default function IndividualProductForm({
                               className="cursor-pointer rounded-sm px-5 py-3 select-none"
                               onClick={() => field.onChange(cond)}
                             >
-                              {CONDITION_LABELS[cond] ?? cond}
+                              {tCondition(cond)}
                             </Badge>
                           ))}
                         </div>
@@ -888,9 +886,9 @@ export default function IndividualProductForm({
                           onCheckedChange={(value) => field.onChange(!!value)}
                         />
                         <span className="grid gap-1">
-                          <span className="font-medium">Produit fragile</span>
+                          <span className="font-medium">{t("fragile")}</span>
                           <span className="text-muted-foreground">
-                            À manipuler avec précaution lors de la livraison.
+                            {t("fragileHint")}
                           </span>
                         </span>
                       </label>
@@ -902,9 +900,7 @@ export default function IndividualProductForm({
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>
-                          Période de validité (jours, optionnel)
-                        </FieldLabel>
+                        <FieldLabel>{t("validityPeriod")}</FieldLabel>
                         <Input
                           {...field}
                           type="number"
@@ -926,7 +922,7 @@ export default function IndividualProductForm({
             <Card>
               <CardHeader>
                 <CardTitle className="font-bold">
-                  Prix du {isService ? "service" : "produit"}
+                  {t("priceTitle", { subject })}
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-4">
@@ -939,7 +935,7 @@ export default function IndividualProductForm({
                         checked={field.value}
                         onCheckedChange={(value) => field.onChange(!!value)}
                       />
-                      <span className="font-medium">Le prix est sur devis</span>
+                      <span className="font-medium">{t("priceOnQuote")}</span>
                     </label>
                   )}
                 />
@@ -951,7 +947,7 @@ export default function IndividualProductForm({
                       control={form.control}
                       render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
-                          <FieldLabel>Prix</FieldLabel>
+                          <FieldLabel>{t("price")}</FieldLabel>
                           <InputGroup className="overflow-hidden">
                             <InputGroupAddon
                               align="inline-start"
@@ -1001,7 +997,7 @@ export default function IndividualProductForm({
 
             <ListingMediaCard
               media={media}
-              subject={isService ? "service" : "produit"}
+              subject={subject}
             />
           </div>
         </div>
@@ -1012,14 +1008,14 @@ export default function IndividualProductForm({
           disabled={isMutating || deleteListing.isPending}
         >
           {isUploading
-            ? `Envoi des médias… ${uploadProgress}%`
+            ? t("uploading", { progress: uploadProgress })
             : createListing.isPending
-              ? "Création en cours..."
+              ? tShared("creating")
               : updateListing.isPending
-                ? "Mise à jour en cours..."
+                ? tShared("updating")
                 : isEdit
-                  ? "Enregistrer les modifications"
-                  : "Enregistrer"}
+                  ? tShared("saveChanges")
+                  : tShared("save")}
         </Button>
       </form>
 

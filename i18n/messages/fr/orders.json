@@ -1,0 +1,103 @@
+{
+  "status": {
+    "PENDING": "En attente",
+    "CONFIRMED": "Confirmée",
+    "PROCESSING": "En préparation",
+    "SHIPPED": "Expédiée",
+    "DELIVERED": "Livrée",
+    "CANCELLED": "Annulée",
+    "REFUNDED": "Remboursée"
+  },
+  "paymentMethod": {
+    "CASH": "Paiement à la livraison",
+    "WAVE": "Wave",
+    "ORANGE_MONEY": "Orange Money",
+    "FREE_MONEY": "Free Money",
+    "EXPRESSO": "Expresso",
+    "CARD": "Carte bancaire",
+    "ONLINE": "Paiement en ligne",
+    "OFFLINE": "Virement ou dépôt",
+    "MTN_MOMO": "MTN Mobile Money",
+    "MOOV_MONEY": "Moov Money"
+  },
+  "list": {
+    "title": "Commandes",
+    "description": "Suivez toutes les commandes passées auprès de votre entreprise",
+    "count": "Commandes ({count})",
+    "filterLabel": "Filtrer par statut",
+    "allStatuses": "Toutes",
+    "columns": {
+      "order": "Commande",
+      "recipient": "Destinataire",
+      "items": "Articles",
+      "date": "Date",
+      "total": "Total",
+      "status": "Statut",
+      "details": "Détails"
+    },
+    "loading": "Chargement des commandes...",
+    "noBusiness": "Aucune entreprise active n’a été trouvée.",
+    "loadError": "Impossible de charger les commandes.",
+    "emptyTitle": "Aucune commande trouvée.",
+    "emptyText": "Les nouvelles commandes apparaîtront ici.",
+    "emptyFiltered": "Aucune commande ne correspond à ce statut.",
+    "notProvided": "Non renseigné",
+    "view": "Voir la commande"
+  },
+  "detail": {
+    "loading": "Chargement de la commande...",
+    "notFoundTitle": "Commande introuvable",
+    "notFoundText": "Cette commande n’existe pas ou vous n’avez pas accès à ses détails.",
+    "back": "Retour aux commandes",
+    "unavailableTitle": "Commande non disponible",
+    "unavailableText": "Cette commande n’est pas liée à l’entreprise active.",
+    "title": "Commande {reference}",
+    "createdAt": "Créée le {date}",
+    "updatedAt": "Dernière mise à jour",
+    "payment": "Paiement",
+    "delivery": "Livraison",
+    "deliveryNotProvided": "Non renseignée",
+    "items": "Articles ({count})",
+    "columns": {
+      "product": "Produit",
+      "unitPrice": "Prix unitaire",
+      "quantity": "Quantité",
+      "subtotal": "Sous-total"
+    },
+    "noItems": "Aucun article de cette commande n’est lié à l’entreprise active.",
+    "total": "Total",
+    "shippingAddress": "Adresse de livraison",
+    "noAddress": "Aucune adresse de livraison renseignée.",
+    "customerNote": "Note du client",
+    "history": "Historique",
+    "noHistory": "Aucun historique disponible."
+  },
+  "actions": {
+    "label": {
+      "PENDING": "Remettre en attente",
+      "CONFIRMED": "Confirmer",
+      "PROCESSING": "En préparation",
+      "SHIPPED": "Expédier",
+      "DELIVERED": "Marquer livrée",
+      "CANCELLED": "Annuler la commande",
+      "REFUNDED": "Marquer remboursée"
+    },
+    "confirm": {
+      "CONFIRMED": "Vous confirmez pouvoir honorer cette commande.",
+      "PROCESSING": "La commande passe en préparation.",
+      "SHIPPED": "La commande est remise au transporteur.",
+      "DELIVERED": "Vous confirmez que l’acheteur a reçu la commande.",
+      "CANCELLED": "La commande est annulée et le stock est remis en vente. Indiquez le motif à l’acheteur.",
+      "REFUNDED": "Vous confirmez que l’acheteur a été remboursé."
+    },
+    "success": "Commande : {action} ✓",
+    "error": "La mise à jour a échoué.",
+    "carrier": "Transporteur",
+    "trackingNumber": "Numéro de suivi",
+    "reason": "Motif",
+    "note": "Note (facultative)",
+    "back": "Retour",
+    "saving": "Enregistrement...",
+    "submit": "Confirmer"
+  }
+}

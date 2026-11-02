@@ -1,0 +1,45 @@
+{
+  "title": "Documents",
+  "intro": "Your supporting documents and their expiry dates. You are notified 30, 7 and 1 day before expiry.",
+  "type": {
+    "REGISTRATION": "Trade register (RCCM)",
+    "TAX": "Tax ID (NINEA)",
+    "IDENTITY": "ID document",
+    "INSURANCE": "Insurance",
+    "CERTIFICATION": "Certification",
+    "OTHER": "Other"
+  },
+  "expired": "Expired",
+  "expiresIn": "In {days} d",
+  "status": {
+    "APPROVED": "Approved",
+    "REJECTED": "Rejected",
+    "PENDING": "Pending"
+  },
+  "errors": {
+    "uploadFailed": "The file could not be uploaded.",
+    "fileFailed": "The document could not be uploaded.",
+    "withdrawFailed": "The document could not be withdrawn."
+  },
+  "filed": "Document uploaded: the team will review it.",
+  "form": {
+    "title": "Upload a document",
+    "description": "PDF or image. To renew a document, simply upload the new one.",
+    "type": "Type",
+    "name": "Title",
+    "reference": "Number (optional)",
+    "file": "File",
+    "issuedOn": "Issued on (optional)",
+    "expiresOn": "Expires on (if applicable)",
+    "submit": "Upload"
+  },
+  "list": {
+    "title": "My documents ({count})",
+    "document": "Document",
+    "type": "Type",
+    "expiry": "Expiry",
+    "status": "Status",
+    "withdraw": "Withdraw",
+    "empty": "No documents uploaded."
+  }
+}

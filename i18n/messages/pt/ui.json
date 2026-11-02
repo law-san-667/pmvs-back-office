@@ -1,0 +1,16 @@
+{
+  "close": "Fechar",
+  "pagination": "Paginação",
+  "previous": "Anterior",
+  "next": "Seguinte",
+  "previousPage": "Ir para a página anterior",
+  "nextPage": "Ir para a página seguinte",
+  "morePages": "Mais páginas",
+  "sidebar": "Barra lateral",
+  "sidebarDescription": "Mostra a barra lateral móvel.",
+  "toggleSidebar": "Mostrar ou ocultar a barra lateral",
+  "commandTitle": "Paleta de comandos",
+  "commandDescription": "Pesquisar um comando a executar…",
+  "breadcrumb": "Navegação estrutural",
+  "more": "Mais"
+}

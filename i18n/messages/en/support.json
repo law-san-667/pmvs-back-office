@@ -1,0 +1,59 @@
+{
+  "title": "Support",
+  "intro": "A question about your shop, an order or a payout? The Diarama team answers you here.",
+  "status": {
+    "OPEN": "Open",
+    "PENDING_CUSTOMER": "Awaiting reply",
+    "RESOLVED": "Resolved",
+    "CLOSED": "Closed"
+  },
+  "priority": {
+    "LOW": "Low",
+    "NORMAL": "Normal",
+    "HIGH": "High",
+    "URGENT": "Urgent"
+  },
+  "category": {
+    "ORDER": "Order",
+    "PAYMENT": "Payment",
+    "ACCOUNT": "Account",
+    "PRODUCT": "Product",
+    "TECHNICAL": "Technical",
+    "OTHER": "Other"
+  },
+  "loading": "Loading…",
+  "send": "Send",
+  "sending": "Sending…",
+  "sendError": "Could not send.",
+  "sent": "Request sent to the Diarama team.",
+  "mine": {
+    "title": "My requests",
+    "empty": "No requests.",
+    "ticketLine": "{reference} · {category} · {date}"
+  },
+  "new": {
+    "title": "New request",
+    "subject": "Subject",
+    "category": "Topic",
+    "message": "Message"
+  },
+  "ticket": {
+    "updated": "Request updated.",
+    "failed": "Failed.",
+    "notFound": "Request not found.",
+    "back": "Back",
+    "reference": "Request {reference} · {category}",
+    "shop": "Shop {name}",
+    "status": "Status",
+    "priority": "Priority",
+    "take": "Take the request",
+    "firstResponded": "First reply sent",
+    "responseDue": "Reply expected before {date}",
+    "exchanges": "Conversation",
+    "staff": "Diarama team",
+    "requester": "Requester",
+    "messageMeta": "{author} · {date}",
+    "yourMessage": "Your message…",
+    "close": "Close the request"
+  }
+}

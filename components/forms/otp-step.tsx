@@ -26,6 +26,7 @@ import { trpc } from "@/server/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Cookies from "js-cookie";
 import { RotateCcw } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Controller, useForm, type Resolver } from "react-hook-form";
 
@@ -45,6 +46,8 @@ export default function OtpStep({
   onBack: () => void;
   onValidated: (result: ValidateOtpData) => void;
 }) {
+  const t = useTranslations("auth.otp");
+  const tErrors = useTranslations("errors");
   const [message, setMessage] = useState(initialMessage);
   const { setUser } = useUser();
 
@@ -74,7 +77,7 @@ export default function OtpStep({
       onValidated(result);
     },
     onError: (error) => {
-      setMessage(error.message || "Une erreur est survenue.");
+      setMessage(error.message || tErrors("generic"));
     },
   });
   const resendOtp = trpc.auth.resendOtp.useMutation();
@@ -108,13 +111,11 @@ export default function OtpStep({
 
       setMessage(
         result.otp?.debugCode
-          ? `Code de test: ${result.otp.debugCode}`
-          : "Un nouveau code vous a été envoyé.",
+          ? t("testCode", { code: result.otp.debugCode })
+          : t("newCodeSent"),
       );
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Une erreur est survenue.",
-      );
+      setMessage(error instanceof Error ? error.message : tErrors("generic"));
     }
   };
 
@@ -130,9 +131,9 @@ export default function OtpStep({
         <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
             <div className="flex flex-col items-center gap-1 text-center">
-              <h1 className="text-2xl font-bold">Validation du code</h1>
+              <h1 className="text-2xl font-bold">{t("title")}</h1>
               <p className="text-muted-foreground text-sm text-balance">
-                Entrez le code envoyé à {context.identifier}.
+                {t("description", { identifier: context.identifier })}
               </p>
             </div>
 
@@ -141,7 +142,7 @@ export default function OtpStep({
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Code de validation</FieldLabel>
+                  <FieldLabel>{t("codeLabel")}</FieldLabel>
                   <InputOTP
                     maxLength={4}
                     value={field.value}
@@ -166,7 +167,7 @@ export default function OtpStep({
 
           <Field>
             <Button type="submit" disabled={isPending} className="h-12">
-              {validateOtp.isPending ? "Validation..." : "Valider"}
+              {validateOtp.isPending ? t("submitting") : t("submit")}
             </Button>
           </Field>
 
@@ -177,7 +178,7 @@ export default function OtpStep({
               onClick={onBack}
               className="h-12"
             >
-              Retour
+              {t("back")}
             </Button>
             <Button
               type="button"
@@ -187,7 +188,7 @@ export default function OtpStep({
               className="h-12"
             >
               <RotateCcw className="size-4" />
-              Renvoyer le code
+              {t("resend")}
             </Button>
           </Field>
         </form>

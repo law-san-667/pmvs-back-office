@@ -120,7 +120,7 @@ export function AdminListingReview({ id }: { id: string }) {
         <Badge variant="outline">
           {LISTING_STATUS_LABELS[value.status] ?? value.status}
         </Badge>
-        <div className="ml-auto flex flex-wrap gap-2">
+        <div className="ms-auto flex flex-wrap gap-2">
           {value.moderationStatus !== "APPROVED" && (
             <Button onClick={() => setDecision("APPROVED")}>
               <CheckCircle2Icon /> Valider

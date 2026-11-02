@@ -143,7 +143,7 @@ export default function AdminListingsPage() {
                 <option value="SERVICE">Services</option>
               </select>
               <div className="relative">
-                <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+                <SearchIcon className="text-muted-foreground absolute top-1/2 start-2.5 size-4 -translate-y-1/2" />
                 <Input
                   value={search}
                   onChange={(event) => {
@@ -151,7 +151,7 @@ export default function AdminListingsPage() {
                     setPage(1);
                   }}
                   placeholder="Rechercher..."
-                  className="h-9 w-56 pl-8"
+                  className="h-9 w-56 ps-8"
                 />
               </div>
             </div>
@@ -190,7 +190,7 @@ export default function AdminListingsPage() {
                 <TableHead>Soumis le</TableHead>
                 <TableHead>Publication</TableHead>
                 <TableHead>Modération</TableHead>
-                <TableHead className="w-[1%] text-right">Actions</TableHead>
+                <TableHead className="w-[1%] text-end">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -276,7 +276,7 @@ export default function AdminListingsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell
-                      className="text-right"
+                      className="text-end"
                       onClick={(event) => event.stopPropagation()}
                     >
                       <DropdownMenu>

@@ -1,0 +1,103 @@
+{
+  "status": {
+    "PENDING": "Pendente",
+    "CONFIRMED": "Confirmada",
+    "PROCESSING": "Em preparação",
+    "SHIPPED": "Enviada",
+    "DELIVERED": "Entregue",
+    "CANCELLED": "Cancelada",
+    "REFUNDED": "Reembolsada"
+  },
+  "paymentMethod": {
+    "CASH": "Pagamento na entrega",
+    "WAVE": "Wave",
+    "ORANGE_MONEY": "Orange Money",
+    "FREE_MONEY": "Free Money",
+    "EXPRESSO": "Expresso",
+    "CARD": "Cartão bancário",
+    "ONLINE": "Pagamento online",
+    "OFFLINE": "Transferência ou depósito",
+    "MTN_MOMO": "MTN Mobile Money",
+    "MOOV_MONEY": "Moov Money"
+  },
+  "list": {
+    "title": "Encomendas",
+    "description": "Acompanhe todas as encomendas feitas à sua empresa",
+    "count": "Encomendas ({count})",
+    "filterLabel": "Filtrar por estado",
+    "allStatuses": "Todas",
+    "columns": {
+      "order": "Encomenda",
+      "recipient": "Destinatário",
+      "items": "Artigos",
+      "date": "Data",
+      "total": "Total",
+      "status": "Estado",
+      "details": "Detalhes"
+    },
+    "loading": "A carregar encomendas...",
+    "noBusiness": "Não foi encontrada nenhuma empresa ativa.",
+    "loadError": "Não foi possível carregar as encomendas.",
+    "emptyTitle": "Nenhuma encomenda encontrada.",
+    "emptyText": "As novas encomendas aparecerão aqui.",
+    "emptyFiltered": "Nenhuma encomenda corresponde a este estado.",
+    "notProvided": "Não indicado",
+    "view": "Ver a encomenda"
+  },
+  "detail": {
+    "loading": "A carregar a encomenda...",
+    "notFoundTitle": "Encomenda não encontrada",
+    "notFoundText": "Esta encomenda não existe ou não tem acesso aos seus detalhes.",
+    "back": "Voltar às encomendas",
+    "unavailableTitle": "Encomenda indisponível",
+    "unavailableText": "Esta encomenda não está associada à empresa ativa.",
+    "title": "Encomenda {reference}",
+    "createdAt": "Criada em {date}",
+    "updatedAt": "Última atualização",
+    "payment": "Pagamento",
+    "delivery": "Entrega",
+    "deliveryNotProvided": "Não indicada",
+    "items": "Artigos ({count})",
+    "columns": {
+      "product": "Produto",
+      "unitPrice": "Preço unitário",
+      "quantity": "Quantidade",
+      "subtotal": "Subtotal"
+    },
+    "noItems": "Nenhum artigo desta encomenda está associado à empresa ativa.",
+    "total": "Total",
+    "shippingAddress": "Endereço de entrega",
+    "noAddress": "Nenhum endereço de entrega indicado.",
+    "customerNote": "Nota do cliente",
+    "history": "Histórico",
+    "noHistory": "Nenhum histórico disponível."
+  },
+  "actions": {
+    "label": {
+      "PENDING": "Voltar a pendente",
+      "CONFIRMED": "Confirmar",
+      "PROCESSING": "Em preparação",
+      "SHIPPED": "Enviar",
+      "DELIVERED": "Marcar como entregue",
+      "CANCELLED": "Cancelar a encomenda",
+      "REFUNDED": "Marcar como reembolsada"
+    },
+    "confirm": {
+      "CONFIRMED": "Confirma que pode satisfazer esta encomenda.",
+      "PROCESSING": "A encomenda passa a estar em preparação.",
+      "SHIPPED": "A encomenda é entregue à transportadora.",
+      "DELIVERED": "Confirma que o comprador recebeu a encomenda.",
+      "CANCELLED": "A encomenda é cancelada e o stock volta a estar à venda. Indique o motivo ao comprador.",
+      "REFUNDED": "Confirma que o comprador foi reembolsado."
+    },
+    "success": "Encomenda: {action} ✓",
+    "error": "A atualização falhou.",
+    "carrier": "Transportadora",
+    "trackingNumber": "Número de seguimento",
+    "reason": "Motivo",
+    "note": "Nota (opcional)",
+    "back": "Voltar",
+    "saving": "A guardar...",
+    "submit": "Confirmar"
+  }
+}

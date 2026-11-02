@@ -139,7 +139,7 @@ export default function AdminConfigurationPage() {
                     <TableHead>Slug</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Statut</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-end">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -168,7 +168,7 @@ export default function AdminConfigurationPage() {
                       <TableCell>
                         <ActiveBadge active={category.isActive} />
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-end">
                         <div className="flex justify-end gap-1">
                           <Button
                             variant="ghost"
@@ -234,7 +234,7 @@ export default function AdminConfigurationPage() {
                     <TableHead>Slug</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Statut</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-end">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -267,7 +267,7 @@ export default function AdminConfigurationPage() {
                       <TableCell>
                         <ActiveBadge active={subCategory.isActive} />
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-end">
                         <div className="flex justify-end gap-1">
                           <Button
                             variant="ghost"
@@ -334,7 +334,7 @@ export default function AdminConfigurationPage() {
                     <TableHead>Phase</TableHead>
                     <TableHead>Fournisseurs</TableHead>
                     <TableHead>Statut</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-end">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -364,7 +364,7 @@ export default function AdminConfigurationPage() {
                       <TableCell>
                         <ActiveBadge active={country.isActive} />
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-end">
                         <div className="flex justify-end gap-1">
                           <Button
                             variant="ghost"
@@ -427,7 +427,7 @@ export default function AdminConfigurationPage() {
                     <TableHead>Pays</TableHead>
                     <TableHead>Créée le</TableHead>
                     <TableHead>Statut</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-end">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -450,7 +450,7 @@ export default function AdminConfigurationPage() {
                       <TableCell>
                         <ActiveBadge active={city.isActive} />
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-end">
                         <div className="flex justify-end gap-1">
                           <Button
                             variant="ghost"

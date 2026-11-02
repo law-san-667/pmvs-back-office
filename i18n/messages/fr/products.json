@@ -1,0 +1,48 @@
+{
+  "addProduct": "Ajouter un produit",
+  "importExport": "Importer / exporter (Excel)",
+  "listTitle": "Liste des produits et services ({count})",
+  "searchPlaceholder": "Recherche...",
+  "tabs": {
+    "all": "Tout",
+    "products": "Produits",
+    "services": "Services"
+  },
+  "deleteSelection": "Supprimer la sélection ({count})",
+  "selectAll": "Tout sélectionner",
+  "select": "Sélectionner {title}",
+  "columns": {
+    "product": "Produit",
+    "price": "Prix",
+    "sold": "Nb vendu",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "loading": "Chargement des produits...",
+  "loadError": "Impossible de charger les produits.",
+  "empty": "Aucun produit ou service trouvé.",
+  "emptyHint": "Ajustez votre recherche ou ajoutez un nouvel élément.",
+  "moderation": {
+    "PENDING": "En attente de validation",
+    "APPROVED": "Validé",
+    "REJECTED": "Refusé"
+  },
+  "size": "Taille: {size}",
+  "colors": "Couleurs: {count}",
+  "onQuote": "Par devis",
+  "stock": {
+    "inStock": "Stock",
+    "low": "Stock bas ({quantity})",
+    "out": "Rupture"
+  },
+  "edit": "Modifier",
+  "delete": "Supprimer",
+  "bestSellers": "Les plus vendus",
+  "noSales": "Aucune vente enregistrée",
+  "noSalesHint": "Les produits les plus vendus apparaîtront ici.",
+  "deleteTitle": "Confirmer la suppression",
+  "deleteBulk": "Voulez-vous vraiment supprimer {count, plural, one {# élément} other {# éléments}} ? Cette action est irréversible.",
+  "deleteOne": "Voulez-vous vraiment supprimer « {title} » ? Cette action est irréversible.",
+  "cancel": "Annuler",
+  "deleting": "Suppression..."
+}

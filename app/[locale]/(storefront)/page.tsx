@@ -1,17 +1,12 @@
 "use client";
 
 import BrandMark from "@/components/brand/brand-mark";
-import Flag from "@/components/flag";
 import SpaceBanner from "@/components/auth/space-banner";
 import ForgotPasswordForm from "@/components/forms/forgot-password-form";
 import LoginForm from "@/components/forms/login-form";
 import OtpStep from "@/components/forms/otp-step";
 import RegisterForm from "@/components/forms/register-form";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import LanguageSelect from "@/components/language-select";
 import { useUser } from "@/contexts/user-context";
 import { useRouter } from "@/i18n/navigation";
 import { isAuthSuccessData, type ValidateOtpData } from "@/lib/backend-utils";
@@ -21,6 +16,7 @@ import {
   usePendingOtp,
   type PendingOtp,
 } from "@/lib/pending-otp";
+import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import React, { Suspense, useState } from "react";
 
@@ -82,19 +78,10 @@ function AuthContent() {
       <div className="container mx-auto space-y-8">
       <div className="flex flex-wrap items-center justify-center gap-4">
         <BrandMark />
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button variant="outline" className="rounded-full">
-                <Flag country="FR" />
-                FR
-              </Button>
-            }
-          />
-        </DropdownMenu>
+        <LanguageSelect />
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        <div className="mx-auto w-full">
+      <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+        <div className="mx-auto w-full min-w-0 px-4 lg:px-0">
           <div className="mx-auto w-full max-w-md">
             <SpaceBanner mode={mode === "register" ? "register" : "login"} />
           </div>
@@ -135,43 +122,35 @@ function AuthContent() {
 }
 
 const SUPPLIER_PROFILES = [
-  "Producteur d'un bien ou Prestataire de service",
-  "Exportateur",
-  "Commerçant en gros, en demi-gros ou au détail",
-  "Adjudicateur",
-];
+  "producer",
+  "exporter",
+  "trader",
+  "contractingAuthority",
+] as const;
 
-const ADMIN_LEVELS = [
-  "Niveau Central (chef de file : Diarama MBA consulting SARL)",
-  "Niveau National (Points Focaux Nationaux : Organismes d'Appui au Commerce)",
-  "Niveau sous-régional (Point Focal Régional : ZLECAF)",
-];
+const ADMIN_LEVELS = ["central", "national", "regional"] as const;
 
 function WelcomePanel() {
+  const t = useTranslations("auth.landing");
+
   return (
     <div className="bg-primary/5 flex w-full flex-col justify-center gap-8 rounded-2xl p-10">
-      <h2 className="text-primary text-3xl font-bold">
-        Soyez les bienvenus !
-      </h2>
+      <h2 className="text-primary text-3xl font-bold">{t("welcome")}</h2>
 
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold">
-          À l&apos;Interface des fournisseurs
-        </h3>
-        <ul className="text-muted-foreground list-disc space-y-1 pl-5">
+        <h3 className="text-lg font-semibold">{t("supplierInterface")}</h3>
+        <ul className="text-muted-foreground list-disc space-y-1 ps-5">
           {SUPPLIER_PROFILES.map((profile) => (
-            <li key={profile}>{profile}</li>
+            <li key={profile}>{t(`supplierProfiles.${profile}`)}</li>
           ))}
         </ul>
       </div>
 
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold">
-          Et à l&apos;Interface des administrateurs
-        </h3>
-        <ul className="text-muted-foreground list-disc space-y-1 pl-5">
+        <h3 className="text-lg font-semibold">{t("adminInterface")}</h3>
+        <ul className="text-muted-foreground list-disc space-y-1 ps-5">
           {ADMIN_LEVELS.map((level) => (
-            <li key={level}>{level}</li>
+            <li key={level}>{t(`adminLevels.${level}`)}</li>
           ))}
         </ul>
       </div>

@@ -4,6 +4,7 @@ import { useBusiness } from "@/contexts/business-context";
 import { useUser } from "@/contexts/user-context";
 import { trpc } from "@/server/trpc/client";
 import { StoreIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -12,6 +13,7 @@ import { toast } from "sonner";
  * every seller page then works on (sent to the API with each request).
  */
 export function OperatorBusinessSwitcher() {
+  const t = useTranslations("nav.operator");
   const { user } = useUser();
   const { business, setBusiness } = useBusiness();
   const utils = trpc.useUtils();
@@ -26,7 +28,7 @@ export function OperatorBusinessSwitcher() {
   if (!shops.data?.length) {
     return shops.isLoading ? null : (
       <span className="text-muted-foreground text-xs">
-        Aucune boutique affectée
+        {t("noShop")}
       </span>
     );
   }
@@ -40,7 +42,7 @@ export function OperatorBusinessSwitcher() {
       // Every cached page belonged to the previous shop.
       await utils.invalidate();
     } catch {
-      toast.error("Impossible d’ouvrir cette boutique.");
+      toast.error(t("openError"));
     } finally {
       setIsSwitching(false);
     }
@@ -49,15 +51,15 @@ export function OperatorBusinessSwitcher() {
   return (
     <label className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-900">
       <StoreIcon className="size-4 shrink-0" />
-      <span className="hidden sm:inline">Vous agissez pour</span>
+      <span className="hidden sm:inline">{t("actingFor")}</span>
       <select
-        aria-label="Boutique gérée"
+        aria-label={t("managedShop")}
         value={business?.id ?? ""}
         disabled={isSwitching}
         onChange={(event) => void switchTo(event.target.value)}
         className="max-w-48 bg-transparent font-semibold outline-none"
       >
-        {!business && <option value="">Choisir une boutique</option>}
+        {!business && <option value="">{t("chooseShop")}</option>}
         {shops.data.map((shop) => (
           <option key={shop.id} value={shop.id}>
             {shop.name}

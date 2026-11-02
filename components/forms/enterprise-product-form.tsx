@@ -38,17 +38,16 @@ import {
   listingExposureEnum,
   listingStockPolicyEnum,
   type Listing,
-  type ListingAvailabilityChannel,
   type ListingBrand,
   type ListingCertificate,
-  type ListingExposure,
   type ListingSpecificsSection,
-  type ListingStockPolicy,
   type MarketPriceInput,
 } from "@/lib/validators/listings-services";
+import { msg, useValidationMessage } from "@/lib/validators/messages";
 import { trpc } from "@/server/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileTextIcon, PlusIcon, Trash2Icon, UploadIcon, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import {
@@ -65,30 +64,23 @@ import { z } from "zod";
 const DEFAULT_MARKET = "SN";
 const MAX_VARIANTS = 8;
 
-const EXPOSURE_LABELS: Record<ListingExposure, string> = {
-  NATIONAL: "National",
-  INTERNATIONAL: "International",
-  BOTH: "Les deux",
-};
+/** Label of each enum value, built from productFormEnterprise.<group>.<value>. */
+const optionLabels = <T extends string>(
+  values: readonly T[],
+  label: (value: T) => string,
+) =>
+  Object.fromEntries(values.map((value) => [value, label(value)])) as Record<
+    T,
+    string
+  >;
 
-const AVAILABILITY_LABELS: Record<ListingAvailabilityChannel, string> = {
-  WEBSITE: "Site web",
-  MARKETPLACE: "Place de marché (VMP)",
-  OFFLINE: "Hors ligne",
-  ALL: "Tous",
-};
-
-const STOCK_POLICY_LABELS: Record<ListingStockPolicy, string> = {
-  ACCEPT_ORDERS: "Accepter les commandes",
-  REFUSE_ORDERS: "Refuser les commandes",
-};
-
+/** Message keys of the step titles (productFormEnterprise.steps.*). */
 const STEPS = [
-  { title: "Informations et prix" },
-  { title: "Stocks et logistique" },
-  { title: "Description et certifications" },
-  { title: "Caractéristiques et références" },
-  { title: "Photos" },
+  "info",
+  "logistics",
+  "description",
+  "features",
+  "photos",
 ] as const;
 
 const CERTIFICATE_ACCEPT = {
@@ -109,33 +101,48 @@ const decimalString = (message: string) =>
         !value.trim() || (Number.isFinite(Number(value)) && Number(value) >= 0),
       { message },
     );
-const percentString = decimalString("Pourcentage invalide.").refine(
-  (value) => !value.trim() || Number(value) <= 100,
-  { message: "Le pourcentage ne peut pas dépasser 100." },
-);
+const percentString = decimalString(
+  msg("productFormEnterprise.errors.percentInvalid"),
+).refine((value) => !value.trim() || Number(value) <= 100, {
+  message: msg("productFormEnterprise.errors.percentMax"),
+});
 
 const b2cPriceSchema = z.object({
-  countryCode: z.string().min(2, "Le marché cible est requis."),
-  priceAmountMinor: integerString("Prix invalide.").refine(
-    (value) => value.trim().length > 0,
-    { message: "Le prix est requis." },
-  ),
+  countryCode: z
+    .string()
+    .min(2, msg("productFormEnterprise.errors.marketRequired")),
+  priceAmountMinor: integerString(
+    msg("productFormEnterprise.errors.priceInvalid"),
+  ).refine((value) => value.trim().length > 0, {
+    message: msg("productFormEnterprise.errors.priceRequired"),
+  }),
   vatRatePercent: percentString,
   vmpCommissionPercent: percentString,
-  ddpPriceAmountMinor: integerString("Prix DDP invalide."),
+  ddpPriceAmountMinor: integerString(
+    msg("productFormEnterprise.errors.ddpPriceInvalid"),
+  ),
 });
 
 const b2bPriceSchema = z.object({
-  countryCode: z.string().min(2, "Le marché cible est requis."),
-  priceAmountMinor: integerString("Prix invalide.").refine(
-    (value) => value.trim().length > 0,
-    { message: "Le prix FOB est requis." },
+  countryCode: z
+    .string()
+    .min(2, msg("productFormEnterprise.errors.marketRequired")),
+  priceAmountMinor: integerString(
+    msg("productFormEnterprise.errors.priceInvalid"),
+  ).refine((value) => value.trim().length > 0, {
+    message: msg("productFormEnterprise.errors.fobPriceRequired"),
+  }),
+  minOrderQuantity: integerString(
+    msg("productFormEnterprise.errors.quantityInvalid"),
   ),
-  minOrderQuantity: integerString("Quantité invalide."),
   agentCommissionPercent: percentString,
-  cartonsPerPallet: integerString("Nombre invalide."),
+  cartonsPerPallet: integerString(
+    msg("productFormEnterprise.errors.numberInvalid"),
+  ),
   containerType: z.string(),
-  unitsPerContainer: integerString("Nombre invalide."),
+  unitsPerContainer: integerString(
+    msg("productFormEnterprise.errors.numberInvalid"),
+  ),
 });
 
 const variantSchema = z.object({
@@ -151,15 +158,22 @@ const enterpriseFormSchema = z.object({
   region: z.string(),
   exposure: z.enum(["", ...listingExposureEnum]),
   brand: z.string(),
-  title: z.string().trim().min(1, "Le nom du produit est requis."),
+  title: z
+    .string()
+    .trim()
+    .min(1, msg("productFormEnterprise.errors.titleRequired")),
   shortDescription: z.string(),
   isService: z.boolean(),
-  categoryId: z.string().min(1, "La catégorie est requise."),
-  subCategoryId: z.string().min(1, "La sous-catégorie est requise."),
+  categoryId: z
+    .string()
+    .min(1, msg("productFormEnterprise.errors.categoryRequired")),
+  subCategoryId: z
+    .string()
+    .min(1, msg("productFormEnterprise.errors.subCategoryRequired")),
   currency: z.string().min(1),
   b2cPrices: z
     .array(b2cPriceSchema)
-    .min(1, "Renseignez au moins un prix B2C (marché par défaut : Sénégal)."),
+    .min(1, msg("productFormEnterprise.errors.b2cRequired")),
   b2bPrices: z.array(b2bPriceSchema),
   // Step 2
   hsCode: z.string(),
@@ -168,19 +182,21 @@ const enterpriseFormSchema = z.object({
   isFragile: z.boolean(),
   packaging: z.string(),
   unit: z.string(),
-  baseValueMinor: integerString("Valeur invalide."),
-  grossWeightKg: decimalString("Poids invalide."),
-  widthCm: decimalString("Largeur invalide."),
-  heightCm: decimalString("Hauteur invalide."),
-  depthCm: decimalString("Profondeur invalide."),
+  baseValueMinor: integerString(msg("productFormEnterprise.errors.valueInvalid")),
+  grossWeightKg: decimalString(msg("productFormEnterprise.errors.weightInvalid")),
+  widthCm: decimalString(msg("productFormEnterprise.errors.widthInvalid")),
+  heightCm: decimalString(msg("productFormEnterprise.errors.heightInvalid")),
+  depthCm: decimalString(msg("productFormEnterprise.errors.depthInvalid")),
   weightVolumeRatio: z.string(),
   packagingType: z.string(),
   transporters: z.string(),
   readyToShip: z.boolean(),
   availableOn: z.enum(["", ...listingAvailabilityChannelEnum]),
   storageLocation: z.string(),
-  stock: integerString("Quantité invalide."),
-  lowStockThreshold: integerString("Seuil invalide."),
+  stock: integerString(msg("productFormEnterprise.errors.quantityInvalid")),
+  lowStockThreshold: integerString(
+    msg("productFormEnterprise.errors.thresholdInvalid"),
+  ),
   leadTime: z.string(),
   outOfStockPolicy: z.enum(["", ...listingStockPolicyEnum]),
   specialDeliveryTime: z.string(),
@@ -195,13 +211,17 @@ const enterpriseFormSchema = z.object({
   manufacturing: z.string(),
   // Step 4
   variants: z.array(variantSchema).max(MAX_VARIANTS),
-  seoTitle: z.string().max(70, "70 caractères maximum."),
+  seoTitle: z
+    .string()
+    .max(70, msg("productFormEnterprise.errors.seoTitleMax")),
   seoExternalUrl: z
     .string()
     .refine((value) => !value.trim() || z.url().safeParse(value).success, {
-      message: "URL invalide.",
+      message: msg("productFormEnterprise.errors.urlInvalid"),
     }),
-  seoMetaDescription: z.string().max(160, "160 caractères maximum."),
+  seoMetaDescription: z
+    .string()
+    .max(160, msg("productFormEnterprise.errors.metaDescriptionMax")),
 });
 
 type EnterpriseFormData = z.infer<typeof enterpriseFormSchema>;
@@ -486,7 +506,7 @@ function SelectField<T extends string>({
   name,
   label,
   options,
-  placeholder = "Sélectionner",
+  placeholder,
 }: {
   control: FormControl;
   name: FieldPath<EnterpriseFormData>;
@@ -494,6 +514,8 @@ function SelectField<T extends string>({
   options: Record<T, string>;
   placeholder?: string;
 }) {
+  const t = useTranslations("productFormEnterprise");
+
   return (
     <Controller
       name={name}
@@ -506,7 +528,7 @@ function SelectField<T extends string>({
             onChange={(event) => field.onChange(event.target.value)}
             className="border-input bg-background h-9 rounded-md border px-3 text-sm"
           >
-            <option value="">{placeholder}</option>
+            <option value="">{placeholder ?? t("select")}</option>
             {(Object.keys(options) as T[]).map((value) => (
               <option key={value} value={value}>
                 {options[value]}
@@ -555,6 +577,8 @@ function CheckboxField({
 // ─── Step 1: Informations et prix ────────────────────────────────────────────
 
 function Step1({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
+  const t = useTranslations("productFormEnterprise");
+  const validation = useValidationMessage();
   const { control } = form;
   const isService = useWatch({ control, name: "isService" });
   const categoryId = useWatch({ control, name: "categoryId" });
@@ -567,7 +591,7 @@ function Step1({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
     <div className="flex flex-col gap-4">
       <Card>
         <CardHeader>
-          <CardTitle className="font-bold">Informations sur le produit</CardTitle>
+          <CardTitle className="font-bold">{t("step1.productInfo")}</CardTitle>
         </CardHeader>
         <CardContent>
           <FieldGroup>
@@ -575,60 +599,62 @@ function Step1({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
               <TextField
                 control={control}
                 name="launchDate"
-                label="Date de lancement"
+                label={t("step1.launchDate")}
                 type="date"
               />
               <TextField
                 control={control}
                 name="gs1Reference"
-                label="N° de référence / code GS1"
+                label={t("step1.gs1Reference")}
                 placeholder="xxxxxx"
               />
               <TextField
                 control={control}
                 name="internalReference"
-                label="Référence interne"
+                label={t("step1.internalReference")}
               />
               <TextField
                 control={control}
                 name="region"
-                label="Région"
-                placeholder="Région + ville"
+                label={t("step1.region")}
+                placeholder={t("step1.regionPlaceholder")}
               />
               <SelectField
                 control={control}
                 name="exposure"
-                label="Exposition actuelle"
-                options={EXPOSURE_LABELS}
+                label={t("step1.exposure")}
+                options={optionLabels(listingExposureEnum, (value) =>
+                  t(`exposure.${value}`),
+                )}
               />
               <TextField
                 control={control}
                 name="brand"
-                label="Marque"
-                placeholder="Nom de la marque"
+                label={t("step1.brand")}
+                placeholder={t("step1.brandPlaceholder")}
               />
             </div>
 
             <TextField
               control={control}
               name="title"
-              label="Nom du produit"
-              placeholder="Nom commercial du produit ou service"
+              label={t("step1.title")}
+              placeholder={t("step1.titlePlaceholder")}
             />
 
             <TextareaField
               control={control}
               name="shortDescription"
-              label="Brève description"
-              placeholder="Au moins 50 mots"
+              label={t("step1.shortDescription")}
+              placeholder={t("step1.shortDescriptionPlaceholder")}
               rows={3}
             />
 
             <CheckboxField
               control={control}
               name="isService"
-              label="Ceci est un service"
-              description="Les données logistiques et de stock seront ignorées."
+              label={t("step1.isService")}
+              description={t("step1.isServiceHint")}
             />
 
             <CategorySelects
@@ -647,7 +673,7 @@ function Step1({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
             />
 
             <Field>
-              <FieldLabel>Devise des prix</FieldLabel>
+              <FieldLabel>{t("step1.currency")}</FieldLabel>
               <Controller
                 name="currency"
                 control={control}
@@ -670,31 +696,27 @@ function Step1({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-bold">
-            Prix B2C par marché cible
-          </CardTitle>
-          <p className="text-muted-foreground text-sm">
-            Le prix du Sénégal est celui affiché par défaut ; chaque
-            marketplace pays affiche le prix de son pays.
-          </p>
+          <CardTitle className="font-bold">{t("step1.b2cTitle")}</CardTitle>
+          <p className="text-muted-foreground text-sm">{t("step1.b2cHint")}</p>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           {form.formState.errors.b2cPrices?.root?.message && (
             <p className="text-destructive text-sm">
-              {form.formState.errors.b2cPrices.root.message}
+              {validation.text(form.formState.errors.b2cPrices.root.message)}
             </p>
           )}
           {form.formState.errors.b2cPrices?.message && (
             <p className="text-destructive text-sm">
-              {form.formState.errors.b2cPrices.message}
+              {validation.text(form.formState.errors.b2cPrices.message)}
             </p>
           )}
           {b2c.fields.map((row, index) => (
             <div key={row.id} className="rounded-md border p-3">
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-sm font-medium">
-                  Marché {index + 1}
-                  {row.countryCode === DEFAULT_MARKET && " (défaut)"}
+                  {row.countryCode === DEFAULT_MARKET
+                    ? t("step1.defaultMarket", { number: index + 1 })
+                    : t("step1.market", { number: index + 1 })}
                 </p>
                 {b2c.fields.length > 1 && (
                   <Button
@@ -703,7 +725,7 @@ function Step1({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
                     size="sm"
                     onClick={() => b2c.remove(index)}
                   >
-                    <X /> Retirer
+                    <X /> {t("step1.remove")}
                   </Button>
                 )}
               </div>
@@ -713,7 +735,7 @@ function Step1({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Marché cible</FieldLabel>
+                      <FieldLabel>{t("step1.targetMarket")}</FieldLabel>
                       <CountryCombobox
                         value={field.value}
                         onChange={field.onChange}
@@ -728,28 +750,28 @@ function Step1({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
                 <TextField
                   control={control}
                   name={`b2cPrices.${index}.priceAmountMinor`}
-                  label={`Prix incluant l'expédition (${currency})`}
+                  label={t("step1.priceWithShipping", { currency })}
                   type="number"
                   placeholder="12 000"
                 />
                 <TextField
                   control={control}
                   name={`b2cPrices.${index}.vatRatePercent`}
-                  label="TVA à destination (%)"
+                  label={t("step1.vat")}
                   type="number"
                   placeholder="18"
                 />
                 <TextField
                   control={control}
                   name={`b2cPrices.${index}.vmpCommissionPercent`}
-                  label="Commission VMP (%)"
+                  label={t("step1.vmpCommission")}
                   type="number"
-                  placeholder="6 à 20 selon le VMP"
+                  placeholder={t("step1.vmpCommissionPlaceholder")}
                 />
                 <TextField
                   control={control}
                   name={`b2cPrices.${index}.ddpPriceAmountMinor`}
-                  label={`Prix en DDP (${currency})`}
+                  label={t("step1.ddpPrice", { currency })}
                   type="number"
                 />
               </div>
@@ -760,32 +782,30 @@ function Step1({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
             variant="outline"
             onClick={() => b2c.append(emptyB2cPrice())}
           >
-            <PlusIcon /> Ajouter un marché B2C
+            <PlusIcon /> {t("step1.addB2c")}
           </Button>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-bold">
-            Prix B2B par marché cible
-          </CardTitle>
-          <p className="text-muted-foreground text-sm">
-            Reproduisez cette section pour chaque pays / marché cible.
-          </p>
+          <CardTitle className="font-bold">{t("step1.b2bTitle")}</CardTitle>
+          <p className="text-muted-foreground text-sm">{t("step1.b2bHint")}</p>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           {b2b.fields.map((row, index) => (
             <div key={row.id} className="rounded-md border p-3">
               <div className="mb-3 flex items-center justify-between">
-                <p className="text-sm font-medium">Marché B2B {index + 1}</p>
+                <p className="text-sm font-medium">
+                  {t("step1.b2bMarket", { number: index + 1 })}
+                </p>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => b2b.remove(index)}
                 >
-                  <X /> Retirer
+                  <X /> {t("step1.remove")}
                 </Button>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -794,7 +814,7 @@ function Step1({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Marché cible</FieldLabel>
+                      <FieldLabel>{t("step1.targetMarket")}</FieldLabel>
                       <CountryCombobox
                         value={field.value}
                         onChange={field.onChange}
@@ -809,39 +829,39 @@ function Step1({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
                 <TextField
                   control={control}
                   name={`b2bPrices.${index}.priceAmountMinor`}
-                  label={`Prix par unité FOB (${currency})`}
+                  label={t("step1.fobPrice", { currency })}
                   type="number"
                 />
                 <TextField
                   control={control}
                   name={`b2bPrices.${index}.minOrderQuantity`}
-                  label="Quantité minimale de commande (MOQ)"
+                  label={t("step1.moq")}
                   type="number"
                 />
                 <TextField
                   control={control}
                   name={`b2bPrices.${index}.agentCommissionPercent`}
-                  label="Commission d'agent (%)"
+                  label={t("step1.agentCommission")}
                   type="number"
-                  hint="Si un intermédiaire est impliqué."
+                  hint={t("step1.agentCommissionHint")}
                 />
                 <TextField
                   control={control}
                   name={`b2bPrices.${index}.cartonsPerPallet`}
-                  label="Nombre de cartons par palette"
+                  label={t("step1.cartonsPerPallet")}
                   type="number"
-                  hint="Palette standard UE 80 × 120 cm."
+                  hint={t("step1.cartonsPerPalletHint")}
                 />
                 <TextField
                   control={control}
                   name={`b2bPrices.${index}.containerType`}
-                  label="Type de conteneur"
+                  label={t("step1.containerType")}
                   placeholder="20', 40', 40' HC…"
                 />
                 <TextField
                   control={control}
                   name={`b2bPrices.${index}.unitsPerContainer`}
-                  label="Nombre d'unités par conteneur"
+                  label={t("step1.unitsPerContainer")}
                   type="number"
                 />
               </div>
@@ -852,7 +872,7 @@ function Step1({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
             variant="outline"
             onClick={() => b2b.append(emptyB2bPrice())}
           >
-            <PlusIcon /> Ajouter un marché B2B
+            <PlusIcon /> {t("step1.addB2b")}
           </Button>
         </CardContent>
       </Card>
@@ -863,6 +883,7 @@ function Step1({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
 // ─── Step 2: Stocks et logistique ────────────────────────────────────────────
 
 function Step2({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
+  const t = useTranslations("productFormEnterprise");
   const { control } = form;
   const isService = useWatch({ control, name: "isService" });
   const readyToShip = useWatch({ control, name: "readyToShip" });
@@ -871,18 +892,17 @@ function Step2({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="font-bold">Stocks et logistique</CardTitle>
+          <CardTitle className="font-bold">{t("step2.title")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <p className="text-muted-foreground text-sm">
-            Cette annonce est un service : les données d&apos;emballage et de
-            stock ne s&apos;appliquent pas. Précisez uniquement vos délais.
+            {t("step2.serviceHint")}
           </p>
           <TextField
             control={control}
             name="leadTime"
-            label="Délai de réalisation"
-            placeholder="Pour un marché spécifique"
+            label={t("step2.completionTime")}
+            placeholder={t("step2.forSpecificMarket")}
           />
         </CardContent>
       </Card>
@@ -893,7 +913,7 @@ function Step2({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
     <div className="flex flex-col gap-4">
       <Card>
         <CardHeader>
-          <CardTitle className="font-bold">Logistique</CardTitle>
+          <CardTitle className="font-bold">{t("step2.logistics")}</CardTitle>
         </CardHeader>
         <CardContent>
           <FieldGroup>
@@ -901,75 +921,75 @@ function Step2({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
               <TextField
                 control={control}
                 name="hsCode"
-                label="Code HS / personnalisé"
+                label={t("step2.hsCode")}
               />
-              <TextField control={control} name="ean13" label="Code EAN13" />
-              <TextField control={control} name="cupCode" label="Code CUP" />
+              <TextField control={control} name="ean13" label={t("step2.ean13")} />
+              <TextField control={control} name="cupCode" label={t("step2.cupCode")} />
               <TextField
                 control={control}
                 name="packaging"
-                label="Emballage"
-                placeholder="Bouteille, carton…"
+                label={t("step2.packaging")}
+                placeholder={t("step2.packagingPlaceholder")}
               />
               <TextField
                 control={control}
                 name="unit"
-                label="Unité"
-                placeholder="g / kg / L…"
+                label={t("step2.unit")}
+                placeholder={t("step2.unitPlaceholder")}
               />
               <TextField
                 control={control}
                 name="baseValueMinor"
-                label="Valeur de base (valeur taxable)"
+                label={t("step2.baseValue")}
                 type="number"
               />
               <TextField
                 control={control}
                 name="grossWeightKg"
-                label="Poids brut (kg)"
+                label={t("step2.grossWeight")}
                 type="number"
               />
               <TextField
                 control={control}
                 name="weightVolumeRatio"
-                label="Rapport pesée / volume"
+                label={t("step2.weightVolumeRatio")}
               />
               <TextField
                 control={control}
                 name="widthCm"
-                label="Largeur (cm)"
+                label={t("step2.width")}
                 type="number"
               />
               <TextField
                 control={control}
                 name="heightCm"
-                label="Hauteur (cm)"
+                label={t("step2.height")}
                 type="number"
               />
               <TextField
                 control={control}
                 name="depthCm"
-                label="Profondeur ou diamètre (cm)"
+                label={t("step2.depth")}
                 type="number"
               />
               <TextField
                 control={control}
                 name="packagingType"
-                label="Type d'emballage"
-                placeholder="Carton / plastique / bois"
+                label={t("step2.packagingType")}
+                placeholder={t("step2.packagingTypePlaceholder")}
               />
             </div>
             <CheckboxField
               control={control}
               name="isFragile"
-              label="Produit fragile"
-              description="À manipuler avec précaution lors de la livraison."
+              label={t("step2.fragile")}
+              description={t("step2.fragileHint")}
             />
             <TextareaField
               control={control}
               name="transporters"
-              label="Transporteurs"
-              placeholder="Liste des transporteurs et de leurs offres pour l'expédition de chaque unité de vente (unité, carton, palette) par marché cible."
+              label={t("step2.transporters")}
+              placeholder={t("step2.transportersPlaceholder")}
             />
           </FieldGroup>
         </CardContent>
@@ -977,40 +997,42 @@ function Step2({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-bold">Stock</CardTitle>
+          <CardTitle className="font-bold">{t("step2.stock")}</CardTitle>
         </CardHeader>
         <CardContent>
           <FieldGroup>
             <CheckboxField
               control={control}
               name="readyToShip"
-              label="Prêt à livrer"
-              description="Décochez si le produit nécessite un temps de fabrication."
+              label={t("step2.readyToShip")}
+              description={t("step2.readyToShipHint")}
             />
             <div className="grid gap-4 sm:grid-cols-2">
               <SelectField
                 control={control}
                 name="availableOn"
-                label="Disponible sur"
-                options={AVAILABILITY_LABELS}
+                label={t("step2.availableOn")}
+                options={optionLabels(listingAvailabilityChannelEnum, (value) =>
+                  t(`availability.${value}`),
+                )}
               />
               <TextField
                 control={control}
                 name="storageLocation"
-                label="Lieu de stockage"
-                placeholder="Ville et code postal"
+                label={t("step2.storageLocation")}
+                placeholder={t("step2.storageLocationPlaceholder")}
               />
               <TextField
                 control={control}
                 name="stock"
-                label="Quantité disponible"
+                label={t("step2.quantity")}
                 type="number"
               />
               <TextField
                 control={control}
                 name="lowStockThreshold"
-                label="Alerte de stock bas"
-                placeholder="Être prévenu à partir de… unités"
+                label={t("step2.lowStock")}
+                placeholder={t("step2.lowStockPlaceholder")}
                 type="number"
               />
               <TextField
@@ -1018,23 +1040,25 @@ function Step2({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
                 name="leadTime"
                 label={
                   readyToShip
-                    ? "Délai de livraison"
-                    : "Délai de livraison (dont fabrication)"
+                    ? t("step2.leadTime")
+                    : t("step2.leadTimeWithManufacturing")
                 }
-                placeholder="Pour un marché spécifique"
+                placeholder={t("step2.forSpecificMarket")}
               />
               <SelectField
                 control={control}
                 name="outOfStockPolicy"
-                label="Dans aucun stock"
-                options={STOCK_POLICY_LABELS}
-                placeholder="Accepter ou refuser les commandes ?"
+                label={t("step2.outOfStock")}
+                options={optionLabels(listingStockPolicyEnum, (value) =>
+                  t(`stockPolicy.${value}`),
+                )}
+                placeholder={t("step2.outOfStockPlaceholder")}
               />
               <TextField
                 control={control}
                 name="specialDeliveryTime"
-                label="Heure de livraison spéciale"
-                placeholder="S'il n'y a plus de stock"
+                label={t("step2.specialDeliveryTime")}
+                placeholder={t("step2.specialDeliveryTimePlaceholder")}
               />
             </div>
           </FieldGroup>
@@ -1053,17 +1077,16 @@ function BrandsCard({
   brands: ManagedBrand[];
   onChange: (brands: ManagedBrand[]) => void;
 }) {
+  const t = useTranslations("productFormEnterprise.step3");
   const update = (key: string, patch: Partial<ManagedBrand>) =>
     onChange(brands.map((b) => (b.key === key ? { ...b, ...patch } : b)));
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-bold">
-          Marques et propriété intellectuelle (le cas échéant)
-        </CardTitle>
+        <CardTitle className="font-bold">{t("brandsTitle")}</CardTitle>
         <p className="text-muted-foreground text-sm">
-          Jusqu&apos;à {MAX_BRANDS} marques, chacune avec son logo.
+          {t("brandsHint", { max: MAX_BRANDS })}
         </p>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
@@ -1075,15 +1098,15 @@ function BrandsCard({
             <Input
               value={brand.name}
               onChange={(event) => update(brand.key, { name: event.target.value })}
-              placeholder={`Marque ${index + 1}`}
+              placeholder={t("brandPlaceholder", { number: index + 1 })}
               className="h-8"
             />
             <label className="text-primary cursor-pointer text-xs whitespace-nowrap underline">
               {brand.logoFile
                 ? brand.logoFile.name
                 : brand.logoUrl
-                  ? "Changer le logo"
-                  : "Logo de la marque"}
+                  ? t("changeLogo")
+                  : t("brandLogo")}
               <input
                 type="file"
                 accept="image/png,image/jpeg,image/svg+xml"
@@ -1097,7 +1120,7 @@ function BrandsCard({
             <button
               type="button"
               onClick={() => onChange(brands.filter((b) => b.key !== brand.key))}
-              aria-label="Retirer la marque"
+              aria-label={t("removeBrand")}
             >
               <X className="text-muted-foreground size-4" />
             </button>
@@ -1113,7 +1136,7 @@ function BrandsCard({
               onChange([...brands, { key: `brand-new-${Date.now()}`, name: "" }])
             }
           >
-            Ajouter une marque
+            {t("addBrand")}
           </Button>
         )}
       </CardContent>
@@ -1138,6 +1161,7 @@ function Step3({
   onRenameCertificate: (key: string, name: string) => void;
   onRemoveCertificate: (key: string) => void;
 }) {
+  const t = useTranslations("productFormEnterprise.step3");
   const { control } = form;
   const dropzone = useDropzone({
     onDrop: onAddCertificates,
@@ -1151,9 +1175,7 @@ function Step3({
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-bold">
-            Certificats (si disponibles)
-          </CardTitle>
+          <CardTitle className="font-bold">{t("certificatesTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <div
@@ -1167,8 +1189,7 @@ function Step3({
             <input {...dropzone.getInputProps()} />
             <UploadIcon className="text-muted-foreground/50 size-8" />
             <span className="text-muted-foreground text-sm">
-              Glissez-déposez vos certificats (PDF, JPG, PNG) ou cliquez pour
-              ajouter
+              {t("certificatesDrop")}
             </span>
           </div>
           {certificates.map((certificate) => (
@@ -1182,7 +1203,7 @@ function Step3({
                 onChange={(event) =>
                   onRenameCertificate(certificate.key, event.target.value)
                 }
-                placeholder="Nom du certificat"
+                placeholder={t("certificateName")}
                 className="h-8"
               />
               {certificate.url && (
@@ -1192,13 +1213,13 @@ function Step3({
                   rel="noreferrer"
                   className="text-primary text-xs whitespace-nowrap underline"
                 >
-                  Voir
+                  {t("view")}
                 </a>
               )}
               <button
                 type="button"
                 onClick={() => onRemoveCertificate(certificate.key)}
-                aria-label="Retirer le certificat"
+                aria-label={t("removeCertificate")}
               >
                 <X className="text-muted-foreground size-4" />
               </button>
@@ -1209,7 +1230,7 @@ function Step3({
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-bold">Profil du produit</CardTitle>
+          <CardTitle className="font-bold">{t("profileTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <FieldGroup>
@@ -1218,9 +1239,9 @@ function Step3({
               control={control}
               render={({ field }) => (
                 <Field>
-                  <FieldLabel>Description détaillée</FieldLabel>
+                  <FieldLabel>{t("description")}</FieldLabel>
                   <p className="text-muted-foreground text-xs">
-                    300 mots minimum recommandés.
+                    {t("descriptionHint")}
                   </p>
                   <Tiptap
                     description={field.value ?? ""}
@@ -1233,44 +1254,44 @@ function Step3({
             <TextareaField
               control={control}
               name="history"
-              label="Histoire du produit / service"
-              placeholder="Environ 100 mots"
+              label={t("history")}
+              placeholder={t("historyPlaceholder")}
             />
             <TextareaField
               control={control}
               name="composition"
-              label="Composition"
-              placeholder="Matériaux, propriétés, fonctions"
+              label={t("composition")}
+              placeholder={t("compositionPlaceholder")}
             />
             <TextareaField
               control={control}
               name="nutrition"
-              label="Valeur nutritionnelle"
-              placeholder="Pour les produits alimentaires uniquement"
+              label={t("nutrition")}
+              placeholder={t("nutritionPlaceholder")}
             />
             <TextareaField
               control={control}
               name="benefits"
-              label="Bénéfices / fonctions"
-              placeholder="Ce que l'utilisateur gagne en termes d'avantages, de fonctions ou de pouvoirs en ayant ce produit."
+              label={t("benefits")}
+              placeholder={t("benefitsPlaceholder")}
             />
             <TextareaField
               control={control}
               name="storage"
-              label="Conservation"
-              placeholder="Comment conserver le produit ou maintenir le service / logiciel (mises à jour) ?"
+              label={t("storage")}
+              placeholder={t("storagePlaceholder")}
             />
             <TextareaField
               control={control}
               name="maintenance"
-              label="Maintenance"
-              placeholder="Comment garder le produit actif / brillant, etc."
+              label={t("maintenance")}
+              placeholder={t("maintenancePlaceholder")}
             />
             <TextareaField
               control={control}
               name="manufacturing"
-              label="Processus de fabrication"
-              placeholder="Comment sont construits les produits / services"
+              label={t("manufacturing")}
+              placeholder={t("manufacturingPlaceholder")}
             />
           </FieldGroup>
         </CardContent>
@@ -1282,6 +1303,7 @@ function Step3({
 // ─── Step 4: Caractéristiques et références ──────────────────────────────────
 
 function Step4({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
+  const t = useTranslations("productFormEnterprise.step4");
   const { control } = form;
   const variants = useFieldArray({ control, name: "variants" });
   const seoTitle = useWatch({ control, name: "seoTitle" });
@@ -1291,11 +1313,8 @@ function Step4({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
     <div className="flex flex-col gap-4">
       <Card>
         <CardHeader>
-          <CardTitle className="font-bold">Caractéristiques</CardTitle>
-          <p className="text-muted-foreground text-sm">
-            Si le produit est disponible en différentes tailles, variantes,
-            couleurs, etc. Séparez les valeurs possibles par des virgules.
-          </p>
+          <CardTitle className="font-bold">{t("featuresTitle")}</CardTitle>
+          <p className="text-muted-foreground text-sm">{t("featuresHint")}</p>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           {variants.fields.map((row, index) => (
@@ -1306,14 +1325,14 @@ function Step4({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
               <TextField
                 control={control}
                 name={`variants.${index}.name`}
-                label={`Fonctionnalité ${index + 1}`}
-                placeholder="Ex : Taille (femmes)"
+                label={t("feature", { number: index + 1 })}
+                placeholder={t("featurePlaceholder")}
               />
               <TextField
                 control={control}
                 name={`variants.${index}.values`}
-                label="Valeurs possibles"
-                placeholder="Ex : 36, 38, 40, 42"
+                label={t("values")}
+                placeholder={t("valuesPlaceholder")}
               />
               <Button
                 type="button"
@@ -1321,7 +1340,7 @@ function Step4({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
                 size="icon"
                 className="mb-0.5"
                 onClick={() => variants.remove(index)}
-                aria-label="Retirer la fonctionnalité"
+                aria-label={t("removeFeature")}
               >
                 <X />
               </Button>
@@ -1334,7 +1353,7 @@ function Step4({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
               className="w-fit"
               onClick={() => variants.append({ name: "", values: "" })}
             >
-              <PlusIcon /> Ajouter une fonctionnalité
+              <PlusIcon /> {t("addFeature")}
             </Button>
           )}
         </CardContent>
@@ -1342,30 +1361,30 @@ function Step4({ form }: { form: UseFormReturn<EnterpriseFormData> }) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-bold">
-            Optimisation des moteurs de recherche
-          </CardTitle>
+          <CardTitle className="font-bold">{t("seoTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <FieldGroup>
             <TextField
               control={control}
               name="seoTitle"
-              label={`Balise titre (${seoTitle.length}/70)`}
+              label={t("titleTag", { length: seoTitle.length })}
             />
             <TextField
               control={control}
               name="seoExternalUrl"
-              label="URL pour plus d'informations"
+              label={t("externalUrl")}
               type="url"
               placeholder="https://…"
-              hint="Si la PME dispose d'un site web ou si le produit / service est répertorié ailleurs."
+              hint={t("externalUrlHint")}
             />
             <TextareaField
               control={control}
               name="seoMetaDescription"
-              label={`Méta-description (${seoMetaDescription.length}/160)`}
-              placeholder="Le groupe de mots-clés qu'un utilisateur peut taper sur Google pour rechercher ce type de produit / service."
+              label={t("metaDescription", {
+                length: seoMetaDescription.length,
+              })}
+              placeholder={t("metaDescriptionPlaceholder")}
               rows={3}
             />
           </FieldGroup>
@@ -1386,6 +1405,8 @@ export default function EnterpriseProductForm({
 }: {
   listing?: Listing;
 }) {
+  const t = useTranslations("productFormEnterprise");
+  const tShared = useTranslations("productForm.shared");
   const isEdit = !!listing;
   const [step, setStep] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
@@ -1501,7 +1522,7 @@ export default function EnterpriseProductForm({
           const url = certificate.url ?? urlByKey.get(certificate.key);
           if (!url) return null;
           return {
-            name: certificate.name.trim() || "Certificat",
+            name: certificate.name.trim() || t("step3.defaultCertificateName"),
             url,
           } satisfies ListingCertificate;
         })
@@ -1636,7 +1657,7 @@ export default function EnterpriseProductForm({
     } catch (error) {
       setIsUploading(false);
       setSubmissionErrors([
-        getMutationErrorMessage(error, "Erreur lors de l'envoi des fichiers."),
+        getMutationErrorMessage(error, t("uploadError")),
       ]);
     }
   };
@@ -1648,9 +1669,7 @@ export default function EnterpriseProductForm({
       fields.some((field) => errorKeys.includes(field)),
     );
     if (firstStep >= 0) setStep(firstStep);
-    setSubmissionErrors([
-      "Certains champs sont invalides. Vérifiez les étapes signalées.",
-    ]);
+    setSubmissionErrors([t("invalidFields")]);
   };
 
   return (
@@ -1658,11 +1677,14 @@ export default function EnterpriseProductForm({
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold">
-            {isEdit ? "Modifier la fiche produit" : "Nouvelle fiche produit"}
+            {isEdit ? t("editTitle") : t("newTitle")}
           </h1>
           <p className="text-muted-foreground text-sm">
-            Fiche Produit et Service détaillée — étape {step + 1}/
-            {STEPS.length} : {STEPS[step].title}
+            {t("stepSubtitle", {
+              step: step + 1,
+              total: STEPS.length,
+              title: t(`steps.${STEPS[step]}`),
+            })}
           </p>
         </div>
 
@@ -1674,7 +1696,7 @@ export default function EnterpriseProductForm({
             onClick={() => setDeleteDialogOpen(true)}
           >
             <Trash2Icon className="size-4" />
-            Supprimer
+            {t("delete")}
           </Button>
         )}
       </div>
@@ -1683,7 +1705,7 @@ export default function EnterpriseProductForm({
       <div className="flex flex-wrap gap-2">
         {STEPS.map((item, index) => (
           <button
-            key={item.title}
+            key={item}
             type="button"
             onClick={() => setStep(index)}
             className={`rounded-md border px-3 py-1.5 text-sm transition-colors ${
@@ -1692,7 +1714,7 @@ export default function EnterpriseProductForm({
                 : "border-input hover:bg-muted"
             }`}
           >
-            {index + 1}. {item.title}
+            {t("stepTab", { number: index + 1, title: t(`steps.${item}`) })}
           </button>
         ))}
       </div>
@@ -1726,12 +1748,9 @@ export default function EnterpriseProductForm({
         {step === 4 && (
           <Card className="bg-muted/30">
             <CardHeader>
-              <CardTitle className="font-bold">Photos du produit</CardTitle>
+              <CardTitle className="font-bold">{t("photosTitle")}</CardTitle>
               <p className="text-muted-foreground text-sm">
-                Au moins 3 photos par produit (de préférence 5), hauteur ou
-                largeur d&apos;au moins 1 000 px, dont une sur fond blanc.
-                Indiquez pour chaque image son type et un nom contenant des
-                mots-clés.
+                {t("photosHint")}
               </p>
             </CardHeader>
             <CardContent>
@@ -1747,7 +1766,7 @@ export default function EnterpriseProductForm({
             disabled={step === 0 || isMutating}
             onClick={() => setStep((current) => Math.max(current - 1, 0))}
           >
-            Précédent
+            {t("previous")}
           </Button>
           {isLastStep ? (
             <Button
@@ -1755,18 +1774,18 @@ export default function EnterpriseProductForm({
               disabled={isMutating || deleteListing.isPending}
             >
               {isUploading
-                ? `Envoi des fichiers… ${uploadProgress}%`
+                ? t("uploading", { progress: uploadProgress })
                 : createListing.isPending
-                  ? "Création en cours..."
+                  ? tShared("creating")
                   : updateListing.isPending
-                    ? "Mise à jour en cours..."
+                    ? tShared("updating")
                     : isEdit
-                      ? "Enregistrer les modifications"
-                      : "Soumettre la fiche"}
+                      ? tShared("saveChanges")
+                      : t("submit")}
             </Button>
           ) : (
             <Button type="button" onClick={() => void goNext()}>
-              Suivant
+              {t("next")}
             </Button>
           )}
         </div>

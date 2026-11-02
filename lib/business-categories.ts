@@ -1,5 +1,9 @@
 import type { BusinessCategory } from "@/lib/backend-resource-types";
 
+/**
+ * French labels, for the admin screens. The supplier wizard shows
+ * onboarding.category.options instead.
+ */
 export const BUSINESS_CATEGORY_LABELS: Record<BusinessCategory, string> = {
   PHYSICAL_PERSON: "Personne physique",
   SME: "PME",

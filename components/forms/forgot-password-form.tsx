@@ -23,6 +23,7 @@ import {
 import { trpc } from "@/server/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MailIcon, PhoneIcon, RotateCcw } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Controller, useForm, type Resolver } from "react-hook-form";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,9 @@ export default function ForgotPasswordForm({
 }: {
   onBackToLogin: () => void;
 }) {
+  const t = useTranslations("auth.forgotPassword");
+  const tOtp = useTranslations("auth.otp");
+  const tErrors = useTranslations("errors");
   const [identifier, setIdentifier] = useState<string | null>(null);
   const [authMethod, setAuthMethod] = useState<AuthMethod>("phone");
   const [isDone, setIsDone] = useState(false);
@@ -62,7 +66,7 @@ export default function ForgotPasswordForm({
   });
 
   const errorMessage = (error: unknown) =>
-    error instanceof Error ? error.message : "Une erreur est survenue.";
+    error instanceof Error ? error.message : tErrors("generic");
 
   const onRequest = async (data: ForgotPasswordInput) => {
     setMessage(null);
@@ -74,8 +78,8 @@ export default function ForgotPasswordForm({
       resetForm.setValue("identifier", data.identifier);
       setMessage(
         result.otp?.debugCode
-          ? `Code de test: ${result.otp.debugCode}`
-          : "Si un compte correspond, un code de vérification vous a été envoyé.",
+          ? tOtp("testCode", { code: result.otp.debugCode })
+          : t("codeSentIfAccount"),
       );
     } catch (error) {
       setMessage(errorMessage(error));
@@ -89,9 +93,7 @@ export default function ForgotPasswordForm({
       await validateOtp.mutateAsync(data);
 
       setIsDone(true);
-      setMessage(
-        "Votre mot de passe a été réinitialisé. Vous pouvez vous connecter.",
-      );
+      setMessage(t("resetDone"));
     } catch (error) {
       setMessage(errorMessage(error));
     }
@@ -111,8 +113,8 @@ export default function ForgotPasswordForm({
 
       setMessage(
         result.otp?.debugCode
-          ? `Code de test: ${result.otp.debugCode}`
-          : "Un nouveau code vous a été envoyé.",
+          ? tOtp("testCode", { code: result.otp.debugCode })
+          : tOtp("newCodeSent"),
       );
     } catch (error) {
       setMessage(errorMessage(error));
@@ -141,14 +143,14 @@ export default function ForgotPasswordForm({
       <div className="w-full max-w-md">
         {isDone ? (
           <div className="flex flex-col items-center gap-6 text-center">
-            <h1 className="text-2xl font-bold">Mot de passe réinitialisé</h1>
+            <h1 className="text-2xl font-bold">{t("doneTitle")}</h1>
             <Button
               type="button"
               size="lg"
               className="h-12 w-full"
               onClick={onBackToLogin}
             >
-              Se connecter
+              {t("signIn")}
             </Button>
           </div>
         ) : identifier === null ? (
@@ -158,17 +160,16 @@ export default function ForgotPasswordForm({
           >
             <FieldGroup>
               <div className="flex flex-col items-center gap-1 text-center">
-                <h1 className="text-2xl font-bold">Mot de passe oublié ?</h1>
+                <h1 className="text-2xl font-bold">{t("title")}</h1>
                 <p className="text-muted-foreground text-sm text-balance">
-                  Entrez vos identifiants, nous vous enverrons un code de
-                  vérification.
+                  {t("intro")}
                 </p>
               </div>
 
               <div
                 className="bg-muted grid grid-cols-2 rounded-lg p-1"
                 role="group"
-                aria-label="Méthode de récupération"
+                aria-label={t("method")}
               >
                 <Button
                   type="button"
@@ -182,7 +183,7 @@ export default function ForgotPasswordForm({
                   onClick={() => changeAuthMethod("phone")}
                 >
                   <PhoneIcon className="size-4" />
-                  Téléphone
+                  {t("phoneTab")}
                 </Button>
                 <Button
                   type="button"
@@ -196,7 +197,7 @@ export default function ForgotPasswordForm({
                   onClick={() => changeAuthMethod("email")}
                 >
                   <MailIcon className="size-4" />
-                  Email
+                  {t("emailTab")}
                 </Button>
               </div>
 
@@ -207,8 +208,8 @@ export default function ForgotPasswordForm({
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel>
                       {authMethod === "phone"
-                        ? "Numéro de téléphone"
-                        : "Adresse email"}
+                        ? t("phoneLabel")
+                        : t("emailLabel")}
                     </FieldLabel>
                     {authMethod === "phone" ? (
                       <PhoneInput
@@ -227,7 +228,7 @@ export default function ForgotPasswordForm({
                         type="email"
                         inputMode="email"
                         autoComplete="email"
-                        placeholder="nom@exemple.com"
+                        placeholder={t("emailPlaceholder")}
                         aria-invalid={fieldState.invalid}
                         disabled={forgotPassword.isPending}
                         className="h-12"
@@ -247,7 +248,7 @@ export default function ForgotPasswordForm({
                   className="h-12"
                   disabled={forgotPassword.isPending}
                 >
-                  {forgotPassword.isPending ? "Envoi..." : "Envoyer le code"}
+                  {forgotPassword.isPending ? t("sending") : t("send")}
                 </Button>
               </Field>
 
@@ -258,7 +259,7 @@ export default function ForgotPasswordForm({
                     onClick={onBackToLogin}
                     className="text-primary cursor-pointer font-semibold hover:underline"
                   >
-                    Retour à la connexion
+                    {t("backToLogin")}
                   </button>
                 </FieldDescription>
               </Field>
@@ -271,10 +272,9 @@ export default function ForgotPasswordForm({
           >
             <FieldGroup>
               <div className="flex flex-col items-center gap-1 text-center">
-                <h1 className="text-2xl font-bold">Nouveau mot de passe</h1>
+                <h1 className="text-2xl font-bold">{t("newPasswordTitle")}</h1>
                 <p className="text-muted-foreground text-sm text-balance">
-                  Entrez le code envoyé à {identifier} et choisissez un nouveau
-                  mot de passe.
+                  {t("newPasswordIntro", { identifier })}
                 </p>
               </div>
 
@@ -283,7 +283,7 @@ export default function ForgotPasswordForm({
                 control={resetForm.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Code de validation</FieldLabel>
+                    <FieldLabel>{t("codeLabel")}</FieldLabel>
                     <InputOTP
                       maxLength={4}
                       value={field.value}
@@ -310,7 +310,7 @@ export default function ForgotPasswordForm({
                 control={resetForm.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Nouveau mot de passe</FieldLabel>
+                    <FieldLabel>{t("newPassword")}</FieldLabel>
                     <Input
                       {...field}
                       type="password"
@@ -331,7 +331,7 @@ export default function ForgotPasswordForm({
                 control={resetForm.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Confirmation</FieldLabel>
+                    <FieldLabel>{t("confirmation")}</FieldLabel>
                     <Input
                       {...field}
                       type="password"
@@ -354,9 +354,7 @@ export default function ForgotPasswordForm({
                   className="h-12"
                   disabled={isResetPending}
                 >
-                  {validateOtp.isPending
-                    ? "Réinitialisation..."
-                    : "Réinitialiser le mot de passe"}
+                  {validateOtp.isPending ? t("resetting") : t("reset")}
                 </Button>
               </Field>
 
@@ -367,7 +365,7 @@ export default function ForgotPasswordForm({
                   onClick={() => setIdentifier(null)}
                   className="h-12"
                 >
-                  Retour
+                  {t("back")}
                 </Button>
                 <Button
                   type="button"
@@ -377,7 +375,7 @@ export default function ForgotPasswordForm({
                   className="h-12"
                 >
                   <RotateCcw className="size-4" />
-                  Renvoyer le code
+                  {t("resend")}
                 </Button>
               </Field>
             </FieldGroup>

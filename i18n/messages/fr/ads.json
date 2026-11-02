@@ -1,0 +1,101 @@
+{
+  "title": "Publicités",
+  "intro": "Mettez votre boutique en avant sur l'accueil, les résultats de recherche ou les fiches produits, dans les pays de votre choix. Chaque publicité est validée par l'équipe Diarama.",
+  "mine": "Mes publicités ({count})",
+  "request": "Demander une publicité",
+  "toast": {
+    "updated": "Publicité mise à jour.",
+    "submitted": "Publicité envoyée pour validation.",
+    "paused": "Publicité suspendue.",
+    "resumed": "Publicité réactivée.",
+    "deleted": "Publicité supprimée."
+  },
+  "errors": {
+    "saveFailed": "Enregistrement impossible.",
+    "actionFailed": "Action impossible.",
+    "imageRequired": "Choisissez une image.",
+    "imageUploadFailed": "Envoi de l'image impossible."
+  },
+  "actions": {
+    "stats": "Statistiques",
+    "edit": "Modifier",
+    "pause": "Suspendre",
+    "resume": "Réactiver",
+    "delete": "Supprimer",
+    "menu": "Actions pour {title}"
+  },
+  "confirmDelete": "Supprimer « {title} » ?",
+  "placement": {
+    "HOME_BANNER": "Bannière de l'accueil",
+    "SEARCH_RESULTS": "Résultats de recherche",
+    "LISTING_DETAIL": "Fiche produit",
+    "CATEGORY_SIDEBAR": "Pages catégorie"
+  },
+  "placementHint": {
+    "HOME_BANNER": "Grand visuel en haut de l'accueil (site et application). Image 1600 × 500.",
+    "SEARCH_RESULTS": "Encart au-dessus de la liste des produits. Image 1200 × 250.",
+    "LISTING_DETAIL": "Encart sous la description d'un produit. Image 1200 × 250.",
+    "CATEGORY_SIDEBAR": "Encart des pages de catégorie. Image 1200 × 250."
+  },
+  "state": {
+    "RUNNING": "En ligne",
+    "SCHEDULED": "Programmée",
+    "ENDED": "Terminée",
+    "PAUSED": "Suspendue",
+    "PENDING": "À valider",
+    "REJECTED": "Refusée"
+  },
+  "period": {
+    "none": "Sans limite",
+    "from": "Dès le {date}",
+    "until": "Jusqu'au {date}",
+    "range": "{start} → {end}"
+  },
+  "table": {
+    "ad": "Publicité",
+    "placement": "Emplacement",
+    "period": "Période",
+    "state": "État",
+    "results": "Affichages / clics",
+    "loading": "Chargement des publicités…",
+    "empty": "Aucune publicité pour le moment.",
+    "allCountries": "Tous les pays"
+  },
+  "form": {
+    "editTitle": "Modifier la publicité",
+    "platformNewTitle": "Nouvelle publicité ou bannière",
+    "requestTitle": "Demander une publicité",
+    "reviewNote": "L'équipe Diarama valide chaque publicité avant sa mise en ligne.",
+    "reviewNoteEdit": "L'équipe Diarama valide chaque publicité avant sa mise en ligne. Modifier le contenu la renvoie en validation.",
+    "placement": "Emplacement",
+    "title": "Titre",
+    "subtitle": "Sous-titre (facultatif)",
+    "image": "Image",
+    "uploading": "Envoi… {progress} %",
+    "target": "Lien (facultatif)",
+    "targetPlaceholder": "/businesses/ma-boutique ou https://…",
+    "targetHint": "Une page du site (commençant par /) ou une adresse https.",
+    "start": "Début (facultatif)",
+    "end": "Fin (facultatif)",
+    "priority": "Priorité (0 à 100)",
+    "priorityHint": "Les plus hautes passent en premier.",
+    "countries": "Pays ({count})",
+    "countriesAll": "Pays (tous)",
+    "noCountryHint": "Aucun pays coché : la publicité s'affiche partout.",
+    "cancel": "Annuler",
+    "saving": "Enregistrement…",
+    "save": "Enregistrer",
+    "submit": "Envoyer pour validation"
+  },
+  "stats": {
+    "title": "Statistiques — {title}",
+    "loading": "Chargement…",
+    "impressions": "Affichages",
+    "clicks": "Clics",
+    "clickRate": "Taux de clic",
+    "period": "30 derniers jours",
+    "empty": "Pas encore d'affichage.",
+    "dayLine": "{impressions} / {clicks, plural, one {# clic} other {# clics}}",
+    "close": "Fermer"
+  }
+}

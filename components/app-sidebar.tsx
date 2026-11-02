@@ -3,7 +3,6 @@
 import Image from "next/image";
 import * as React from "react";
 
-import { BRAND_TAGLINE } from "@/components/brand/brand-mark";
 import { NavSecondary } from "@/components/nav-secondary";
 import {
     Sidebar,
@@ -17,155 +16,331 @@ import { useMessaging } from "@/contexts/messaging-context";
 import { useUser } from "@/contexts/user-context";
 import {
     ActivityIcon,
+  HeartPulseIcon,
+  ClipboardCheckIcon,
+  FileChartColumnIcon,
+  GraduationCapIcon,
+  MailIcon,
+  TrophyIcon,
+  FileCheckIcon,
+  ChartNoAxesColumnIcon,
     AwardIcon,
+    BanknoteIcon,
     Building2Icon,
     CircleHelpIcon,
     CreditCardIcon,
     FileTextIcon,
+    FlagIcon,
     GavelIcon,
     LayoutDashboardIcon,
+    LifeBuoyIcon,
     MapPinnedIcon,
+    MegaphoneIcon,
     MessageSquareIcon,
     PackageIcon,
+    PercentIcon,
+    SendIcon,
     SettingsIcon,
     ShieldCheckIcon,
     ShoppingCartIcon,
     StoreIcon,
+    UndoIcon,
     UserCogIcon,
     Users2Icon,
 } from "lucide-react";
+import type { Messages } from "@/i18n/messages";
+import { type MessageKeys, type NestedKeyOf, useTranslations } from "next-intl";
 import { NavUser } from "./nav-user";
 
-const generalItems = [
+type ItemsMessages = Messages["nav"]["items"];
+type NavKey = MessageKeys<ItemsMessages, NestedKeyOf<ItemsMessages>>;
+type NavItem = { key: NavKey; url: string; icon: React.ReactNode };
+
+const generalItems: NavItem[] = [
   {
-    title: "Tableau de bord",
+    key: "dashboard",
     url: "/dashboard",
     icon: <LayoutDashboardIcon />,
   },
   {
-    title: "Produits",
+    key: "products",
     url: "/dashboard/products",
     icon: <PackageIcon />,
   },
   {
-    title: "Appels d'offres",
+    key: "tenders",
     url: "/dashboard/tenders",
     icon: <GavelIcon />,
   },
   {
-    title: "Commandes",
+    key: "tenderOpportunities",
+    url: "/dashboard/tenders/opportunities",
+    icon: <SendIcon />,
+  },
+  {
+    key: "orders",
     url: "/dashboard/orders",
     icon: <ShoppingCartIcon />,
   },
   {
-    title: "Clients",
+    key: "invoices",
+    url: "/dashboard/invoices",
+    icon: <FileTextIcon />,
+  },
+  {
+    key: "promotions",
+    url: "/dashboard/promotions",
+    icon: <PercentIcon />,
+  },
+  {
+    key: "documents",
+    url: "/dashboard/documents",
+    icon: <FileCheckIcon />,
+  },
+  {
+    key: "traffic",
+    url: "/dashboard/traffic",
+    icon: <ChartNoAxesColumnIcon />,
+  },
+  {
+    key: "reports",
+    url: "/dashboard/reports",
+    icon: <FileChartColumnIcon />,
+  },
+  {
+    key: "vendability",
+    url: "/dashboard/vendability",
+    icon: <TrophyIcon />,
+  },
+  {
+    key: "advertising",
+    url: "/dashboard/advertising",
+    icon: <MegaphoneIcon />,
+  },
+  {
+    key: "afterSales",
+    url: "/dashboard/after-sales",
+    icon: <UndoIcon />,
+  },
+  {
+    key: "clients",
     url: "/dashboard/clients",
     icon: <Users2Icon />,
   },
   {
-    title: "Messagerie",
+    key: "messages",
     url: "/dashboard/messages",
     icon: <MessageSquareIcon />,
   },
 ];
 
-const toolsItems = [
+const toolsItems: NavItem[] = [
   {
-    title: "Paramètres",
+    key: "support",
+    url: "/dashboard/support",
+    icon: <LifeBuoyIcon />,
+  },
+  {
+    key: "settings",
     url: "/dashboard/settings",
     icon: <SettingsIcon />,
   },
   {
-    title: "Aide",
+    key: "training",
+    url: "/dashboard/training",
+    icon: <GraduationCapIcon />,
+  },
+  {
+    key: "help",
     url: "/dashboard/help",
     icon: <CircleHelpIcon />,
   },
 ];
 
-const adminItems = [
+const adminItems: NavItem[] = [
   {
-    title: "Tableau de bord",
+    key: "admin.dashboard",
     url: "/dashboard/admin",
     icon: <LayoutDashboardIcon />,
   },
   {
-    title: "Contenus",
+    key: "admin.content",
     url: "/dashboard/admin/content",
     icon: <FileTextIcon />,
   },
   {
-    title: "Configuration",
+    key: "admin.configuration",
     url: "/dashboard/admin/configuration",
     icon: <MapPinnedIcon />,
   },
   {
-    title: "Fournisseurs",
+    key: "admin.businesses",
     url: "/dashboard/admin/businesses",
     icon: <Building2Icon />,
   },
   {
-    title: "Produits & services",
+    key: "admin.listings",
     url: "/dashboard/admin/listings",
     icon: <PackageIcon />,
   },
   {
-    title: "Appels d'offres",
+    key: "admin.tenders",
     url: "/dashboard/admin/tenders",
     icon: <GavelIcon />,
   },
   {
-    title: "Commandes",
+    key: "admin.orders",
     url: "/dashboard/admin/orders",
     icon: <ShoppingCartIcon />,
   },
   {
-    title: "Transactions",
+    key: "admin.payouts",
+    url: "/dashboard/admin/payouts",
+    icon: <BanknoteIcon />,
+  },
+  {
+    key: "admin.transactions",
     url: "/dashboard/admin/transactions",
     icon: <CreditCardIcon />,
   },
   {
-    title: "Qualité fournisseurs",
+    key: "admin.quality",
     url: "/dashboard/admin/quality",
     icon: <AwardIcon />,
   },
   {
-    title: "Utilisateurs",
+    key: "admin.traffic",
+    url: "/dashboard/admin/traffic",
+    icon: <ChartNoAxesColumnIcon />,
+  },
+  {
+    key: "admin.reports",
+    url: "/dashboard/admin/reports",
+    icon: <FileChartColumnIcon />,
+  },
+  {
+    key: "admin.vendability",
+    url: "/dashboard/admin/vendability",
+    icon: <TrophyIcon />,
+  },
+  {
+    key: "admin.training",
+    url: "/dashboard/admin/training",
+    icon: <GraduationCapIcon />,
+  },
+  {
+    key: "admin.marketing",
+    url: "/dashboard/admin/marketing",
+    icon: <MailIcon />,
+  },
+  {
+    key: "admin.teamMembers",
     url: "/dashboard/admin/team-members",
     icon: <UserCogIcon />,
   },
   {
-    title: "Clients",
+    key: "admin.moderation",
+    url: "/dashboard/admin/moderation",
+    icon: <FlagIcon />,
+  },
+  {
+    key: "admin.advertising",
+    url: "/dashboard/admin/advertising",
+    icon: <MegaphoneIcon />,
+  },
+  {
+    key: "admin.afterSales",
+    url: "/dashboard/admin/after-sales",
+    icon: <UndoIcon />,
+  },
+  {
+    key: "admin.support",
+    url: "/dashboard/admin/support",
+    icon: <LifeBuoyIcon />,
+  },
+  {
+    key: "admin.customers",
     url: "/dashboard/admin/customers",
     icon: <Users2Icon />,
   },
   {
-    title: "Administrateurs",
+    key: "admin.administrators",
     url: "/dashboard/admin/administrators",
     icon: <ShieldCheckIcon />,
   },
   {
-    title: "Opérateurs",
+    key: "admin.operators",
     url: "/dashboard/admin/operators",
     icon: <StoreIcon />,
   },
   {
-    title: "Diagnostic",
+    key: "admin.compliance",
+    url: "/dashboard/admin/compliance",
+    icon: <ClipboardCheckIcon />,
+  },
+  {
+    key: "admin.monitoring",
+    url: "/dashboard/admin/monitoring",
+    icon: <HeartPulseIcon />,
+  },
+  {
+    key: "admin.diagnostics",
     url: "/dashboard/admin/diagnostics",
     icon: <ActivityIcon />,
   },
   {
-    title: "Paramètres",
+    key: "admin.settings",
     url: "/dashboard/admin/settings",
     icon: <SettingsIcon />,
   },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const t = useTranslations("nav");
   const { user } = useUser();
   const { unreadCount } = useMessaging();
   const isAdmin = user?.role === "ADMIN";
+  // Operators confirm payments and release payouts of their shops.
+  const operatorTools: NavItem[] =
+    user?.role === "OPERATOR"
+      ? [
+          {
+            key: "admin.payouts",
+            url: "/dashboard/admin/payouts",
+            icon: <BanknoteIcon />,
+          },
+          ...toolsItems,
+        ]
+      : user?.role === "MODERATOR"
+        ? [
+            {
+              key: "admin.moderation",
+              url: "/dashboard/admin/moderation",
+              icon: <FlagIcon />,
+            },
+            {
+              key: "admin.compliance",
+              url: "/dashboard/admin/compliance",
+              icon: <ClipboardCheckIcon />,
+            },
+            {
+              key: "admin.listingsToReview",
+              url: "/dashboard/admin/listings",
+              icon: <PackageIcon />,
+            },
+            {
+              key: "admin.advertising",
+              url: "/dashboard/admin/advertising",
+              icon: <MegaphoneIcon />,
+            },
+            ...toolsItems,
+          ]
+        : toolsItems;
+  const label = ({ key, ...item }: NavItem) => ({ ...item, title: t(`items.${key}`) });
   const navigationItems = generalItems.map((item) =>
-    item.url === "/dashboard/messages" ? { ...item, badge: unreadCount } : item,
+    item.url === "/dashboard/messages"
+      ? { ...label(item), badge: unreadCount }
+      : label(item),
   );
 
   return (
@@ -182,17 +357,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               priority
             />
             <p className="px-2 pb-1 text-xs leading-tight font-semibold text-slate-600 group-data-[collapsible=icon]:hidden">
-              {BRAND_TAGLINE}
+              {t("brand.tagline")}
             </p>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <NavSecondary
-          label={isAdmin ? "Administration" : "Général"}
-          items={isAdmin ? adminItems : navigationItems}
+          label={isAdmin ? t("sidebar.administration") : t("sidebar.general")}
+          items={isAdmin ? adminItems.map(label) : navigationItems}
         />
-        {!isAdmin && <NavSecondary label="Outils" items={toolsItems} />}
+        {!isAdmin && (
+          <NavSecondary label={t("sidebar.tools")} items={operatorTools.map(label)} />
+        )}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

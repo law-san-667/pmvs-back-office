@@ -34,7 +34,7 @@ export function UserPreferencesProvider({
   children: React.ReactNode;
 }) {
   const locale = useLocale();
-  const [language, setLanguage] = useState(locale);
+  const [language, setLanguage] = useState<string>(locale);
   const [country, setCountry] = useState(getCountryFromHostname);
 
   const value = useMemo(

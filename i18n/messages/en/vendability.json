@@ -1,0 +1,32 @@
+{
+  "page": {
+    "title": "Sellability",
+    "subtitle": "Your best-ranked products, and your shop's assessment questionnaire.",
+    "loadingShop": "Loading the shop..."
+  },
+  "tabs": {
+    "top": "Best products",
+    "questionnaire": "Questionnaire"
+  },
+  "questionnaire": {
+    "saved": "Answers saved.",
+    "loading": "Loading...",
+    "none": "No questionnaire is in force at the moment.",
+    "version": "Version {version}.",
+    "upToDate": "Your answers are up to date. You can correct them.",
+    "upToDateScore": "Your answers are up to date, result: {score} / 100. You can correct them.",
+    "newVersion": "A new version is available. The result of your answers to version {version} keeps counting until you answer this one.",
+    "notAnswered": "You have not answered yet.",
+    "optional": "(optional)",
+    "saving": "Saving...",
+    "submit": "Save my answers"
+  },
+  "top": {
+    "title": "The 5 best products",
+    "description": "By sellability score, over the last {days} days, among {ranked} product(s) on sale.",
+    "empty": "No product on sale to rank yet.",
+    "scoreOf": "Score of {title}",
+    "summary": "{units} unit(s), {views} view(s). See the details.",
+    "notRated": "Not rated"
+  }
+}

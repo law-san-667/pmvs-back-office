@@ -1,0 +1,26 @@
+{
+  "title": "Training",
+  "intro": "Courses to get started and to go further. Your progress is saved.",
+  "empty": "No courses are available yet.",
+  "level": {
+    "BEGINNER": "Beginner",
+    "ADVANCED": "Advanced"
+  },
+  "kind": {
+    "VIDEO": "Video",
+    "PDF": "PDF",
+    "TEXT": "Text"
+  },
+  "courseProgress": "{title} progress",
+  "lessonCount": "{done} of {total} lesson(s)",
+  "done": "Completed",
+  "openPdf": "Open the PDF",
+  "loading": "Loading…",
+  "allCourses": "All courses",
+  "lessonMeta": "{kind}, {minutes} min",
+  "markDone": "I have completed this lesson",
+  "lessons": "Lessons",
+  "lessonsDone": "{done} of {total} completed",
+  "courseProgressLabel": "Course progress",
+  "lessonDone": "Completed"
+}

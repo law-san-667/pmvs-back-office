@@ -125,7 +125,7 @@ export function PageEditor({ page }: { page: AdminContentPage }) {
             <TabsTrigger key={l} value={l}>
               {LOCALE_LABELS[l]}
               {!translation(l) && (
-                <span className="text-muted-foreground ml-1">·</span>
+                <span className="text-muted-foreground ms-1">·</span>
               )}
             </TabsTrigger>
           ))}

@@ -18,17 +18,23 @@ import { trpc } from "@/server/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TRPCClientError } from "@trpc/client";
 import { MailIcon, PhoneIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { Controller, useForm, type Resolver } from "react-hook-form";
+import { MfaStep } from "./mfa-step";
 import { PhoneInput } from "../phone-input";
+import type { LoginChallenge } from "@/lib/backend-utils";
 
 type AuthMethod = "email" | "phone";
 
-// Le backend répond 403 à un compte non validé, une fois le mot de passe vérifié.
+// Le backend répond 403 à un compte non validé, une fois le mot de passe vérifié,
+// avec un message dans la langue de la page.
+const PENDING_VERIFICATION =
+  /pending verification|en attente de validation|awaiting validation|aguardar validação|انتظار التفعيل/i;
 const isPendingVerificationError = (error: unknown) =>
   error instanceof TRPCClientError &&
   error.data?.code === "FORBIDDEN" &&
-  /pending verification/i.test(error.message);
+  PENDING_VERIFICATION.test(error.message);
 
 export default function LoginForm({
   onSwitchToRegister,
@@ -39,8 +45,12 @@ export default function LoginForm({
   onForgotPassword: () => void;
   onOtpRequired: (otp: PendingOtp, message: string) => void;
 }) {
+  const t = useTranslations("auth.login");
+  const tErrors = useTranslations("errors");
+  const locale = useLocale();
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
+  const [challenge, setChallenge] = useState<LoginChallenge | null>(null);
   const [authMethod, setAuthMethod] = useState<AuthMethod>("phone");
 
   const login = trpc.auth.login.useMutation();
@@ -55,7 +65,11 @@ export default function LoginForm({
     setMessage(null);
 
     try {
-      await login.mutateAsync(data);
+      const result = await login.mutateAsync(data);
+      if ("mfaRequired" in result) {
+        setChallenge(result);
+        return;
+      }
       clearPendingOtp();
       router.replace("/callback");
       router.refresh();
@@ -65,9 +79,7 @@ export default function LoginForm({
         return;
       }
 
-      setMessage(
-        error instanceof Error ? error.message : "Une erreur est survenue.",
-      );
+      setMessage(error instanceof Error ? error.message : tErrors("generic"));
     }
   };
 
@@ -82,13 +94,11 @@ export default function LoginForm({
       onOtpRequired(
         { identifier, purpose: "REGISTER" },
         result.otp?.debugCode
-          ? `Votre compte n'est pas encore validé. Code de test: ${result.otp.debugCode}`
-          : "Votre compte n'est pas encore validé. Un nouveau code vous a été envoyé.",
+          ? t("accountNotValidatedTestCode", { code: result.otp.debugCode })
+          : t("accountNotValidated"),
       );
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Une erreur est survenue.",
-      );
+      setMessage(error instanceof Error ? error.message : tErrors("generic"));
     }
   };
 
@@ -100,6 +110,20 @@ export default function LoginForm({
     form.resetField("identifier", { defaultValue: "" });
     form.clearErrors("identifier");
   };
+
+  if (challenge) {
+    return (
+      <MfaStep
+        challenge={challenge}
+        onSignedIn={() => {
+          clearPendingOtp();
+          router.replace("/callback");
+          router.refresh();
+        }}
+        onCancel={() => setChallenge(null)}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col items-center space-y-8">
@@ -116,16 +140,15 @@ export default function LoginForm({
         >
           <FieldGroup>
             <div className="flex flex-col items-center gap-1 text-center">
-              <h1 className="text-2xl font-bold">Content de vous revoir !</h1>
+              <h1 className="text-2xl font-bold">{t("title")}</h1>
               <p className="text-muted-foreground text-sm text-balance">
-                Entrez votre numéro de téléphone WhatsApp ou votre adresse
-                électronique pour vous connecter à votre compte.
+                {t("intro")}
               </p>
             </div>
             <div
               className="bg-muted grid grid-cols-2 rounded-lg p-1"
               role="group"
-              aria-label="Méthode de connexion"
+              aria-label={t("method")}
             >
               <Button
                 type="button"
@@ -139,7 +162,7 @@ export default function LoginForm({
                 onClick={() => changeAuthMethod("phone")}
               >
                 <PhoneIcon className="size-4" />
-                Téléphone WhatsApp
+                {t("whatsappPhone")}
               </Button>
               <Button
                 type="button"
@@ -153,7 +176,7 @@ export default function LoginForm({
                 onClick={() => changeAuthMethod("email")}
               >
                 <MailIcon className="size-4" />
-                Adresse électronique
+                {t("email")}
               </Button>
             </div>
             <Controller
@@ -162,9 +185,7 @@ export default function LoginForm({
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel>
-                    {authMethod === "phone"
-                      ? "Téléphone WhatsApp"
-                      : "Adresse électronique"}
+                    {authMethod === "phone" ? t("whatsappPhone") : t("email")}
                   </FieldLabel>
                   {authMethod === "phone" ? (
                     <PhoneInput
@@ -183,7 +204,7 @@ export default function LoginForm({
                       type="email"
                       inputMode="email"
                       autoComplete="email"
-                      placeholder="nom@exemple.com"
+                      placeholder={t("emailPlaceholder")}
                       aria-invalid={fieldState.invalid}
                       disabled={login.isPending}
                       className="h-12"
@@ -200,7 +221,7 @@ export default function LoginForm({
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Mot de passe</FieldLabel>
+                  <FieldLabel>{t("password")}</FieldLabel>
                   <Input
                     {...field}
                     type="password"
@@ -213,9 +234,9 @@ export default function LoginForm({
                     <button
                       type="button"
                       onClick={onForgotPassword}
-                      className="ml-auto cursor-pointer text-sm underline-offset-4 hover:underline"
+                      className="ms-auto cursor-pointer text-sm underline-offset-4 hover:underline"
                     >
-                      Mot de passe oublié ?
+                      {t("forgotPassword")}
                     </button>
                   </div>
                   {fieldState.invalid && (
@@ -232,42 +253,48 @@ export default function LoginForm({
                 disabled={login.isPending || resendOtp.isPending}
               >
                 {login.isPending || resendOtp.isPending
-                  ? "Connexion..."
-                  : "Se connecter"}
+                  ? t("submitting")
+                  : t("submit")}
               </Button>
             </Field>
             <Field>
               <FieldDescription className="text-center">
-                Vous n&apos;avez pas de compte ?{" "}
-                <button
-                  type="button"
-                  onClick={onSwitchToRegister}
-                  className="text-primary cursor-pointer font-semibold hover:underline"
-                >
-                  Inscrivez-vous
-                </button>
+                {t.rich("noAccount", {
+                  register: (chunks) => (
+                    <button
+                      type="button"
+                      onClick={onSwitchToRegister}
+                      className="text-primary cursor-pointer font-semibold hover:underline"
+                    >
+                      {chunks}
+                    </button>
+                  ),
+                })}
               </FieldDescription>
             </Field>
             <div className="bg-muted/40 text-muted-foreground space-y-2 rounded-lg border px-4 py-3 text-xs">
               <p>
-                <span className="text-destructive font-semibold">
-                  Attention :
-                </span>{" "}
-                vos identifiants correspondent à ceux que vous avez utilisés
-                pour vous inscrire.
+                {t.rich("warning", {
+                  b: (chunks) => (
+                    <span className="text-destructive font-semibold">
+                      {chunks}
+                    </span>
+                  ),
+                })}
               </p>
               <p>
-                En cliquant sur « Se connecter », vous déclarez avoir lu et
-                accepté les{" "}
-                <a
-                  href={`${BUYER_APP_URL}/fr/cgu`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-primary underline"
-                >
-                  conditions générales d&apos;utilisation
-                </a>{" "}
-                sur Diarama et le règlement concernant la confidentialité.
+                {t.rich("termsNotice", {
+                  terms: (chunks) => (
+                    <a
+                      href={`${BUYER_APP_URL}/${locale}/cgu`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-primary underline"
+                    >
+                      {chunks}
+                    </a>
+                  ),
+                })}
               </p>
             </div>
           </FieldGroup>

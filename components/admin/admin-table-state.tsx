@@ -1,14 +1,15 @@
 import { Spinner } from "@/components/ui/spinner";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { InboxIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export function AdminTableState({
   colSpan,
   isLoading,
   error,
   isEmpty,
-  loadingLabel = "Chargement...",
-  emptyLabel = "Aucune donnée disponible.",
+  loadingLabel,
+  emptyLabel,
 }: {
   colSpan: number;
   isLoading: boolean;
@@ -17,12 +18,13 @@ export function AdminTableState({
   loadingLabel?: string;
   emptyLabel?: string;
 }) {
+  const t = useTranslations("table");
   if (isLoading) {
     return (
       <TableRow>
         <TableCell colSpan={colSpan} className="h-32 text-center">
           <div className="text-muted-foreground flex items-center justify-center gap-2">
-            <Spinner /> {loadingLabel}
+            <Spinner /> {loadingLabel ?? t("loading")}
           </div>
         </TableCell>
       </TableRow>
@@ -48,7 +50,7 @@ export function AdminTableState({
         <TableCell colSpan={colSpan} className="h-36 text-center">
           <div className="text-muted-foreground flex flex-col items-center gap-2">
             <InboxIcon className="size-8" />
-            <p>{emptyLabel}</p>
+            <p>{emptyLabel ?? t("empty")}</p>
           </div>
         </TableCell>
       </TableRow>

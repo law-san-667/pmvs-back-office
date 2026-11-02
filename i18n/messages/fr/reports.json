@@ -1,0 +1,104 @@
+{
+  "page": {
+    "title": "Rapports",
+    "subtitle": "Composez vos rapports, ou recevez-les automatiquement par e-mail.",
+    "loadingShop": "Chargement de la boutique..."
+  },
+  "tabs": {
+    "custom": "Personnalisés",
+    "automatic": "Automatiques"
+  },
+  "frequency": {
+    "DAILY": "Quotidien",
+    "WEEKLY": "Hebdomadaire",
+    "MONTHLY": "Mensuel"
+  },
+  "frequencyHint": {
+    "DAILY": "Chaque matin, la journée de la veille.",
+    "WEEKLY": "Chaque lundi, la semaine écoulée.",
+    "MONTHLY": "Le 1er du mois, le mois écoulé."
+  },
+  "emailStatus": {
+    "SENT": "Envoyé",
+    "PARTIAL": "Envoi partiel",
+    "FAILED": "Échec de l'envoi",
+    "NOT_SENT": "Non envoyé",
+    "PENDING": "En cours"
+  },
+  "automatic": {
+    "period": "{from} au {to}",
+    "saved": "Réglage enregistré.",
+    "recipientsLabel": {
+      "DAILY": "Autres destinataires du rapport quotidien",
+      "WEEKLY": "Autres destinataires du rapport hebdomadaire",
+      "MONTHLY": "Autres destinataires du rapport mensuel"
+    },
+    "recipientsPlaceholder": "Autres destinataires (5 adresses au plus)",
+    "save": "Enregistrer",
+    "report": "Rapport",
+    "emailTitle": "Envois par e-mail",
+    "emailShop": "Envoyés aux propriétaires et administrateurs de la boutique, avec le détail en PDF. Rien n'est envoyé pour une période sans commande ni visite.",
+    "emailPlatform": "Envoyés aux administrateurs, avec le détail en PDF. Rien n'est envoyé pour une période sans commande ni visite.",
+    "archivesTitle": "Rapports archivés",
+    "archivesDescription": "Les chiffres restent ceux de l'envoi. Conservés deux ans.",
+    "columns": {
+      "period": "Période",
+      "type": "Type",
+      "sending": "Envoi",
+      "actions": "Actions"
+    },
+    "recipients": "{count, plural, one {# destinataire} other {# destinataires}}",
+    "view": "Voir",
+    "empty": "Aucun rapport envoyé pour l'instant.",
+    "previous": "Précédent",
+    "next": "Suivant"
+  },
+  "result": {
+    "empty": "Aucune donnée sur cette période.",
+    "partial": "{shown} lignes affichées sur {total}. Les fichiers Excel et CSV contiennent toutes les lignes.",
+    "truncated": "{shown} lignes affichées sur {total}. Les fichiers s'arrêtent à {limit} lignes : réduisez la période pour tout obtenir."
+  },
+  "builder": {
+    "saved": "Rapport enregistré.",
+    "updated": "Rapport mis à jour.",
+    "deleted": "Rapport supprimé.",
+    "loading": "Chargement...",
+    "defaultTitle": "Rapport",
+    "fileName": "rapport",
+    "exportError": "Export impossible.",
+    "groups": {
+      "sales": "Ventes",
+      "traffic": "Visites"
+    },
+    "title": "Composer le rapport",
+    "timezone": "Jours comptés en heure de Dakar (UTC).",
+    "savedReport": "Rapport enregistré",
+    "newReport": "Nouveau rapport",
+    "deleteNamed": "Supprimer {name}",
+    "period": "Période",
+    "from": "Du",
+    "to": "Au",
+    "trafficUnavailable": "Les visites ne sont pas disponibles avec cet axe : une vue n'a ni mode de paiement, ni statut, ni pays de livraison.",
+    "axisFirst": "Répartir par",
+    "axisSecond": "Puis par",
+    "noAxis": "Aucun",
+    "generate": "Générer le rapport",
+    "update": "Mettre à jour « {name} »",
+    "nameLabel": "Nom du rapport à enregistrer",
+    "namePlaceholder": "Nom du rapport",
+    "save": "Enregistrer",
+    "result": "Résultat",
+    "resultDescription": "Du {from} au {to}. Une commande de plusieurs produits compte sur chaque ligne concernée, mais une seule fois dans le total. Chiffre d'affaires livré : commandes au statut « Livrée ».",
+    "computing": "Calcul en cours...",
+    "preparing": "Préparation...",
+    "currency": "Devise",
+    "otherCurrencies": "Les ventes en {currencies} ne sont pas incluses : les montants ne s'additionnent pas entre devises. Les visites, elles, sont toutes comptées.",
+    "delete": {
+      "title": "Supprimer ce rapport ?",
+      "description": "« {name} » sera supprimé pour toute l'équipe. Les chiffres, eux, ne changent pas.",
+      "cancel": "Annuler",
+      "deleting": "Suppression...",
+      "confirm": "Supprimer"
+    }
+  }
+}

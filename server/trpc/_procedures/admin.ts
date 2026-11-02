@@ -93,6 +93,7 @@ const payoutStatusSchema = z.enum([
   "PROCESSING",
   "SUCCEEDED",
   "FAILED",
+  "ON_HOLD",
 ] satisfies [PayoutStatus, ...PayoutStatus[]]);
 
 const paymentMethodSchema = z.enum([
@@ -103,6 +104,9 @@ const paymentMethodSchema = z.enum([
   "EXPRESSO",
   "CARD",
   "ONLINE",
+  "OFFLINE",
+  "MTN_MOMO",
+  "MOOV_MONEY",
 ]);
 
 const ledgerAccountSchema = z.enum([
@@ -250,6 +254,8 @@ const cityPayloadSchema = z.object({
   name: z.string().trim().min(1),
   slug: z.string().trim().min(1),
   isActive: z.boolean().optional(),
+  latitude: z.number().min(-90).max(90).nullable().optional(),
+  longitude: z.number().min(-180).max(180).nullable().optional(),
 });
 
 export const adminRouter = createTRPCRouter({

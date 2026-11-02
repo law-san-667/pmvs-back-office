@@ -1,0 +1,27 @@
+{
+  "type": {
+    "INVOICE": "Invoice",
+    "CREDIT_NOTE": "Credit note"
+  },
+  "card": {
+    "title": "Invoices",
+    "invoice": "Invoice {number}",
+    "creditNote": "Credit note {number}",
+    "openError": "Could not open the invoice. Please try again."
+  },
+  "page": {
+    "title": "Invoices",
+    "description": "An invoice is issued when each order is confirmed; a cancellation or refund issues a credit note.",
+    "documents": "Documents ({count})",
+    "columns": {
+      "number": "Number",
+      "type": "Type",
+      "date": "Date",
+      "order": "Order",
+      "amount": "Amount"
+    },
+    "loading": "Loading invoices...",
+    "empty": "No invoices yet.",
+    "openError": "Could not open the document."
+  }
+}

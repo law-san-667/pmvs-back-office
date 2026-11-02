@@ -42,6 +42,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "@/i18n/navigation";
 import type { BusinessCategory } from "@/lib/backend-resource-types";
+import frOnboarding from "@/i18n/messages/fr/onboarding.json";
 import { getBackendErrorMessages } from "@/lib/backend-utils";
 import {
     BUSINESS_CATEGORY_OPTIONS,
@@ -49,7 +50,6 @@ import {
 } from "@/lib/business-categories";
 import { getCroppedImg, type CroppedArea } from "@/lib/crop-image";
 import { getMutationErrorMessage } from "@/lib/mutation-error";
-import legalBusinessQuestions from "@/lib/questions.json";
 import {
     uploadFileToR2FromBrowser,
     uploadFilesToR2FromBrowser,
@@ -58,16 +58,17 @@ import {
 import {
     createBusinessInputSchema,
     legalBusinessInformationSchema,
-    BUSINESS_SIZE_LABELS,
+    legalBusinessTypeSchema,
     getBusinessSizeClass,
-    LEGAL_BUSINESS_TYPE_LABELS,
     type CreateBusinessInput,
     type LegalBusinessInformation,
     type LegalBusinessType,
     type PersonTitle,
 } from "@/lib/validators/business";
+import { useValidationMessage } from "@/lib/validators/messages";
 import { trpc } from "@/server/trpc/client";
 import { AlertCircle, Camera, Pencil, Upload, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import Cropper from "react-easy-crop";
@@ -88,12 +89,25 @@ const legalBusinessIdentitySchema = legalBusinessInformationSchema.omit({
   plannedActions: true,
 });
 
-const LEGAL_BUSINESS_TYPES = (
-  Object.entries(LEGAL_BUSINESS_TYPE_LABELS) as [LegalBusinessType, string][]
-).map(([value, label]) => ({ value, label }));
+const LEGAL_BUSINESS_TYPES: LegalBusinessType[] = legalBusinessTypeSchema.options;
 
-const OTHER_QUESTION = "Autres questions (précisez)";
+/**
+ * The questions shown in the page's language; the API keeps the French title
+ * (questionTitle), which the Diarama team reads.
+ */
+type LegalQuestionKey = keyof typeof frOnboarding.questions.items;
+const LEGAL_QUESTION_KEYS = Object.keys(
+  frOnboarding.questions.items,
+) as LegalQuestionKey[];
+const OTHER_QUESTION = frOnboarding.questions.items.other;
+
 const PERSON_TITLES: PersonTitle[] = ["M.", "Mme", "Mlle"];
+/** Message keys of the titles (the values sent to the API stay French). */
+const PERSON_TITLE_KEYS = {
+  "M.": "mr",
+  Mme: "mrs",
+  Mlle: "miss",
+} as const satisfies Record<PersonTitle, string>;
 
 const emptyKeyPerson = (): KeyPersonForm => ({
   title: "M.",
@@ -463,6 +477,8 @@ const buildCreateBusinessPayload = (
 };
 
 export default function InitBusinessForm() {
+  const t = useTranslations("onboarding");
+  const validation = useValidationMessage();
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [submissionErrors, setSubmissionErrors] = useState<string[]>([]);
@@ -481,10 +497,7 @@ export default function InitBusinessForm() {
     },
     onError: (error) => {
       setSubmissionErrors(
-        getBackendErrorMessages(
-          error,
-          "Erreur lors de la création du business.",
-        ),
+        getBackendErrorMessages(error, t("errors.createFailed")),
       );
     },
   });
@@ -600,9 +613,7 @@ export default function InitBusinessForm() {
     setSubmissionErrors([]);
 
     if (step === BASE_TOTAL_STEPS && formData.businessCategory === null) {
-      setSubmissionErrors([
-        "Sélectionnez votre catégorisation pour continuer.",
-      ]);
+      setSubmissionErrors([t("errors.categoryRequiredToContinue")]);
       return;
     }
 
@@ -611,9 +622,7 @@ export default function InitBusinessForm() {
       isLegalCategory &&
       formData.legalDocuments.length === 0
     ) {
-      setSubmissionErrors([
-        "Ajoutez au moins un document légal avant de continuer.",
-      ]);
+      setSubmissionErrors([t("errors.legalDocumentRequired")]);
       return;
     }
 
@@ -622,9 +631,7 @@ export default function InitBusinessForm() {
       const hasLongitude = formData.headquartersLongitude.trim().length > 0;
 
       if (hasLatitude !== hasLongitude) {
-        setSubmissionErrors([
-          "Renseignez la latitude et la longitude du siège ensemble.",
-        ]);
+        setSubmissionErrors([t("errors.coordinatesTogether")]);
         return;
       }
 
@@ -633,7 +640,9 @@ export default function InitBusinessForm() {
       );
 
       if (!result.success) {
-        setSubmissionErrors(result.error.issues.map((issue) => issue.message));
+        setSubmissionErrors(
+          result.error.issues.map((issue) => validation.text(issue.message)),
+        );
         return;
       }
     }
@@ -643,7 +652,7 @@ export default function InitBusinessForm() {
       formData.businessTypes.includes("OTHER") &&
       formData.otherBusinessType.trim().length === 0
     ) {
-      setSubmissionErrors(["Précisez l'autre type d'activité."]);
+      setSubmissionErrors([t("errors.otherBusinessTypeRequired")]);
       return;
     }
 
@@ -653,7 +662,9 @@ export default function InitBusinessForm() {
       );
 
       if (!result.success) {
-        setSubmissionErrors(result.error.issues.map((issue) => issue.message));
+        setSubmissionErrors(
+          result.error.issues.map((issue) => validation.text(issue.message)),
+        );
         return;
       }
     }
@@ -663,7 +674,7 @@ export default function InitBusinessForm() {
       formData.legalQuestionTitles.includes(OTHER_QUESTION) &&
       formData.otherQuestionsAnswer.trim().length === 0
     ) {
-      setSubmissionErrors(["Précisez vos autres questions."]);
+      setSubmissionErrors([t("errors.otherQuestionsRequired")]);
       return;
     }
 
@@ -677,7 +688,7 @@ export default function InitBusinessForm() {
       contact.fullName.trim(),
     );
     if (namedContacts.length < 2) {
-      errors.push("Indiquez au moins deux contacts dans l'entreprise.");
+      errors.push(t("errors.twoContactsRequired"));
     }
     const namedPersons = formData.keyPersons.filter(
       (person) => person.firstName.trim() || person.lastName.trim(),
@@ -687,10 +698,10 @@ export default function InitBusinessForm() {
         (person) => !person.firstName.trim() || !person.lastName.trim(),
       )
     ) {
-      errors.push("Chaque personne-clé renseignée doit avoir un prénom et un nom.");
+      errors.push(t("errors.keyPersonNameRequired"));
     }
     if (formData.businessPhotos.length < 3) {
-      errors.push("Ajoutez au moins trois photos de votre entreprise.");
+      errors.push(t("errors.threePhotosRequired"));
     }
     return errors;
   };
@@ -703,16 +714,12 @@ export default function InitBusinessForm() {
     setSubmissionErrors([]);
 
     if (formData.businessCategory === null) {
-      setSubmissionErrors([
-        "Sélectionnez votre catégorisation avant de continuer.",
-      ]);
+      setSubmissionErrors([t("errors.categoryRequiredBeforeContinue")]);
       return;
     }
 
     if (isLegalCategory && formData.legalQuestionTitles.length === 0) {
-      setSubmissionErrors([
-        "Sélectionnez au moins une question applicable à votre business.",
-      ]);
+      setSubmissionErrors([t("errors.questionRequired")]);
       return;
     }
 
@@ -809,7 +816,9 @@ export default function InitBusinessForm() {
       });
 
       if (!result.success) {
-        setSubmissionErrors(result.error.issues.map((issue) => issue.message));
+        setSubmissionErrors(
+          result.error.issues.map((issue) => validation.text(issue.message)),
+        );
         return;
       }
 
@@ -817,7 +826,7 @@ export default function InitBusinessForm() {
     } catch (error) {
       setIsUploading(false);
       setSubmissionErrors([
-        getMutationErrorMessage(error, "Erreur lors de l'envoi des fichiers."),
+        getMutationErrorMessage(error, t("errors.uploadFailed")),
       ]);
     }
   };
@@ -839,7 +848,7 @@ export default function InitBusinessForm() {
             <Badge
               key={`${error}-${index}`}
               variant="destructive"
-              className="max-w-full text-left whitespace-normal"
+              className="max-w-full text-start whitespace-normal"
             >
               <AlertCircle className="size-3" />
               {error}
@@ -848,10 +857,8 @@ export default function InitBusinessForm() {
         </div>
       )}
       <div>
-        <h1 className="text-2xl font-bold">Configurer votre compte</h1>
-        <p className="text-muted-foreground text-sm">
-          Configurez votre compte en entrant les informations suivantes :
-        </p>
+        <h1 className="text-2xl font-bold">{t("form.title")}</h1>
+        <p className="text-muted-foreground text-sm">{t("form.intro")}</p>
       </div>
 
       {step === 1 && (
@@ -895,7 +902,7 @@ export default function InitBusinessForm() {
             className="h-12! w-full rounded-sm"
             onClick={() => setStep(step - 1)}
           >
-            Retour
+            {t("form.back")}
           </Button>
         )}
         <Button
@@ -905,10 +912,10 @@ export default function InitBusinessForm() {
           disabled={isMutating}
         >
           {isUploading
-            ? `Envoi des fichiers… ${uploadProgress}%`
+            ? t("form.uploading", { progress: uploadProgress })
             : createBusiness.isPending
-              ? "Création..."
-              : "Continuer"}
+              ? t("form.creating")
+              : t("form.continue")}
         </Button>
       </div>
 
@@ -919,7 +926,7 @@ export default function InitBusinessForm() {
       >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Recadrer la photo</DialogTitle>
+            <DialogTitle>{t("form.cropTitle")}</DialogTitle>
           </DialogHeader>
           <div className="relative h-72 w-full">
             {cropImage && (
@@ -938,9 +945,9 @@ export default function InitBusinessForm() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCropImage(null)}>
-              Annuler
+              {t("form.cancel")}
             </Button>
-            <Button onClick={handleCropSave}>Enregistrer</Button>
+            <Button onClick={handleCropSave}>{t("form.save")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -959,10 +966,12 @@ function Step1({
   formData: FormData;
   logoDropzone: ReturnType<typeof useDropzone>;
 }) {
+  const t = useTranslations("onboarding.profile");
+
   return (
     <FieldGroup>
       <Field>
-        <FieldLabel>Photo de profile/Logo</FieldLabel>
+        <FieldLabel>{t("logo")}</FieldLabel>
         <div
           {...logoDropzone.getRootProps()}
           className="border-primary/30 bg-primary/5 relative flex size-24! cursor-pointer items-center justify-center rounded-full border-2 border-dashed"
@@ -971,13 +980,13 @@ function Step1({
           {formData.logoPreview ? (
             <img
               src={formData.logoPreview}
-              alt="Logo"
+              alt={t("logoAlt")}
               className="size-full rounded-full object-cover"
             />
           ) : (
             <Camera className="text-primary/50 size-8" />
           )}
-          <span className="bg-primary/10 text-primary absolute -right-1 -bottom-1 flex size-6 items-center justify-center rounded-full border-2 border-white">
+          <span className="bg-primary/10 text-primary absolute -end-1 -bottom-1 flex size-6 items-center justify-center rounded-full border-2 border-white">
             <Pencil className="size-3" />
           </span>
         </div>
@@ -988,7 +997,7 @@ function Step1({
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Nom de votre Activité ou métier</FieldLabel>
+            <FieldLabel>{t("businessName")}</FieldLabel>
             <Input
               {...field}
               aria-invalid={fieldState.invalid}
@@ -1004,7 +1013,7 @@ function Step1({
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Description</FieldLabel>
+            <FieldLabel>{t("description")}</FieldLabel>
             <Textarea {...field} aria-invalid={fieldState.invalid} />
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
           </Field>
@@ -1031,6 +1040,7 @@ function Step2({
   isLoadingCountries: boolean;
   isLoadingCities: boolean;
 }) {
+  const t = useTranslations("onboarding.location");
   const deliveryZoneAnchorRef = useComboboxAnchor();
   const countryNameByCode = Object.fromEntries(
     countries.map((country) => [country.code, country.name]),
@@ -1048,7 +1058,7 @@ function Step2({
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Pays</FieldLabel>
+            <FieldLabel>{t("country")}</FieldLabel>
             <Select
               items={countryNameByCode}
               value={field.value}
@@ -1064,7 +1074,7 @@ function Step2({
                 className="h-12! w-full"
               >
                 <SelectValue
-                  placeholder={isLoadingCountries ? "Chargement..." : "Pays"}
+                  placeholder={isLoadingCountries ? t("loading") : t("country")}
                 />
               </SelectTrigger>
               <SelectContent>
@@ -1085,7 +1095,7 @@ function Step2({
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Ville</FieldLabel>
+            <FieldLabel>{t("city")}</FieldLabel>
             <Select
               items={cityNameItems}
               value={field.value}
@@ -1097,7 +1107,7 @@ function Step2({
                 className="h-12! w-full"
               >
                 <SelectValue
-                  placeholder={isLoadingCities ? "Chargement..." : "Ville"}
+                  placeholder={isLoadingCities ? t("loading") : t("city")}
                 />
               </SelectTrigger>
               <SelectContent>
@@ -1118,7 +1128,7 @@ function Step2({
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Adresse</FieldLabel>
+            <FieldLabel>{t("address")}</FieldLabel>
             <div className="flex items-center gap-2">
               <Input
                 {...field}
@@ -1136,7 +1146,7 @@ function Step2({
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Zone de livraison</FieldLabel>
+            <FieldLabel>{t("deliveryZones")}</FieldLabel>
             <Combobox
               multiple
               items={citySlugs}
@@ -1152,12 +1162,14 @@ function Step2({
                   </ComboboxChip>
                 ))}
                 <ComboboxChipsInput
-                  placeholder={isLoadingCities ? "Chargement..." : "Villes"}
+                  placeholder={
+                    isLoadingCities ? t("loading") : t("citiesPlaceholder")
+                  }
                   disabled={isLoadingCities || cities.length === 0}
                 />
               </ComboboxChips>
               <ComboboxContent anchor={deliveryZoneAnchorRef}>
-                <ComboboxEmpty>Aucune ville trouvée.</ComboboxEmpty>
+                <ComboboxEmpty>{t("noCity")}</ComboboxEmpty>
                 <ComboboxList>
                   {cities.map((city) => (
                     <ComboboxItem key={city.slug} value={city.slug}>
@@ -1178,6 +1190,8 @@ function Step2({
 // ─── Step 3: Contact & Social ─────────────────────────────────────────
 
 function Step3({ control }: { control: Control<FormData> }) {
+  const t = useTranslations("onboarding.contact");
+
   return (
     <FieldGroup>
       <Controller
@@ -1185,7 +1199,7 @@ function Step3({ control }: { control: Control<FormData> }) {
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Numéro Whatsapp (optionnel)</FieldLabel>
+            <FieldLabel>{t("whatsapp")}</FieldLabel>
             <PhoneInput
               value={field.value}
               onChange={(value) => field.onChange(value || "")}
@@ -1201,7 +1215,7 @@ function Step3({ control }: { control: Control<FormData> }) {
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Email professionel (optionnel)</FieldLabel>
+            <FieldLabel>{t("professionalEmail")}</FieldLabel>
             <Input
               {...field}
               type="email"
@@ -1218,7 +1232,7 @@ function Step3({ control }: { control: Control<FormData> }) {
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Lien Facebook (optionnel)</FieldLabel>
+            <FieldLabel>{t("facebook")}</FieldLabel>
             <Input
               {...field}
               aria-invalid={fieldState.invalid}
@@ -1234,7 +1248,7 @@ function Step3({ control }: { control: Control<FormData> }) {
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Lien Instagram (optionnel)</FieldLabel>
+            <FieldLabel>{t("instagram")}</FieldLabel>
             <Input
               {...field}
               aria-invalid={fieldState.invalid}
@@ -1251,6 +1265,8 @@ function Step3({ control }: { control: Control<FormData> }) {
 // ─── Step 4: Payment Methods ──────────────────────────────────────────
 
 function Step4({ control }: { control: Control<FormData> }) {
+  const t = useTranslations("onboarding.payment");
+
   return (
     <FieldGroup>
       <Controller
@@ -1258,7 +1274,7 @@ function Step4({ control }: { control: Control<FormData> }) {
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Numéro Orange Money (optionnel)</FieldLabel>
+            <FieldLabel>{t("orangeMoney")}</FieldLabel>
             <PhoneInput
               value={field.value}
               onChange={(value) => field.onChange(value || "")}
@@ -1274,7 +1290,7 @@ function Step4({ control }: { control: Control<FormData> }) {
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Numéro Wave (optionnel)</FieldLabel>
+            <FieldLabel>{t("wave")}</FieldLabel>
             <PhoneInput
               value={field.value}
               onChange={(value) => field.onChange(value || "")}
@@ -1301,6 +1317,7 @@ function Step5({
   documentDropzone: ReturnType<typeof useDropzone>;
   removeDocument: (index: number) => void;
 }) {
+  const t = useTranslations("onboarding.category");
   const documentsDisabled = !isLegalBusinessCategory(formData.businessCategory);
   const { getRootProps, getInputProps, isDragActive, isDragReject } =
     documentDropzone;
@@ -1312,7 +1329,7 @@ function Step5({
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Sélectionnez votre catégorisation</FieldLabel>
+            <FieldLabel>{t("label")}</FieldLabel>
             <div className="flex flex-col gap-2">
               {BUSINESS_CATEGORY_OPTIONS.map((option) => (
                 <label
@@ -1331,9 +1348,11 @@ function Step5({
                     onChange={() => field.onChange(option.value)}
                   />
                   <span>
-                    <span className="block font-medium">{option.label}</span>
+                    <span className="block font-medium">
+                      {t(`options.${option.value}.label`)}
+                    </span>
                     <span className="text-muted-foreground block text-xs">
-                      {option.description}
+                      {t(`options.${option.value}.description`)}
                     </span>
                   </span>
                 </label>
@@ -1346,16 +1365,14 @@ function Step5({
 
       {documentsDisabled && (
         <p className="text-muted-foreground text-sm">
-          En tant que personne physique, vous n&apos;avez pas de documents
-          légaux à fournir : vous pouvez finaliser votre inscription à
-          l&apos;étape suivante.
+          {t("physicalPersonNote")}
         </p>
       )}
 
       <Field data-disabled={documentsDisabled} hidden={documentsDisabled}>
-        <FieldLabel>Documents légaux</FieldLabel>
+        <FieldLabel>{t("legalDocuments")}</FieldLabel>
         <p className="text-muted-foreground text-xs">
-          Note : Format photos SVG, PNG, JPG, pdf, word
+          {t("formatsNote")}
         </p>
         <div
           {...getRootProps()}
@@ -1372,9 +1389,7 @@ function Step5({
           <input {...getInputProps()} />
           <Upload className="text-muted-foreground/50 size-8" />
           <span className="text-muted-foreground text-sm">
-            {isDragActive
-              ? "Déposez les documents ici"
-              : "Glissez-déposez des documents ou cliquez pour ajouter"}
+            {isDragActive ? t("dropHere") : t("dropOrClick")}
           </span>
         </div>
         {formData.legalDocuments.length > 0 && (
@@ -1495,13 +1510,15 @@ function LegalTextarea({
 // ─── Step 6: Legal business information ──────────────────────────────
 
 function Step6({ control }: { control: Control<FormData> }) {
+  const t = useTranslations("onboarding.legal");
+
   return (
-    <div className="max-h-[65vh] overflow-y-auto pr-3">
+    <div className="max-h-[65vh] overflow-y-auto pe-3">
       <FieldGroup>
         <div>
-          <h2 className="font-semibold">Informations juridiques</h2>
+          <h2 className="font-semibold">{t("title")}</h2>
           <p className="text-muted-foreground text-sm">
-            Renseignez les informations officielles de votre entreprise.
+            {t("intro")}
           </p>
         </div>
 
@@ -1509,12 +1526,12 @@ function Step6({ control }: { control: Control<FormData> }) {
           <LegalInput
             control={control}
             name="legalAcronym"
-            label="Sigle (optionnel)"
+            label={t("acronym")}
           />
           <LegalInput
             control={control}
             name="legalCreationYear"
-            label="Année de création"
+            label={t("creationYear")}
             type="number"
             placeholder="2024"
           />
@@ -1522,41 +1539,41 @@ function Step6({ control }: { control: Control<FormData> }) {
         <LegalInput
           control={control}
           name="legalStatus"
-          label="Statut juridique"
-          placeholder="SARL, SA, GIE…"
+          label={t("legalStatus")}
+          placeholder={t("legalStatusPlaceholder")}
         />
         <div className="grid gap-4 sm:grid-cols-2">
           <LegalInput
             control={control}
             name="commercialRegisterNumber"
-            label="Numéro du registre de commerce"
+            label={t("commercialRegister")}
           />
           <LegalInput
             control={control}
             name="taxIdentificationNumber"
-            label="Numéro d'identification fiscale (NIF)"
+            label={t("taxId")}
           />
         </div>
         <LegalInput
           control={control}
           name="permanentStaffCount"
-          label="Effectif permanent"
+          label={t("staffCount")}
           type="number"
         />
         <BusinessSizeHint control={control} />
         <LegalTextarea
           control={control}
           name="legalAddresses"
-          label="Adresses (optionnel)"
-          placeholder="Une adresse par ligne"
+          label={t("addresses")}
+          placeholder={t("addressesPlaceholder")}
         />
         <div className="grid gap-4 sm:grid-cols-[1fr_10rem]">
           <LegalInput
             control={control}
             name="postalAddress"
-            label="Adresse postale (optionnel)"
+            label={t("postalAddress")}
           />
-          <LegalInput control={control} name="postalCode" label="Code postal" />
+          <LegalInput control={control} name="postalCode" label={t("postalCode")} />
         </div>
         <Controller
           name="headquartersLatitude"
@@ -1599,7 +1616,7 @@ function Step6({ control }: { control: Control<FormData> }) {
         <LegalInput
           control={control}
           name="legalWebsite"
-          label="Site web (optionnel)"
+          label={t("website")}
           type="url"
           placeholder="https://example.com"
         />
@@ -1617,51 +1634,51 @@ function Step7({
   control: Control<FormData>;
   formData: FormData;
 }) {
+  const t = useTranslations("onboarding.activities");
+
   return (
     <FieldGroup>
       <div>
-        <h2 className="font-semibold">Activités de l&apos;entreprise</h2>
-        <p className="text-muted-foreground text-sm">
-          Décrivez les produits, services et activités de votre entreprise.
-        </p>
+        <h2 className="font-semibold">{t("title")}</h2>
+        <p className="text-muted-foreground text-sm">{t("intro")}</p>
       </div>
       <LegalTextarea
         control={control}
         name="productCategories"
-        label="Catégories de produits (optionnel)"
-        placeholder="Séparez les catégories par une virgule ou une ligne"
+        label={t("productCategories")}
+        placeholder={t("categoriesPlaceholder")}
       />
       <LegalTextarea
         control={control}
         name="serviceCategories"
-        label="Catégories de services (optionnel)"
-        placeholder="Séparez les catégories par une virgule ou une ligne"
+        label={t("serviceCategories")}
+        placeholder={t("categoriesPlaceholder")}
       />
       <Controller
         name="businessTypes"
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Types d&apos;activité (optionnel)</FieldLabel>
+            <FieldLabel>{t("businessTypes")}</FieldLabel>
             <div className="grid gap-3 sm:grid-cols-2">
               {LEGAL_BUSINESS_TYPES.map((businessType) => (
                 <label
-                  key={businessType.value}
+                  key={businessType}
                   className="flex items-center gap-2 rounded-md border p-3 text-sm"
                 >
                   <Checkbox
-                    checked={field.value.includes(businessType.value)}
+                    checked={field.value.includes(businessType)}
                     onCheckedChange={(checked) => {
                       field.onChange(
                         checked
-                          ? [...field.value, businessType.value]
+                          ? [...field.value, businessType]
                           : field.value.filter(
-                              (value) => value !== businessType.value,
+                              (value) => value !== businessType,
                             ),
                       );
                     }}
                   />
-                  {businessType.label}
+                  {t(`types.${businessType}`)}
                 </label>
               ))}
             </div>
@@ -1673,18 +1690,18 @@ function Step7({
         <LegalInput
           control={control}
           name="otherBusinessType"
-          label="Autre type d'activité"
+          label={t("otherBusinessType")}
         />
       )}
       <LegalTextarea
         control={control}
         name="importExportIssues"
-        label="Difficultés d'import-export (optionnel)"
+        label={t("importExportIssues")}
       />
       <LegalTextarea
         control={control}
         name="plannedActions"
-        label="Actions prévues (optionnel)"
+        label={t("plannedActions")}
       />
     </FieldGroup>
   );
@@ -1693,60 +1710,60 @@ function Step7({
 // ─── Step 8: Legal representative and production resources ──────────
 
 function Step8({ control }: { control: Control<FormData> }) {
+  const t = useTranslations("onboarding.representative");
+
   return (
     <FieldGroup>
       <div>
-        <h2 className="font-semibold">Représentant et moyens de production</h2>
-        <p className="text-muted-foreground text-sm">
-          Renseignez le représentant légal et les capacités de production.
-        </p>
+        <h2 className="font-semibold">{t("title")}</h2>
+        <p className="text-muted-foreground text-sm">{t("intro")}</p>
       </div>
       <LegalInput
         control={control}
         name="representativeName"
-        label="Nom complet du représentant"
+        label={t("name")}
       />
       <LegalInput
         control={control}
         name="representativeRole"
-        label="Fonction (optionnel)"
+        label={t("role")}
       />
       <LegalInput
         control={control}
         name="representativeEmail"
-        label="Email (optionnel)"
+        label={t("email")}
         type="email"
       />
       <LegalInput
         control={control}
         name="representativeMobilePhone"
-        label="Téléphone mobile"
+        label={t("mobilePhone")}
       />
       <div className="border-t pt-2">
-        <h3 className="font-medium">Moyens de production (optionnel)</h3>
+        <h3 className="font-medium">{t("productionTitle")}</h3>
       </div>
       <LegalTextarea
         control={control}
         name="productionDescription"
-        label="Description des moyens de production"
+        label={t("productionDescription")}
       />
       <div className="grid gap-4 sm:grid-cols-3">
         <LegalInput
           control={control}
           name="workshopAreaM2"
-          label="Atelier (m²)"
+          label={t("workshop")}
           type="number"
         />
         <LegalInput
           control={control}
           name="storeAreaM2"
-          label="Magasin (m²)"
+          label={t("store")}
           type="number"
         />
         <LegalInput
           control={control}
           name="outdoorAreaM2"
-          label="Extérieur (m²)"
+          label={t("outdoor")}
           type="number"
         />
       </div>
@@ -1763,43 +1780,45 @@ function Step9({
   control: Control<FormData>;
   formData: FormData;
 }) {
+  const t = useTranslations("onboarding.questions");
+
   return (
     <FieldGroup>
       <div>
-        <h2 className="font-semibold">Questions applicables</h2>
-        <p className="text-muted-foreground text-sm">
-          Sélectionnez les questions qui correspondent à votre entreprise. Les
-          réponses pourront être complétées ultérieurement.
-        </p>
+        <h2 className="font-semibold">{t("title")}</h2>
+        <p className="text-muted-foreground text-sm">{t("intro")}</p>
       </div>
       <p className="text-muted-foreground text-sm">
-        {formData.legalQuestionTitles.length} question(s) sélectionnée(s)
+        {t("selectedCount", { count: formData.legalQuestionTitles.length })}
       </p>
       <Controller
         name="legalQuestionTitles"
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <div className="max-h-[55vh] space-y-2 overflow-y-auto pr-3">
-              {legalBusinessQuestions.map((question) => (
-                <label
-                  key={question}
-                  className="hover:bg-muted/50 flex cursor-pointer items-start gap-3 rounded-md border p-3 text-sm"
-                >
-                  <Checkbox
-                    className="mt-0.5"
-                    checked={field.value.includes(question)}
-                    onCheckedChange={(checked) => {
-                      field.onChange(
-                        checked
-                          ? [...field.value, question]
-                          : field.value.filter((value) => value !== question),
-                      );
-                    }}
-                  />
-                  <span>{question}</span>
-                </label>
-              ))}
+            <div className="max-h-[55vh] space-y-2 overflow-y-auto pe-3">
+              {LEGAL_QUESTION_KEYS.map((key) => {
+                const question = frOnboarding.questions.items[key];
+                return (
+                  <label
+                    key={key}
+                    className="hover:bg-muted/50 flex cursor-pointer items-start gap-3 rounded-md border p-3 text-sm"
+                  >
+                    <Checkbox
+                      className="mt-0.5"
+                      checked={field.value.includes(question)}
+                      onCheckedChange={(checked) => {
+                        field.onChange(
+                          checked
+                            ? [...field.value, question]
+                            : field.value.filter((value) => value !== question),
+                        );
+                      }}
+                    />
+                    <span>{t(`items.${key}`)}</span>
+                  </label>
+                );
+              })}
             </div>
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
           </Field>
@@ -1809,8 +1828,8 @@ function Step9({
         <LegalTextarea
           control={control}
           name="otherQuestionsAnswer"
-          label="Autres questions (précisez)"
-          placeholder="Vos autres questions sur l'exportation ou l'importation"
+          label={t("items.other")}
+          placeholder={t("otherPlaceholder")}
         />
       )}
     </FieldGroup>
@@ -1819,6 +1838,7 @@ function Step9({
 
 /** Live MPME size class from the headcount, as defined by the client. */
 function BusinessSizeHint({ control }: { control: Control<FormData> }) {
+  const t = useTranslations("onboarding.legal");
   const staffCount = useWatch({ control, name: "permanentStaffCount" });
   const sizeClass = getBusinessSizeClass(
     staffCount.trim() ? Number(staffCount) : null,
@@ -1828,9 +1848,10 @@ function BusinessSizeHint({ control }: { control: Control<FormData> }) {
 
   return (
     <p className="text-muted-foreground -mt-2 text-xs">
-      Classification MPME : <strong>{BUSINESS_SIZE_LABELS[sizeClass]}</strong>.
-      Indicatif : votre catégorisation reste celle choisie à l&apos;étape
-      précédente.
+      {t.rich("sizeHint", {
+        size: t(`sizeClasses.${sizeClass}`),
+        b: (chunks) => <strong>{chunks}</strong>,
+      })}
     </p>
   );
 }
@@ -1855,6 +1876,7 @@ function SingleFileField({
   onChange: (file: File | null) => void;
   accept: Record<string, string[]>;
 }) {
+  const t = useTranslations("onboarding.compliance");
   const dropzone = useDropzone({
     onDrop: (files) => files[0] && onChange(files[0]),
     accept,
@@ -1868,7 +1890,7 @@ function SingleFileField({
       {file ? (
         <div className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
           <span className="truncate">{file.name}</span>
-          <button type="button" onClick={() => onChange(null)} aria-label="Retirer">
+          <button type="button" onClick={() => onChange(null)} aria-label={t("remove")}>
             <X className="text-muted-foreground size-4" />
           </button>
         </div>
@@ -1879,7 +1901,7 @@ function SingleFileField({
         >
           <input {...dropzone.getInputProps()} />
           <Upload className="text-muted-foreground/50 size-4" />
-          <span className="text-muted-foreground">Téléchargez le fichier</span>
+          <span className="text-muted-foreground">{t("uploadFile")}</span>
         </div>
       )}
     </Field>
@@ -1893,16 +1915,18 @@ function PersonTitleSelect({
   value: PersonTitle;
   onChange: (value: PersonTitle) => void;
 }) {
+  const t = useTranslations("onboarding.compliance");
+
   return (
     <select
       value={value}
       onChange={(event) => onChange(event.target.value as PersonTitle)}
       className="border-input bg-background h-9 rounded-md border px-2 text-sm"
-      aria-label="Titre"
+      aria-label={t("personTitle")}
     >
       {PERSON_TITLES.map((title) => (
         <option key={title} value={title}>
-          {title}
+          {t(`personTitles.${PERSON_TITLE_KEYS[title]}`)}
         </option>
       ))}
     </select>
@@ -1916,6 +1940,7 @@ function Step10({
   control: Control<FormData>;
   formData: FormData;
 }) {
+  const t = useTranslations("onboarding.compliance");
   const photosDropzone = useDropzone({
     accept: PHOTO_ACCEPT,
     multiple: true,
@@ -1923,36 +1948,33 @@ function Step10({
   });
 
   return (
-    <div className="max-h-[65vh] overflow-y-auto pr-3">
+    <div className="max-h-[65vh] overflow-y-auto pe-3">
       <FieldGroup>
         <div>
-          <h2 className="font-semibold">Banque, personnes-clés et contacts</h2>
-          <p className="text-muted-foreground text-sm">
-            Coordonnées bancaires, les deux personnes-clés de l&apos;entreprise
-            et au moins deux contacts.
-          </p>
+          <h2 className="font-semibold">{t("title")}</h2>
+          <p className="text-muted-foreground text-sm">{t("intro")}</p>
         </div>
 
         <div className="border-t pt-2">
-          <h3 className="font-medium">Coordonnées de la banque</h3>
+          <h3 className="font-medium">{t("bankTitle")}</h3>
         </div>
-        <LegalInput control={control} name="bankName" label="Nom de la banque" />
+        <LegalInput control={control} name="bankName" label={t("bankName")} />
         <LegalInput
           control={control}
           name="bankAddress"
-          label="Adresse de la banque"
+          label={t("bankAddress")}
         />
         <LegalInput
           control={control}
           name="paymentAccount"
-          label="Compte de paiement ou passerelle de paiement utilisée"
-          placeholder="IBAN, numéro de compte, ou nom de la passerelle"
+          label={t("paymentAccount")}
+          placeholder={t("paymentAccountPlaceholder")}
         />
 
         <div className="border-t pt-2">
-          <h3 className="font-medium">Personnes-clés (2)</h3>
+          <h3 className="font-medium">{t("keyPersonsTitle")}</h3>
           <p className="text-muted-foreground text-xs">
-            Directeur, gestionnaire ou personne en charge des exportations.
+            {t("keyPersonsHint")}
           </p>
         </div>
         <Controller
@@ -1969,39 +1991,41 @@ function Step10({
                   );
                 return (
                   <div key={index} className="flex flex-col gap-2 rounded-md border p-3">
-                    <p className="text-sm font-medium">Personne-clé {index + 1}</p>
+                    <p className="text-sm font-medium">
+                      {t("keyPerson", { number: index + 1 })}
+                    </p>
                     <PersonTitleSelect
                       value={person.title}
                       onChange={(title) => update({ title })}
                     />
                     <Input
-                      placeholder="Prénom"
+                      placeholder={t("firstName")}
                       value={person.firstName}
                       onChange={(e) => update({ firstName: e.target.value })}
                     />
                     <Input
-                      placeholder="Nom"
+                      placeholder={t("lastName")}
                       value={person.lastName}
                       onChange={(e) => update({ lastName: e.target.value })}
                     />
                     <Input
-                      placeholder="Passeport / N° d'identité"
+                      placeholder={t("idNumber")}
                       value={person.idNumber}
                       onChange={(e) => update({ idNumber: e.target.value })}
                     />
                     <Input
-                      placeholder="Poste"
+                      placeholder={t("position")}
                       value={person.position}
                       onChange={(e) => update({ position: e.target.value })}
                     />
                     <Input
-                      placeholder="Mobile"
+                      placeholder={t("mobile")}
                       type="tel"
                       value={person.mobilePhone}
                       onChange={(e) => update({ mobilePhone: e.target.value })}
                     />
                     <Input
-                      placeholder="E-mail"
+                      placeholder={t("personEmail")}
                       type="email"
                       value={person.email}
                       onChange={(e) => update({ email: e.target.value })}
@@ -2014,8 +2038,8 @@ function Step10({
         />
 
         <div className="border-t pt-2">
-          <h3 className="font-medium">Contacts dans l&apos;entreprise</h3>
-          <p className="text-muted-foreground text-xs">Au moins deux contacts.</p>
+          <h3 className="font-medium">{t("contactsTitle")}</h3>
+          <p className="text-muted-foreground text-xs">{t("contactsHint")}</p>
         </div>
         <Controller
           name="contacts"
@@ -2039,26 +2063,26 @@ function Step10({
                       onChange={(title) => update({ title })}
                     />
                     <Input
-                      placeholder="Nom complet"
+                      placeholder={t("fullName")}
                       value={contact.fullName}
                       onChange={(e) => update({ fullName: e.target.value })}
                     />
                     <Input
-                      placeholder="Email"
+                      placeholder={t("contactEmail")}
                       type="email"
                       value={contact.email}
                       onChange={(e) => update({ email: e.target.value })}
                     />
                     <span className="hidden sm:block" />
                     <Input
-                      placeholder="Téléphone fixe"
+                      placeholder={t("landline")}
                       type="tel"
                       value={contact.landlinePhone}
                       onChange={(e) => update({ landlinePhone: e.target.value })}
                     />
                     <div className="flex gap-2">
                       <Input
-                        placeholder="Téléphone mobile"
+                        placeholder={t("mobilePhone")}
                         type="tel"
                         value={contact.mobilePhone}
                         onChange={(e) => update({ mobilePhone: e.target.value })}
@@ -2069,7 +2093,7 @@ function Step10({
                           onClick={() =>
                             field.onChange(field.value.filter((_, i) => i !== index))
                           }
-                          aria-label="Retirer le contact"
+                          aria-label={t("removeContact")}
                         >
                           <X className="text-muted-foreground size-4" />
                         </button>
@@ -2086,7 +2110,7 @@ function Step10({
                   className="w-fit"
                   onClick={() => field.onChange([...field.value, emptyContact()])}
                 >
-                  Ajouter un contact
+                  {t("addContact")}
                 </Button>
               )}
             </div>
@@ -2094,9 +2118,9 @@ function Step10({
         />
 
         <div className="border-t pt-2">
-          <h3 className="font-medium">Documents de conformité</h3>
+          <h3 className="font-medium">{t("documentsTitle")}</h3>
           <p className="text-muted-foreground text-xs">
-            Vérifiez que les copies numérisées sont lisibles.
+            {t("documentsHint")}
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -2105,7 +2129,7 @@ function Step10({
             control={control}
             render={({ field }) => (
               <SingleFileField
-                label="Acte de constitution"
+                label={t("incorporationDeed")}
                 file={field.value}
                 onChange={field.onChange}
                 accept={LEGAL_DOCUMENT_ACCEPT}
@@ -2117,8 +2141,8 @@ function Step10({
             control={control}
             render={({ field }) => (
               <SingleFileField
-                label="Scan du passeport"
-                hint="Du signataire / responsable"
+                label={t("passportScan")}
+                hint={t("passportHint")}
                 file={field.value}
                 onChange={field.onChange}
                 accept={LEGAL_DOCUMENT_ACCEPT}
@@ -2131,11 +2155,11 @@ function Step10({
           control={control}
           render={({ field }) => (
             <Field>
-              <FieldLabel>Photos de l&apos;entreprise (MPME)</FieldLabel>
+              <FieldLabel>{t("photos")}</FieldLabel>
               <p className="text-muted-foreground text-xs">
-                Au moins 3 photos, 800 × 800 px minimum, JPG ou PNG.
+                {t("photosHint")}
                 {formData.businessPhotos.length > 0 &&
-                  ` ${formData.businessPhotos.length} photo(s) ajoutée(s).`}
+                  ` ${t("photosAdded", { count: formData.businessPhotos.length })}`}
               </p>
               <div
                 {...photosDropzone.getRootProps({
@@ -2153,7 +2177,7 @@ function Step10({
                   })}
                 />
                 <Camera className="text-muted-foreground/50 size-4" />
-                <span className="text-muted-foreground">Ajouter des photos</span>
+                <span className="text-muted-foreground">{t("addPhotos")}</span>
               </div>
               {field.value.length > 0 && (
                 <div className="flex flex-col gap-1 pt-1">
@@ -2168,7 +2192,7 @@ function Step10({
                         onClick={() =>
                           field.onChange(field.value.filter((_, i) => i !== index))
                         }
-                        aria-label="Retirer la photo"
+                        aria-label={t("removePhoto")}
                       >
                         <X className="text-muted-foreground size-4" />
                       </button>

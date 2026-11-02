@@ -1,0 +1,104 @@
+{
+  "page": {
+    "title": "Relatórios",
+    "subtitle": "Crie os seus relatórios ou receba-os automaticamente por e-mail.",
+    "loadingShop": "A carregar a loja..."
+  },
+  "tabs": {
+    "custom": "Personalizados",
+    "automatic": "Automáticos"
+  },
+  "frequency": {
+    "DAILY": "Diário",
+    "WEEKLY": "Semanal",
+    "MONTHLY": "Mensal"
+  },
+  "frequencyHint": {
+    "DAILY": "Todas as manhãs, o dia anterior.",
+    "WEEKLY": "Todas as segundas-feiras, a semana anterior.",
+    "MONTHLY": "No dia 1 de cada mês, o mês anterior."
+  },
+  "emailStatus": {
+    "SENT": "Enviado",
+    "PARTIAL": "Envio parcial",
+    "FAILED": "Falha no envio",
+    "NOT_SENT": "Não enviado",
+    "PENDING": "Em curso"
+  },
+  "automatic": {
+    "period": "{from} a {to}",
+    "saved": "Definição guardada.",
+    "recipientsLabel": {
+      "DAILY": "Outros destinatários do relatório diário",
+      "WEEKLY": "Outros destinatários do relatório semanal",
+      "MONTHLY": "Outros destinatários do relatório mensal"
+    },
+    "recipientsPlaceholder": "Outros destinatários (5 endereços no máximo)",
+    "save": "Guardar",
+    "report": "Relatório",
+    "emailTitle": "Envios por e-mail",
+    "emailShop": "Enviados aos proprietários e administradores da loja, com o detalhe em PDF. Nada é enviado para um período sem encomendas nem visitas.",
+    "emailPlatform": "Enviados aos administradores, com o detalhe em PDF. Nada é enviado para um período sem encomendas nem visitas.",
+    "archivesTitle": "Relatórios arquivados",
+    "archivesDescription": "Os números ficam como no momento do envio. Conservados durante dois anos.",
+    "columns": {
+      "period": "Período",
+      "type": "Tipo",
+      "sending": "Envio",
+      "actions": "Ações"
+    },
+    "recipients": "{count, plural, one {# destinatário} other {# destinatários}}",
+    "view": "Ver",
+    "empty": "Ainda não foi enviado nenhum relatório.",
+    "previous": "Anterior",
+    "next": "Seguinte"
+  },
+  "result": {
+    "empty": "Sem dados neste período.",
+    "partial": "{shown} linhas apresentadas de {total}. Os ficheiros Excel e CSV contêm todas as linhas.",
+    "truncated": "{shown} linhas apresentadas de {total}. Os ficheiros param nas {limit} linhas: reduza o período para obter tudo."
+  },
+  "builder": {
+    "saved": "Relatório guardado.",
+    "updated": "Relatório atualizado.",
+    "deleted": "Relatório eliminado.",
+    "loading": "A carregar...",
+    "defaultTitle": "Relatório",
+    "fileName": "relatorio",
+    "exportError": "Não foi possível exportar.",
+    "groups": {
+      "sales": "Vendas",
+      "traffic": "Visitas"
+    },
+    "title": "Criar o relatório",
+    "timezone": "Dias contados na hora de Dakar (UTC).",
+    "savedReport": "Relatório guardado",
+    "newReport": "Novo relatório",
+    "deleteNamed": "Eliminar {name}",
+    "period": "Período",
+    "from": "De",
+    "to": "Até",
+    "trafficUnavailable": "As visitas não estão disponíveis com este eixo: uma visualização não tem método de pagamento, estado nem país de entrega.",
+    "axisFirst": "Repartir por",
+    "axisSecond": "Depois por",
+    "noAxis": "Nenhum",
+    "generate": "Gerar o relatório",
+    "update": "Atualizar «{name}»",
+    "nameLabel": "Nome do relatório a guardar",
+    "namePlaceholder": "Nome do relatório",
+    "save": "Guardar",
+    "result": "Resultado",
+    "resultDescription": "De {from} a {to}. Uma encomenda com vários produtos conta em cada linha em causa, mas apenas uma vez no total. Volume de negócios entregue: encomendas com o estado «Entregue».",
+    "computing": "A calcular...",
+    "preparing": "A preparar...",
+    "currency": "Moeda",
+    "otherCurrencies": "As vendas em {currencies} não estão incluídas: os montantes em moedas diferentes não se somam. As visitas são todas contadas.",
+    "delete": {
+      "title": "Eliminar este relatório?",
+      "description": "«{name}» será eliminado para toda a equipa. Os números, esses, não mudam.",
+      "cancel": "Cancelar",
+      "deleting": "A eliminar...",
+      "confirm": "Eliminar"
+    }
+  }
+}

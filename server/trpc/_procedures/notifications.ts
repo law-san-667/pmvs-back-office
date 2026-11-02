@@ -1,4 +1,4 @@
-import type { AppNotification } from "@/lib/notifications";
+import type { AppNotification, NotificationPreferenceData } from "@/lib/notifications";
 import {
   idInputSchema,
   paginationInputSchema,
@@ -8,6 +8,14 @@ import z from "zod";
 import { createTRPCRouter, privateProcedure } from "../init";
 
 export const notificationsRouter = createTRPCRouter({
+  preferences: privateProcedure.query(({ ctx }) =>
+    callBackend<NotificationPreferenceData>(ctx.api.get("/me/notification-preferences")),
+  ),
+  updatePreference: privateProcedure
+    .input(z.object({ category: z.string(), channel: z.enum(["EMAIL", "PHONE"]), enabled: z.boolean() }))
+    .mutation(({ ctx, input }) =>
+      callBackend<NotificationPreferenceData>(ctx.api.put("/me/notification-preferences", input)),
+    ),
   list: privateProcedure
     .input(paginationInputSchema.extend({ unread: z.boolean().optional() }))
     .query(({ ctx, input }) =>

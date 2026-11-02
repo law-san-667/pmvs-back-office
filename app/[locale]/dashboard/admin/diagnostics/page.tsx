@@ -245,7 +245,7 @@ function DiagnosticsDashboard() {
           <CardAction>
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative">
-                <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+                <SearchIcon className="text-muted-foreground absolute top-1/2 start-2.5 size-4 -translate-y-1/2" />
                 <Input
                   value={search}
                   onChange={(event) => {
@@ -253,7 +253,7 @@ function DiagnosticsDashboard() {
                     setPage(1);
                   }}
                   placeholder="Rechercher (ex. +22177…, orders, too_small)"
-                  className="h-9 w-72 pl-8"
+                  className="h-9 w-72 ps-8"
                 />
               </div>
               <select
@@ -297,7 +297,7 @@ function DiagnosticsDashboard() {
           {chips.length > 0 && (
             <div className="flex flex-wrap items-center gap-2">
               {chips.map((chip) => (
-                <Badge key={chip.key} variant="secondary" className="gap-1 pr-1">
+                <Badge key={chip.key} variant="secondary" className="gap-1 pe-1">
                   <span className="max-w-72 truncate">{chip.label}</span>
                   <button
                     type="button"
@@ -332,7 +332,7 @@ function DiagnosticsDashboard() {
                   <TableHead>Statut</TableHead>
                   <TableHead>Erreur</TableHead>
                   <TableHead>Utilisateur</TableHead>
-                  <TableHead className="text-right">Durée</TableHead>
+                  <TableHead className="text-end">Durée</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -390,7 +390,7 @@ function DiagnosticsDashboard() {
                     </TableCell>
                     <TableCell
                       className={cn(
-                        "text-right text-xs whitespace-nowrap",
+                        "text-end text-xs whitespace-nowrap",
                         log.durationMs >= 2000 && "font-semibold text-amber-700",
                       )}
                     >

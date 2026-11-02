@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { getBackendErrorMessages } from "@/lib/backend-utils";
-import { PAYOUT_ACCOUNT_STATUS_LABELS } from "@/lib/payment-utils";
+import { msg } from "@/lib/validators/messages";
 import { trpc } from "@/server/trpc/client";
 import { ShieldCheckIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 const NUMBER_PATTERN = /^\+?[0-9]{8,15}$/;
@@ -19,7 +20,24 @@ const NUMBER_PATTERN = /^\+?[0-9]{8,15}$/;
  * the number masked. Wave is the only operator LawPay pays out to, so there is
  * no service to pick.
  */
-export function PayoutAccountForm({ businessId }: { businessId: string }) {
+export function PayoutAccountForm({
+  businessId,
+  countryCode,
+}: {
+  businessId: string;
+  countryCode?: string;
+}) {
+  const t = useTranslations("settings.payout");
+  // PayDunya pays several operators (Orange Money, Free Money…): the
+  // supplier picks one. LawPay only knows Wave.
+  const services = trpc.businesses.payoutServices.useQuery({ country: countryCode });
+  const operators = (services.data ?? []).filter((service) => service !== "Wave Senegal");
+  const viaPayDunya = operators.length > 0;
+  const [service, setService] = useState("");
+  const operatorName = (code: string) =>
+    t.has(`operators.${code}` as never) ? t(`operators.${code}` as never) : code;
+  const k = (key: "title" | "description" | "notConfigured" | "saved" | "number" | "numberHint" | "activate") =>
+    viaPayDunya ? (`online.${key}` as const) : key;
   const utils = trpc.useUtils();
   const account = trpc.businesses.payoutAccount.useQuery(
     { businessId },
@@ -34,7 +52,7 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const isNotConfigured =
-    account.error?.data?.code === "NOT_FOUND" || account.error?.message === "Not found.";
+    account.error?.data?.code === "NOT_FOUND";
   const isLoading = account.isLoading;
   const showForm = isEditing || (!account.data && !isLoading);
   const isPending = upsert.isPending || updateStatus.isPending;
@@ -51,7 +69,7 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
     setSuccessMessage(null);
 
     if (!NUMBER_PATTERN.test(destinationNumber.trim())) {
-      setNumberError("Numéro Wave invalide (8 à 15 chiffres).");
+      setNumberError(msg("settings.errors.waveNumberInvalid"));
       return;
     }
 
@@ -59,13 +77,12 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
       await upsert.mutateAsync({
         businessId,
         destinationNumber: destinationNumber.trim(),
+        ...(viaPayDunya ? { service: service || operators[0] } : {}),
       });
       await refresh();
       setIsEditing(false);
       setDestinationNumber("");
-      setSuccessMessage(
-        "Numéro Wave enregistré. Vos clients peuvent maintenant commander.",
-      );
+      setSuccessMessage(t(k("saved")));
     } catch {
       // Error rendered below.
     }
@@ -93,20 +110,14 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 font-bold">
           <ShieldCheckIcon className="text-primary size-5" />
-          Compte Wave de reversement (LawPay)
+          {t(k("title"))}
         </CardTitle>
-        <p className="text-muted-foreground text-sm">
-          Vos clients paient avec Wave, et votre part de chaque vente vous est
-          reversée immédiatement sur ce numéro Wave, déduite des frais et de la
-          commission. Sans compte Wave actif, vos produits ne peuvent pas être
-          commandés.
-        </p>
+        <p className="text-muted-foreground text-sm">{t(k("description"))}</p>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {accessDenied && (
           <p className="text-muted-foreground text-sm">
-            Seul le propriétaire de l&apos;entreprise peut gérer le compte de
-            reversement.
+            {t("ownerOnly")}
           </p>
         )}
 
@@ -114,7 +125,7 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
           <div className="flex flex-col gap-3 rounded-md border p-3 text-sm">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="font-medium">{account.data.service}</p>
+                <p className="font-medium">{operatorName(account.data.service)}</p>
                 <p className="text-muted-foreground">
                   {account.data.destinationNumber}
                 </p>
@@ -127,7 +138,7 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
                     : "border-red-200 bg-red-50 text-red-700"
                 }
               >
-                {PAYOUT_ACCOUNT_STATUS_LABELS[account.data.status]}
+                {t(`status.${account.data.status}`)}
               </Badge>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -137,7 +148,7 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
                 size="sm"
                 onClick={() => setIsEditing(true)}
               >
-                Changer le numéro
+                {t("changeNumber")}
               </Button>
               <Button
                 type="button"
@@ -147,24 +158,20 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
                 onClick={() => void toggleStatus()}
               >
                 {account.data.status === "ACTIVE"
-                  ? "Suspendre les reversements"
-                  : "Réactiver les reversements"}
+                  ? t("suspend")
+                  : t("reactivate")}
               </Button>
             </div>
           </div>
         )}
 
         {isLoading && (
-          <p className="text-muted-foreground text-sm">Chargement...</p>
+          <p className="text-muted-foreground text-sm">{t("loading")}</p>
         )}
 
         {!isLoading && !account.data && !accessDenied && (
           <p className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-            Aucun compte Wave n&apos;est encore configuré : vos produits ne
-            peuvent pas être commandés. Renseignez votre numéro Wave
-            ci-dessous, puis validez avec le bouton de cette carte — le bouton
-            « Enregistrer les modifications » en bas de page ne sauvegarde pas
-            ce champ.
+            {t(k("notConfigured"))}
           </p>
         )}
 
@@ -177,8 +184,25 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
         {showForm && !accessDenied && (
           <div className="flex flex-col gap-4">
             <FieldGroup>
+              {viaPayDunya && (
+                <Field>
+                  <FieldLabel htmlFor="payout-operator">{t("operator")}</FieldLabel>
+                  <select
+                    id="payout-operator"
+                    value={service || operators[0]}
+                    onChange={(event) => setService(event.target.value)}
+                    className="border-input bg-background h-9 rounded-md border px-3 text-sm"
+                  >
+                    {operators.map((code) => (
+                      <option key={code} value={code}>
+                        {operatorName(code)}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+              )}
               <Field data-invalid={Boolean(numberError)}>
-                <FieldLabel htmlFor="payout-number">Numéro Wave</FieldLabel>
+                <FieldLabel htmlFor="payout-number">{t(k("number"))}</FieldLabel>
                 <Input
                   id="payout-number"
                   inputMode="tel"
@@ -195,9 +219,7 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
                   aria-invalid={Boolean(numberError)}
                 />
                 <p className="text-muted-foreground text-xs">
-                  Le numéro doit être rattaché à un compte Wave : c&apos;est
-                  lui qui recevra votre argent. Chaque changement est
-                  journalisé.
+                  {t(k("numberHint"))}
                 </p>
                 {numberError && <FieldError errors={[{ message: numberError }]} />}
               </Field>
@@ -211,7 +233,7 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
                   onClick={() => setIsEditing(false)}
                   disabled={isPending}
                 >
-                  Annuler
+                  {t("cancel")}
                 </Button>
               )}
               <Button
@@ -220,10 +242,10 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
                 disabled={isPending || !destinationNumber.trim()}
               >
                 {upsert.isPending
-                  ? "Enregistrement..."
+                  ? t("saving")
                   : account.data
-                    ? "Mettre à jour"
-                    : "Activer les paiements Wave"}
+                    ? t("update")
+                    : t(k("activate"))}
               </Button>
             </div>
           </div>
@@ -231,10 +253,7 @@ export function PayoutAccountForm({ businessId }: { businessId: string }) {
 
         {mutationError && (
           <p className="text-destructive text-sm">
-            {getBackendErrorMessages(
-              mutationError,
-              "Impossible d'enregistrer le compte de reversement.",
-            ).join(" ")}
+            {getBackendErrorMessages(mutationError, t("saveError")).join(" ")}
           </p>
         )}
       </CardContent>

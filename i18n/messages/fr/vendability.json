@@ -1,0 +1,32 @@
+{
+  "page": {
+    "title": "Vendabilité",
+    "subtitle": "Vos produits les mieux placés, et le questionnaire d'évaluation de votre boutique.",
+    "loadingShop": "Chargement de la boutique..."
+  },
+  "tabs": {
+    "top": "Meilleurs produits",
+    "questionnaire": "Questionnaire"
+  },
+  "questionnaire": {
+    "saved": "Réponses enregistrées.",
+    "loading": "Chargement...",
+    "none": "Aucun questionnaire n'est en vigueur pour l'instant.",
+    "version": "Version {version}.",
+    "upToDate": "Vos réponses sont à jour. Vous pouvez les corriger.",
+    "upToDateScore": "Vos réponses sont à jour, résultat : {score} / 100. Vous pouvez les corriger.",
+    "newVersion": "Une nouvelle version est disponible. Le résultat de vos réponses à la version {version} reste compté jusqu'à ce que vous répondiez à celle-ci.",
+    "notAnswered": "Vous n'avez pas encore répondu.",
+    "optional": "(facultatif)",
+    "saving": "Enregistrement...",
+    "submit": "Enregistrer mes réponses"
+  },
+  "top": {
+    "title": "Les 5 meilleurs produits",
+    "description": "Selon le score de vendabilité, sur les {days} derniers jours, parmi {ranked} produit(s) en vente.",
+    "empty": "Aucun produit en vente à classer pour l'instant.",
+    "scoreOf": "Score de {title}",
+    "summary": "{units} unité(s), {views} vue(s). Voir le détail.",
+    "notRated": "Non évalué"
+  }
+}

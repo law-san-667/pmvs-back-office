@@ -5,19 +5,25 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import dynamic from "next/dynamic";
 import { Crosshair, Loader2, MapPin, Pencil } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
 const LocationMapPicker = dynamic(
   () => import("@/components/location-map-picker"),
   {
     ssr: false,
-    loading: () => (
-      <div className="bg-muted/40 text-muted-foreground flex h-64 w-full items-center justify-center rounded-md border text-sm">
-        Chargement de la carte...
-      </div>
-    ),
+    loading: () => <MapLoading />,
   },
 );
+
+function MapLoading() {
+  const t = useTranslations("settings.geolocation");
+  return (
+    <div className="bg-muted/40 text-muted-foreground flex h-64 w-full items-center justify-center rounded-md border text-sm">
+      {t("loadingMap")}
+    </div>
+  );
+}
 
 export type GeolocationSource = "DEVICE" | "MAP" | "MANUAL";
 
@@ -28,11 +34,6 @@ export type GeolocationValue = {
   source: GeolocationSource | "";
 };
 
-const SOURCE_LABELS: Record<GeolocationSource, string> = {
-  DEVICE: "Position de l'appareil",
-  MAP: "Choisie sur la carte",
-  MANUAL: "Saisie manuelle",
-};
 
 const toNumber = (value: string) => {
   const trimmed = value.trim();
@@ -44,12 +45,13 @@ const toNumber = (value: string) => {
 export function HeadquartersGeolocationField({
   value,
   onChange,
-  label = "Géolocalisation du siège (optionnel)",
+  label,
 }: {
   value: GeolocationValue;
   onChange: (value: GeolocationValue) => void;
   label?: string;
 }) {
+  const t = useTranslations("settings.geolocation");
   const [mode, setMode] = useState<"map" | "manual">("map");
   const [isLocating, setIsLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +79,7 @@ export function HeadquartersGeolocationField({
 
     if (!("geolocation" in navigator)) {
       if (!silent) {
-        setError("La géolocalisation n'est pas disponible sur cet appareil.");
+        setError(t("unavailable"));
       }
       return;
     }
@@ -101,8 +103,8 @@ export function HeadquartersGeolocationField({
         if (silent) return;
         setError(
           positionError.code === positionError.PERMISSION_DENIED
-            ? "Accès à la position refusé. Choisissez le point sur la carte ou saisissez les coordonnées."
-            : "Impossible de récupérer la position de l'appareil.",
+            ? t("denied")
+            : t("failed"),
         );
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
@@ -128,11 +130,8 @@ export function HeadquartersGeolocationField({
 
   return (
     <Field>
-      <FieldLabel>{label}</FieldLabel>
-      <p className="text-muted-foreground text-xs">
-        Enregistrez la position de votre appareil, placez le point sur la carte,
-        ou saisissez les coordonnées à la main.
-      </p>
+      <FieldLabel>{label ?? t("label")}</FieldLabel>
+      <p className="text-muted-foreground text-xs">{t("help")}</p>
 
       <div className="flex flex-wrap gap-2">
         <Button
@@ -147,7 +146,7 @@ export function HeadquartersGeolocationField({
           ) : (
             <Crosshair />
           )}
-          {isLocating ? "Localisation..." : "Utiliser ma position"}
+          {isLocating ? t("locating") : t("useMyPosition")}
         </Button>
         <Button
           type="button"
@@ -156,11 +155,11 @@ export function HeadquartersGeolocationField({
           onClick={() => setMode(mode === "map" ? "manual" : "map")}
         >
           {mode === "map" ? <Pencil /> : <MapPin />}
-          {mode === "map" ? "Saisie manuelle" : "Choisir sur la carte"}
+          {mode === "map" ? t("source.MANUAL") : t("pickOnMap")}
         </Button>
         {(value.latitude || value.longitude) && (
           <Button type="button" variant="ghost" size="sm" onClick={clear}>
-            Effacer
+            {t("clear")}
           </Button>
         )}
       </div>
@@ -175,14 +174,13 @@ export function HeadquartersGeolocationField({
             onChange={(coordinates) => setCoordinates(coordinates, "MAP")}
           />
           <p className="text-muted-foreground text-xs">
-            Cliquez sur la carte ou déplacez le marqueur pour ajuster la
-            position.
+            {t("mapHint")}
           </p>
         </>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-2">
-            <FieldLabel htmlFor="headquarters-latitude">Latitude</FieldLabel>
+            <FieldLabel htmlFor="headquarters-latitude">{t("latitude")}</FieldLabel>
             <Input
               id="headquarters-latitude"
               type="number"
@@ -198,7 +196,7 @@ export function HeadquartersGeolocationField({
             />
           </div>
           <div className="flex flex-col gap-2">
-            <FieldLabel htmlFor="headquarters-longitude">Longitude</FieldLabel>
+            <FieldLabel htmlFor="headquarters-longitude">{t("longitude")}</FieldLabel>
             <Input
               id="headquarters-longitude"
               type="number"
@@ -219,7 +217,7 @@ export function HeadquartersGeolocationField({
       {latitude !== null && longitude !== null && (
         <p className="text-muted-foreground text-xs">
           {latitude}, {longitude}
-          {value.source ? ` — ${SOURCE_LABELS[value.source]}` : ""}
+          {value.source ? ` — ${t(`source.${value.source}`)}` : ""}
           {value.accuracyMeters ? ` (± ${value.accuracyMeters} m)` : ""}
         </p>
       )}

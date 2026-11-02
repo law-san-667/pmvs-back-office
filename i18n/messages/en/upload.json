@@ -1,0 +1,6 @@
+{
+  "uploadFailed": "The file upload failed.",
+  "deleteFailed": "The file could not be deleted.",
+  "publicUrlMissing": "The public file address is not configured.",
+  "cropFailed": "The image could not be cropped."
+}

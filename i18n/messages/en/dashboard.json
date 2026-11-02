@@ -1,0 +1,48 @@
+{
+  "title": "Dashboard",
+  "subtitle": "Overview of your business activity",
+  "statsError": "Unable to load the statistics: {message}",
+  "revenue": "Revenue",
+  "revenueYear": "Revenue {year}",
+  "chartCurrency": "Chart currency",
+  "metrics": {
+    "customers": "Customers",
+    "customersLink": "View customers",
+    "orders": "Orders",
+    "ordersLink": "View orders",
+    "products": "Products",
+    "productsLink": "View products",
+    "sold": "Items sold",
+    "soldLink": "View items sold"
+  },
+  "recentOrders": {
+    "title": "Latest orders",
+    "seeAll": "View all",
+    "order": "Order",
+    "customer": "Customer",
+    "date": "Date",
+    "total": "Total",
+    "status": "Status",
+    "loading": "Loading orders...",
+    "error": "Unable to load the orders.",
+    "empty": "No orders yet.",
+    "items": "{count, plural, one {# item} other {# items}}"
+  },
+  "bestSelling": {
+    "title": "Best-selling products",
+    "products": "Products",
+    "product": "Product",
+    "sold": "Sold",
+    "orders": "Orders",
+    "loading": "Loading products...",
+    "error": "Unable to load the best sellers.",
+    "empty": "Delivered products will appear here."
+  },
+  "recentCustomers": {
+    "title": "Recent customers",
+    "seeAll": "View customers",
+    "error": "Unable to load the customers.",
+    "empty": "No customers yet.",
+    "orders": "{count, plural, one {# order} other {# orders}}"
+  }
+}

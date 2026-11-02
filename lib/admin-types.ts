@@ -21,14 +21,15 @@ export type PaymentStatus =
   | "REFUND_PENDING"
   | "REFUNDED";
 
-export type PaymentProvider = "CASH" | "LAWPAY";
+export type PaymentProvider = "CASH" | "LAWPAY" | "OFFLINE" | "PAYDUNYA";
 
 export type PayoutStatus =
   | "NOT_APPLICABLE"
   | "PENDING"
   | "PROCESSING"
   | "SUCCEEDED"
-  | "FAILED";
+  | "FAILED"
+  | "ON_HOLD";
 
 export type PaymentRecord = {
   id: string;
@@ -51,10 +52,15 @@ export type PaymentRecord = {
   applicationFeeMinor: number;
   platformFeeMinor: number;
   payoutAmountMinor: number | null;
+  /** Held shares: what is still owed (the share less partial refunds). */
+  payoutDueMinor?: number;
+  refundedPayoutMinor?: number;
   payoutStatus: PayoutStatus;
   payoutReference: string | null;
   payoutError: string | null;
   payoutAt: string | null;
+  offlineReference?: string | null;
+  payoutValidatedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };

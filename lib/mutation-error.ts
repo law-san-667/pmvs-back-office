@@ -1,6 +1,8 @@
+import { errorText } from "@/lib/backend-utils";
+
 export const getMutationErrorMessage = (
   error: unknown,
-  fallback = "Une erreur est survenue.",
+  fallback: string = errorText("generic"),
 ) => {
   if (error instanceof Error && error.message) {
     return error.message;

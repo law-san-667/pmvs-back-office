@@ -45,10 +45,8 @@ import {
 } from "@/components/ui/tooltip";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
-import {
-  MODERATION_STATUS_CLASSES,
-  MODERATION_STATUS_LABELS,
-} from "@/lib/moderation-utils";
+import { MODERATION_STATUS_CLASSES } from "@/lib/moderation-utils";
+import { formatNumber } from "@/lib/utils";
 import type { Listing } from "@/lib/validators/listings-services";
 import { trpc } from "@/server/trpc/client";
 import {
@@ -59,7 +57,9 @@ import {
   SearchIcon,
   ShoppingBagIcon,
   Trash2Icon,
+  FileSpreadsheetIcon,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 type FilterTab = "all" | "products" | "services";
@@ -91,7 +91,7 @@ const getSpecificValue = (listing: Listing, title: string) => {
     .filter((value) => value !== null && value !== undefined)
     .map(String);
 
-  return values?.length ? values.join(", ") : "Variable";
+  return values?.length ? values.join(", ") : null;
 };
 
 const getSpecificCount = (listing: Listing, title: string) => {
@@ -102,27 +102,25 @@ const getSpecificCount = (listing: Listing, title: string) => {
   return section?.items.length ?? 0;
 };
 
-const formatPrice = (amountMinor: number, currency: string) => {
-  const amount = amountMinor;
-
+const formatPrice = (amountMinor: number, currency: string, locale: string) => {
   try {
-    return new Intl.NumberFormat("fr-FR", {
+    return formatNumber(amountMinor, locale, {
       style: "currency",
       currency,
       maximumFractionDigits: 0,
-    }).format(amount);
+    });
   } catch {
-    return `${amount.toLocaleString("fr-FR")} ${currency}`;
+    return `${formatNumber(amountMinor, locale)} ${currency}`;
   }
 };
 
 const getListingStatus = (listing: Listing) => {
-  if (listing.isService) return "-";
-  if (listing.quantityAvailable === 0) return "Rupture";
+  if (listing.isService) return "none";
+  if (listing.quantityAvailable === 0) return "out";
   return listing.lowStockThreshold != null &&
     listing.quantityAvailable <= listing.lowStockThreshold
-    ? "Stock bas"
-    : "Stock";
+    ? "low"
+    : "inStock";
 };
 
 const getVisiblePages = (currentPage: number, totalPages: number) => {
@@ -139,6 +137,8 @@ type DeleteTarget =
   | { type: "bulk"; ids: string[] };
 
 export default function ProductsPage() {
+  const t = useTranslations("products");
+  const locale = useLocale();
   const router = useRouter();
   const utils = trpc.useUtils();
 
@@ -225,31 +225,37 @@ export default function ProductsPage() {
 
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_340px]">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="flex flex-col gap-4">
-          <Link href="/dashboard/products/new">
-            <Button
-              variant="outline"
-              className="h-14 w-full border-dashed text-base"
-            >
-              <PlusIcon className="size-5" />
-              Ajouter un produit
-            </Button>
-          </Link>
+          <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+            <Link href="/dashboard/products/new">
+              <Button
+                variant="outline"
+                className="h-14 w-full border-dashed text-base"
+              >
+                <PlusIcon className="size-5" />
+                {t("addProduct")}
+              </Button>
+            </Link>
+            <Link href="/dashboard/products/import">
+              <Button variant="outline" className="h-14 w-full text-base">
+                <FileSpreadsheetIcon className="size-5" />
+                {t("importExport")}
+              </Button>
+            </Link>
+          </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>
-                Liste des produits et services ({totalListings})
-              </CardTitle>
+              <CardTitle>{t("listTitle", { count: totalListings })}</CardTitle>
               <CardAction>
                 <div className="relative">
-                  <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+                  <SearchIcon className="text-muted-foreground absolute top-1/2 start-2.5 size-4 -translate-y-1/2" />
                   <Input
-                    placeholder="Recherche..."
+                    placeholder={t("searchPlaceholder")}
                     value={search}
                     onChange={(event) => updateSearch(event.target.value)}
-                    className="h-8 w-48 pl-8"
+                    className="h-8 w-48 ps-8"
                   />
                 </div>
               </CardAction>
@@ -262,21 +268,21 @@ export default function ProductsPage() {
                     variant={activeTab === "all" ? "default" : "outline"}
                     onClick={() => updateActiveTab("all")}
                   >
-                    Tout
+                    {t("tabs.all")}
                   </Button>
                   <Button
                     size="sm"
                     variant={activeTab === "products" ? "default" : "outline"}
                     onClick={() => updateActiveTab("products")}
                   >
-                    Produits
+                    {t("tabs.products")}
                   </Button>
                   <Button
                     size="sm"
                     variant={activeTab === "services" ? "default" : "outline"}
                     onClick={() => updateActiveTab("services")}
                   >
-                    Services
+                    {t("tabs.services")}
                   </Button>
                 </div>
 
@@ -292,7 +298,7 @@ export default function ProductsPage() {
                     }
                   >
                     <Trash2Icon className="size-4" />
-                    Supprimer la sélection ({selectedIds.size})
+                    {t("deleteSelection", { count: selectedIds.size })}
                   </Button>
                 )}
               </div>
@@ -306,24 +312,24 @@ export default function ProductsPage() {
                         onCheckedChange={(checked) =>
                           toggleSelectAll(!!checked)
                         }
-                        aria-label="Tout sélectionner"
+                        aria-label={t("selectAll")}
                         disabled={listingItems.length === 0}
                       />
                     </TableHead>
                     <TableHead className="text-muted-foreground font-normal">
-                      Produit
+                      {t("columns.product")}
                     </TableHead>
                     <TableHead className="text-muted-foreground font-normal">
-                      Prix
+                      {t("columns.price")}
                     </TableHead>
                     <TableHead className="text-muted-foreground font-normal">
-                      Nb vendu
+                      {t("columns.sold")}
                     </TableHead>
                     <TableHead className="text-muted-foreground font-normal">
-                      Status
+                      {t("columns.status")}
                     </TableHead>
                     <TableHead className="text-muted-foreground font-normal">
-                      Actions
+                      {t("columns.actions")}
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -333,7 +339,7 @@ export default function ProductsPage() {
                       <TableCell colSpan={7} className="h-32 text-center">
                         <div className="text-muted-foreground flex items-center justify-center gap-2 text-sm">
                           <Spinner />
-                          Chargement des produits...
+                          {t("loading")}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -342,9 +348,7 @@ export default function ProductsPage() {
                       <TableCell colSpan={7} className="h-32 text-center">
                         <div className="flex flex-col items-center gap-2 text-sm">
                           <PackageSearchIcon className="text-muted-foreground size-8" />
-                          <p className="font-medium">
-                            Impossible de charger les produits.
-                          </p>
+                          <p className="font-medium">{t("loadError")}</p>
                           <p className="text-muted-foreground">
                             {listings.error.message}
                           </p>
@@ -356,12 +360,9 @@ export default function ProductsPage() {
                       <TableCell colSpan={7} className="h-40 text-center">
                         <div className="flex flex-col items-center gap-2 text-sm">
                           <PackageSearchIcon className="text-muted-foreground size-9" />
-                          <p className="font-medium">
-                            Aucun produit ou service trouvé.
-                          </p>
+                          <p className="font-medium">{t("empty")}</p>
                           <p className="text-muted-foreground">
-                            Ajustez votre recherche ou ajoutez un nouvel
-                            élément.
+                            {t("emptyHint")}
                           </p>
                         </div>
                       </TableCell>
@@ -386,7 +387,7 @@ export default function ProductsPage() {
                               onCheckedChange={(checked) =>
                                 toggleSelectOne(listing.id, !!checked)
                               }
-                              aria-label={`Sélectionner ${listing.title}`}
+                              aria-label={t("select", { title: listing.title })}
                             />
                           </TableCell>
                           <TableCell className="py-4">
@@ -412,18 +413,14 @@ export default function ProductsPage() {
                                   className={`mt-0.5 ${MODERATION_STATUS_CLASSES[listing.moderationStatus]}`}
                                   title={listing.moderationReason ?? undefined}
                                 >
-                                  {
-                                    MODERATION_STATUS_LABELS[
-                                      listing.moderationStatus
-                                    ]
-                                  }
+                                  {t(`moderation.${listing.moderationStatus}`)}
                                 </Badge>
-                                {size !== "Variable" && (
-                                  <p className="text-sm">Taille: {size}</p>
+                                {size && (
+                                  <p className="text-sm">{t("size", { size })}</p>
                                 )}
                                 {!listing.isService && colorCount > 0 && (
                                   <p className="text-sm">
-                                    Couleurs: {colorCount}
+                                    {t("colors", { count: colorCount })}
                                   </p>
                                 )}
                               </div>
@@ -431,27 +428,30 @@ export default function ProductsPage() {
                           </TableCell>
                           <TableCell className="font-bold">
                             {perQuote
-                              ? "Par devis"
+                              ? t("onQuote")
                               : formatPrice(
                                   listing.priceAmountMinor,
                                   listing.currency,
+                                  locale,
                                 )}
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             -
                           </TableCell>
                           <TableCell>
-                            {status === "Stock" ? (
+                            {status === "inStock" ? (
                               <span className="font-medium text-green-500">
-                                Stock
+                                {t("stock.inStock")}
                               </span>
-                            ) : status === "Stock bas" ? (
+                            ) : status === "low" ? (
                               <span className="font-medium text-amber-600">
-                                Stock bas ({listing.quantityAvailable})
+                                {t("stock.low", {
+                                  quantity: listing.quantityAvailable,
+                                })}
                               </span>
-                            ) : status === "Rupture" ? (
+                            ) : status === "out" ? (
                               <span className="text-muted-foreground">
-                                Rupture
+                                {t("stock.out")}
                               </span>
                             ) : (
                               <span className="text-green-500">-</span>
@@ -475,9 +475,9 @@ export default function ProductsPage() {
                                   }
                                 >
                                   <PencilIcon className="size-4" />
-                                  <span className="sr-only">Modifier</span>
+                                  <span className="sr-only">{t("edit")}</span>
                                 </TooltipTrigger>
-                                <TooltipContent>Modifier</TooltipContent>
+                                <TooltipContent>{t("edit")}</TooltipContent>
                               </Tooltip>
 
                               <Tooltip>
@@ -498,9 +498,9 @@ export default function ProductsPage() {
                                   }
                                 >
                                   <Trash2Icon className="size-4" />
-                                  <span className="sr-only">Supprimer</span>
+                                  <span className="sr-only">{t("delete")}</span>
                                 </TooltipTrigger>
-                                <TooltipContent>Supprimer</TooltipContent>
+                                <TooltipContent>{t("delete")}</TooltipContent>
                               </Tooltip>
                             </div>
                           </TableCell>
@@ -578,7 +578,7 @@ export default function ProductsPage() {
 
         <Card className="h-fit">
           <CardHeader>
-            <CardTitle className="font-bold">Les plus vendus</CardTitle>
+            <CardTitle className="font-bold">{t("bestSellers")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="border-border/70 flex min-h-64 flex-col items-center justify-center gap-3 rounded-lg border border-dashed px-6 py-10 text-center">
@@ -586,9 +586,9 @@ export default function ProductsPage() {
                 <ShoppingBagIcon className="size-6" />
               </div>
               <div className="space-y-1">
-                <p className="font-medium">Aucune vente enregistrée</p>
+                <p className="font-medium">{t("noSales")}</p>
                 <p className="text-muted-foreground text-sm">
-                  Les produits les plus vendus apparaîtront ici.
+                  {t("noSalesHint")}
                 </p>
               </div>
             </div>
@@ -604,16 +604,16 @@ export default function ProductsPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogTitle>{t("deleteTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
               {deleteTarget?.type === "bulk"
-                ? `Voulez-vous vraiment supprimer ${deleteTarget.ids.length} élément(s) ? Cette action est irréversible.`
-                : `Voulez-vous vraiment supprimer « ${deleteTarget?.title} » ? Cette action est irréversible.`}
+                ? t("deleteBulk", { count: deleteTarget.ids.length })
+                : t("deleteOne", { title: deleteTarget?.title ?? "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleteListing.isPending}>
-              Annuler
+              {t("cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
@@ -623,7 +623,7 @@ export default function ProductsPage() {
                 confirmDelete();
               }}
             >
-              {deleteListing.isPending ? "Suppression..." : "Supprimer"}
+              {deleteListing.isPending ? t("deleting") : t("delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

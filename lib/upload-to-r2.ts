@@ -1,5 +1,20 @@
 "use client";
 
+import { defaultLocale, isLocale } from "@/i18n/config";
+import ar from "@/i18n/messages/ar/upload.json";
+import en from "@/i18n/messages/en/upload.json";
+import fr from "@/i18n/messages/fr/upload.json";
+import pt from "@/i18n/messages/pt/upload.json";
+
+const uploadMessages = { fr, en, pt, ar };
+
+/** One of the "upload" messages in the page's language (<html lang>). */
+export const uploadText = (key: keyof typeof fr) => {
+  const lang =
+    typeof document === "undefined" ? undefined : document.documentElement.lang;
+  return uploadMessages[isLocale(lang) ? lang : defaultLocale][key];
+};
+
 type R2UploadDir = "images" | "videos" | "docs";
 
 type CreateUploadInput = {
@@ -42,9 +57,9 @@ export function uploadFileWithProgress(
         return;
       }
 
-      reject(new Error("Failed to upload file to R2."));
+      reject(new Error(uploadText("uploadFailed")));
     };
-    xhr.onerror = () => reject(new Error("Failed to upload file to R2."));
+    xhr.onerror = () => reject(new Error(uploadText("uploadFailed")));
     xhr.open("PUT", uploadUrl);
     xhr.setRequestHeader("Content-Type", contentType);
     xhr.send(file);
@@ -68,7 +83,7 @@ export async function uploadFileToR2FromBrowser(
   });
 
   if (!upload.url) {
-    throw new Error("R2 public URL is not configured.");
+    throw new Error(uploadText("publicUrlMissing"));
   }
 
   await uploadFileWithProgress(file, upload.uploadUrl, onProgress);

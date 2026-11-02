@@ -1,0 +1,31 @@
+{
+  "loadingBusiness": "Chargement de l’entreprise…",
+  "noBusiness": "Créez ou sélectionnez une entreprise pour accéder à la messagerie.",
+  "title": "Messagerie",
+  "intro": "Échangez en direct avec vos clients",
+  "live": "Temps réel actif",
+  "connecting": "Connexion…",
+  "conversations": "Conversations",
+  "conversationCount": "{count, plural, one {# conversation} other {# conversations}}",
+  "loading": "Chargement…",
+  "loadError": "Impossible de charger les conversations.",
+  "empty": "Aucun client ne vous a encore écrit.",
+  "newConversation": "Nouvelle conversation",
+  "select": "Sélectionnez une conversation.",
+  "back": "Retour aux conversations",
+  "customer": "Client",
+  "loadingMessages": "Chargement des messages…",
+  "noMessages": "Aucun message dans cette conversation.",
+  "placeholder": "Répondre au client…",
+  "send": "Envoyer",
+  "sendError": "Envoi du message impossible.",
+  "notification": {
+    "title": "Nouveau message de {name}",
+    "someone": "Un client",
+    "view": "Voir"
+  },
+  "socket": {
+    "timeout": "L’envoi du message a expiré.",
+    "failed": "Envoi impossible."
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "page": {
+    "title": "Estatísticas de visitas",
+    "subtitle": "Visualizações dos seus produtos e da sua loja, adições ao carrinho e encomendas. Os robôs e as suas próprias visitas não são contados; nada é registado sobre os visitantes.",
+    "loading": "A carregar as estatísticas..."
+  },
+  "window": {
+    "label": "Período",
+    "days": "{count, plural, one {# dia} other {# dias}}"
+  },
+  "metrics": {
+    "listingViews": "Visualizações de produtos",
+    "shopViews": "Visualizações da loja",
+    "cartAdds": "Adições ao carrinho",
+    "orders": "Encomendas"
+  },
+  "tiles": {
+    "shopViews": "Loja: {count} visualização(ões)",
+    "ofViews": "{rate} das visualizações",
+    "confirmed": "{count} confirmada(s)",
+    "conversion": "Taxa de conversão",
+    "conversionHint": "Encomendas por 100 visualizações de produtos"
+  },
+  "chart": {
+    "title": "{metric} por dia",
+    "description": "De {from} a {to} (dias UTC; o dia atual ainda não terminou).",
+    "metric": "Indicador"
+  },
+  "funnel": {
+    "title": "Funil de conversão",
+    "description": "Cada etapa com a sua parte da etapa anterior. As encomendas feitas sem visualização contada (antes do registo, versões antigas da aplicação) podem ultrapassar 100 %."
+  },
+  "topTen": "Dez no máximo, no período.",
+  "noVisits": "Ainda sem visitas no período.",
+  "columns": {
+    "orders": "Encomendas",
+    "conversion": "Conversão"
+  },
+  "topListings": {
+    "title": "Produtos mais vistos",
+    "product": "Produto",
+    "views": "Visualizações",
+    "carts": "Carrinhos"
+  },
+  "topBusinesses": {
+    "title": "Lojas mais visitadas",
+    "shop": "Loja",
+    "listingViews": "Vis. produtos",
+    "shopViews": "Vis. loja"
+  }
+}

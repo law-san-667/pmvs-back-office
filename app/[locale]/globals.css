@@ -7,9 +7,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-body);
-  --font-mono: var(--font-body);
-  --font-heading: var(--font-title);
+  /* Latin fonts have no Arabic letters: those fall through to the Arabic font. */
+  --font-sans: var(--font-body), var(--font-arabic);
+  --font-mono: var(--font-body), var(--font-arabic);
+  --font-heading: var(--font-title), var(--font-arabic);
   --color-brand-primary: var(--brand-primary);
   --color-brand-secondary: var(--brand-secondary);
   --color-brand-highlight: var(--brand-highlight);
@@ -166,4 +167,17 @@
     background: rgb(55 142 203 / 0.22);
     color: var(--foreground);
   }
+}
+
+/* Right to left (Arabic): arrows point the other way. */
+[dir="rtl"] :is(
+    .lucide-chevron-right,
+    .lucide-chevron-left,
+    .lucide-chevrons-right,
+    .lucide-chevrons-left,
+    .lucide-arrow-right,
+    .lucide-arrow-left,
+    .lucide-move-right
+  ) {
+  transform: scaleX(-1);
 }

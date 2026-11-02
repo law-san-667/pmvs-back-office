@@ -1,0 +1,86 @@
+{
+  "brand": {
+    "tagline": "The African virtual marketplace"
+  },
+  "sidebar": {
+    "general": "General",
+    "tools": "Tools",
+    "administration": "Administration"
+  },
+  "items": {
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "tenders": "Calls for tenders",
+    "tenderOpportunities": "Bid on tenders",
+    "orders": "Orders",
+    "invoices": "Invoices",
+    "promotions": "Promotions",
+    "documents": "Documents",
+    "traffic": "Visit statistics",
+    "reports": "Reports",
+    "vendability": "Sellability",
+    "advertising": "Ads",
+    "afterSales": "Returns and disputes",
+    "clients": "Customers",
+    "messages": "Messages",
+    "support": "Support",
+    "settings": "Settings",
+    "training": "Training",
+    "help": "Help",
+    "admin": {
+      "dashboard": "Dashboard",
+      "content": "Content",
+      "configuration": "Configuration",
+      "businesses": "Suppliers",
+      "listings": "Products & services",
+      "listingsToReview": "Listings to review",
+      "tenders": "Calls for tenders",
+      "orders": "Orders",
+      "payouts": "Payments and payouts",
+      "transactions": "Transactions",
+      "quality": "Supplier quality",
+      "traffic": "Traffic and conversion",
+      "reports": "Reports",
+      "vendability": "Sellability",
+      "training": "Training",
+      "marketing": "Marketing e-mails",
+      "teamMembers": "Users",
+      "moderation": "Moderation",
+      "advertising": "Ads",
+      "afterSales": "Returns and disputes",
+      "support": "Customer service",
+      "customers": "Customers",
+      "administrators": "Administrators",
+      "operators": "Operators",
+      "compliance": "Compliance",
+      "monitoring": "Monitoring",
+      "diagnostics": "Diagnostics",
+      "settings": "Settings"
+    }
+  },
+  "header": {
+    "search": "Search...",
+    "messages": "Messages",
+    "unreadMessages": "{count, plural, one {# unread message} other {# unread messages}}"
+  },
+  "roles": {
+    "ADMIN": "Administrator",
+    "SELLER": "Seller",
+    "CLIENT": "Customer",
+    "MODERATOR": "Moderator",
+    "OPERATOR": "Operator"
+  },
+  "user": {
+    "account": "My account",
+    "notifications": "Notifications",
+    "language": "Language",
+    "logout": "Log out"
+  },
+  "operator": {
+    "noShop": "No shop assigned",
+    "openError": "Unable to open this shop.",
+    "actingFor": "You are acting for",
+    "managedShop": "Managed shop",
+    "chooseShop": "Choose a shop"
+  }
+}

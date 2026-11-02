@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { BUYER_APP_URL } from "@/config/spaces";
 import { ShoppingBag, Store } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
 /**
  * Says which of the two spaces the visitor is in, and sends them to the other
@@ -8,6 +9,9 @@ import { ShoppingBag, Store } from "lucide-react";
  * account lives on the storefront, not here.
  */
 export default function SpaceBanner({ mode }: { mode: "login" | "register" }) {
+  const t = useTranslations("auth.spaceBanner");
+  const locale = useLocale();
+
   return (
     <div className="border-primary/20 bg-primary/5 mb-6 w-full rounded-2xl border p-4">
       <div className="flex items-start gap-3">
@@ -15,34 +19,29 @@ export default function SpaceBanner({ mode }: { mode: "login" | "register" }) {
           <Store className="size-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-primary text-sm font-semibold">
-            Espace fournisseur
-          </p>
+          <p className="text-primary text-sm font-semibold">{t("title")}</p>
           <p className="text-muted-foreground mt-1 text-sm">
-            {mode === "register"
-              ? "Créez un compte fournisseur pour publier vos produits et services, répondre aux appels d'offres et gérer vos ventes. Cet espace s'adresse aux producteurs, prestataires, exportateurs, commerçants et adjudicateurs."
-              : "Connectez-vous à votre compte fournisseur pour gérer vos produits, vos commandes et vos reversements. Les administrateurs de la plateforme se connectent également ici."}
+            {mode === "register" ? t("register") : t("login")}
           </p>
         </div>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-dashed pt-3">
-        <p className="text-muted-foreground text-sm">
-          Vous souhaitez acheter sur la plateforme ?
-        </p>
+        <p className="text-muted-foreground text-sm">{t("buyQuestion")}</p>
         <Button
           variant="outline"
           size="sm"
           className="rounded-full"
+          nativeButton={false}
           render={
             // Keep the visitor on the same step in the other space.
             <a
-              href={`${BUYER_APP_URL}/fr/auth${mode === "register" ? "?mode=register" : ""}`}
+              href={`${BUYER_APP_URL}/${locale}/auth${mode === "register" ? "?mode=register" : ""}`}
               rel="noreferrer"
             />
           }
         >
-          <ShoppingBag /> Je suis un acheteur
+          <ShoppingBag /> {t("buyerButton")}
         </Button>
       </div>
     </div>

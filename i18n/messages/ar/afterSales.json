@@ -1,0 +1,54 @@
+{
+  "reason": {
+    "NOT_RECEIVED": "لم يتم استلام الطلب",
+    "DAMAGED": "منتج تالف",
+    "NOT_AS_DESCRIBED": "غير مطابق للإعلان",
+    "WRONG_ITEM": "منتج خاطئ",
+    "OTHER": "مشكلة أخرى"
+  },
+  "status": {
+    "OPEN": "في انتظار البائع",
+    "SUPPLIER_ACCEPTED": "قبله البائع",
+    "ESCALATED": "قيد المراجعة من Diarama",
+    "RESOLVED": "تمت التسوية",
+    "CANCELLED": "مسحوب"
+  },
+  "resolution": {
+    "REFUND_FULL": "استرداد كامل",
+    "REFUND_PARTIAL": "استرداد جزئي",
+    "REPLACEMENT": "استبدال",
+    "NO_REFUND": "دون استرداد",
+    "partialAmount": "استرداد جزئي بقيمة {amount}"
+  },
+  "card": {
+    "dispute": "النزاع",
+    "returnRequest": "طلب الإرجاع",
+    "summary": "{reason} · {status}",
+    "photo": "صورة مرفقة",
+    "supplierResponse": "رد البائع: {response}",
+    "decision": "القرار: <b>{resolution}</b>",
+    "decisionWithNote": "القرار: <b>{resolution}</b> — {note}",
+    "failed": "فشلت العملية.",
+    "deadline": "يُرجى الرد قبل {date}؛ وإلا سيبتّ فريق Diarama في الأمر.",
+    "yourAnswer": "ردّك",
+    "refuse": "رفض",
+    "refused": "تم إرسال الرفض إلى فريق Diarama.",
+    "accept": "قبول",
+    "accepted": "تم قبول الطلب.",
+    "decisionLabel": "القرار",
+    "decisionReason": "سبب القرار",
+    "decisionPlaceholder": "السبب المُبلَّغ إلى المشتري والبائع",
+    "refundHint": "يُسجَّل الدفع كمسترد (صدر إشعار دائن وأُلغيت حصة البائع). أعِد المبلغ إلى المشتري عبر تحويل بنكي أو mobile money.",
+    "decided": "تم تسجيل القرار.",
+    "resolve": "البتّ",
+    "refundAmount": "المبلغ المسترد ({currency})",
+    "partialRefundHint": "يُخصم المبلغ من حصة البائع ومن العمولة بالتناسب، وتصدر مذكرة دائنة جزئية. ردّ المبلغ إلى المشتري خارج المنصة."
+  },
+  "page": {
+    "title": "الإرجاع والنزاعات",
+    "description": "يُرجى الرد خلال 72 ساعة: بعد انقضاء هذه المهلة يبتّ فريق Diarama في الأمر. لا تُدفع حصة الطلب إلا بعد إغلاق الملف.",
+    "loading": "جارٍ التحميل…",
+    "empty": "لا توجد حالات إرجاع أو نزاعات.",
+    "order": "الطلب {reference}"
+  }
+}

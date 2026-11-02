@@ -21,6 +21,9 @@ export type City = {
   name: string;
   slug: string;
   isActive: boolean;
+  /** City centre, used by "near me" searches. */
+  latitude?: number | null;
+  longitude?: number | null;
   createdAt: string;
   updatedAt: string;
 };

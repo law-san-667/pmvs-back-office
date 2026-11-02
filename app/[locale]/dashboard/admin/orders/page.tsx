@@ -56,7 +56,7 @@ export default function AdminOrdersPage() {
                 <TableHead>Date</TableHead>
                 <TableHead>Total</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Détails</TableHead>
+                <TableHead className="text-end">Détails</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -98,7 +98,7 @@ export default function AdminOrdersPage() {
                     <TableCell>
                       <OrderStatusBadge status={order.status} />
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-end">
                       <Button
                         variant="ghost"
                         size="icon-sm"

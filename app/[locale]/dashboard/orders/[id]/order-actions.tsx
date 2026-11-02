@@ -17,42 +17,12 @@ import { Textarea } from "@/components/ui/textarea";
 import type { OrderStatus } from "@/lib/seller-dashboard-types";
 import { trpc } from "@/server/trpc/client";
 import { useState } from "react";
+import { intlLocale } from "@/i18n/config";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-/** Button label and confirmation text of each target status. */
-const ACTIONS: Record<
-  OrderStatus,
-  { label: string; confirm: string; destructive?: boolean }
-> = {
-  PENDING: { label: "Remettre en attente", confirm: "" },
-  CONFIRMED: {
-    label: "Confirmer",
-    confirm: "Vous confirmez pouvoir honorer cette commande.",
-  },
-  PROCESSING: {
-    label: "En préparation",
-    confirm: "La commande passe en préparation.",
-  },
-  SHIPPED: {
-    label: "Expédier",
-    confirm: "La commande est remise au transporteur.",
-  },
-  DELIVERED: {
-    label: "Marquer livrée",
-    confirm: "Vous confirmez que l’acheteur a reçu la commande.",
-  },
-  CANCELLED: {
-    label: "Annuler la commande",
-    confirm:
-      "La commande est annulée et le stock est remis en vente. Indiquez le motif à l’acheteur.",
-    destructive: true,
-  },
-  REFUNDED: {
-    label: "Marquer remboursée",
-    confirm: "Vous confirmez que l’acheteur a été remboursé.",
-    destructive: true,
-  },
-};
+/** Target statuses shown as a destructive action. */
+const DESTRUCTIVE: OrderStatus[] = ["CANCELLED", "REFUNDED"];
 
 /**
  * Next steps of an order for the seller (or an operator / admin acting for
@@ -66,6 +36,8 @@ export function OrderActions({
   orderId: string;
   allowedStatuses: OrderStatus[];
 }) {
+  const t = useTranslations("orders.actions");
+  const locale = useLocale();
   const utils = trpc.useUtils();
   const updateStatus = trpc.orders.updateStatus.useMutation();
   const [target, setTarget] = useState<OrderStatus | null>(null);
@@ -94,17 +66,19 @@ export function OrderActions({
           trackingNumber: trackingNumber.trim() || null,
         }),
       });
-      toast.success(`Commande : ${ACTIONS[target].label.toLowerCase()} ✓`);
+      toast.success(
+        t("success", {
+          action: t(`label.${target}`).toLocaleLowerCase(intlLocale(locale)),
+        }),
+      );
       await utils.orders.invalidate();
       close();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "La mise à jour a échoué.",
-      );
+      toast.error(error instanceof Error ? error.message : t("error"));
     }
   };
 
-  const action = target ? ACTIONS[target] : null;
+  const destructive = target !== null && DESTRUCTIVE.includes(target);
 
   return (
     <>
@@ -112,10 +86,10 @@ export function OrderActions({
         {allowedStatuses.map((status) => (
           <Button
             key={status}
-            variant={ACTIONS[status].destructive ? "outline" : "default"}
+            variant={DESTRUCTIVE.includes(status) ? "outline" : "default"}
             onClick={() => setTarget(status)}
           >
-            {ACTIONS[status].label}
+            {t(`label.${status}`)}
           </Button>
         ))}
       </div>
@@ -128,15 +102,21 @@ export function OrderActions({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{action?.label}</AlertDialogTitle>
-            <AlertDialogDescription>{action?.confirm}</AlertDialogDescription>
+            <AlertDialogTitle>
+              {target && t(`label.${target}`)}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {target && target !== "PENDING" && t(`confirm.${target}`)}
+            </AlertDialogDescription>
           </AlertDialogHeader>
 
           <div className="flex flex-col gap-3">
             {target === "SHIPPED" && (
               <>
                 <Field>
-                  <FieldLabel htmlFor="order-carrier">Transporteur</FieldLabel>
+                  <FieldLabel htmlFor="order-carrier">
+                    {t("carrier")}
+                  </FieldLabel>
                   <Input
                     id="order-carrier"
                     value={carrier}
@@ -146,7 +126,7 @@ export function OrderActions({
                 </Field>
                 <Field>
                   <FieldLabel htmlFor="order-tracking">
-                    Numéro de suivi
+                    {t("trackingNumber")}
                   </FieldLabel>
                   <Input
                     id="order-tracking"
@@ -159,7 +139,7 @@ export function OrderActions({
             )}
             <Field>
               <FieldLabel htmlFor="order-note">
-                {target === "CANCELLED" ? "Motif" : "Note (facultative)"}
+                {target === "CANCELLED" ? t("reason") : t("note")}
               </FieldLabel>
               <Textarea
                 id="order-note"
@@ -172,10 +152,10 @@ export function OrderActions({
 
           <AlertDialogFooter>
             <AlertDialogCancel disabled={updateStatus.isPending}>
-              Retour
+              {t("back")}
             </AlertDialogCancel>
             <AlertDialogAction
-              variant={action?.destructive ? "destructive" : "default"}
+              variant={destructive ? "destructive" : "default"}
               disabled={
                 updateStatus.isPending ||
                 (target === "CANCELLED" && note.trim().length === 0)
@@ -185,7 +165,7 @@ export function OrderActions({
                 void submit();
               }}
             >
-              {updateStatus.isPending ? "Enregistrement..." : "Confirmer"}
+              {updateStatus.isPending ? t("saving") : t("submit")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

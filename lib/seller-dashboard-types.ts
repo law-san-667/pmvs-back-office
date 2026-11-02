@@ -14,7 +14,10 @@ export type PaymentMethod =
   | "FREE_MONEY"
   | "EXPRESSO"
   | "CARD"
-  | "ONLINE";
+  | "ONLINE"
+  | "OFFLINE"
+  | "MTN_MOMO"
+  | "MOOV_MONEY";
 
 /** Buyer-safe payment attached to an order. */
 export type OrderPayment = {

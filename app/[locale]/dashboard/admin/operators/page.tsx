@@ -206,7 +206,7 @@ export default function AdminOperatorsPage() {
                       {assignment.isActive ? "Active" : "Terminée"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-end">
                     <Button
                       variant="outline"
                       size="sm"

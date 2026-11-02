@@ -1,0 +1,56 @@
+{
+  "paymentStatus": {
+    "PENDING": "قيد الانتظار",
+    "SUCCEEDED": "مدفوع",
+    "CANCELLED": "ملغى",
+    "ERRORED": "فاشل",
+    "REFUND_PENDING": "الاسترداد جارٍ",
+    "REFUNDED": "مسترد"
+  },
+  "payoutStatus": {
+    "NOT_APPLICABLE": "—",
+    "PENDING": "دفعة البائع معلّقة",
+    "PROCESSING": "دفعة البائع جارية",
+    "SUCCEEDED": "تم الدفع للبائع",
+    "FAILED": "فشلت دفعة البائع",
+    "ON_HOLD": "محتجزة حتى التحقق"
+  },
+  "filters": {
+    "all": "الكل",
+    "paid": "مدفوعة",
+    "pending": "قيد الانتظار",
+    "paidOut": "محوّلة",
+    "payoutFailed": "فشل التحويل",
+    "refunded": "مستردة"
+  },
+  "stats": {
+    "sales": "المبيعات المحصّلة",
+    "salesHint": "{count, plural, zero {لا توجد معاملات} one {معاملة واحدة إجمالًا} two {معاملتان إجمالًا} few {# معاملات إجمالًا} many {# معاملة إجمالًا} other {# معاملة إجمالًا}}",
+    "paidOut": "المحوَّل إلى حسابك",
+    "paidOutHint": "المبلغ الصافي الذي حوّلته LawPay بالفعل",
+    "pendingPayouts": "دفعات معلّقة",
+    "failedHint": "{amount} فشل تحويله — تواصل مع الدعم",
+    "pendingHint": "{count, plural, zero {لا توجد مدفوعات عملاء معلّقة} one {دفعة عميل واحدة معلّقة} two {دفعتا عملاء معلّقتان} few {# دفعات عملاء معلّقة} many {# دفعة عملاء معلّقة} other {# دفعة عملاء معلّقة}}",
+    "fees": "الرسوم والعمولات",
+    "feesHint": "رسوم LawPay {fees} · العمولة {commission}"
+  },
+  "otherCurrencies": "عملات أخرى: {list}",
+  "otherCurrency": "{currency} — المحصّل {gross}، المحوَّل {paidOut}",
+  "history": "سجل المعاملات ({count})",
+  "searchPlaceholder": "المرجع...",
+  "columns": {
+    "reference": "المرجع",
+    "client": "العميل",
+    "method": "الوسيلة",
+    "date": "التاريخ",
+    "amount": "المبلغ",
+    "netPaidOut": "الصافي المحوَّل",
+    "payment": "الدفع",
+    "payout": "دفعة البائع",
+    "order": "الطلب"
+  },
+  "loading": "جارٍ تحميل المعاملات...",
+  "empty": "لم يتم العثور على أي معاملة.",
+  "cash": "نقدًا",
+  "viewOrder": "عرض الطلب"
+}

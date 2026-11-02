@@ -1,6 +1,7 @@
 "use client";
 
 import { env } from "@/config/env/client";
+import { useLocale } from "next-intl";
 import { useEffect, useRef } from "react";
 
 const SCRIPT_ID = "cf-turnstile-script";
@@ -67,6 +68,7 @@ export default function CaptchaField({
   // callback on every render.
   const onTokenRef = useRef(onToken);
   const siteKey = env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const locale = useLocale();
 
   useEffect(() => {
     onTokenRef.current = onToken;
@@ -83,7 +85,8 @@ export default function CaptchaField({
         if (cancelled || !containerRef.current || !window.turnstile) return;
         widgetId = window.turnstile.render(containerRef.current, {
           sitekey: siteKey,
-          language: "fr",
+          // Turnstile knows Brazilian Portuguese only.
+          language: locale === "pt" ? "pt-br" : locale,
           callback: (token) => onTokenRef.current(token),
           "expired-callback": () => onTokenRef.current(undefined),
           "error-callback": () => onTokenRef.current(undefined),
@@ -98,7 +101,7 @@ export default function CaptchaField({
       cancelled = true;
       if (widgetId && window.turnstile) window.turnstile.remove(widgetId);
     };
-  }, [siteKey]);
+  }, [siteKey, locale]);
 
   if (!siteKey) return null;
 

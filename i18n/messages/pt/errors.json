@@ -1,0 +1,7 @@
+{
+  "generic": "Ocorreu um erro.",
+  "authRequired": "Autenticação necessária.",
+  "backendFailed": "O pedido ao servidor falhou.",
+  "unexpected": "Ocorreu um erro inesperado.",
+  "waveNumberInvalid": "Número Wave inválido."
+}

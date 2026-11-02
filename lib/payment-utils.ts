@@ -4,7 +4,26 @@ import type {
   PayoutAccountStatus,
   PayoutStatus,
 } from "@/lib/admin-types";
+import { intlLocale } from "@/i18n/config";
 
+/** An amount in its currency for the page's language ("12 500 F CFA"). */
+export const formatAmount = (
+  amountMinor: number,
+  currency: string,
+  locale = "fr",
+) => {
+  try {
+    return new Intl.NumberFormat(intlLocale(locale), {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+    }).format(amountMinor);
+  } catch {
+    return `${new Intl.NumberFormat(intlLocale(locale)).format(amountMinor)} ${currency}`;
+  }
+};
+
+/** French labels (admin screens); supplier pages use the transactions messages. */
 export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
   PENDING: "En attente",
   SUCCEEDED: "Payée",
@@ -29,6 +48,7 @@ export const PAYOUT_STATUS_LABELS: Record<PayoutStatus, string> = {
   PROCESSING: "Reversement en cours",
   SUCCEEDED: "Reversé",
   FAILED: "Reversement échoué",
+  ON_HOLD: "Retenu jusqu’à validation",
 };
 
 export const PAYOUT_STATUS_CLASSES: Record<PayoutStatus, string> = {
@@ -37,6 +57,7 @@ export const PAYOUT_STATUS_CLASSES: Record<PayoutStatus, string> = {
   PROCESSING: "border-blue-200 bg-blue-50 text-blue-700",
   SUCCEEDED: "border-green-200 bg-green-50 text-green-700",
   FAILED: "border-red-200 bg-red-50 text-red-700",
+  ON_HOLD: "border-violet-200 bg-violet-50 text-violet-700",
 };
 
 export const PAYOUT_ACCOUNT_STATUS_LABELS: Record<PayoutAccountStatus, string> =

@@ -180,7 +180,7 @@ export default function AdminTransactionsPage() {
                   ))}
               </select>
               <div className="relative">
-                <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+                <SearchIcon className="text-muted-foreground absolute top-1/2 start-2.5 size-4 -translate-y-1/2" />
                 <Input
                   value={search}
                   onChange={(event) => {
@@ -188,7 +188,7 @@ export default function AdminTransactionsPage() {
                     setPage(1);
                   }}
                   placeholder="Référence LP-..."
-                  className="h-9 w-48 pl-8"
+                  className="h-9 w-48 ps-8"
                 />
               </div>
             </div>

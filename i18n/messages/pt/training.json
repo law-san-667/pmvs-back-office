@@ -1,0 +1,26 @@
+{
+  "title": "Formação",
+  "intro": "Cursos para começar bem e ir mais longe. O seu progresso fica guardado.",
+  "empty": "Ainda não há cursos disponíveis.",
+  "level": {
+    "BEGINNER": "Iniciante",
+    "ADVANCED": "Avançado"
+  },
+  "kind": {
+    "VIDEO": "Vídeo",
+    "PDF": "PDF",
+    "TEXT": "Texto"
+  },
+  "courseProgress": "Progresso de {title}",
+  "lessonCount": "{done} lição(ões) de {total}",
+  "done": "Concluído",
+  "openPdf": "Abrir o PDF",
+  "loading": "A carregar…",
+  "allCourses": "Todos os cursos",
+  "lessonMeta": "{kind}, {minutes} min",
+  "markDone": "Concluí esta lição",
+  "lessons": "Lições",
+  "lessonsDone": "{done} de {total} concluída(s)",
+  "courseProgressLabel": "Progresso do curso",
+  "lessonDone": "Concluída"
+}

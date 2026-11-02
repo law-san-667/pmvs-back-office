@@ -1,0 +1,48 @@
+{
+  "title": "Painel",
+  "subtitle": "Visão geral da atividade da sua empresa",
+  "statsError": "Não foi possível carregar as estatísticas: {message}",
+  "revenue": "Volume de negócios",
+  "revenueYear": "Volume de negócios {year}",
+  "chartCurrency": "Moeda do gráfico",
+  "metrics": {
+    "customers": "Clientes",
+    "customersLink": "Ver os clientes",
+    "orders": "Encomendas",
+    "ordersLink": "Ver as encomendas",
+    "products": "Produtos",
+    "productsLink": "Ver os produtos",
+    "sold": "Artigos vendidos",
+    "soldLink": "Ver os artigos vendidos"
+  },
+  "recentOrders": {
+    "title": "Últimas encomendas",
+    "seeAll": "Ver tudo",
+    "order": "Encomenda",
+    "customer": "Cliente",
+    "date": "Data",
+    "total": "Total",
+    "status": "Estado",
+    "loading": "A carregar as encomendas...",
+    "error": "Não foi possível carregar as encomendas.",
+    "empty": "Ainda não há encomendas.",
+    "items": "{count, plural, one {# artigo} other {# artigos}}"
+  },
+  "bestSelling": {
+    "title": "Produtos mais vendidos",
+    "products": "Produtos",
+    "product": "Produto",
+    "sold": "Vendidos",
+    "orders": "Encomendas",
+    "loading": "A carregar os produtos...",
+    "error": "Não foi possível carregar os mais vendidos.",
+    "empty": "Os produtos entregues aparecerão aqui."
+  },
+  "recentCustomers": {
+    "title": "Clientes recentes",
+    "seeAll": "Ver os clientes",
+    "error": "Não foi possível carregar os clientes.",
+    "empty": "Ainda não há clientes.",
+    "orders": "{count, plural, one {# encomenda} other {# encomendas}}"
+  }
+}

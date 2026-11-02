@@ -2,6 +2,7 @@ import "server-only";
 
 import {
   BackendResponseError,
+  FALLBACK_ERRORS,
   getBackendResponseError,
   type BackendDataForMode,
   type BackendResponse,
@@ -65,8 +66,11 @@ export const asTRPCError = (error: unknown): TRPCError => {
       (error.response?.data
         ? getBackendResponseError(error.response.data)
         : null) ??
-      error.message ??
-      "Backend request failed.";
+      FALLBACK_ERRORS.backendFailed;
+    if (!error.response) {
+      // The API was not reached: say why in the logs, not to the visitor.
+      console.error(`API unreachable: ${error.code ?? ""} ${error.message}`);
+    }
 
     return new TRPCError({
       code: getTRPCCode(statusCode),
@@ -84,7 +88,9 @@ export const asTRPCError = (error: unknown): TRPCError => {
   return new TRPCError({
     code: "INTERNAL_SERVER_ERROR",
     message:
-      error instanceof Error ? error.message : "Unexpected backend error.",
+      error instanceof Error && error.message
+        ? error.message
+        : FALLBACK_ERRORS.unexpected,
   });
 };
 
@@ -100,8 +106,9 @@ export const callBackend = async <
     const data = unwrapBackendResponse(response.data, response.status);
 
     if (options.mode === "paginated" && !isPaginatedData<T>(data)) {
+      console.error("Expected a paginated backend response.");
       throw new BackendResponseError(
-        "Expected a paginated backend response.",
+        FALLBACK_ERRORS.backendFailed,
         response.status,
       );
     }

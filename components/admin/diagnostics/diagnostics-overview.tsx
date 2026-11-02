@@ -235,7 +235,7 @@ export function DiagnosticsOverviewPanel({
                 key={`${route.method} ${route.route}`}
                 type="button"
                 onClick={() => onRouteClick(route.method, route.route)}
-                className="hover:bg-muted flex w-full flex-col gap-0.5 rounded-md px-2 py-1.5 text-left"
+                className="hover:bg-muted flex w-full flex-col gap-0.5 rounded-md px-2 py-1.5 text-start"
               >
                 <span className="flex items-center gap-2">
                   <span
@@ -279,7 +279,7 @@ export function DiagnosticsOverviewPanel({
                 key={`${error.status} ${error.errorMessage}`}
                 type="button"
                 onClick={() => onErrorClick(error.sampleId)}
-                className="hover:bg-muted flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left"
+                className="hover:bg-muted flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-start"
               >
                 <Badge variant="outline" className={cn("shrink-0", statusClasses(error.status))}>
                   {error.status}

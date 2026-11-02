@@ -4,9 +4,11 @@ import IsLoadingScreen from "@/components/is-loading-screen";
 import { useUser } from "@/contexts/user-context";
 import { useRouter } from "@/i18n/navigation";
 import { trpc } from "@/server/trpc/client";
+import { useTranslations } from "next-intl";
 import React from "react";
 
 export default function AuthCallbackPage() {
+  const t = useTranslations("auth.callback");
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useUser();
   const [hasCheckedBusiness, setHasCheckedBusiness] = React.useState(false);
@@ -40,7 +42,7 @@ export default function AuthCallbackPage() {
   }, [isAuthenticated, isLoading, router, fetchBusiness, user?.role]);
 
   if (isLoading || !hasCheckedBusiness) {
-    return <IsLoadingScreen text="Authentification en cours..." />;
+    return <IsLoadingScreen text={t("loading")} />;
   }
 
   return null;

@@ -1,0 +1,34 @@
+{
+  "actions": {
+    "create": "Création (brouillon)",
+    "update": "Mise à jour",
+    "error": "Erreur"
+  },
+  "importFailed": "Import impossible.",
+  "importDone": "{created, plural, one {# brouillon créé} other {# brouillons créés}}, {updated, plural, one {# annonce mise à jour} other {# annonces mises à jour}}.",
+  "title": "Import et export du catalogue",
+  "subtitle": "Ajoutez ou mettez à jour jusqu'à 200 produits et services à la fois avec un fichier Excel.",
+  "fileLanguage": "Le fichier Excel reste en français : gardez les en-têtes de colonnes et les valeurs proposées (par exemple l'état « Neuf ») tels qu'ils sont dans le modèle.",
+  "prepareTitle": "1. Préparer le fichier",
+  "prepareDescription": "Le modèle contient la liste des codes de sous-catégorie. Les colonnes marquées d'un astérisque sont obligatoires ; une note sur chaque en-tête explique le format attendu.",
+  "downloadTemplate": "Télécharger le modèle",
+  "exportCatalog": "Exporter mon catalogue",
+  "updateHint": "Pour changer vos prix ou vos stocks : exportez, modifiez le fichier puis importez-le. Les lignes dont la « Référence interne » correspond à une de vos annonces mettent à jour son prix, son stock et son seuil d'alerte.",
+  "checkTitle": "2. Vérifier puis importer",
+  "checkDescription": "La vérification n'enregistre rien. Les nouveaux produits sont créés en brouillon : relisez-les puis publiez-les.",
+  "checking": "Vérification…",
+  "checkFile": "Vérifier le fichier",
+  "importing": "Import en cours…",
+  "importLines": "Importer {count, plural, one {# ligne} other {# lignes}}",
+  "errorLinesHint": "Les lignes en erreur seront ignorées : corrigez-les dans le fichier et vérifiez à nouveau, ou importez les autres.",
+  "reportCheck": "Vérification — {total, plural, one {# ligne} other {# lignes}}",
+  "reportDone": "Import terminé — {total, plural, one {# ligne} other {# lignes}}",
+  "reportSummary": "{created, plural, one {# création} other {# créations}}, {updated, plural, one {# mise à jour} other {# mises à jour}}, {failed, plural, one {# erreur} other {# erreurs}}.",
+  "viewDrafts": "Voir mes brouillons",
+  "columns": {
+    "line": "Ligne",
+    "title": "Titre",
+    "result": "Résultat",
+    "details": "Détails"
+  }
+}

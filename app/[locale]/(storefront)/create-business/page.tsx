@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { useUser } from "@/contexts/user-context";
 import { useRouter } from "@/i18n/navigation";
 import { LogOutIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import React from "react";
 
 export default function CreateBusinessPage() {
+  const t = useTranslations("onboarding.page");
   const router = useRouter();
   const { user, isAuthenticated, isLoading, logout } = useUser();
 
@@ -35,7 +37,7 @@ export default function CreateBusinessPage() {
   }, [isAuthenticated, isLoading, router, user?.role]);
 
   if (isLoading || user?.role === "ADMIN") {
-    return <IsLoadingScreen text="Chargement de votre compte..." />;
+    return <IsLoadingScreen text={t("loading")} />;
   }
 
   return (
@@ -43,11 +45,11 @@ export default function CreateBusinessPage() {
       <Button
         type="button"
         variant="outline"
-        className="absolute top-4 right-4 sm:top-8 sm:right-8"
+        className="absolute top-4 end-4 sm:top-8 sm:end-8"
         onClick={() => void handleLogout()}
       >
         <LogOutIcon />
-        Déconnexion
+        {t("logout")}
       </Button>
       <div className="container mx-auto">
         <div className="grid gap-8 lg:grid-cols-2">
@@ -57,7 +59,7 @@ export default function CreateBusinessPage() {
           <div className="hidden w-full lg:block">
             <Image
               src="/auth/auth-image.png"
-              alt="Illustration promotionnelle"
+              alt={t("imageAlt")}
               width={904}
               height={982}
               className="h-auto w-full"

@@ -1,0 +1,26 @@
+{
+  "title": "Formation",
+  "intro": "Des cours pour bien démarrer et pour aller plus loin. Votre progression est enregistrée.",
+  "empty": "Aucun cours n'est disponible pour l'instant.",
+  "level": {
+    "BEGINNER": "Débutant",
+    "ADVANCED": "Confirmé"
+  },
+  "kind": {
+    "VIDEO": "Vidéo",
+    "PDF": "PDF",
+    "TEXT": "Texte"
+  },
+  "courseProgress": "Progression de {title}",
+  "lessonCount": "{done} leçon(s) sur {total}",
+  "done": "Terminé",
+  "openPdf": "Ouvrir le PDF",
+  "loading": "Chargement…",
+  "allCourses": "Tous les cours",
+  "lessonMeta": "{kind}, {minutes} min",
+  "markDone": "J'ai terminé cette leçon",
+  "lessons": "Leçons",
+  "lessonsDone": "{done} sur {total} terminée(s)",
+  "courseProgressLabel": "Progression du cours",
+  "lessonDone": "Terminée"
+}

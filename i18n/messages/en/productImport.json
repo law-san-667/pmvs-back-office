@@ -1,0 +1,34 @@
+{
+  "actions": {
+    "create": "Creation (draft)",
+    "update": "Update",
+    "error": "Error"
+  },
+  "importFailed": "Import failed.",
+  "importDone": "{created, plural, one {# draft created} other {# drafts created}}, {updated, plural, one {# listing updated} other {# listings updated}}.",
+  "title": "Catalogue import and export",
+  "subtitle": "Add or update up to 200 products and services at once with an Excel file.",
+  "fileLanguage": "The Excel file stays in French: keep the column headers and the suggested values (for example the condition “Neuf”, meaning new) exactly as they are in the template.",
+  "prepareTitle": "1. Prepare the file",
+  "prepareDescription": "The template contains the list of subcategory codes. Columns marked with an asterisk are required; a note on each header explains the expected format.",
+  "downloadTemplate": "Download the template",
+  "exportCatalog": "Export my catalogue",
+  "updateHint": "To change your prices or stock: export, edit the file, then import it. Rows whose “Référence interne” (internal reference) matches one of your listings update its price, stock and alert threshold.",
+  "checkTitle": "2. Check, then import",
+  "checkDescription": "Checking saves nothing. New products are created as drafts: review them, then publish them.",
+  "checking": "Checking…",
+  "checkFile": "Check the file",
+  "importing": "Importing…",
+  "importLines": "Import {count, plural, one {# row} other {# rows}}",
+  "errorLinesHint": "Rows with errors will be skipped: fix them in the file and check again, or import the others.",
+  "reportCheck": "Check — {total, plural, one {# row} other {# rows}}",
+  "reportDone": "Import complete — {total, plural, one {# row} other {# rows}}",
+  "reportSummary": "{created, plural, one {# creation} other {# creations}}, {updated, plural, one {# update} other {# updates}}, {failed, plural, one {# error} other {# errors}}.",
+  "viewDrafts": "View my drafts",
+  "columns": {
+    "line": "Row",
+    "title": "Title",
+    "result": "Result",
+    "details": "Details"
+  }
+}

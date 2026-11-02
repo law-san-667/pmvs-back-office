@@ -16,16 +16,16 @@ import {
 import { useBusiness } from "@/contexts/business-context";
 import { Link } from "@/i18n/navigation";
 import {
-  formatDate,
-  formatMoney,
   getListingImage,
   getOrderReference,
-  ORDER_STATUS_LABELS,
-  PAYMENT_METHOD_LABELS,
 } from "@/lib/seller-dashboard-utils";
-import { PAYMENT_STATUS_LABELS } from "@/lib/payment-utils";
+import { formatAmount } from "@/lib/payment-utils";
+import { formatDate } from "@/lib/utils";
+import { useLocale, useTranslations } from "next-intl";
 import { trpc } from "@/server/trpc/client";
 import { OrderActions } from "./order-actions";
+import { InvoicesCard } from "@/components/orders/invoices-card";
+import { AfterSalesCard } from "@/components/orders/after-sales-card";
 import {
   ArrowLeftIcon,
   CalendarIcon,
@@ -34,6 +34,8 @@ import {
   MapPinIcon,
   PackageSearchIcon,
 } from "lucide-react";
+
+const DATE_TIME = { dateStyle: "medium", timeStyle: "short" } as const;
 
 function ItemImage({ images, title }: { images: unknown; title: string }) {
   const image = getListingImage(images);
@@ -59,6 +61,9 @@ export function OrderDetails({
   id: string;
   admin?: boolean;
 }) {
+  const t = useTranslations("orders");
+  const tPayment = useTranslations("transactions");
+  const locale = useLocale();
   const { businessId, isLoading: isBusinessLoading } = useBusiness();
   const order = trpc.orders.detail.useQuery({ id }, { retry: false });
   const ordersHref = admin ? "/dashboard/admin/orders" : "/dashboard/orders";
@@ -66,7 +71,7 @@ export function OrderDetails({
   if ((!admin && isBusinessLoading) || order.isLoading) {
     return (
       <div className="text-muted-foreground flex min-h-80 items-center justify-center gap-2 p-6">
-        <Spinner /> Chargement de la commande...
+        <Spinner /> {t("detail.loading")}
       </div>
     );
   }
@@ -76,10 +81,9 @@ export function OrderDetails({
       <div className="flex min-h-80 flex-col items-center justify-center gap-3 p-6 text-center">
         <PackageSearchIcon className="text-muted-foreground size-10" />
         <div>
-          <p className="font-bold">Commande introuvable</p>
+          <p className="font-bold">{t("detail.notFoundTitle")}</p>
           <p className="text-muted-foreground text-sm">
-            {order.error?.message ??
-              "Cette commande n’existe pas ou vous n’avez pas accès à ses détails."}
+            {order.error?.message ?? t("detail.notFoundText")}
           </p>
         </div>
         <Button
@@ -87,7 +91,7 @@ export function OrderDetails({
           nativeButton={false}
           render={<Link href={ordersHref} />}
         >
-          <ArrowLeftIcon className="size-4" /> Retour aux commandes
+          <ArrowLeftIcon className="size-4" /> {t("detail.back")}
         </Button>
       </div>
     );
@@ -107,9 +111,9 @@ export function OrderDetails({
       <div className="flex min-h-80 flex-col items-center justify-center gap-3 p-6 text-center">
         <PackageSearchIcon className="text-muted-foreground size-10" />
         <div>
-          <p className="font-bold">Commande non disponible</p>
+          <p className="font-bold">{t("detail.unavailableTitle")}</p>
           <p className="text-muted-foreground text-sm">
-            Cette commande n’est pas liée à l’entreprise active.
+            {t("detail.unavailableText")}
           </p>
         </div>
         <Button
@@ -117,7 +121,7 @@ export function OrderDetails({
           nativeButton={false}
           render={<Link href={ordersHref} />}
         >
-          <ArrowLeftIcon className="size-4" /> Retour aux commandes
+          <ArrowLeftIcon className="size-4" /> {t("detail.back")}
         </Button>
       </div>
     );
@@ -136,23 +140,25 @@ export function OrderDetails({
             render={<Link href={ordersHref} />}
           >
             <ArrowLeftIcon className="size-4" />
-            <span className="sr-only">Retour aux commandes</span>
+            <span className="sr-only">{t("detail.back")}</span>
           </Button>
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold">
-                Commande {getOrderReference(data.id)}
+                {t("detail.title", { reference: getOrderReference(data.id) })}
               </h1>
               <OrderStatusBadge status={data.status} />
             </div>
             <p className="text-muted-foreground text-sm">
-              Créée le {formatDate(data.createdAt, true)}
+              {t("detail.createdAt", {
+                date: formatDate(data.createdAt, locale, DATE_TIME),
+              })}
             </p>
           </div>
         </div>
         <div className="flex flex-col items-end gap-3">
           <p className="text-2xl font-bold">
-            {formatMoney(businessTotal, data.currency)}
+            {formatAmount(businessTotal, data.currency, locale)}
           </p>
           <OrderActions
             orderId={data.id}
@@ -167,9 +173,11 @@ export function OrderDetails({
             <CalendarIcon className="text-primary size-5" />
             <div>
               <p className="text-muted-foreground text-xs">
-                Dernière mise à jour
+                {t("detail.updatedAt")}
               </p>
-              <p className="font-medium">{formatDate(data.updatedAt, true)}</p>
+              <p className="font-medium">
+                {formatDate(data.updatedAt, locale, DATE_TIME)}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -177,16 +185,18 @@ export function OrderDetails({
           <CardContent className="flex items-center gap-3">
             <CreditCardIcon className="text-primary size-5" />
             <div>
-              <p className="text-muted-foreground text-xs">Paiement</p>
+              <p className="text-muted-foreground text-xs">
+                {t("detail.payment")}
+              </p>
               <p className="font-medium">
                 {data.payment?.providerPaymentMethod ??
-                  PAYMENT_METHOD_LABELS[
-                    data.payment?.method ?? data.paymentMethod
-                  ]}
+                  t(
+                    `paymentMethod.${data.payment?.method ?? data.paymentMethod}`,
+                  )}
               </p>
               {data.payment && (
                 <p className="text-muted-foreground text-xs">
-                  {PAYMENT_STATUS_LABELS[data.payment.status]}
+                  {tPayment(`paymentStatus.${data.payment.status}`)}
                   {data.payment.transactionReference
                     ? ` · ${data.payment.transactionReference}`
                     : ""}
@@ -199,11 +209,13 @@ export function OrderDetails({
           <CardContent className="flex items-center gap-3">
             <MapPinIcon className="text-primary size-5" />
             <div>
-              <p className="text-muted-foreground text-xs">Livraison</p>
+              <p className="text-muted-foreground text-xs">
+                {t("detail.delivery")}
+              </p>
               <p className="font-medium">
                 {address
                   ? `${address.city}, ${address.countryCode}`
-                  : "Non renseignée"}
+                  : t("detail.deliveryNotProvided")}
               </p>
               {(data.carrier || data.trackingNumber) && (
                 <p className="text-muted-foreground text-xs">
@@ -220,24 +232,27 @@ export function OrderDetails({
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <Card className="min-w-0">
           <CardHeader>
-            <CardTitle>Articles ({businessItems.length})</CardTitle>
+            <CardTitle>
+              {t("detail.items", { count: businessItems.length })}
+            </CardTitle>
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Produit</TableHead>
-                  <TableHead>Prix unitaire</TableHead>
-                  <TableHead>Quantité</TableHead>
-                  <TableHead className="text-right">Sous-total</TableHead>
+                  <TableHead>{t("detail.columns.product")}</TableHead>
+                  <TableHead>{t("detail.columns.unitPrice")}</TableHead>
+                  <TableHead>{t("detail.columns.quantity")}</TableHead>
+                  <TableHead className="text-end">
+                    {t("detail.columns.subtotal")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {businessItems.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="h-32 text-center">
-                      Aucun article de cette commande n’est lié à l’entreprise
-                      active.
+                      {t("detail.noItems")}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -253,11 +268,19 @@ export function OrderDetails({
                         </div>
                       </TableCell>
                       <TableCell className="whitespace-nowrap">
-                        {formatMoney(item.unitPriceMinor, data.currency)}
+                        {formatAmount(
+                          item.unitPriceMinor,
+                          data.currency,
+                          locale,
+                        )}
                       </TableCell>
                       <TableCell>{item.quantity}</TableCell>
-                      <TableCell className="text-right font-bold whitespace-nowrap">
-                        {formatMoney(item.totalPriceMinor, data.currency)}
+                      <TableCell className="text-end font-bold whitespace-nowrap">
+                        {formatAmount(
+                          item.totalPriceMinor,
+                          data.currency,
+                          locale,
+                        )}
                       </TableCell>
                     </TableRow>
                   ))
@@ -267,9 +290,9 @@ export function OrderDetails({
             <Separator className="my-4" />
             <div className="flex justify-end">
               <div className="flex w-full max-w-xs items-center justify-between text-base">
-                <span>Total</span>
+                <span>{t("detail.total")}</span>
                 <span className="font-bold">
-                  {formatMoney(businessTotal, data.currency)}
+                  {formatAmount(businessTotal, data.currency, locale)}
                 </span>
               </div>
             </div>
@@ -279,7 +302,7 @@ export function OrderDetails({
         <div className="flex flex-col gap-4">
           <Card>
             <CardHeader>
-              <CardTitle>Adresse de livraison</CardTitle>
+              <CardTitle>{t("detail.shippingAddress")}</CardTitle>
             </CardHeader>
             <CardContent>
               {address ? (
@@ -295,14 +318,12 @@ export function OrderDetails({
                   <p>{address.countryCode}</p>
                 </div>
               ) : (
-                <p className="text-muted-foreground">
-                  Aucune adresse de livraison renseignée.
-                </p>
+                <p className="text-muted-foreground">{t("detail.noAddress")}</p>
               )}
               {data.notes && (
                 <>
                   <Separator className="my-4" />
-                  <p className="mb-1 font-medium">Note du client</p>
+                  <p className="mb-1 font-medium">{t("detail.customerNote")}</p>
                   <p className="text-muted-foreground whitespace-pre-wrap">
                     {data.notes}
                   </p>
@@ -312,14 +333,14 @@ export function OrderDetails({
           </Card>
 
           <Card>
+            <InvoicesCard orderId={data.id} />
+            <AfterSalesCard orderId={data.id} />
             <CardHeader>
-              <CardTitle>Historique</CardTitle>
+              <CardTitle>{t("detail.history")}</CardTitle>
             </CardHeader>
             <CardContent>
               {data.statusHistory.length === 0 ? (
-                <p className="text-muted-foreground">
-                  Aucun historique disponible.
-                </p>
+                <p className="text-muted-foreground">{t("detail.noHistory")}</p>
               ) : (
                 <ol className="space-y-4">
                   {[...data.statusHistory].reverse().map((entry, index) => (
@@ -332,10 +353,10 @@ export function OrderDetails({
                       </div>
                       <div className="pb-1">
                         <p className="font-medium">
-                          {ORDER_STATUS_LABELS[entry.toStatus]}
+                          {t(`status.${entry.toStatus}`)}
                         </p>
                         <p className="text-muted-foreground text-xs">
-                          {formatDate(entry.createdAt, true)}
+                          {formatDate(entry.createdAt, locale, DATE_TIME)}
                         </p>
                         {entry.note && (
                           <p className="text-muted-foreground mt-1 text-sm">

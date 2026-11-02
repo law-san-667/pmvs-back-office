@@ -1,7 +1,12 @@
 import { CheckIcon, ChevronsUpDown } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import * as React from "react";
 import * as RPNInput from "react-phone-number-input";
 import flags from "react-phone-number-input/flags";
+import ar from "react-phone-number-input/locale/ar.json";
+import en from "react-phone-number-input/locale/en.json";
+import fr from "react-phone-number-input/locale/fr.json";
+import pt from "react-phone-number-input/locale/pt.json";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,11 +34,16 @@ type PhoneInputProps = Omit<
     onChange?: (value: RPNInput.Value) => void;
   };
 
+/** Country names in the page's language. */
+const COUNTRY_LABELS: Record<string, RPNInput.Labels> = { fr, en, pt, ar };
+
 const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
   React.forwardRef<
     React.ComponentRef<typeof RPNInput.default>,
     PhoneInputProps
   >(({ className, onChange, ...props }, ref) => {
+    const locale = useLocale();
+
     return (
       <RPNInput.default
         ref={ref}
@@ -42,6 +52,7 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
         countrySelectComponent={CountrySelect}
         inputComponent={InputComponent}
         smartCaret={false}
+        labels={COUNTRY_LABELS[locale] ?? fr}
         /**
          * Handles the onChange event.
          *
@@ -85,6 +96,8 @@ const CountrySelect = ({
   options: countryList,
   onChange,
 }: CountrySelectProps) => {
+  const t = useTranslations("auth.phoneInput");
+
   return (
     <Popover>
       <PopoverTrigger
@@ -92,7 +105,7 @@ const CountrySelect = ({
           <Button
             type="button"
             variant="outline"
-            className="border-primary flex h-12 gap-1 rounded-s-md rounded-e-none border-r-0 px-3 focus:z-10"
+            className="border-primary flex h-12 gap-1 rounded-s-md rounded-e-none border-e-0 px-3 focus:z-10"
             disabled={disabled}
           >
             <FlagComponent
@@ -101,7 +114,7 @@ const CountrySelect = ({
             />
             <ChevronsUpDown
               className={cn(
-                "text-primary -mr-2 size-4 opacity-50",
+                "text-primary -me-2 size-4 opacity-50",
                 disabled ? "hidden" : "opacity-100",
               )}
             />
@@ -110,10 +123,10 @@ const CountrySelect = ({
       />
       <PopoverContent className="w-[300px] p-0">
         <Command>
-          <CommandInput placeholder="Search country..." />
+          <CommandInput placeholder={t("searchCountry")} />
           <CommandList>
             <ScrollArea className="h-72">
-              <CommandEmpty>No country found.</CommandEmpty>
+              <CommandEmpty>{t("noCountry")}</CommandEmpty>
               <CommandGroup>
                 {countryList.map(({ value, label }) =>
                   value ? (
@@ -154,7 +167,7 @@ const CountrySelectOption = ({
         country,
       )}`}</span>
       <CheckIcon
-        className={`ml-auto size-4 ${
+        className={`ms-auto size-4 ${
           country === selectedCountry ? "opacity-100" : "opacity-0"
         }`}
       />

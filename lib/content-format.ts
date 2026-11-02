@@ -42,6 +42,8 @@ export type SiteSettings = {
     email?: string | null;
   };
   tagline?: string | null;
+  /** Bank details and steps shown to buyers paying by transfer. */
+  offlinePaymentInstructions?: string | null;
   socialLinks: SiteLink[];
   footerColumns: { title: string; links: SiteLink[] }[];
 };

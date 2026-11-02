@@ -1,0 +1,101 @@
+{
+  "title": "Ads",
+  "intro": "Promote your shop on the home page, in search results or on product pages, in the countries of your choice. Every ad is approved by the Diarama team.",
+  "mine": "My ads ({count})",
+  "request": "Request an ad",
+  "toast": {
+    "updated": "Ad updated.",
+    "submitted": "Ad sent for approval.",
+    "paused": "Ad paused.",
+    "resumed": "Ad resumed.",
+    "deleted": "Ad deleted."
+  },
+  "errors": {
+    "saveFailed": "Could not save.",
+    "actionFailed": "The action failed.",
+    "imageRequired": "Choose an image.",
+    "imageUploadFailed": "The image could not be uploaded."
+  },
+  "actions": {
+    "stats": "Statistics",
+    "edit": "Edit",
+    "pause": "Pause",
+    "resume": "Resume",
+    "delete": "Delete",
+    "menu": "Actions for {title}"
+  },
+  "confirmDelete": "Delete “{title}”?",
+  "placement": {
+    "HOME_BANNER": "Home page banner",
+    "SEARCH_RESULTS": "Search results",
+    "LISTING_DETAIL": "Product page",
+    "CATEGORY_SIDEBAR": "Category pages"
+  },
+  "placementHint": {
+    "HOME_BANNER": "Large visual at the top of the home page (website and app). Image 1600 × 500.",
+    "SEARCH_RESULTS": "Insert above the product list. Image 1200 × 250.",
+    "LISTING_DETAIL": "Insert below a product description. Image 1200 × 250.",
+    "CATEGORY_SIDEBAR": "Insert on category pages. Image 1200 × 250."
+  },
+  "state": {
+    "RUNNING": "Live",
+    "SCHEDULED": "Scheduled",
+    "ENDED": "Ended",
+    "PAUSED": "Paused",
+    "PENDING": "To approve",
+    "REJECTED": "Rejected"
+  },
+  "period": {
+    "none": "No limit",
+    "from": "From {date}",
+    "until": "Until {date}",
+    "range": "{start} → {end}"
+  },
+  "table": {
+    "ad": "Ad",
+    "placement": "Placement",
+    "period": "Period",
+    "state": "Status",
+    "results": "Impressions / clicks",
+    "loading": "Loading ads…",
+    "empty": "No ads yet.",
+    "allCountries": "All countries"
+  },
+  "form": {
+    "editTitle": "Edit the ad",
+    "platformNewTitle": "New ad or banner",
+    "requestTitle": "Request an ad",
+    "reviewNote": "The Diarama team approves every ad before it goes live.",
+    "reviewNoteEdit": "The Diarama team approves every ad before it goes live. Changing the content sends it back for approval.",
+    "placement": "Placement",
+    "title": "Title",
+    "subtitle": "Subtitle (optional)",
+    "image": "Image",
+    "uploading": "Uploading… {progress}%",
+    "target": "Link (optional)",
+    "targetPlaceholder": "/businesses/my-shop or https://…",
+    "targetHint": "A page of the site (starting with /) or an https address.",
+    "start": "Start (optional)",
+    "end": "End (optional)",
+    "priority": "Priority (0 to 100)",
+    "priorityHint": "The highest come first.",
+    "countries": "Countries ({count})",
+    "countriesAll": "Countries (all)",
+    "noCountryHint": "No country selected: the ad is shown everywhere.",
+    "cancel": "Cancel",
+    "saving": "Saving…",
+    "save": "Save",
+    "submit": "Send for approval"
+  },
+  "stats": {
+    "title": "Statistics — {title}",
+    "loading": "Loading…",
+    "impressions": "Impressions",
+    "clicks": "Clicks",
+    "clickRate": "Click rate",
+    "period": "Last 30 days",
+    "empty": "No impressions yet.",
+    "dayLine": "{impressions} / {clicks, plural, one {# click} other {# clicks}}",
+    "close": "Close"
+  }
+}

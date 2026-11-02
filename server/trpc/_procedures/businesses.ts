@@ -1,6 +1,7 @@
 import type { PayoutAccount } from "@/lib/admin-types";
 import type { Business } from "@/lib/backend-resource-types";
 import { uuidSchema } from "@/lib/validators/backend-resources";
+import { msg } from "@/lib/validators/messages";
 import z from "zod";
 import {
   createBusinessInputSchema,
@@ -19,13 +20,21 @@ const WAVE_PAYOUT_SERVICE = "Wave Senegal";
 
 const payoutAccountInputSchema = z.object({
   businessId: uuidSchema,
+  /** PayDunya: the wallet ("orange-money-senegal"…); LawPay: always Wave. */
+  service: z.string().trim().max(60).optional(),
   destinationNumber: z
     .string()
     .trim()
-    .regex(/^\+?[0-9]{8,15}$/, "Numéro Wave invalide."),
+    .regex(/^\+?[0-9]{8,15}$/, msg("errors.waveNumberInvalid")),
 });
 
 export const businessesRouter = createTRPCRouter({
+  /** Operators the supplier can be paid on (PayDunya: by country; LawPay: Wave). */
+  payoutServices: privateProcedure
+    .input(z.object({ country: z.string().length(2).optional() }))
+    .query(({ ctx, input }) =>
+      callBackend<string[]>(ctx.api.get("/payout-accounts/services", { params: input })),
+    ),
   payoutAccount: privateProcedure
     .input(z.object({ businessId: uuidSchema }))
     .query(({ ctx, input }) =>
@@ -41,7 +50,7 @@ export const businessesRouter = createTRPCRouter({
       return callBackend<PayoutAccount>(
         ctx.api.put(`/businesses/${businessId}/payout-account`, {
           ...payload,
-          service: WAVE_PAYOUT_SERVICE,
+          service: payload.service ?? WAVE_PAYOUT_SERVICE,
         }),
       );
     }),

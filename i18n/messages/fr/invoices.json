@@ -1,0 +1,27 @@
+{
+  "type": {
+    "INVOICE": "Facture",
+    "CREDIT_NOTE": "Avoir"
+  },
+  "card": {
+    "title": "Factures",
+    "invoice": "Facture {number}",
+    "creditNote": "Avoir {number}",
+    "openError": "Impossible d’ouvrir la facture. Réessayez."
+  },
+  "page": {
+    "title": "Factures",
+    "description": "Une facture est émise à la confirmation de chaque commande ; une annulation ou un remboursement émet un avoir.",
+    "documents": "Documents ({count})",
+    "columns": {
+      "number": "Numéro",
+      "type": "Type",
+      "date": "Date",
+      "order": "Commande",
+      "amount": "Montant"
+    },
+    "loading": "Chargement des factures...",
+    "empty": "Aucune facture pour le moment.",
+    "openError": "Impossible d’ouvrir le document."
+  }
+}

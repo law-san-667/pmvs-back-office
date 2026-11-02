@@ -7,6 +7,7 @@ import { useBusiness } from "@/contexts/business-context";
 import { isLegalBusinessCategory } from "@/lib/business-categories";
 import type { Listing } from "@/lib/validators/listings-services";
 import { trpc } from "@/server/trpc/client";
+import { useTranslations } from "next-intl";
 
 /**
  * Picks the product sheet matching the supplier's categorisation:
@@ -15,6 +16,7 @@ import { trpc } from "@/server/trpc/client";
  * can initialise from it directly.
  */
 export default function ProductForm({ listingId }: { listingId?: string }) {
+  const t = useTranslations("productForm");
   const { business, isLoading: isBusinessLoading } = useBusiness();
   const listingDetail = trpc.listings.detail.useQuery(
     { id: listingId ?? "" },
@@ -22,14 +24,14 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
   );
 
   if (isBusinessLoading || (listingId && listingDetail.isLoading)) {
-    return <IsLoadingScreen text="Chargement..." />;
+    return <IsLoadingScreen text={t("loading")} />;
   }
 
   if (listingId && (listingDetail.error || !listingDetail.data)) {
     return (
       <div className="p-4 lg:p-6">
         <p className="text-destructive text-sm">
-          {listingDetail.error?.message ?? "Produit introuvable."}
+          {listingDetail.error?.message ?? t("notFound")}
         </p>
       </div>
     );
@@ -51,6 +53,7 @@ export default function ProductForm({ listingId }: { listingId?: string }) {
 
 /** Tells the seller where their listing stands in the review queue. */
 function ModerationBanner({ listing }: { listing: Listing }) {
+  const t = useTranslations("productForm.moderation");
   if (listing.moderationStatus === "APPROVED") return null;
 
   const isRejected = listing.moderationStatus === "REJECTED";
@@ -64,15 +67,12 @@ function ModerationBanner({ listing }: { listing: Listing }) {
       }`}
     >
       <p className="font-medium">
-        {isRejected
-          ? "Annonce refusée par la modération"
-          : "Annonce en attente de validation"}
+        {isRejected ? t("rejectedTitle") : t("pendingTitle")}
       </p>
       <p className="text-muted-foreground">
         {isRejected
-          ? listing.moderationReason ??
-            "Corrigez votre annonce puis enregistrez pour la soumettre à nouveau."
-          : "Elle sera visible par les acheteurs dès qu'un administrateur l'aura validée."}
+          ? listing.moderationReason ?? t("rejectedHint")
+          : t("pendingHint")}
       </p>
     </div>
   );

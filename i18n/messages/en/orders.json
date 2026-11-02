@@ -1,0 +1,103 @@
+{
+  "status": {
+    "PENDING": "Pending",
+    "CONFIRMED": "Confirmed",
+    "PROCESSING": "Being prepared",
+    "SHIPPED": "Shipped",
+    "DELIVERED": "Delivered",
+    "CANCELLED": "Cancelled",
+    "REFUNDED": "Refunded"
+  },
+  "paymentMethod": {
+    "CASH": "Cash on delivery",
+    "WAVE": "Wave",
+    "ORANGE_MONEY": "Orange Money",
+    "FREE_MONEY": "Free Money",
+    "EXPRESSO": "Expresso",
+    "CARD": "Bank card",
+    "ONLINE": "Online payment",
+    "OFFLINE": "Transfer or deposit",
+    "MTN_MOMO": "MTN Mobile Money",
+    "MOOV_MONEY": "Moov Money"
+  },
+  "list": {
+    "title": "Orders",
+    "description": "Track all orders placed with your business",
+    "count": "Orders ({count})",
+    "filterLabel": "Filter by status",
+    "allStatuses": "All",
+    "columns": {
+      "order": "Order",
+      "recipient": "Recipient",
+      "items": "Items",
+      "date": "Date",
+      "total": "Total",
+      "status": "Status",
+      "details": "Details"
+    },
+    "loading": "Loading orders...",
+    "noBusiness": "No active business was found.",
+    "loadError": "Could not load the orders.",
+    "emptyTitle": "No orders found.",
+    "emptyText": "New orders will appear here.",
+    "emptyFiltered": "No orders match this status.",
+    "notProvided": "Not provided",
+    "view": "View order"
+  },
+  "detail": {
+    "loading": "Loading order...",
+    "notFoundTitle": "Order not found",
+    "notFoundText": "This order does not exist or you do not have access to its details.",
+    "back": "Back to orders",
+    "unavailableTitle": "Order not available",
+    "unavailableText": "This order is not linked to the active business.",
+    "title": "Order {reference}",
+    "createdAt": "Created on {date}",
+    "updatedAt": "Last updated",
+    "payment": "Payment",
+    "delivery": "Delivery",
+    "deliveryNotProvided": "Not provided",
+    "items": "Items ({count})",
+    "columns": {
+      "product": "Product",
+      "unitPrice": "Unit price",
+      "quantity": "Quantity",
+      "subtotal": "Subtotal"
+    },
+    "noItems": "No item in this order is linked to the active business.",
+    "total": "Total",
+    "shippingAddress": "Delivery address",
+    "noAddress": "No delivery address provided.",
+    "customerNote": "Customer note",
+    "history": "History",
+    "noHistory": "No history available."
+  },
+  "actions": {
+    "label": {
+      "PENDING": "Set back to pending",
+      "CONFIRMED": "Confirm",
+      "PROCESSING": "Being prepared",
+      "SHIPPED": "Ship",
+      "DELIVERED": "Mark as delivered",
+      "CANCELLED": "Cancel order",
+      "REFUNDED": "Mark as refunded"
+    },
+    "confirm": {
+      "CONFIRMED": "You confirm that you can fulfil this order.",
+      "PROCESSING": "The order moves to preparation.",
+      "SHIPPED": "The order is handed over to the carrier.",
+      "DELIVERED": "You confirm that the buyer has received the order.",
+      "CANCELLED": "The order is cancelled and the stock is put back on sale. Tell the buyer the reason.",
+      "REFUNDED": "You confirm that the buyer has been refunded."
+    },
+    "success": "Order: {action} ✓",
+    "error": "The update failed.",
+    "carrier": "Carrier",
+    "trackingNumber": "Tracking number",
+    "reason": "Reason",
+    "note": "Note (optional)",
+    "back": "Back",
+    "saving": "Saving...",
+    "submit": "Confirm"
+  }
+}

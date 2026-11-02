@@ -1,0 +1,48 @@
+{
+  "addProduct": "Add a product",
+  "importExport": "Import / export (Excel)",
+  "listTitle": "Products and services ({count})",
+  "searchPlaceholder": "Search...",
+  "tabs": {
+    "all": "All",
+    "products": "Products",
+    "services": "Services"
+  },
+  "deleteSelection": "Delete selection ({count})",
+  "selectAll": "Select all",
+  "select": "Select {title}",
+  "columns": {
+    "product": "Product",
+    "price": "Price",
+    "sold": "Sold",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "loading": "Loading products...",
+  "loadError": "Unable to load the products.",
+  "empty": "No product or service found.",
+  "emptyHint": "Adjust your search or add a new item.",
+  "moderation": {
+    "PENDING": "Awaiting approval",
+    "APPROVED": "Approved",
+    "REJECTED": "Rejected"
+  },
+  "size": "Size: {size}",
+  "colors": "Colours: {count}",
+  "onQuote": "On quotation",
+  "stock": {
+    "inStock": "In stock",
+    "low": "Low stock ({quantity})",
+    "out": "Out of stock"
+  },
+  "edit": "Edit",
+  "delete": "Delete",
+  "bestSellers": "Best sellers",
+  "noSales": "No sales yet",
+  "noSalesHint": "Your best-selling products will appear here.",
+  "deleteTitle": "Confirm deletion",
+  "deleteBulk": "Do you really want to delete {count, plural, one {# item} other {# items}}? This action cannot be undone.",
+  "deleteOne": "Do you really want to delete “{title}”? This action cannot be undone.",
+  "cancel": "Cancel",
+  "deleting": "Deleting..."
+}

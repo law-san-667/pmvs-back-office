@@ -1,0 +1,34 @@
+{
+  "actions": {
+    "create": "Criação (rascunho)",
+    "update": "Atualização",
+    "error": "Erro"
+  },
+  "importFailed": "Importação impossível.",
+  "importDone": "{created, plural, one {# rascunho criado} other {# rascunhos criados}}, {updated, plural, one {# anúncio atualizado} other {# anúncios atualizados}}.",
+  "title": "Importação e exportação do catálogo",
+  "subtitle": "Adicione ou atualize até 200 produtos e serviços de uma só vez com um ficheiro Excel.",
+  "fileLanguage": "O ficheiro Excel permanece em francês: mantenha os cabeçalhos das colunas e os valores propostos (por exemplo o estado «Neuf», que significa novo) tal como estão no modelo.",
+  "prepareTitle": "1. Preparar o ficheiro",
+  "prepareDescription": "O modelo contém a lista dos códigos de subcategoria. As colunas marcadas com um asterisco são obrigatórias; uma nota em cada cabeçalho explica o formato esperado.",
+  "downloadTemplate": "Descarregar o modelo",
+  "exportCatalog": "Exportar o meu catálogo",
+  "updateHint": "Para alterar os seus preços ou stocks: exporte, modifique o ficheiro e importe-o. As linhas cuja «Référence interne» (referência interna) corresponda a um dos seus anúncios atualizam o preço, o stock e o limite de alerta desse anúncio.",
+  "checkTitle": "2. Verificar e importar",
+  "checkDescription": "A verificação não guarda nada. Os novos produtos são criados como rascunho: reveja-os e publique-os.",
+  "checking": "A verificar…",
+  "checkFile": "Verificar o ficheiro",
+  "importing": "A importar…",
+  "importLines": "Importar {count, plural, one {# linha} other {# linhas}}",
+  "errorLinesHint": "As linhas com erro serão ignoradas: corrija-as no ficheiro e verifique novamente, ou importe as restantes.",
+  "reportCheck": "Verificação — {total, plural, one {# linha} other {# linhas}}",
+  "reportDone": "Importação concluída — {total, plural, one {# linha} other {# linhas}}",
+  "reportSummary": "{created, plural, one {# criação} other {# criações}}, {updated, plural, one {# atualização} other {# atualizações}}, {failed, plural, one {# erro} other {# erros}}.",
+  "viewDrafts": "Ver os meus rascunhos",
+  "columns": {
+    "line": "Linha",
+    "title": "Título",
+    "result": "Resultado",
+    "details": "Detalhes"
+  }
+}

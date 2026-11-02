@@ -1,5 +1,6 @@
 import { isLegalBusinessCategory } from "@/lib/business-categories";
 import z from "zod";
+import { msg } from "./messages";
 
 /** Supplier types from the client's account-opening specification. */
 export const legalBusinessTypeSchema = z.enum([
@@ -17,6 +18,7 @@ export const legalBusinessTypeSchema = z.enum([
   "OTHER",
 ]);
 
+/** French labels, for the admin screens (the supplier wizard uses onboarding.activities.types). */
 export const LEGAL_BUSINESS_TYPE_LABELS: Record<
   z.infer<typeof legalBusinessTypeSchema>,
   string
@@ -40,18 +42,18 @@ const optionalTrimmed = z.string().trim().min(1).optional();
 
 export const businessKeyPersonSchema = z.object({
   title: personTitleSchema.optional(),
-  firstName: z.string().trim().min(1, "Le prénom est requis."),
-  lastName: z.string().trim().min(1, "Le nom est requis."),
+  firstName: z.string().trim().min(1, msg("onboarding.errors.firstNameRequired")),
+  lastName: z.string().trim().min(1, msg("onboarding.errors.lastNameRequired")),
   idNumber: optionalTrimmed,
   position: optionalTrimmed,
   mobilePhone: optionalTrimmed,
-  email: z.email("Email invalide.").optional(),
+  email: z.email(msg("onboarding.errors.emailInvalid")).optional(),
 });
 
 export const businessContactSchema = z.object({
   title: personTitleSchema.optional(),
-  fullName: z.string().trim().min(1, "Le nom complet est requis."),
-  email: z.email("Email invalide.").optional(),
+  fullName: z.string().trim().min(1, msg("onboarding.errors.fullNameRequired")),
+  email: z.email(msg("onboarding.errors.emailInvalid")).optional(),
   landlinePhone: optionalTrimmed,
   mobilePhone: optionalTrimmed,
 });
@@ -70,6 +72,7 @@ export const getBusinessSizeClass = (permanentStaffCount?: number | null) => {
   return "LARGE" as const;
 };
 
+/** French labels, for the admin screens (the supplier wizard uses onboarding.legal.sizeClasses). */
 export const BUSINESS_SIZE_LABELS = {
   MICRO: "Micro-entreprise (0 à 5 employés)",
   SMALL: "Petite entreprise (6 à 20 employés)",
@@ -79,12 +82,16 @@ export const BUSINESS_SIZE_LABELS = {
 
 export const legalBusinessInformationSchema = z.object({
   acronym: z.string().trim().min(1).optional(),
-  creationYear: z.number().int().min(1000).max(9999),
-  legalStatus: z.string().trim().min(1, "Le statut juridique est requis."),
+  creationYear: z
+    .number(msg("onboarding.errors.creationYearInvalid"))
+    .int(msg("onboarding.errors.creationYearInvalid"))
+    .min(1000, msg("onboarding.errors.creationYearInvalid"))
+    .max(9999, msg("onboarding.errors.creationYearInvalid")),
+  legalStatus: z.string().trim().min(1, msg("onboarding.errors.legalStatusRequired")),
   commercialRegisterNumber: z
     .string()
     .trim()
-    .min(1, "Le numéro du registre de commerce est requis."),
+    .min(1, msg("onboarding.errors.commercialRegisterRequired")),
   taxIdentificationNumber: optionalTrimmed,
   permanentStaffCount: z.number().int().nonnegative().optional(),
   postalCode: optionalTrimmed,
@@ -98,7 +105,7 @@ export const legalBusinessInformationSchema = z.object({
       source: z.enum(["DEVICE", "MAP", "MANUAL"]).optional(),
     })
     .optional(),
-  website: z.url("Le site web est invalide.").optional(),
+  website: z.url(msg("onboarding.errors.websiteInvalid")).optional(),
   productCategories: z.array(z.string().trim().min(1)).optional(),
   serviceCategories: z.array(z.string().trim().min(1)).optional(),
   businessTypes: z.array(legalBusinessTypeSchema).optional(),
@@ -120,13 +127,13 @@ export const legalBusinessInformationSchema = z.object({
     })
     .optional(),
   legalRepresentative: z.object({
-    name: z.string().trim().min(1, "Le nom du représentant légal est requis."),
+    name: z.string().trim().min(1, msg("onboarding.errors.representativeNameRequired")),
     role: z.string().trim().min(1).optional(),
-    email: z.email("L'email du représentant est invalide.").optional(),
+    email: z.email(msg("onboarding.errors.representativeEmailInvalid")).optional(),
     mobilePhone: z
       .string()
       .trim()
-      .min(1, "Le téléphone du représentant légal est requis."),
+      .min(1, msg("onboarding.errors.representativePhoneRequired")),
   }),
   productionResources: z
     .object({
@@ -152,29 +159,29 @@ export const legalBusinessQuestionSchema = z.object({
 });
 
 const businessBaseSchema = z.object({
-  name: z.string().trim().min(1, "Le nom du business est requis."),
+  name: z.string().trim().min(1, msg("onboarding.errors.nameRequired")),
   image: z.string().trim().min(1).optional(),
   description: z.string().trim().optional(),
   whatsappPhone: z.string().trim().optional(),
   contactEmail: z
     .string()
     .trim()
-    .email("L'email professionnel est invalide.")
+    .email(msg("onboarding.errors.contactEmailInvalid"))
     .optional(),
   facebookLink: z
     .string()
     .trim()
-    .url("Le lien Facebook est invalide.")
+    .url(msg("onboarding.errors.facebookInvalid"))
     .optional(),
   instagramLink: z
     .string()
     .trim()
-    .url("Le lien Instagram est invalide.")
+    .url(msg("onboarding.errors.instagramInvalid"))
     .optional(),
   orangeMoneyNumber: z.string().trim().optional(),
   waveNumber: z.string().trim().optional(),
-  countryCode: z.string().trim().min(2, "Le pays est requis."),
-  citySlug: z.string().trim().min(1, "La ville est requise."),
+  countryCode: z.string().trim().min(2, msg("onboarding.errors.countryRequired")),
+  citySlug: z.string().trim().min(1, msg("onboarding.errors.cityRequired")),
   address: z.string().trim().optional(),
   deliveryZones: z.array(z.string().trim().min(1)).optional(),
   businessCategory: businessCategorySchema.optional(),
@@ -197,7 +204,7 @@ export const createBusinessInputSchema = businessBaseSchema.superRefine(
         code: "custom",
         path: ["legalDocuments"],
         message:
-          "Les documents légaux sont requis pour un business régularisé.",
+          msg("onboarding.errors.legalDocumentsRequired"),
       });
     }
 
@@ -206,7 +213,7 @@ export const createBusinessInputSchema = businessBaseSchema.superRefine(
         code: "custom",
         path: ["legalBusinessInformation"],
         message:
-          "Les informations légales sont requises pour un business régularisé.",
+          msg("onboarding.errors.legalInformationRequired"),
       });
     }
 
@@ -215,7 +222,7 @@ export const createBusinessInputSchema = businessBaseSchema.superRefine(
         code: "custom",
         path: ["legalBusinessQuestions"],
         message:
-          "Sélectionnez au moins une question applicable à votre business.",
+          msg("onboarding.errors.questionRequired"),
       });
     }
   },

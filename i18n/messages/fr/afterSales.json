@@ -1,0 +1,54 @@
+{
+  "reason": {
+    "NOT_RECEIVED": "Commande non reçue",
+    "DAMAGED": "Article endommagé",
+    "NOT_AS_DESCRIBED": "Non conforme à l'annonce",
+    "WRONG_ITEM": "Mauvais article",
+    "OTHER": "Autre problème"
+  },
+  "status": {
+    "OPEN": "En attente du vendeur",
+    "SUPPLIER_ACCEPTED": "Accepté par le vendeur",
+    "ESCALATED": "En examen par Diarama",
+    "RESOLVED": "Résolu",
+    "CANCELLED": "Retiré"
+  },
+  "resolution": {
+    "REFUND_FULL": "Remboursement intégral",
+    "REFUND_PARTIAL": "Remboursement partiel",
+    "REPLACEMENT": "Remplacement",
+    "NO_REFUND": "Pas de remboursement",
+    "partialAmount": "Remboursement partiel de {amount}"
+  },
+  "card": {
+    "dispute": "Litige",
+    "returnRequest": "Demande de retour",
+    "summary": "{reason} · {status}",
+    "photo": "Photo jointe",
+    "supplierResponse": "Réponse du vendeur : {response}",
+    "decision": "Décision : <b>{resolution}</b>",
+    "decisionWithNote": "Décision : <b>{resolution}</b> — {note}",
+    "failed": "Échec.",
+    "deadline": "Répondez avant le {date} ; sinon l’équipe Diarama tranchera.",
+    "yourAnswer": "Votre réponse",
+    "refuse": "Refuser",
+    "refused": "Refus transmis à l’équipe Diarama.",
+    "accept": "Accepter",
+    "accepted": "Demande acceptée.",
+    "decisionLabel": "Décision",
+    "decisionReason": "Motif de la décision",
+    "decisionPlaceholder": "Motif communiqué à l’acheteur et au vendeur",
+    "refundHint": "Le paiement est enregistré comme remboursé (avoir émis, part du vendeur annulée). Remboursez l’acheteur par virement ou mobile money.",
+    "decided": "Décision enregistrée.",
+    "resolve": "Trancher",
+    "refundAmount": "Montant remboursé ({currency})",
+    "partialRefundHint": "Le montant est retiré de la part du vendeur et de la commission en proportion ; un avoir partiel est émis. Remboursez l’acheteur hors plateforme."
+  },
+  "page": {
+    "title": "Retours et litiges",
+    "description": "Répondez sous 72 h : passé ce délai, l’équipe Diarama tranche. La part de la commande n’est versée qu’une fois le dossier clos.",
+    "loading": "Chargement…",
+    "empty": "Aucun retour ni litige.",
+    "order": "Commande {reference}"
+  }
+}

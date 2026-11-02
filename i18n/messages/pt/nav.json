@@ -1,0 +1,86 @@
+{
+  "brand": {
+    "tagline": "O mercado virtual africano"
+  },
+  "sidebar": {
+    "general": "Geral",
+    "tools": "Ferramentas",
+    "administration": "Administração"
+  },
+  "items": {
+    "dashboard": "Painel",
+    "products": "Produtos",
+    "tenders": "Concursos",
+    "tenderOpportunities": "Responder a concursos",
+    "orders": "Encomendas",
+    "invoices": "Faturas",
+    "promotions": "Promoções",
+    "documents": "Documentos",
+    "traffic": "Estatísticas de visitas",
+    "reports": "Relatórios",
+    "vendability": "Vendabilidade",
+    "advertising": "Anúncios publicitários",
+    "afterSales": "Devoluções e litígios",
+    "clients": "Clientes",
+    "messages": "Mensagens",
+    "support": "Assistência",
+    "settings": "Definições",
+    "training": "Formação",
+    "help": "Ajuda",
+    "admin": {
+      "dashboard": "Painel",
+      "content": "Conteúdos",
+      "configuration": "Configuração",
+      "businesses": "Fornecedores",
+      "listings": "Produtos e serviços",
+      "listingsToReview": "Anúncios a validar",
+      "tenders": "Concursos",
+      "orders": "Encomendas",
+      "payouts": "Pagamentos e transferências",
+      "transactions": "Transações",
+      "quality": "Qualidade dos fornecedores",
+      "traffic": "Tráfego e conversão",
+      "reports": "Relatórios",
+      "vendability": "Vendabilidade",
+      "training": "Formação",
+      "marketing": "E-mails de marketing",
+      "teamMembers": "Utilizadores",
+      "moderation": "Moderação",
+      "advertising": "Anúncios publicitários",
+      "afterSales": "Devoluções e litígios",
+      "support": "Apoio ao cliente",
+      "customers": "Clientes",
+      "administrators": "Administradores",
+      "operators": "Operadores",
+      "compliance": "Conformidade",
+      "monitoring": "Supervisão",
+      "diagnostics": "Diagnóstico",
+      "settings": "Definições"
+    }
+  },
+  "header": {
+    "search": "Pesquisar...",
+    "messages": "Mensagens",
+    "unreadMessages": "{count, plural, one {# mensagem não lida} other {# mensagens não lidas}}"
+  },
+  "roles": {
+    "ADMIN": "Administrador",
+    "SELLER": "Vendedor",
+    "CLIENT": "Cliente",
+    "MODERATOR": "Moderador",
+    "OPERATOR": "Operador"
+  },
+  "user": {
+    "account": "A minha conta",
+    "notifications": "Notificações",
+    "language": "Idioma",
+    "logout": "Terminar sessão"
+  },
+  "operator": {
+    "noShop": "Nenhuma loja atribuída",
+    "openError": "Não foi possível abrir esta loja.",
+    "actingFor": "Está a agir por",
+    "managedShop": "Loja gerida",
+    "chooseShop": "Escolher uma loja"
+  }
+}

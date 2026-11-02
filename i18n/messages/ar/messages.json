@@ -1,0 +1,31 @@
+{
+  "loadingBusiness": "جارٍ تحميل الشركة…",
+  "noBusiness": "أنشئ شركة أو اخترها للوصول إلى الرسائل.",
+  "title": "الرسائل",
+  "intro": "تواصل مباشرة مع عملائك",
+  "live": "الوقت الفعلي مفعّل",
+  "connecting": "جارٍ الاتصال…",
+  "conversations": "المحادثات",
+  "conversationCount": "{count, plural, zero {لا توجد محادثات} one {محادثة واحدة} two {محادثتان} few {# محادثات} many {# محادثة} other {# محادثة}}",
+  "loading": "جارٍ التحميل…",
+  "loadError": "تعذّر تحميل المحادثات.",
+  "empty": "لم يراسلك أي عميل بعد.",
+  "newConversation": "محادثة جديدة",
+  "select": "اختر محادثة.",
+  "back": "العودة إلى المحادثات",
+  "customer": "العميل",
+  "loadingMessages": "جارٍ تحميل الرسائل…",
+  "noMessages": "لا توجد رسائل في هذه المحادثة.",
+  "placeholder": "الرد على العميل…",
+  "send": "إرسال",
+  "sendError": "تعذّر إرسال الرسالة.",
+  "notification": {
+    "title": "رسالة جديدة من {name}",
+    "someone": "عميل",
+    "view": "عرض"
+  },
+  "socket": {
+    "timeout": "انتهت مهلة إرسال الرسالة.",
+    "failed": "تعذّر الإرسال."
+  }
+}

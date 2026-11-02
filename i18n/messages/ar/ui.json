@@ -1,0 +1,16 @@
+{
+  "close": "إغلاق",
+  "pagination": "ترقيم الصفحات",
+  "previous": "السابق",
+  "next": "التالي",
+  "previousPage": "الانتقال إلى الصفحة السابقة",
+  "nextPage": "الانتقال إلى الصفحة التالية",
+  "morePages": "صفحات أخرى",
+  "sidebar": "الشريط الجانبي",
+  "sidebarDescription": "يعرض الشريط الجانبي للجوال.",
+  "toggleSidebar": "إظهار الشريط الجانبي أو إخفاؤه",
+  "commandTitle": "لوحة الأوامر",
+  "commandDescription": "ابحث عن أمر لتنفيذه…",
+  "breadcrumb": "مسار التنقل",
+  "more": "المزيد"
+}

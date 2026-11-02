@@ -1,0 +1,48 @@
+{
+  "title": "Tableau de bord",
+  "subtitle": "Vue d’ensemble de l’activité de votre entreprise",
+  "statsError": "Impossible de charger les statistiques : {message}",
+  "revenue": "Chiffre d’affaires",
+  "revenueYear": "Chiffre d’affaires {year}",
+  "chartCurrency": "Devise du graphique",
+  "metrics": {
+    "customers": "Clients",
+    "customersLink": "Voir les clients",
+    "orders": "Commandes",
+    "ordersLink": "Voir les commandes",
+    "products": "Produits",
+    "productsLink": "Voir les produits",
+    "sold": "Articles vendus",
+    "soldLink": "Voir les articles vendus"
+  },
+  "recentOrders": {
+    "title": "Dernières commandes",
+    "seeAll": "Voir tout",
+    "order": "Commande",
+    "customer": "Client",
+    "date": "Date",
+    "total": "Total",
+    "status": "Statut",
+    "loading": "Chargement des commandes...",
+    "error": "Impossible de charger les commandes.",
+    "empty": "Aucune commande pour le moment.",
+    "items": "{count, plural, one {# article} other {# articles}}"
+  },
+  "bestSelling": {
+    "title": "Produits les plus vendus",
+    "products": "Produits",
+    "product": "Produit",
+    "sold": "Vendus",
+    "orders": "Commandes",
+    "loading": "Chargement des produits...",
+    "error": "Impossible de charger les meilleures ventes.",
+    "empty": "Les produits livrés apparaîtront ici."
+  },
+  "recentCustomers": {
+    "title": "Clients récents",
+    "seeAll": "Voir les clients",
+    "error": "Impossible de charger les clients.",
+    "empty": "Aucun client pour le moment.",
+    "orders": "{count, plural, one {# commande} other {# commandes}}"
+  }
+}

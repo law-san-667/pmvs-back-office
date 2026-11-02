@@ -2,6 +2,7 @@
 
 import type { DirectMessage, SocketAcknowledgement } from "@/lib/messaging";
 import { trpc } from "@/server/trpc/client";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { io, type Socket } from "socket.io-client";
 
@@ -34,6 +35,7 @@ export function useMessagingSocket(
   enabled: boolean,
   { onMessage }: { onMessage?: (message: DirectMessage) => void } = {},
 ) {
+  const t = useTranslations("messages");
   const utils = trpc.useUtils();
   const { mutateAsync: getSocketTicket } =
     trpc.messaging.socketTicket.useMutation();
@@ -147,18 +149,18 @@ export function useMessagingSocket(
 
       return new Promise<DirectMessage>((resolve, reject) => {
         const timeout = setTimeout(
-          () => reject(new Error("L’envoi du message a expiré.")),
+          () => reject(new Error(t("socket.timeout"))),
           ACK_TIMEOUT_MS,
         );
 
         socket.emit("message:send", { conversationId, content }, (response) => {
           clearTimeout(timeout);
           if (response.data) resolve(response.data);
-          else reject(new Error(response.error ?? "Envoi impossible."));
+          else reject(new Error(response.error ?? t("socket.failed")));
         });
       });
     },
-    [sendHttp],
+    [sendHttp, t],
   );
 
   return { isConnected, joinConversation, sendMessage };

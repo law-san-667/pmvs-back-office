@@ -1,0 +1,59 @@
+{
+  "title": "Assistência",
+  "intro": "Uma questão sobre a sua loja, uma encomenda ou um pagamento? A equipa Diarama responde-lhe aqui.",
+  "status": {
+    "OPEN": "Aberto",
+    "PENDING_CUSTOMER": "A aguardar resposta",
+    "RESOLVED": "Resolvido",
+    "CLOSED": "Fechado"
+  },
+  "priority": {
+    "LOW": "Baixa",
+    "NORMAL": "Normal",
+    "HIGH": "Alta",
+    "URGENT": "Urgente"
+  },
+  "category": {
+    "ORDER": "Encomenda",
+    "PAYMENT": "Pagamento",
+    "ACCOUNT": "Conta",
+    "PRODUCT": "Produto",
+    "TECHNICAL": "Técnico",
+    "OTHER": "Outro"
+  },
+  "loading": "A carregar…",
+  "send": "Enviar",
+  "sending": "A enviar…",
+  "sendError": "Não foi possível enviar.",
+  "sent": "Pedido enviado à equipa Diarama.",
+  "mine": {
+    "title": "Os meus pedidos",
+    "empty": "Nenhum pedido.",
+    "ticketLine": "{reference} · {category} · {date}"
+  },
+  "new": {
+    "title": "Novo pedido",
+    "subject": "Assunto",
+    "category": "Tema",
+    "message": "Mensagem"
+  },
+  "ticket": {
+    "updated": "Pedido atualizado.",
+    "failed": "Falhou.",
+    "notFound": "Pedido não encontrado.",
+    "back": "Voltar",
+    "reference": "Pedido {reference} · {category}",
+    "shop": "Loja {name}",
+    "status": "Estado",
+    "priority": "Prioridade",
+    "take": "Assumir o pedido",
+    "firstResponded": "Primeira resposta enviada",
+    "responseDue": "Resposta esperada antes de {date}",
+    "exchanges": "Mensagens",
+    "staff": "Equipa Diarama",
+    "requester": "Requerente",
+    "messageMeta": "{author} · {date}",
+    "yourMessage": "A sua mensagem…",
+    "close": "Encerrar o pedido"
+  }
+}

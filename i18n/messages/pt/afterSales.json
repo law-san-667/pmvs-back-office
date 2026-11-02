@@ -1,0 +1,54 @@
+{
+  "reason": {
+    "NOT_RECEIVED": "Encomenda não recebida",
+    "DAMAGED": "Artigo danificado",
+    "NOT_AS_DESCRIBED": "Não conforme com o anúncio",
+    "WRONG_ITEM": "Artigo errado",
+    "OTHER": "Outro problema"
+  },
+  "status": {
+    "OPEN": "A aguardar o vendedor",
+    "SUPPLIER_ACCEPTED": "Aceite pelo vendedor",
+    "ESCALATED": "Em análise pela Diarama",
+    "RESOLVED": "Resolvido",
+    "CANCELLED": "Retirado"
+  },
+  "resolution": {
+    "REFUND_FULL": "Reembolso integral",
+    "REFUND_PARTIAL": "Reembolso parcial",
+    "REPLACEMENT": "Substituição",
+    "NO_REFUND": "Sem reembolso",
+    "partialAmount": "Reembolso parcial de {amount}"
+  },
+  "card": {
+    "dispute": "Litígio",
+    "returnRequest": "Pedido de devolução",
+    "summary": "{reason} · {status}",
+    "photo": "Foto anexada",
+    "supplierResponse": "Resposta do vendedor: {response}",
+    "decision": "Decisão: <b>{resolution}</b>",
+    "decisionWithNote": "Decisão: <b>{resolution}</b> — {note}",
+    "failed": "Falhou.",
+    "deadline": "Responda até {date}; caso contrário, a equipa Diarama decidirá.",
+    "yourAnswer": "A sua resposta",
+    "refuse": "Recusar",
+    "refused": "Recusa enviada à equipa Diarama.",
+    "accept": "Aceitar",
+    "accepted": "Pedido aceite.",
+    "decisionLabel": "Decisão",
+    "decisionReason": "Motivo da decisão",
+    "decisionPlaceholder": "Motivo comunicado ao comprador e ao vendedor",
+    "refundHint": "O pagamento fica registado como reembolsado (nota de crédito emitida, parte do vendedor anulada). Reembolse o comprador por transferência ou mobile money.",
+    "decided": "Decisão registada.",
+    "resolve": "Decidir",
+    "refundAmount": "Montante reembolsado ({currency})",
+    "partialRefundHint": "O montante é retirado da parte do vendedor e da comissão em proporção; é emitida uma nota de crédito parcial. Reembolse o comprador fora da plataforma."
+  },
+  "page": {
+    "title": "Devoluções e litígios",
+    "description": "Responda no prazo de 72 h: depois disso, a equipa Diarama decide. A parte da encomenda só é paga quando o processo estiver encerrado.",
+    "loading": "A carregar…",
+    "empty": "Nenhuma devolução nem litígio.",
+    "order": "Encomenda {reference}"
+  }
+}

@@ -48,29 +48,31 @@ import {
   type CreateR2Upload,
 } from "@/lib/upload-to-r2";
 import type { UpdateBusinessInput } from "@/lib/validators/business";
+import { msg } from "@/lib/validators/messages";
 import { trpc } from "@/server/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Camera, CheckCircle2, Pencil } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import Cropper from "react-easy-crop";
+import { useTranslations } from "next-intl";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { PhoneInput } from "../phone-input";
 
 const settingsFormSchema = z.object({
-  name: z.string().trim().min(1, "Le nom du business est requis."),
+  name: z.string().trim().min(1, msg("settings.errors.nameRequired")),
   description: z.string(),
-  countryCode: z.string().trim().min(2, "Le pays est requis."),
-  citySlug: z.string().trim().min(1, "La ville est requise."),
+  countryCode: z.string().trim().min(2, msg("settings.errors.countryRequired")),
+  citySlug: z.string().trim().min(1, msg("settings.errors.cityRequired")),
   address: z.string(),
   deliveryZones: z.array(z.string()),
   whatsappPhone: z.string(),
   contactEmail: z
-    .email("L'email professionnel est invalide.")
+    .email(msg("settings.errors.emailInvalid"))
     .or(z.literal("")),
-  facebookLink: z.url("Le lien Facebook est invalide.").or(z.literal("")),
-  instagramLink: z.url("Le lien Instagram est invalide.").or(z.literal("")),
+  facebookLink: z.url(msg("settings.errors.facebookInvalid")).or(z.literal("")),
+  instagramLink: z.url(msg("settings.errors.instagramInvalid")).or(z.literal("")),
   orangeMoneyNumber: z.string(),
   waveNumber: z.string(),
 });
@@ -98,6 +100,7 @@ const optional = (value: string) => {
 };
 
 export default function BusinessSettingsForm() {
+  const t = useTranslations("settings.business");
   const utils = trpc.useUtils();
   const { setBusiness } = useBusiness();
 
@@ -134,7 +137,8 @@ export default function BusinessSettingsForm() {
       countryCode: business.countryCode,
       citySlug: business.citySlug,
       address: business.address ?? "",
-      deliveryZones: business.deliveryZones ?? [],
+      // Older records may list a city twice.
+      deliveryZones: [...new Set(business.deliveryZones ?? [])],
       whatsappPhone: business.whatsappPhone ?? "",
       contactEmail: business.contactEmail ?? "",
       facebookLink: business.facebookLink ?? "",
@@ -168,17 +172,14 @@ export default function BusinessSettingsForm() {
   const updateBusiness = trpc.businesses.update.useMutation({
     onSuccess: async (updated) => {
       setSubmissionErrors([]);
-      setSuccessMessage("Les informations du business ont été mises à jour.");
+      setSuccessMessage(t("updated"));
       setBusiness(updated);
       setLogoFile(null);
       await utils.businesses.myBusiness.invalidate();
     },
     onError: (error) => {
       setSubmissionErrors(
-        getBackendErrorMessages(
-          error,
-          "Erreur lors de la mise à jour du business.",
-        ),
+        getBackendErrorMessages(error, t("updateError")),
       );
     },
   });
@@ -247,7 +248,7 @@ export default function BusinessSettingsForm() {
         countryCode: data.countryCode,
         citySlug: data.citySlug,
         address: optional(data.address),
-        deliveryZones: data.deliveryZones,
+        deliveryZones: [...new Set(data.deliveryZones)],
         whatsappPhone: optional(data.whatsappPhone),
         contactEmail: optional(data.contactEmail),
         facebookLink: optional(data.facebookLink),
@@ -261,7 +262,7 @@ export default function BusinessSettingsForm() {
     } catch (error) {
       setIsUploading(false);
       setSubmissionErrors([
-        getMutationErrorMessage(error, "Erreur lors de l'envoi du logo."),
+        getMutationErrorMessage(error, t("logoUploadError")),
       ]);
     }
   };
@@ -290,7 +291,7 @@ export default function BusinessSettingsForm() {
     return (
       <div className="text-muted-foreground flex h-64 items-center justify-center gap-2 text-sm">
         <Spinner />
-        Chargement des informations du business...
+        {t("loading")}
       </div>
     );
   }
@@ -300,7 +301,7 @@ export default function BusinessSettingsForm() {
       <div className="flex h-64 flex-col items-center justify-center gap-2 p-4 text-center text-sm">
         <AlertCircle className="text-muted-foreground size-8" />
         <p className="font-medium">
-          Impossible de charger les informations du business.
+          {t("loadError")}
         </p>
         {myBusiness.error && (
           <p className="text-muted-foreground">{myBusiness.error.message}</p>
@@ -314,10 +315,8 @@ export default function BusinessSettingsForm() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <div>
-        <h1 className="text-xl font-bold">Paramètres</h1>
-        <p className="text-muted-foreground text-sm">
-          Mettez à jour les informations de votre business
-        </p>
+        <h1 className="text-xl font-bold">{t("title")}</h1>
+        <p className="text-muted-foreground text-sm">{t("subtitle")}</p>
       </div>
 
       {submissionErrors.length > 0 && (
@@ -326,7 +325,7 @@ export default function BusinessSettingsForm() {
             <Badge
               key={`${error}-${index}`}
               variant="destructive"
-              className="max-w-full text-left whitespace-normal"
+              className="max-w-full text-start whitespace-normal"
             >
               <AlertCircle className="size-3" />
               {error}
@@ -348,12 +347,12 @@ export default function BusinessSettingsForm() {
           <div className="flex flex-col gap-4">
             <Card>
               <CardHeader>
-                <CardTitle className="font-bold">Profil du business</CardTitle>
+                <CardTitle className="font-bold">{t("profile")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <FieldGroup>
                   <Field>
-                    <FieldLabel>Photo de profile/Logo</FieldLabel>
+                    <FieldLabel>{t("logo")}</FieldLabel>
                     <div
                       {...logoDropzone.getRootProps()}
                       className="border-primary/30 bg-primary/5 relative flex size-24! cursor-pointer items-center justify-center rounded-full border-2 border-dashed"
@@ -363,13 +362,13 @@ export default function BusinessSettingsForm() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={currentLogo}
-                          alt="Logo"
+                          alt={t("logoAlt")}
                           className="size-full rounded-full object-cover"
                         />
                       ) : (
                         <Camera className="text-primary/50 size-8" />
                       )}
-                      <span className="bg-primary/10 text-primary absolute -right-1 -bottom-1 flex size-6 items-center justify-center rounded-full border-2 border-white">
+                      <span className="bg-primary/10 text-primary absolute -end-1 -bottom-1 flex size-6 items-center justify-center rounded-full border-2 border-white">
                         <Pencil className="size-3" />
                       </span>
                     </div>
@@ -380,7 +379,7 @@ export default function BusinessSettingsForm() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Nom de votre Activité ou métier</FieldLabel>
+                        <FieldLabel>{t("name")}</FieldLabel>
                         <Input
                           {...field}
                           aria-invalid={fieldState.invalid}
@@ -398,7 +397,7 @@ export default function BusinessSettingsForm() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Description</FieldLabel>
+                        <FieldLabel>{t("description")}</FieldLabel>
                         <Textarea
                           {...field}
                           aria-invalid={fieldState.invalid}
@@ -415,7 +414,7 @@ export default function BusinessSettingsForm() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="font-bold">Localisation</CardTitle>
+                <CardTitle className="font-bold">{t("location")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <FieldGroup>
@@ -424,7 +423,7 @@ export default function BusinessSettingsForm() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Pays</FieldLabel>
+                        <FieldLabel>{t("country")}</FieldLabel>
                         <Select
                           items={countryNameByCode}
                           value={field.value}
@@ -444,7 +443,7 @@ export default function BusinessSettingsForm() {
                           >
                             <SelectValue
                               placeholder={
-                                countries.isLoading ? "Chargement..." : "Pays"
+                                countries.isLoading ? t("loadingShort") : t("country")
                               }
                             />
                           </SelectTrigger>
@@ -471,7 +470,7 @@ export default function BusinessSettingsForm() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Ville</FieldLabel>
+                        <FieldLabel>{t("city")}</FieldLabel>
                         <Select
                           items={cityNameItems}
                           value={field.value}
@@ -484,7 +483,7 @@ export default function BusinessSettingsForm() {
                           >
                             <SelectValue
                               placeholder={
-                                cities.isLoading ? "Chargement..." : "Ville"
+                                cities.isLoading ? t("loadingShort") : t("city")
                               }
                             />
                           </SelectTrigger>
@@ -508,7 +507,7 @@ export default function BusinessSettingsForm() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Adresse</FieldLabel>
+                        <FieldLabel>{t("address")}</FieldLabel>
                         <Input
                           {...field}
                           aria-invalid={fieldState.invalid}
@@ -526,7 +525,7 @@ export default function BusinessSettingsForm() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Zone de livraison</FieldLabel>
+                        <FieldLabel>{t("deliveryZones")}</FieldLabel>
                         <Combobox
                           multiple
                           items={citySlugs}
@@ -548,7 +547,7 @@ export default function BusinessSettingsForm() {
                             ))}
                             <ComboboxChipsInput
                               placeholder={
-                                cities.isLoading ? "Chargement..." : "Villes"
+                                cities.isLoading ? t("loadingShort") : t("cities")
                               }
                               disabled={
                                 cities.isLoading || cityItems.length === 0
@@ -556,7 +555,7 @@ export default function BusinessSettingsForm() {
                             />
                           </ComboboxChips>
                           <ComboboxContent anchor={deliveryZoneAnchorRef}>
-                            <ComboboxEmpty>Aucune ville trouvée.</ComboboxEmpty>
+                            <ComboboxEmpty>{t("noCity")}</ComboboxEmpty>
                             <ComboboxList>
                               {cityItems.map((city) => (
                                 <ComboboxItem key={city.slug} value={city.slug}>
@@ -581,9 +580,7 @@ export default function BusinessSettingsForm() {
           <div className="flex flex-col gap-4">
             <Card>
               <CardHeader>
-                <CardTitle className="font-bold">
-                  Contact et réseaux sociaux
-                </CardTitle>
+                <CardTitle className="font-bold">{t("contact")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <FieldGroup>
@@ -592,7 +589,7 @@ export default function BusinessSettingsForm() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Numéro Whatsapp (optionnel)</FieldLabel>
+                        <FieldLabel>{t("whatsapp")}</FieldLabel>
                         <PhoneInput
                           value={field.value}
                           onChange={(value) => field.onChange(value || "")}
@@ -610,7 +607,7 @@ export default function BusinessSettingsForm() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Email professionel (optionnel)</FieldLabel>
+                        <FieldLabel>{t("email")}</FieldLabel>
                         <Input
                           {...field}
                           type="email"
@@ -629,7 +626,7 @@ export default function BusinessSettingsForm() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Lien Facebook (optionnel)</FieldLabel>
+                        <FieldLabel>{t("facebook")}</FieldLabel>
                         <Input
                           {...field}
                           aria-invalid={fieldState.invalid}
@@ -647,7 +644,7 @@ export default function BusinessSettingsForm() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Lien Instagram (optionnel)</FieldLabel>
+                        <FieldLabel>{t("instagram")}</FieldLabel>
                         <Input
                           {...field}
                           aria-invalid={fieldState.invalid}
@@ -663,11 +660,13 @@ export default function BusinessSettingsForm() {
               </CardContent>
             </Card>
 
-            {business && <PayoutAccountForm businessId={business.id} />}
+            {business && (
+              <PayoutAccountForm businessId={business.id} countryCode={countryCode} />
+            )}
 
             <Card>
               <CardHeader>
-                <CardTitle className="font-bold">Moyens de paiement</CardTitle>
+                <CardTitle className="font-bold">{t("paymentMethods")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <FieldGroup>
@@ -676,7 +675,7 @@ export default function BusinessSettingsForm() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Numéro Orange Money (optionnel)</FieldLabel>
+                        <FieldLabel>{t("orangeMoney")}</FieldLabel>
                         <PhoneInput
                           value={field.value}
                           onChange={(value) => field.onChange(value || "")}
@@ -694,7 +693,7 @@ export default function BusinessSettingsForm() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Numéro Wave (optionnel)</FieldLabel>
+                        <FieldLabel>{t("wave")}</FieldLabel>
                         <PhoneInput
                           value={field.value}
                           onChange={(value) => field.onChange(value || "")}
@@ -718,10 +717,10 @@ export default function BusinessSettingsForm() {
           disabled={isMutating}
         >
           {isUploading
-            ? `Envoi du logo… ${uploadProgress}%`
+            ? t("uploadingLogo", { progress: uploadProgress })
             : updateBusiness.isPending
-              ? "Mise à jour en cours..."
-              : "Enregistrer les modifications"}
+              ? t("updating")
+              : t("submit")}
         </Button>
       </form>
 
@@ -732,7 +731,7 @@ export default function BusinessSettingsForm() {
       >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Recadrer la photo</DialogTitle>
+            <DialogTitle>{t("cropTitle")}</DialogTitle>
           </DialogHeader>
           <div className="relative h-72 w-full">
             {cropImage && (
@@ -751,9 +750,9 @@ export default function BusinessSettingsForm() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCropImage(null)}>
-              Annuler
+              {t("cancel")}
             </Button>
-            <Button onClick={handleCropSave}>Enregistrer</Button>
+            <Button onClick={handleCropSave}>{t("save")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

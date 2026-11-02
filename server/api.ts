@@ -1,3 +1,4 @@
+import { defaultLocale, isLocale, type Locale } from "@/i18n/config";
 import "server-only";
 
 import { env } from "@/config/env/client";
@@ -302,6 +303,46 @@ export const getRequestAuthState = async (req?: Request | null) => {
   };
 };
 
+/**
+ * Lets the API rate-limit and audit per visitor rather than per web server:
+ * the visitor's address and browser, vouched for by the key shared with the API.
+ */
+const visitorHeaders = (requestHeaders: Headers): Record<string, string> => {
+  const key = process.env.INTERNAL_API_KEY;
+  if (!key) return {};
+  const ip =
+    requestHeaders.get("cf-connecting-ip") ??
+    requestHeaders.get("x-real-ip") ??
+    requestHeaders.get("x-forwarded-for")?.split(",").at(-1)?.trim();
+  const agent = requestHeaders.get("user-agent");
+  return {
+    "x-internal-key": key,
+    ...(ip ? { "x-client-ip": ip } : {}),
+    ...(agent ? { "x-visitor-user-agent": agent } : {}),
+  };
+};
+
+/**
+ * The visitor's language, so the API answers (errors, names) in it: sent by
+ * the browser with each tRPC call, set by next-intl on page requests.
+ */
+const localeFromHeaders = (requestHeaders: Headers): Locale | null => {
+  const locale =
+    requestHeaders.get("x-locale") ??
+    requestHeaders.get("x-next-intl-locale") ??
+    parseCookieHeader(requestHeaders.get("cookie")).get("NEXT_LOCALE");
+  return locale && isLocale(locale) ? locale : null;
+};
+
+const languageHeaders = (requestHeaders: Headers): Record<string, string> => {
+  const locale = localeFromHeaders(requestHeaders);
+  return locale ? { "Accept-Language": locale } : {};
+};
+
+/** The visitor's language for texts written by this server (French by default). */
+export const getRequestLocale = async (req?: Request | null): Promise<Locale> =>
+  localeFromHeaders(await getRequestHeaders(req)) ?? defaultLocale;
+
 export const createApiClient = async (
   options: CreateApiClientOptions = {},
 ): Promise<AxiosInstance> => {
@@ -312,12 +353,20 @@ export const createApiClient = async (
 
   const api = Axios.create({
     baseURL: getBackendBaseUrl(),
-    headers: defaultRequestHeaders,
+    headers: {
+      ...defaultRequestHeaders,
+      ...visitorHeaders(requestHeaders),
+      ...languageHeaders(requestHeaders),
+    },
     withCredentials: true,
   });
   const refreshClient = Axios.create({
     baseURL: getBackendBaseUrl(),
-    headers: defaultRequestHeaders,
+    headers: {
+      ...defaultRequestHeaders,
+      ...visitorHeaders(requestHeaders),
+      ...languageHeaders(requestHeaders),
+    },
     withCredentials: true,
   });
   let refreshPromise: Promise<RefreshTokenData | null> | null = null;

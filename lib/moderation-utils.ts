@@ -1,5 +1,9 @@
 import type { ListingModerationStatus } from "@/lib/backend-resource-types";
 
+/**
+ * French labels for the admin screens (which stay in French). Supplier pages
+ * translate the status with the "products.moderation.<status>" messages.
+ */
 export const MODERATION_STATUS_LABELS: Record<ListingModerationStatus, string> =
   {
     PENDING: "En attente de validation",

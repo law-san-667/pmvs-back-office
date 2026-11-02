@@ -1,0 +1,31 @@
+{
+  "loadingBusiness": "Loading the business…",
+  "noBusiness": "Create or select a business to access messages.",
+  "title": "Messages",
+  "intro": "Chat live with your customers",
+  "live": "Real time on",
+  "connecting": "Connecting…",
+  "conversations": "Conversations",
+  "conversationCount": "{count, plural, one {# conversation} other {# conversations}}",
+  "loading": "Loading…",
+  "loadError": "Could not load the conversations.",
+  "empty": "No customer has written to you yet.",
+  "newConversation": "New conversation",
+  "select": "Select a conversation.",
+  "back": "Back to conversations",
+  "customer": "Customer",
+  "loadingMessages": "Loading messages…",
+  "noMessages": "No messages in this conversation.",
+  "placeholder": "Reply to the customer…",
+  "send": "Send",
+  "sendError": "The message could not be sent.",
+  "notification": {
+    "title": "New message from {name}",
+    "someone": "A customer",
+    "view": "View"
+  },
+  "socket": {
+    "timeout": "Sending the message timed out.",
+    "failed": "Could not send."
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "title": "Assistance",
+  "intro": "Une question sur votre boutique, une commande ou un versement ? L’équipe Diarama vous répond ici.",
+  "status": {
+    "OPEN": "Ouverte",
+    "PENDING_CUSTOMER": "En attente de réponse",
+    "RESOLVED": "Résolue",
+    "CLOSED": "Close"
+  },
+  "priority": {
+    "LOW": "Basse",
+    "NORMAL": "Normale",
+    "HIGH": "Haute",
+    "URGENT": "Urgente"
+  },
+  "category": {
+    "ORDER": "Commande",
+    "PAYMENT": "Paiement",
+    "ACCOUNT": "Compte",
+    "PRODUCT": "Produit",
+    "TECHNICAL": "Technique",
+    "OTHER": "Autre"
+  },
+  "loading": "Chargement…",
+  "send": "Envoyer",
+  "sending": "Envoi…",
+  "sendError": "Envoi impossible.",
+  "sent": "Demande envoyée à l’équipe Diarama.",
+  "mine": {
+    "title": "Mes demandes",
+    "empty": "Aucune demande.",
+    "ticketLine": "{reference} · {category} · {date}"
+  },
+  "new": {
+    "title": "Nouvelle demande",
+    "subject": "Objet",
+    "category": "Sujet",
+    "message": "Message"
+  },
+  "ticket": {
+    "updated": "Demande mise à jour.",
+    "failed": "Échec.",
+    "notFound": "Demande introuvable.",
+    "back": "Retour",
+    "reference": "Demande {reference} · {category}",
+    "shop": "Boutique {name}",
+    "status": "Statut",
+    "priority": "Priorité",
+    "take": "Prendre la demande",
+    "firstResponded": "Première réponse envoyée",
+    "responseDue": "Réponse attendue avant le {date}",
+    "exchanges": "Échanges",
+    "staff": "Équipe Diarama",
+    "requester": "Demandeur",
+    "messageMeta": "{author} · {date}",
+    "yourMessage": "Votre message…",
+    "close": "Clore la demande"
+  }
+}

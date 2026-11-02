@@ -1,0 +1,24 @@
+{
+  "bell": {
+    "title": "Notifications",
+    "unread": "{count, plural, one {# notification non lue} other {# notifications non lues}}",
+    "markAllRead": "Tout marquer comme lu",
+    "loading": "Chargement…",
+    "empty": "Aucune notification pour le moment.",
+    "justNow": "à l’instant",
+    "minutesAgo": "il y a {minutes} min",
+    "hoursAgo": "il y a {hours} h"
+  },
+  "preferences": {
+    "title": "Préférences d'alertes",
+    "description": "Vos alertes restent toujours visibles dans l'application. Choisissez celles que vous recevez aussi ailleurs. Les messages de sécurité du compte sont toujours envoyés.",
+    "category": "Catégorie",
+    "email": "E-mail",
+    "emailLower": "e-mail",
+    "phone": "WhatsApp ou SMS",
+    "toggleLabel": "{category} : {channel}",
+    "notOffered": "Non proposé",
+    "noEmail": "Aucune adresse électronique sur votre compte : les e-mails ne peuvent pas être envoyés.",
+    "noPhone": "Aucun numéro de téléphone sur votre compte : les messages WhatsApp ou SMS ne peuvent pas être envoyés."
+  }
+}

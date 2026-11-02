@@ -1,0 +1,6 @@
+{
+  "uploadFailed": "L'envoi du fichier a échoué.",
+  "deleteFailed": "La suppression du fichier a échoué.",
+  "publicUrlMissing": "L'adresse publique des fichiers n'est pas configurée.",
+  "cropFailed": "Impossible de recadrer l'image."
+}

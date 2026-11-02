@@ -1,0 +1,24 @@
+{
+  "bell": {
+    "title": "Notifications",
+    "unread": "{count, plural, one {# unread notification} other {# unread notifications}}",
+    "markAllRead": "Mark all as read",
+    "loading": "Loading…",
+    "empty": "No notifications yet.",
+    "justNow": "just now",
+    "minutesAgo": "{minutes} min ago",
+    "hoursAgo": "{hours} h ago"
+  },
+  "preferences": {
+    "title": "Alert preferences",
+    "description": "Your alerts always stay visible in the app. Choose the ones you also receive elsewhere. Account security messages are always sent.",
+    "category": "Category",
+    "email": "E-mail",
+    "emailLower": "e-mail",
+    "phone": "WhatsApp or SMS",
+    "toggleLabel": "{category}: {channel}",
+    "notOffered": "Not offered",
+    "noEmail": "No e-mail address on your account: e-mails cannot be sent.",
+    "noPhone": "No phone number on your account: WhatsApp or SMS messages cannot be sent."
+  }
+}

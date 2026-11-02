@@ -27,24 +27,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { intlLocale } from "@/i18n/config";
 import { useRouter } from "@/i18n/navigation";
 import { getBackendErrorMessages } from "@/lib/backend-utils";
 import countries from "@/lib/countries.json";
 import { trpc } from "@/server/trpc/client";
 import { AlertCircle } from "lucide-react";
-import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 
-export const CONDITION_LABELS: Record<string, string> = {
-  NEW: "Neuf",
-  LIKE_NEW: "Comme neuf",
-  USED: "Occasion",
-  REFURBISHED: "Reconditionné",
-};
-
+/** English names from countries.json, used when the browser has no regional names. */
 export const COUNTRY_NAME_BY_CODE: Record<string, string> = Object.fromEntries(
   countries.map((country) => [country.code, country.name]),
 );
 export const COUNTRY_CODES = countries.map((country) => country.code);
+
+/** Country names in the page's language (Intl), falling back to the English list. */
+export function useCountryName() {
+  const locale = useLocale();
+
+  return useMemo(() => {
+    let names: Intl.DisplayNames | null = null;
+    try {
+      names = new Intl.DisplayNames([intlLocale(locale)], { type: "region" });
+    } catch {
+      names = null;
+    }
+    return (code: string) => {
+      try {
+        return names?.of(code) ?? COUNTRY_NAME_BY_CODE[code] ?? code;
+      } catch {
+        return COUNTRY_NAME_BY_CODE[code] ?? code;
+      }
+    };
+  }, [locale]);
+}
 
 export const optionalText = (value: string | undefined | null) => {
   const trimmed = value?.trim() ?? "";
@@ -78,7 +95,7 @@ export function SubmissionErrors({ errors }: { errors: string[] }) {
         <Badge
           key={`${error}-${index}`}
           variant="destructive"
-          className="max-w-full text-left whitespace-normal"
+          className="max-w-full text-start whitespace-normal"
         >
           <AlertCircle className="size-3" />
           {error}
@@ -90,6 +107,7 @@ export function SubmissionErrors({ errors }: { errors: string[] }) {
 
 /** Create / update / delete mutations with their error messages collected. */
 export function useListingMutations() {
+  const t = useTranslations("productForm.shared");
   const router = useRouter();
   const utils = trpc.useUtils();
   const [submissionErrors, setSubmissionErrors] = useState<string[]>([]);
@@ -105,7 +123,7 @@ export function useListingMutations() {
     onSuccess: goToProducts,
     onError: (error) =>
       setSubmissionErrors(
-        getBackendErrorMessages(error, "Erreur lors de la création du produit."),
+        getBackendErrorMessages(error, t("createError")),
       ),
   });
 
@@ -115,7 +133,7 @@ export function useListingMutations() {
       setSubmissionErrors(
         getBackendErrorMessages(
           error,
-          "Erreur lors de la mise à jour du produit.",
+          t("updateError"),
         ),
       ),
   });
@@ -131,7 +149,7 @@ export function useListingMutations() {
       setSubmissionErrors(
         getBackendErrorMessages(
           error,
-          "Erreur lors de la suppression du produit.",
+          t("deleteError"),
         ),
       );
     },
@@ -159,18 +177,17 @@ export function ListingDeleteDialog({
   onConfirm: () => void;
   isPending: boolean;
 }) {
+  const t = useTranslations("productForm.shared");
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-          <AlertDialogDescription>
-            Voulez-vous vraiment supprimer cet article ? Cette action est
-            irréversible.
-          </AlertDialogDescription>
+          <AlertDialogTitle>{t("deleteTitle")}</AlertDialogTitle>
+          <AlertDialogDescription>{t("deleteDescription")}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>{t("cancel")}</AlertDialogCancel>
           <AlertDialogAction
             variant="destructive"
             disabled={isPending}
@@ -179,7 +196,7 @@ export function ListingDeleteDialog({
               onConfirm();
             }}
           >
-            {isPending ? "Suppression..." : "Supprimer"}
+            {isPending ? t("deleting") : t("delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -190,7 +207,7 @@ export function ListingDeleteDialog({
 export function CountryCombobox({
   value,
   onChange,
-  placeholder = "Sélectionner un pays",
+  placeholder,
   invalid,
 }: {
   value: string;
@@ -198,25 +215,28 @@ export function CountryCombobox({
   placeholder?: string;
   invalid?: boolean;
 }) {
+  const t = useTranslations("productForm.shared");
+  const countryName = useCountryName();
+
   return (
     <Combobox
       items={COUNTRY_CODES}
-      itemToStringLabel={(code) => COUNTRY_NAME_BY_CODE[code] ?? code}
+      itemToStringLabel={countryName}
       value={value || null}
       onValueChange={(next) => onChange(next ?? "")}
     >
       <ComboboxInput
-        placeholder={placeholder}
+        placeholder={placeholder ?? t("selectCountry")}
         showClear
         className="w-full"
         aria-invalid={invalid}
       />
       <ComboboxContent>
-        <ComboboxEmpty>Aucun pays trouvé.</ComboboxEmpty>
+        <ComboboxEmpty>{t("noCountry")}</ComboboxEmpty>
         <ComboboxList>
           {countries.map((country) => (
             <ComboboxItem key={country.code} value={country.code}>
-              {country.name}
+              {countryName(country.code)}
             </ComboboxItem>
           ))}
         </ComboboxList>
@@ -246,6 +266,7 @@ export function CategorySelects({
   categoryError?: { message?: string };
   subCategoryError?: { message?: string };
 }) {
+  const t = useTranslations("productForm.shared");
   const categories = trpc.catalog.categories.useQuery({ isService });
   const selectedCategory = categories.data?.find((c) => c.id === categoryId);
   const subCategories = trpc.catalog.subCategories.useQuery(
@@ -263,7 +284,7 @@ export function CategorySelects({
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <Field data-invalid={Boolean(categoryError)}>
-        <FieldLabel>Catégorie</FieldLabel>
+        <FieldLabel>{t("category")}</FieldLabel>
         <Select
           items={categoryItems}
           value={categoryId}
@@ -280,8 +301,8 @@ export function CategorySelects({
             <SelectValue
               placeholder={
                 categories.isLoading
-                  ? "Chargement..."
-                  : "Sélectionner une catégorie"
+                  ? t("loading")
+                  : t("selectCategory")
               }
             />
           </SelectTrigger>
@@ -297,7 +318,7 @@ export function CategorySelects({
       </Field>
 
       <Field data-invalid={Boolean(subCategoryError)}>
-        <FieldLabel>Sous-catégorie</FieldLabel>
+        <FieldLabel>{t("subCategory")}</FieldLabel>
         <Select
           items={subCategoryItems}
           value={subCategoryId}
@@ -311,10 +332,10 @@ export function CategorySelects({
             <SelectValue
               placeholder={
                 !categoryId
-                  ? "Sélectionner une catégorie d'abord"
+                  ? t("selectCategoryFirst")
                   : subCategories.isLoading
-                    ? "Chargement..."
-                    : "Sélectionner une sous-catégorie"
+                    ? t("loading")
+                    : t("selectSubCategory")
               }
             />
           </SelectTrigger>

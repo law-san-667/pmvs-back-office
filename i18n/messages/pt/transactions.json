@@ -1,0 +1,56 @@
+{
+  "paymentStatus": {
+    "PENDING": "Pendente",
+    "SUCCEEDED": "Paga",
+    "CANCELLED": "Cancelada",
+    "ERRORED": "Falhada",
+    "REFUND_PENDING": "Reembolso em curso",
+    "REFUNDED": "Reembolsada"
+  },
+  "payoutStatus": {
+    "NOT_APPLICABLE": "—",
+    "PENDING": "Transferência pendente",
+    "PROCESSING": "Transferência em curso",
+    "SUCCEEDED": "Transferido",
+    "FAILED": "Transferência falhada",
+    "ON_HOLD": "Retido até validação"
+  },
+  "filters": {
+    "all": "Tudo",
+    "paid": "Pagas",
+    "pending": "Pendentes",
+    "paidOut": "Transferidas",
+    "payoutFailed": "Transferência falhada",
+    "refunded": "Reembolsadas"
+  },
+  "stats": {
+    "sales": "Vendas recebidas",
+    "salesHint": "{count, plural, one {# transação no total} other {# transações no total}}",
+    "paidOut": "Transferido para a sua conta",
+    "paidOutHint": "Montante líquido já transferido pela LawPay",
+    "pendingPayouts": "Transferências pendentes",
+    "failedHint": "{amount} falhado — contacte o suporte",
+    "pendingHint": "{count, plural, one {# pagamento de cliente pendente} other {# pagamentos de clientes pendentes}}",
+    "fees": "Taxas e comissões",
+    "feesHint": "Taxas LawPay {fees} · comissão {commission}"
+  },
+  "otherCurrencies": "Outras moedas: {list}",
+  "otherCurrency": "{currency} — recebido {gross}, transferido {paidOut}",
+  "history": "Histórico de transações ({count})",
+  "searchPlaceholder": "Referência...",
+  "columns": {
+    "reference": "Referência",
+    "client": "Cliente",
+    "method": "Meio",
+    "date": "Data",
+    "amount": "Montante",
+    "netPaidOut": "Líquido transferido",
+    "payment": "Pagamento",
+    "payout": "Transferência",
+    "order": "Encomenda"
+  },
+  "loading": "A carregar transações...",
+  "empty": "Nenhuma transação encontrada.",
+  "cash": "Numerário",
+  "viewOrder": "Ver a encomenda"
+}

@@ -1,3 +1,9 @@
+import { defaultLocale, isLocale } from "@/i18n/config";
+import arErrors from "@/i18n/messages/ar/errors.json";
+import enErrors from "@/i18n/messages/en/errors.json";
+import frErrors from "@/i18n/messages/fr/errors.json";
+import ptErrors from "@/i18n/messages/pt/errors.json";
+
 export type BackendResponse<T> = {
   data: T | null;
   error: unknown;
@@ -42,6 +48,21 @@ export type PublicUser = {
   status: UserStatus;
   emailVerifiedAt: string | null;
   phoneVerifiedAt: string | null;
+  mfaEnabled?: boolean;
+  /** fr, en, pt or ar: the language of e-mails and notifications. */
+  language?: string;
+  mfaRequired?: boolean;
+};
+
+/** The password was right; a code was sent. */
+export type LoginChallenge = {
+  mfaRequired: true;
+  challengeId: string;
+  channel: "WHATSAPP" | "SMS" | "EMAIL";
+  destination: string;
+  codeLength: number;
+  expiresAt: string;
+  debugCode: string | null;
 };
 
 export type OtpDelivery = {
@@ -88,6 +109,25 @@ export class BackendResponseError extends Error {
     this.name = "BackendResponseError";
   }
 }
+
+/**
+ * This site's own error texts, when the API gives none. They are the French
+ * "errors" messages: the tRPC error formatter (server/trpc/init.ts) puts them
+ * in the visitor's language.
+ */
+export const FALLBACK_ERRORS = frErrors;
+
+const errorMessages = { fr: frErrors, en: enErrors, pt: ptErrors, ar: arErrors };
+
+/**
+ * One of the "errors" messages in the page's language (<html lang>), for code
+ * outside React; French on the server.
+ */
+export const errorText = (key: keyof typeof FALLBACK_ERRORS) => {
+  const lang =
+    typeof document === "undefined" ? undefined : document.documentElement.lang;
+  return errorMessages[isLocale(lang) ? lang : defaultLocale][key];
+};
 
 type BackendErrorIssue = {
   code?: unknown;
@@ -139,7 +179,7 @@ const getIssueMessages = (
 
 export const getBackendErrorMessages = (
   error: unknown,
-  fallbackMessage = "Backend request failed.",
+  fallbackMessage: string = FALLBACK_ERRORS.backendFailed,
 ): string[] => {
   if (typeof error === "string") {
     const message = error.trim();
@@ -179,7 +219,7 @@ export const getBackendErrorMessages = (
 
 export const getBackendResponseError = <T>(
   response: BackendResponse<T>,
-  fallbackMessage = "Backend request failed.",
+  fallbackMessage: string = FALLBACK_ERRORS.backendFailed,
 ) =>
   getBackendErrorMessages(
     response.error,
@@ -188,7 +228,7 @@ export const getBackendResponseError = <T>(
 
 export const normalizeBackendResponse = <T>(
   response: BackendResponse<T>,
-  fallbackMessage = "Backend request failed.",
+  fallbackMessage: string = FALLBACK_ERRORS.backendFailed,
 ): BackendResponse<T> & { error: string | null } => ({
   data: response.data,
   error: getBackendResponseError(response, fallbackMessage),

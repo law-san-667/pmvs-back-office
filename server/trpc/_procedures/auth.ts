@@ -1,5 +1,8 @@
+import { locales } from "@/i18n/config";
+import z from "zod";
 import {
   type AuthSuccessData,
+  type LoginChallenge,
   type AuthOtpActionData,
   type PublicUser,
   type SignUpData,
@@ -14,7 +17,7 @@ import {
   validateOtpSchema,
 } from "@/lib/validators/auth";
 import { callBackend } from "@/server/backend-utils";
-import { createTRPCRouter, publicProcedure } from "../init";
+import { privateProcedure, createTRPCRouter, publicProcedure } from "../init";
 
 const cookieOptions = {
   httpOnly: true,
@@ -72,14 +75,35 @@ export const authRouter = createTRPCRouter({
       callBackend<SignUpData>(ctx.api.post("/signup", input)),
     ),
   login: publicProcedure.input(loginSchema).mutation(async ({ ctx, input }) => {
-    const result = await callBackend<AuthSuccessData>(
-      ctx.api.post("/login", input),
+    const result = await callBackend<AuthSuccessData | LoginChallenge>(
+      ctx.api.post("/login", { ...input, supportsMfa: true }),
     );
 
-    setAuthCookies(ctx.resHeaders, result);
+    if ("accessToken" in result) setAuthCookies(ctx.resHeaders, result);
 
     return result;
   }),
+  verifyLogin: publicProcedure
+    .input(z.object({ challengeId: z.uuid(), code: z.string().min(4).max(8), device: z.enum(["WEB", "MOBILE"]).default("WEB") }))
+    .mutation(async ({ ctx, input }) => {
+      const result = await callBackend<AuthSuccessData>(ctx.api.post("/login/verify", input));
+
+      setAuthCookies(ctx.resHeaders, result);
+
+      return result;
+    }),
+  resendLoginCode: publicProcedure
+    .input(z.object({ challengeId: z.uuid() }))
+    .mutation(({ ctx, input }) =>
+      callBackend<LoginChallenge>(ctx.api.post("/login/resend", input)),
+    ),
+  /** Language of the person's e-mails, messages and notifications. */
+  setLanguage: privateProcedure
+    .input(z.object({ language: z.enum(locales) }))
+    .mutation(({ ctx, input }) => callBackend<PublicUser>(ctx.api.put("/me/language", input))),
+  updateMfa: privateProcedure
+    .input(z.object({ enabled: z.boolean(), password: z.string().min(1) }))
+    .mutation(({ ctx, input }) => callBackend<PublicUser>(ctx.api.put("/me/mfa", input))),
   resendOtp: publicProcedure
     .input(resendOtpSchema)
     .mutation(({ ctx, input }) =>

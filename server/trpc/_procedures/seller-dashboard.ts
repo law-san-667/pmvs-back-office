@@ -29,7 +29,14 @@ const transactionsInputSchema = paginationInputSchema.extend({
     ])
     .optional(),
   payoutStatus: z
-    .enum(["NOT_APPLICABLE", "PENDING", "PROCESSING", "SUCCEEDED", "FAILED"])
+    .enum([
+      "NOT_APPLICABLE",
+      "PENDING",
+      "PROCESSING",
+      "SUCCEEDED",
+      "FAILED",
+      "ON_HOLD",
+    ])
     .optional(),
   search: z.string().trim().min(1).optional(),
 });

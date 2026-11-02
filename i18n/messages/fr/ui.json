@@ -1,0 +1,16 @@
+{
+  "close": "Fermer",
+  "pagination": "Pagination",
+  "previous": "Précédent",
+  "next": "Suivant",
+  "previousPage": "Aller à la page précédente",
+  "nextPage": "Aller à la page suivante",
+  "morePages": "Autres pages",
+  "sidebar": "Barre latérale",
+  "sidebarDescription": "Affiche la barre latérale mobile.",
+  "toggleSidebar": "Afficher ou masquer la barre latérale",
+  "commandTitle": "Palette de commandes",
+  "commandDescription": "Rechercher une commande à exécuter…",
+  "breadcrumb": "Fil d'Ariane",
+  "more": "Plus"
+}

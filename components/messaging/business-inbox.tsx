@@ -6,22 +6,19 @@ import { useBusiness } from "@/contexts/business-context";
 import { useMessaging } from "@/contexts/messaging-context";
 import { useUser } from "@/contexts/user-context";
 import type { DirectConversation } from "@/lib/messaging";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { trpc } from "@/server/trpc/client";
 import { ArrowLeft, LoaderCircle, MessageSquareText, Send } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import React from "react";
 
-const shortTime = new Intl.DateTimeFormat("fr-FR", {
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
-const listDate = new Intl.DateTimeFormat("fr-FR", {
-  day: "2-digit",
-  month: "short",
-});
-
 export function BusinessInbox() {
+  const t = useTranslations("messages");
+  const locale = useLocale();
+  const shortTime = (value: string | Date) =>
+    formatDate(value, locale, { hour: "2-digit", minute: "2-digit" });
+  const listDate = (value: string | Date) =>
+    formatDate(value, locale, { day: "2-digit", month: "short" });
   const { user } = useUser();
   const { businessId, isLoading: isBusinessLoading } = useBusiness();
   const [activeConversationId, setActiveConversationId] =
@@ -81,7 +78,7 @@ export function BusinessInbox() {
       ]);
     } catch (error) {
       setSendError(
-        error instanceof Error ? error.message : "Envoi du message impossible.",
+        error instanceof Error ? error.message : t("sendError"),
       );
     } finally {
       setIsSending(false);
@@ -89,12 +86,12 @@ export function BusinessInbox() {
   };
 
   if (isBusinessLoading) {
-    return <Status label="Chargement de l’entreprise…" loading />;
+    return <Status label={t("loadingBusiness")} loading />;
   }
 
   if (!businessId) {
     return (
-      <Status label="Créez ou sélectionnez une entreprise pour accéder à la messagerie." />
+      <Status label={t("noBusiness")} />
     );
   }
 
@@ -102,10 +99,8 @@ export function BusinessInbox() {
     <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 lg:p-6">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Messagerie</h1>
-          <p className="text-muted-foreground text-sm">
-            Échangez en direct avec vos clients
-          </p>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <p className="text-muted-foreground text-sm">{t("intro")}</p>
         </div>
         <div className="text-muted-foreground flex items-center gap-2 text-xs">
           <span
@@ -114,31 +109,30 @@ export function BusinessInbox() {
               isConnected ? "bg-emerald-500" : "bg-amber-400",
             )}
           />
-          {isConnected ? "Temps réel actif" : "Connexion…"}
+          {isConnected ? t("live") : t("connecting")}
         </div>
       </div>
 
       <div className="grid min-h-[36rem] flex-1 overflow-hidden rounded-xl border bg-white md:grid-cols-[19rem_minmax(0,1fr)]">
         <aside
           className={cn(
-            "min-h-0 border-r",
+            "min-h-0 border-e",
             mobileThreadOpen && "hidden md:block",
           )}
         >
           <div className="border-b px-4 py-3">
-            <p className="font-semibold">Conversations</p>
+            <p className="font-semibold">{t("conversations")}</p>
             <p className="text-muted-foreground text-xs">
-              {conversations.length} conversation
-              {conversations.length === 1 ? "" : "s"}
+              {t("conversationCount", { count: conversations.length })}
             </p>
           </div>
           <div className="h-[calc(100%-4rem)] overflow-y-auto">
             {conversationsQuery.isLoading ? (
-              <Status label="Chargement…" loading />
+              <Status label={t("loading")} loading />
             ) : conversationsQuery.isError ? (
-              <Status label="Impossible de charger les conversations." />
+              <Status label={t("loadError")} />
             ) : conversations.length === 0 ? (
-              <Status label="Aucun client ne vous a encore écrit." />
+              <Status label={t("empty")} />
             ) : (
               conversations.map((conversation) => (
                 <button
@@ -146,7 +140,7 @@ export function BusinessInbox() {
                   type="button"
                   onClick={() => selectConversation(conversation)}
                   className={cn(
-                    "flex w-full gap-3 border-b px-4 py-3 text-left transition-colors hover:bg-zinc-50",
+                    "flex w-full gap-3 border-b px-4 py-3 text-start transition-colors hover:bg-zinc-50",
                     conversation.id === selectedConversationId &&
                       "bg-primary/5",
                   )}
@@ -164,16 +158,14 @@ export function BusinessInbox() {
                       </span>
                       {conversation.latestMessage && (
                         <span className="text-muted-foreground shrink-0 text-[10px]">
-                          {listDate.format(
-                            new Date(conversation.latestMessage.createdAt),
-                          )}
+                          {listDate(conversation.latestMessage.createdAt)}
                         </span>
                       )}
                     </span>
                     <span className="mt-0.5 flex items-center gap-2">
                       <span className="text-muted-foreground min-w-0 flex-1 truncate text-xs">
                         {conversation.latestMessage?.content ??
-                          "Nouvelle conversation"}
+                          t("newConversation")}
                       </span>
                       {conversation.unreadCount > 0 && (
                         <span className="bg-primary text-primary-foreground flex size-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold">
@@ -197,7 +189,7 @@ export function BusinessInbox() {
           {!selectedConversation || !user ? (
             <div className="text-muted-foreground flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
               <MessageSquareText className="size-10" />
-              <p className="text-sm">Sélectionnez une conversation.</p>
+              <p className="text-sm">{t("select")}</p>
             </div>
           ) : (
             <>
@@ -207,7 +199,7 @@ export function BusinessInbox() {
                   size="icon-sm"
                   className="md:hidden"
                   onClick={() => setMobileThreadOpen(false)}
-                  aria-label="Retour aux conversations"
+                  aria-label={t("back")}
                 >
                   <ArrowLeft />
                 </Button>
@@ -221,7 +213,7 @@ export function BusinessInbox() {
                     {selectedConversation.customer.firstName}{" "}
                     {selectedConversation.customer.lastName}
                   </p>
-                  <p className="text-muted-foreground text-xs">Client</p>
+                  <p className="text-muted-foreground text-xs">{t("customer")}</p>
                 </div>
               </div>
 
@@ -230,9 +222,9 @@ export function BusinessInbox() {
                 className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto bg-zinc-50 p-4"
               >
                 {messagesQuery.isLoading ? (
-                  <Status label="Chargement des messages…" loading />
+                  <Status label={t("loadingMessages")} loading />
                 ) : messages.length === 0 ? (
-                  <Status label="Aucun message dans cette conversation." />
+                  <Status label={t("noMessages")} />
                 ) : (
                   messages.map((message) => {
                     const mine = message.senderId === user.id;
@@ -242,8 +234,8 @@ export function BusinessInbox() {
                         className={cn(
                           "max-w-[78%] rounded-2xl px-3 py-2 text-sm shadow-sm",
                           mine
-                            ? "bg-primary text-primary-foreground ml-auto rounded-br-sm"
-                            : "mr-auto rounded-bl-sm bg-white",
+                            ? "bg-primary text-primary-foreground ms-auto rounded-ee-sm"
+                            : "me-auto rounded-es-sm bg-white",
                         )}
                       >
                         <p className="break-words whitespace-pre-wrap">
@@ -257,7 +249,7 @@ export function BusinessInbox() {
                               : "text-muted-foreground",
                           )}
                         >
-                          {shortTime.format(new Date(message.createdAt))}
+                          {shortTime(message.createdAt)}
                         </p>
                       </div>
                     );
@@ -277,14 +269,14 @@ export function BusinessInbox() {
                       }
                     }}
                     rows={1}
-                    placeholder="Répondre au client…"
+                    placeholder={t("placeholder")}
                     className="border-input focus:ring-primary/30 max-h-28 min-h-10 flex-1 resize-none rounded-lg border bg-transparent px-3 py-2 text-sm outline-none focus:ring-2"
                   />
                   <Button
                     type="submit"
                     size="icon-lg"
                     disabled={!draft.trim() || isSending}
-                    aria-label="Envoyer"
+                    aria-label={t("send")}
                   >
                     {isSending ? (
                       <LoaderCircle className="animate-spin" />

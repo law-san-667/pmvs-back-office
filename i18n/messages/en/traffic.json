@@ -1,0 +1,51 @@
+{
+  "page": {
+    "title": "Visit statistics",
+    "subtitle": "Views of your products and your shop, cart additions and orders. Bots and your own visits are not counted; nothing is recorded about visitors.",
+    "loading": "Loading statistics..."
+  },
+  "window": {
+    "label": "Period",
+    "days": "{count, plural, one {# day} other {# days}}"
+  },
+  "metrics": {
+    "listingViews": "Product views",
+    "shopViews": "Shop views",
+    "cartAdds": "Added to cart",
+    "orders": "Orders"
+  },
+  "tiles": {
+    "shopViews": "Shop: {count} view(s)",
+    "ofViews": "{rate} of views",
+    "confirmed": "{count} confirmed",
+    "conversion": "Conversion rate",
+    "conversionHint": "Orders per 100 product views"
+  },
+  "chart": {
+    "title": "{metric} per day",
+    "description": "From {from} to {to} (UTC days; the current day is not over).",
+    "metric": "Indicator"
+  },
+  "funnel": {
+    "title": "Conversion funnel",
+    "description": "Each step with its share of the previous step. Orders placed without a counted view (before tracking, older app versions) can exceed 100 %."
+  },
+  "topTen": "Ten at most, over the period.",
+  "noVisits": "No visits yet over the period.",
+  "columns": {
+    "orders": "Orders",
+    "conversion": "Conversion"
+  },
+  "topListings": {
+    "title": "Most viewed products",
+    "product": "Product",
+    "views": "Views",
+    "carts": "Carts"
+  },
+  "topBusinesses": {
+    "title": "Most visited shops",
+    "shop": "Shop",
+    "listingViews": "Product views",
+    "shopViews": "Shop views"
+  }
+}

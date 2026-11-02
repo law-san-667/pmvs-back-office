@@ -1,0 +1,31 @@
+{
+  "loadingBusiness": "A carregar a empresa…",
+  "noBusiness": "Crie ou selecione uma empresa para aceder às mensagens.",
+  "title": "Mensagens",
+  "intro": "Converse em direto com os seus clientes",
+  "live": "Tempo real ativo",
+  "connecting": "A ligar…",
+  "conversations": "Conversas",
+  "conversationCount": "{count, plural, one {# conversa} other {# conversas}}",
+  "loading": "A carregar…",
+  "loadError": "Não foi possível carregar as conversas.",
+  "empty": "Nenhum cliente lhe escreveu ainda.",
+  "newConversation": "Nova conversa",
+  "select": "Selecione uma conversa.",
+  "back": "Voltar às conversas",
+  "customer": "Cliente",
+  "loadingMessages": "A carregar as mensagens…",
+  "noMessages": "Nenhuma mensagem nesta conversa.",
+  "placeholder": "Responder ao cliente…",
+  "send": "Enviar",
+  "sendError": "Não foi possível enviar a mensagem.",
+  "notification": {
+    "title": "Nova mensagem de {name}",
+    "someone": "Um cliente",
+    "view": "Ver"
+  },
+  "socket": {
+    "timeout": "O envio da mensagem expirou.",
+    "failed": "Não foi possível enviar."
+  }
+}

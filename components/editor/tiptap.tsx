@@ -18,7 +18,7 @@ const Tiptap: React.FC<TiptapProps> = ({ description, onChange, preview, showToo
       StarterKit.configure({
         bulletList: {
           HTMLAttributes: {
-            class: "list-disc pl-8",
+            class: "list-disc ps-8",
           },
         },
         heading: {

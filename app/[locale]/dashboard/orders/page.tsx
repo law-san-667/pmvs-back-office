@@ -30,32 +30,34 @@ import {
 import { useBusiness } from "@/contexts/business-context";
 import { Link } from "@/i18n/navigation";
 import type { OrderStatus } from "@/lib/seller-dashboard-types";
+import { formatAmount } from "@/lib/payment-utils";
 import {
-  formatDate,
-  formatMoney,
   getOrderReference,
   getVisiblePages,
-  ORDER_STATUS_LABELS,
 } from "@/lib/seller-dashboard-utils";
+import { formatDate } from "@/lib/utils";
 import { trpc } from "@/server/trpc/client";
 import { EyeIcon, PackageSearchIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 const PAGE_SIZE = 10;
 type StatusFilter = "ALL" | OrderStatus;
 
-const STATUS_FILTERS: Array<{ value: StatusFilter; label: string }> = [
-  { value: "ALL", label: "Toutes" },
-  { value: "PENDING", label: ORDER_STATUS_LABELS.PENDING },
-  { value: "CONFIRMED", label: ORDER_STATUS_LABELS.CONFIRMED },
-  { value: "PROCESSING", label: ORDER_STATUS_LABELS.PROCESSING },
-  { value: "SHIPPED", label: ORDER_STATUS_LABELS.SHIPPED },
-  { value: "DELIVERED", label: ORDER_STATUS_LABELS.DELIVERED },
-  { value: "CANCELLED", label: ORDER_STATUS_LABELS.CANCELLED },
-  { value: "REFUNDED", label: ORDER_STATUS_LABELS.REFUNDED },
+const STATUS_FILTERS: StatusFilter[] = [
+  "ALL",
+  "PENDING",
+  "CONFIRMED",
+  "PROCESSING",
+  "SHIPPED",
+  "DELIVERED",
+  "CANCELLED",
+  "REFUNDED",
 ];
 
 export default function OrdersPage() {
+  const t = useTranslations("orders");
+  const locale = useLocale();
   const { businessId, isLoading: isBusinessLoading } = useBusiness();
   const [currentPage, setCurrentPage] = useState(1);
   const [status, setStatus] = useState<StatusFilter>("ALL");
@@ -88,15 +90,13 @@ export default function OrdersPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <div>
-        <h1 className="text-2xl font-bold">Commandes</h1>
-        <p className="text-muted-foreground text-sm">
-          Suivez toutes les commandes passées auprès de votre entreprise
-        </p>
+        <h1 className="text-2xl font-bold">{t("list.title")}</h1>
+        <p className="text-muted-foreground text-sm">{t("list.description")}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Commandes ({totalOrders})</CardTitle>
+          <CardTitle>{t("list.count", { count: totalOrders })}</CardTitle>
           <CardAction>
             <select
               value={status}
@@ -104,11 +104,13 @@ export default function OrdersPage() {
                 updateStatus(event.target.value as StatusFilter)
               }
               className="border-input bg-background h-9 rounded-md border px-3 text-sm"
-              aria-label="Filtrer par statut"
+              aria-label={t("list.filterLabel")}
             >
               {STATUS_FILTERS.map((filter) => (
-                <option key={filter.value} value={filter.value}>
-                  {filter.label}
+                <option key={filter} value={filter}>
+                  {filter === "ALL"
+                    ? t("list.allStatuses")
+                    : t(`status.${filter}`)}
                 </option>
               ))}
             </select>
@@ -118,13 +120,15 @@ export default function OrdersPage() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead>Commande</TableHead>
-                <TableHead>Destinataire</TableHead>
-                <TableHead>Articles</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Détails</TableHead>
+                <TableHead>{t("list.columns.order")}</TableHead>
+                <TableHead>{t("list.columns.recipient")}</TableHead>
+                <TableHead>{t("list.columns.items")}</TableHead>
+                <TableHead>{t("list.columns.date")}</TableHead>
+                <TableHead>{t("list.columns.total")}</TableHead>
+                <TableHead>{t("list.columns.status")}</TableHead>
+                <TableHead className="text-end">
+                  {t("list.columns.details")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -132,14 +136,14 @@ export default function OrdersPage() {
                 <TableRow>
                   <TableCell colSpan={7} className="h-36 text-center">
                     <div className="text-muted-foreground flex items-center justify-center gap-2 text-sm">
-                      <Spinner /> Chargement des commandes...
+                      <Spinner /> {t("list.loading")}
                     </div>
                   </TableCell>
                 </TableRow>
               ) : !businessId ? (
                 <TableRow>
                   <TableCell colSpan={7} className="h-36 text-center">
-                    Aucune entreprise active n’a été trouvée.
+                    {t("list.noBusiness")}
                   </TableCell>
                 </TableRow>
               ) : orders.isError ? (
@@ -147,9 +151,7 @@ export default function OrdersPage() {
                   <TableCell colSpan={7} className="h-40 text-center">
                     <div className="flex flex-col items-center gap-2 text-sm">
                       <PackageSearchIcon className="text-muted-foreground size-9" />
-                      <p className="font-medium">
-                        Impossible de charger les commandes.
-                      </p>
+                      <p className="font-medium">{t("list.loadError")}</p>
                       <p className="text-muted-foreground">
                         {orders.error.message}
                       </p>
@@ -161,11 +163,11 @@ export default function OrdersPage() {
                   <TableCell colSpan={7} className="h-40 text-center">
                     <div className="flex flex-col items-center gap-2 text-sm">
                       <PackageSearchIcon className="text-muted-foreground size-9" />
-                      <p className="font-medium">Aucune commande trouvée.</p>
+                      <p className="font-medium">{t("list.emptyTitle")}</p>
                       <p className="text-muted-foreground">
                         {status === "ALL"
-                          ? "Les nouvelles commandes apparaîtront ici."
-                          : "Aucune commande ne correspond à ce statut."}
+                          ? t("list.emptyText")
+                          : t("list.emptyFiltered")}
                       </p>
                     </div>
                   </TableCell>
@@ -184,7 +186,7 @@ export default function OrdersPage() {
                     <TableCell>
                       <p className="font-medium">
                         {order.shippingAddress?.recipientName ??
-                          "Non renseigné"}
+                          t("list.notProvided")}
                       </p>
                       <p className="text-muted-foreground text-xs">
                         {order.shippingAddress?.phoneNumber ?? "—"}
@@ -197,15 +199,22 @@ export default function OrdersPage() {
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground whitespace-nowrap">
-                      {formatDate(order.createdAt, true)}
+                      {formatDate(order.createdAt, locale, {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
                     </TableCell>
                     <TableCell className="font-bold whitespace-nowrap">
-                      {formatMoney(order.totalAmountMinor, order.currency)}
+                      {formatAmount(
+                        order.totalAmountMinor,
+                        order.currency,
+                        locale,
+                      )}
                     </TableCell>
                     <TableCell>
                       <OrderStatusBadge status={order.status} />
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-end">
                       <Button
                         variant="ghost"
                         size="icon-sm"
@@ -213,7 +222,7 @@ export default function OrdersPage() {
                         render={<Link href={`/dashboard/orders/${order.id}`} />}
                       >
                         <EyeIcon className="size-4" />
-                        <span className="sr-only">Voir la commande</span>
+                        <span className="sr-only">{t("list.view")}</span>
                       </Button>
                     </TableCell>
                   </TableRow>

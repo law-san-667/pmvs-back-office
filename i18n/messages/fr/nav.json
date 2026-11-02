@@ -1,0 +1,86 @@
+{
+  "brand": {
+    "tagline": "La Place de marché virtuelle spécifique africaine"
+  },
+  "sidebar": {
+    "general": "Général",
+    "tools": "Outils",
+    "administration": "Administration"
+  },
+  "items": {
+    "dashboard": "Tableau de bord",
+    "products": "Produits",
+    "tenders": "Appels d'offres",
+    "tenderOpportunities": "Répondre aux AO",
+    "orders": "Commandes",
+    "invoices": "Factures",
+    "promotions": "Promotions",
+    "documents": "Documents",
+    "traffic": "Statistiques de visite",
+    "reports": "Rapports",
+    "vendability": "Vendabilité",
+    "advertising": "Publicités",
+    "afterSales": "Retours et litiges",
+    "clients": "Clients",
+    "messages": "Messagerie",
+    "support": "Assistance",
+    "settings": "Paramètres",
+    "training": "Formation",
+    "help": "Aide",
+    "admin": {
+      "dashboard": "Tableau de bord",
+      "content": "Contenus",
+      "configuration": "Configuration",
+      "businesses": "Fournisseurs",
+      "listings": "Produits & services",
+      "listingsToReview": "Annonces à valider",
+      "tenders": "Appels d'offres",
+      "orders": "Commandes",
+      "payouts": "Paiements et versements",
+      "transactions": "Transactions",
+      "quality": "Qualité fournisseurs",
+      "traffic": "Trafic et conversion",
+      "reports": "Rapports",
+      "vendability": "Vendabilité",
+      "training": "Formation",
+      "marketing": "E-mails marketing",
+      "teamMembers": "Utilisateurs",
+      "moderation": "Modération",
+      "advertising": "Publicités",
+      "afterSales": "Retours et litiges",
+      "support": "Service client",
+      "customers": "Clients",
+      "administrators": "Administrateurs",
+      "operators": "Opérateurs",
+      "compliance": "Conformité",
+      "monitoring": "Supervision",
+      "diagnostics": "Diagnostic",
+      "settings": "Paramètres"
+    }
+  },
+  "header": {
+    "search": "Rechercher...",
+    "messages": "Messagerie",
+    "unreadMessages": "{count, plural, one {# message non lu} other {# messages non lus}}"
+  },
+  "roles": {
+    "ADMIN": "Administrateur",
+    "SELLER": "Vendeur",
+    "CLIENT": "Client",
+    "MODERATOR": "Modérateur",
+    "OPERATOR": "Opérateur"
+  },
+  "user": {
+    "account": "Mon compte",
+    "notifications": "Notifications",
+    "language": "Langue",
+    "logout": "Déconnexion"
+  },
+  "operator": {
+    "noShop": "Aucune boutique affectée",
+    "openError": "Impossible d’ouvrir cette boutique.",
+    "actingFor": "Vous agissez pour",
+    "managedShop": "Boutique gérée",
+    "chooseShop": "Choisir une boutique"
+  }
+}

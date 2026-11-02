@@ -10,16 +10,20 @@ import { useRouter } from "@/i18n/navigation";
 import { type AppNotification, notificationHref } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/server/trpc/client";
+import { intlLocale } from "@/i18n/config";
 import { BellIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
-const timeAgo = (date: string) => {
+type T = ReturnType<typeof useTranslations<"notifications">>;
+
+const timeAgo = (date: string, t: T, locale: string) => {
   const minutes = Math.round((Date.now() - new Date(date).getTime()) / 60_000);
-  if (minutes < 1) return "à l’instant";
-  if (minutes < 60) return `il y a ${minutes} min`;
+  if (minutes < 1) return t("bell.justNow");
+  if (minutes < 60) return t("bell.minutesAgo", { minutes });
   const hours = Math.round(minutes / 60);
-  if (hours < 24) return `il y a ${hours} h`;
-  return new Date(date).toLocaleDateString("fr-FR");
+  if (hours < 24) return t("bell.hoursAgo", { hours });
+  return new Date(date).toLocaleDateString(intlLocale(locale));
 };
 
 /**
@@ -28,6 +32,8 @@ const timeAgo = (date: string) => {
  * every minute.
  */
 export function NotificationsBell() {
+  const t = useTranslations("notifications");
+  const locale = useLocale();
   const router = useRouter();
   const utils = trpc.useUtils();
   const [open, setOpen] = useState(false);
@@ -63,23 +69,21 @@ export function NotificationsBell() {
             size="icon-sm"
             className="relative bg-zinc-100"
             aria-label={
-              count
-                ? `${count} notification${count > 1 ? "s" : ""} non lue${count > 1 ? "s" : ""}`
-                : "Notifications"
+              count ? t("bell.unread", { count }) : t("bell.title")
             }
           />
         }
       >
         <BellIcon className="size-4" />
         {count > 0 && (
-          <span className="bg-primary text-primary-foreground absolute -top-1.5 -right-1.5 flex min-w-4 items-center justify-center rounded-full px-1 text-[9px] leading-4 font-bold tabular-nums">
+          <span className="bg-primary text-primary-foreground absolute -top-1.5 -end-1.5 flex min-w-4 items-center justify-center rounded-full px-1 text-[9px] leading-4 font-bold tabular-nums">
             {count > 99 ? "99+" : count}
           </span>
         )}
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
         <div className="flex items-center justify-between border-b px-3 py-2">
-          <p className="text-sm font-semibold">Notifications</p>
+          <p className="text-sm font-semibold">{t("bell.title")}</p>
           {count > 0 && (
             <Button
               variant="link"
@@ -88,16 +92,16 @@ export function NotificationsBell() {
               disabled={markAllRead.isPending}
               onClick={() => markAllRead.mutate()}
             >
-              Tout marquer comme lu
+              {t("bell.markAllRead")}
             </Button>
           )}
         </div>
         <div className="max-h-96 overflow-y-auto">
           {list.isLoading ? (
-            <p className="text-muted-foreground p-4 text-sm">Chargement…</p>
+            <p className="text-muted-foreground p-4 text-sm">{t("bell.loading")}</p>
           ) : !list.data?.items.length ? (
             <p className="text-muted-foreground p-4 text-sm">
-              Aucune notification pour le moment.
+              {t("bell.empty")}
             </p>
           ) : (
             list.data.items.map((notification) => (
@@ -106,7 +110,7 @@ export function NotificationsBell() {
                 type="button"
                 onClick={() => openNotification(notification)}
                 className={cn(
-                  "hover:bg-muted flex w-full flex-col gap-0.5 border-b px-3 py-2 text-left last:border-b-0",
+                  "hover:bg-muted flex w-full flex-col gap-0.5 border-b px-3 py-2 text-start last:border-b-0",
                   !notification.readAt && "bg-primary/5",
                 )}
               >
@@ -122,7 +126,7 @@ export function NotificationsBell() {
                   </span>
                 )}
                 <span className="text-muted-foreground text-[11px]">
-                  {timeAgo(notification.createdAt)}
+                  {timeAgo(notification.createdAt, t, locale)}
                 </span>
               </button>
             ))

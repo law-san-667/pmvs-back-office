@@ -1,0 +1,59 @@
+{
+  "title": "الدعم",
+  "intro": "لديك سؤال حول متجرك أو طلب أو دفعة؟ يجيبك فريق Diarama هنا.",
+  "status": {
+    "OPEN": "مفتوح",
+    "PENDING_CUSTOMER": "في انتظار الرد",
+    "RESOLVED": "تمت التسوية",
+    "CLOSED": "مغلق"
+  },
+  "priority": {
+    "LOW": "منخفضة",
+    "NORMAL": "عادية",
+    "HIGH": "عالية",
+    "URGENT": "عاجلة"
+  },
+  "category": {
+    "ORDER": "الطلب",
+    "PAYMENT": "الدفع",
+    "ACCOUNT": "الحساب",
+    "PRODUCT": "المنتج",
+    "TECHNICAL": "تقني",
+    "OTHER": "أخرى"
+  },
+  "loading": "جارٍ التحميل…",
+  "send": "إرسال",
+  "sending": "جارٍ الإرسال…",
+  "sendError": "تعذّر الإرسال.",
+  "sent": "تم إرسال الطلب إلى فريق Diarama.",
+  "mine": {
+    "title": "طلباتي",
+    "empty": "لا توجد طلبات.",
+    "ticketLine": "{reference} · {category} · {date}"
+  },
+  "new": {
+    "title": "طلب جديد",
+    "subject": "الموضوع",
+    "category": "النوع",
+    "message": "الرسالة"
+  },
+  "ticket": {
+    "updated": "تم تحديث الطلب.",
+    "failed": "فشلت العملية.",
+    "notFound": "الطلب غير موجود.",
+    "back": "رجوع",
+    "reference": "الطلب {reference} · {category}",
+    "shop": "المتجر {name}",
+    "status": "الحالة",
+    "priority": "الأولوية",
+    "take": "تولّي الطلب",
+    "firstResponded": "تم إرسال الرد الأول",
+    "responseDue": "الرد متوقع قبل {date}",
+    "exchanges": "المراسلات",
+    "staff": "فريق Diarama",
+    "requester": "مقدّم الطلب",
+    "messageMeta": "{author} · {date}",
+    "yourMessage": "رسالتك…",
+    "close": "إغلاق الطلب"
+  }
+}

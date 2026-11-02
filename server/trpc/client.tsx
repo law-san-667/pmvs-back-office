@@ -46,6 +46,10 @@ export function TRPCProvider(
           async headers() {
             const headers = new Headers();
             headers.set("x-trpc-source", "nextjs-react");
+            // The page's language: the API answers in it.
+            if (typeof document !== "undefined" && document.documentElement.lang) {
+              headers.set("x-locale", document.documentElement.lang);
+            }
             return headers;
           },
         }),

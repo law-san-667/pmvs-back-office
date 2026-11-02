@@ -445,13 +445,30 @@ function CityEditor({
   const [name, setName] = useState(value?.name ?? "");
   const slug = slugify(name);
   const [isActive, setIsActive] = useState(value?.isActive ?? true);
+  const [latitude, setLatitude] = useState(
+    value?.latitude != null ? String(value.latitude) : "",
+  );
+  const [longitude, setLongitude] = useState(
+    value?.longitude != null ? String(value.longitude) : "",
+  );
   const create = trpc.admin.createCity.useMutation();
   const update = trpc.admin.updateCity.useMutation();
   const mutation = value ? update : create;
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const payload = { countryCode, name, slug, isActive };
+    const toCoordinate = (text: string) => {
+      const number = Number.parseFloat(text.replace(",", "."));
+      return Number.isFinite(number) ? number : null;
+    };
+    const payload = {
+      countryCode,
+      name,
+      slug,
+      isActive,
+      latitude: toCoordinate(latitude),
+      longitude: toCoordinate(longitude),
+    };
 
     try {
       if (value) {
@@ -515,6 +532,32 @@ function CityEditor({
               className="bg-muted"
               required
             />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="city-latitude">Latitude du centre</Label>
+              <Input
+                id="city-latitude"
+                inputMode="decimal"
+                placeholder="14.6928"
+                value={latitude}
+                onChange={(event) => setLatitude(event.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="city-longitude">Longitude du centre</Label>
+              <Input
+                id="city-longitude"
+                inputMode="decimal"
+                placeholder="-17.4467"
+                value={longitude}
+                onChange={(event) => setLongitude(event.target.value)}
+              />
+            </div>
+            <p className="text-muted-foreground col-span-2 text-xs">
+              Sert à la recherche « Près de moi » pour les vendeurs de la
+              ville qui n&apos;ont pas indiqué leur siège.
+            </p>
           </div>
           <BooleanField
             id="city-active"

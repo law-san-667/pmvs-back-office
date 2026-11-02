@@ -1,0 +1,45 @@
+{
+  "title": "Documentos",
+  "intro": "Os seus comprovativos e a respetiva data de validade. É avisado 30, 7 e 1 dia antes de expirarem.",
+  "type": {
+    "REGISTRATION": "Registo comercial (RCCM)",
+    "TAX": "Identificação fiscal (NINEA)",
+    "IDENTITY": "Documento de identificação",
+    "INSURANCE": "Seguro",
+    "CERTIFICATION": "Certificação",
+    "OTHER": "Outro"
+  },
+  "expired": "Expirado",
+  "expiresIn": "Em {days} d",
+  "status": {
+    "APPROVED": "Validado",
+    "REJECTED": "Recusado",
+    "PENDING": "Pendente"
+  },
+  "errors": {
+    "uploadFailed": "Não foi possível enviar o ficheiro.",
+    "fileFailed": "Não foi possível submeter o documento.",
+    "withdrawFailed": "Não foi possível retirar o documento."
+  },
+  "filed": "Documento submetido: será analisado pela equipa.",
+  "form": {
+    "title": "Submeter um documento",
+    "description": "PDF ou imagem. Para renovar um documento, basta submeter o novo.",
+    "type": "Tipo",
+    "name": "Designação",
+    "reference": "Número (opcional)",
+    "file": "Ficheiro",
+    "issuedOn": "Emitido em (opcional)",
+    "expiresOn": "Expira em (se aplicável)",
+    "submit": "Submeter"
+  },
+  "list": {
+    "title": "Os meus documentos ({count})",
+    "document": "Documento",
+    "type": "Tipo",
+    "expiry": "Validade",
+    "status": "Estado",
+    "withdraw": "Retirar",
+    "empty": "Nenhum documento submetido."
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "title": "لوحة التحكم",
+  "subtitle": "نظرة عامة على نشاط شركتك",
+  "statsError": "تعذّر تحميل الإحصاءات: {message}",
+  "revenue": "رقم الأعمال",
+  "revenueYear": "رقم الأعمال {year}",
+  "chartCurrency": "عملة الرسم البياني",
+  "metrics": {
+    "customers": "العملاء",
+    "customersLink": "عرض العملاء",
+    "orders": "الطلبات",
+    "ordersLink": "عرض الطلبات",
+    "products": "المنتجات",
+    "productsLink": "عرض المنتجات",
+    "sold": "القطع المبيعة",
+    "soldLink": "عرض القطع المبيعة"
+  },
+  "recentOrders": {
+    "title": "أحدث الطلبات",
+    "seeAll": "عرض الكل",
+    "order": "الطلب",
+    "customer": "العميل",
+    "date": "التاريخ",
+    "total": "الإجمالي",
+    "status": "الحالة",
+    "loading": "جارٍ تحميل الطلبات...",
+    "error": "تعذّر تحميل الطلبات.",
+    "empty": "لا توجد طلبات حتى الآن.",
+    "items": "{count, plural, zero {لا قطع} one {قطعة واحدة} two {قطعتان} few {# قطع} many {# قطعة} other {# قطعة}}"
+  },
+  "bestSelling": {
+    "title": "المنتجات الأكثر مبيعًا",
+    "products": "المنتجات",
+    "product": "المنتج",
+    "sold": "المبيع",
+    "orders": "الطلبات",
+    "loading": "جارٍ تحميل المنتجات...",
+    "error": "تعذّر تحميل المنتجات الأكثر مبيعًا.",
+    "empty": "ستظهر هنا المنتجات التي تم تسليمها."
+  },
+  "recentCustomers": {
+    "title": "أحدث العملاء",
+    "seeAll": "عرض العملاء",
+    "error": "تعذّر تحميل العملاء.",
+    "empty": "لا يوجد عملاء حتى الآن.",
+    "orders": "{count, plural, zero {لا طلبات} one {طلب واحد} two {طلبان} few {# طلبات} many {# طلبًا} other {# طلب}}"
+  }
+}

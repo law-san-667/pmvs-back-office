@@ -1,0 +1,32 @@
+{
+  "page": {
+    "title": "Vendabilidade",
+    "subtitle": "Os seus produtos mais bem posicionados e o questionário de avaliação da sua loja.",
+    "loadingShop": "A carregar a loja..."
+  },
+  "tabs": {
+    "top": "Melhores produtos",
+    "questionnaire": "Questionário"
+  },
+  "questionnaire": {
+    "saved": "Respostas guardadas.",
+    "loading": "A carregar...",
+    "none": "De momento, não há nenhum questionário em vigor.",
+    "version": "Versão {version}.",
+    "upToDate": "As suas respostas estão atualizadas. Pode corrigi-las.",
+    "upToDateScore": "As suas respostas estão atualizadas, resultado: {score} / 100. Pode corrigi-las.",
+    "newVersion": "Está disponível uma nova versão. O resultado das suas respostas à versão {version} continua a contar até responder a esta.",
+    "notAnswered": "Ainda não respondeu.",
+    "optional": "(opcional)",
+    "saving": "A guardar...",
+    "submit": "Guardar as minhas respostas"
+  },
+  "top": {
+    "title": "Os 5 melhores produtos",
+    "description": "Segundo a pontuação de vendabilidade, nos últimos {days} dias, entre {ranked} produto(s) à venda.",
+    "empty": "Ainda não há produtos à venda para classificar.",
+    "scoreOf": "Pontuação de {title}",
+    "summary": "{units} unidade(s), {views} visualização(ões). Ver o detalhe.",
+    "notRated": "Não avaliado"
+  }
+}

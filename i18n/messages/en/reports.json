@@ -1,0 +1,104 @@
+{
+  "page": {
+    "title": "Reports",
+    "subtitle": "Build your reports, or receive them automatically by e-mail.",
+    "loadingShop": "Loading the shop..."
+  },
+  "tabs": {
+    "custom": "Custom",
+    "automatic": "Automatic"
+  },
+  "frequency": {
+    "DAILY": "Daily",
+    "WEEKLY": "Weekly",
+    "MONTHLY": "Monthly"
+  },
+  "frequencyHint": {
+    "DAILY": "Every morning, the previous day.",
+    "WEEKLY": "Every Monday, the past week.",
+    "MONTHLY": "On the 1st of the month, the past month."
+  },
+  "emailStatus": {
+    "SENT": "Sent",
+    "PARTIAL": "Partly sent",
+    "FAILED": "Sending failed",
+    "NOT_SENT": "Not sent",
+    "PENDING": "In progress"
+  },
+  "automatic": {
+    "period": "{from} to {to}",
+    "saved": "Setting saved.",
+    "recipientsLabel": {
+      "DAILY": "Other recipients of the daily report",
+      "WEEKLY": "Other recipients of the weekly report",
+      "MONTHLY": "Other recipients of the monthly report"
+    },
+    "recipientsPlaceholder": "Other recipients (5 addresses at most)",
+    "save": "Save",
+    "report": "Report",
+    "emailTitle": "E-mail delivery",
+    "emailShop": "Sent to the shop's owners and administrators, with the details as a PDF. Nothing is sent for a period without orders or visits.",
+    "emailPlatform": "Sent to the administrators, with the details as a PDF. Nothing is sent for a period without orders or visits.",
+    "archivesTitle": "Archived reports",
+    "archivesDescription": "The figures stay as they were when sent. Kept for two years.",
+    "columns": {
+      "period": "Period",
+      "type": "Type",
+      "sending": "Delivery",
+      "actions": "Actions"
+    },
+    "recipients": "{count, plural, one {# recipient} other {# recipients}}",
+    "view": "View",
+    "empty": "No report sent yet.",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "result": {
+    "empty": "No data for this period.",
+    "partial": "{shown} rows shown out of {total}. The Excel and CSV files contain all rows.",
+    "truncated": "{shown} rows shown out of {total}. The files stop at {limit} rows: shorten the period to get everything."
+  },
+  "builder": {
+    "saved": "Report saved.",
+    "updated": "Report updated.",
+    "deleted": "Report deleted.",
+    "loading": "Loading...",
+    "defaultTitle": "Report",
+    "fileName": "report",
+    "exportError": "Export failed.",
+    "groups": {
+      "sales": "Sales",
+      "traffic": "Visits"
+    },
+    "title": "Build the report",
+    "timezone": "Days counted in Dakar time (UTC).",
+    "savedReport": "Saved report",
+    "newReport": "New report",
+    "deleteNamed": "Delete {name}",
+    "period": "Period",
+    "from": "From",
+    "to": "To",
+    "trafficUnavailable": "Visits are not available with this axis: a view has no payment method, status or delivery country.",
+    "axisFirst": "Break down by",
+    "axisSecond": "Then by",
+    "noAxis": "None",
+    "generate": "Generate report",
+    "update": "Update “{name}”",
+    "nameLabel": "Name of the report to save",
+    "namePlaceholder": "Report name",
+    "save": "Save",
+    "result": "Result",
+    "resultDescription": "From {from} to {to}. An order with several products counts on each row concerned, but only once in the total. Delivered revenue: orders with the “Delivered” status.",
+    "computing": "Calculating...",
+    "preparing": "Preparing...",
+    "currency": "Currency",
+    "otherCurrencies": "Sales in {currencies} are not included: amounts in different currencies do not add up. Visits are all counted.",
+    "delete": {
+      "title": "Delete this report?",
+      "description": "“{name}” will be deleted for the whole team. The figures themselves do not change.",
+      "cancel": "Cancel",
+      "deleting": "Deleting...",
+      "confirm": "Delete"
+    }
+  }
+}

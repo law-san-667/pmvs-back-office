@@ -50,7 +50,10 @@ import {
   type CreateR2Upload,
 } from "@/lib/upload-to-r2";
 import countries from "@/lib/countries.json";
+import { msg } from "@/lib/validators/messages";
 import { tenderStatusEnum, tenderTypeEnum } from "@/lib/validators/tenders";
+import { intlLocale } from "@/i18n/config";
+import { useLocale, useTranslations } from "next-intl";
 import { trpc } from "@/server/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Trash2Icon } from "lucide-react";
@@ -58,21 +61,27 @@ import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
-const COUNTRY_NAME_BY_CODE = Object.fromEntries(
-  countries.map((country) => [country.code, country.name]),
-);
 const COUNTRY_CODES = countries.map((country) => country.code);
 
-const TYPE_LABELS: Record<(typeof tenderTypeEnum)[number], string> = {
-  SUPPLY: "Fourniture",
-  SERVICE: "Service",
-  WORKS: "Travaux",
-  INTELLECTUAL_SERVICE: "Prestation intellectuelle",
+/** Country names in the page's language (lib/countries.json is in English). */
+const countryNamer = (locale: string) => {
+  const names = new Map(
+    countries.map((country) => [country.code, country.name]),
+  );
+  let display: Intl.DisplayNames | null = null;
+  try {
+    display = new Intl.DisplayNames([intlLocale(locale)], { type: "region" });
+  } catch {
+    display = null;
+  }
+  return (code: string) => {
+    try {
+      return display?.of(code) ?? names.get(code) ?? code;
+    } catch {
+      return names.get(code) ?? code;
+    }
+  };
 };
-
-const TYPE_ITEMS = Object.fromEntries(
-  tenderTypeEnum.map((type) => [type, TYPE_LABELS[type]]),
-);
 
 // Convert an ISO timestamp into the value expected by an
 // `<input type="datetime-local" />` (i.e. `YYYY-MM-DDTHH:mm`, local time).
@@ -96,21 +105,21 @@ const fromDatetimeLocal = (value: string) => {
 
 const tenderFormSchema = z
   .object({
-    title: z.string().trim().min(1, "Le titre est requis."),
+    title: z.string().trim().min(1, msg("tenders.errors.titleRequired")),
     description: z.string(),
-    categoryId: z.string().min(1, "La catégorie est requise."),
-    subCategoryId: z.string().min(1, "La sous-catégorie est requise."),
+    categoryId: z.string().min(1, msg("tenders.errors.categoryRequired")),
+    subCategoryId: z.string().min(1, msg("tenders.errors.subCategoryRequired")),
     type: z.enum(tenderTypeEnum),
     status: z.enum(tenderStatusEnum),
     budgetMin: z.string(),
     budgetMax: z.string(),
     currency: z.string().min(1),
     location: z.string(),
-    countryCode: z.string().min(2, "Le pays est requis."),
+    countryCode: z.string().min(2, msg("tenders.errors.countryRequired")),
     opensAt: z.string(),
     submissionDeadline: z
       .string()
-      .min(1, "La date limite de soumission est requise."),
+      .min(1, msg("tenders.errors.deadlineRequired")),
     evaluationDeadline: z.string(),
     requirements: z.string(),
     // Not enforced yet: the bidding terms page does not exist.
@@ -124,14 +133,14 @@ const tenderFormSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["budgetMin"],
-        message: "Le budget doit être un nombre entier positif.",
+        message: msg("tenders.errors.budgetInteger"),
       });
     }
     if (max && !/^\d+$/.test(max)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["budgetMax"],
-        message: "Le budget doit être un nombre entier positif.",
+        message: msg("tenders.errors.budgetInteger"),
       });
     }
     if (min && max && /^\d+$/.test(min) && /^\d+$/.test(max)) {
@@ -139,7 +148,7 @@ const tenderFormSchema = z
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["budgetMax"],
-          message: "Le budget maximum doit être supérieur au minimum.",
+          message: msg("tenders.errors.budgetMaxBelowMin"),
         });
       }
     }
@@ -167,6 +176,12 @@ const defaultValues: TenderFormData = {
 };
 
 export default function TenderForm({ tenderId }: { tenderId?: string }) {
+  const t = useTranslations("tenders");
+  const locale = useLocale();
+  const countryName = useMemo(() => countryNamer(locale), [locale]);
+  const typeItems = Object.fromEntries(
+    tenderTypeEnum.map((type) => [type, t(`type.${type}`)]),
+  );
   const router = useRouter();
   const utils = trpc.useUtils();
   const isEdit = !!tenderId;
@@ -263,10 +278,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
     },
     onError: (error) => {
       setSubmissionErrors(
-        getBackendErrorMessages(
-          error,
-          "Erreur lors de la création de l'appel d'offres.",
-        ),
+        getBackendErrorMessages(error, t("form.createError")),
       );
     },
   });
@@ -280,10 +292,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
     },
     onError: (error) => {
       setSubmissionErrors(
-        getBackendErrorMessages(
-          error,
-          "Erreur lors de la mise à jour de l'appel d'offres.",
-        ),
+        getBackendErrorMessages(error, t("form.updateError")),
       );
     },
   });
@@ -298,10 +307,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
     onError: (error) => {
       setDeleteDialogOpen(false);
       setSubmissionErrors(
-        getBackendErrorMessages(
-          error,
-          "Erreur lors de la suppression de l'appel d'offres.",
-        ),
+        getBackendErrorMessages(error, t("form.deleteError")),
       );
     },
   });
@@ -329,9 +335,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
 
     const publisherUserId = currentUser.data?.id;
     if (!publisherUserId) {
-      setSubmissionErrors([
-        "Impossible d'identifier l'utilisateur. Veuillez vous reconnecter.",
-      ]);
+      setSubmissionErrors([t("form.noUser")]);
       return;
     }
 
@@ -339,7 +343,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
 
     const submissionDeadline = fromDatetimeLocal(data.submissionDeadline);
     if (!submissionDeadline) {
-      setSubmissionErrors(["La date limite de soumission est invalide."]);
+      setSubmissionErrors([t("form.invalidDeadline")]);
       return;
     }
 
@@ -354,7 +358,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
             createUpload,
           )) ?? null;
       } catch {
-        setSubmissionErrors(["L'envoi de la photo a échoué. Réessayez."]);
+        setSubmissionErrors([t("form.uploadError")]);
         return;
       } finally {
         setIsUploading(false);
@@ -398,12 +402,10 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold">
-            {isEdit ? "Modifier un appel d'offres" : "Créer un appel d'offres"}
+            {isEdit ? t("form.editTitle") : t("form.createTitle")}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {isEdit
-              ? "Mettez à jour les informations de cet appel d'offres."
-              : "Publiez un nouvel appel d'offres pour recevoir des soumissions."}
+            {isEdit ? t("form.editDescription") : t("form.createDescription")}
           </p>
         </div>
 
@@ -415,7 +417,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
             onClick={() => setDeleteDialogOpen(true)}
           >
             <Trash2Icon className="size-4" />
-            Supprimer
+            {t("form.delete")}
           </Button>
         )}
       </div>
@@ -426,7 +428,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
             <Badge
               key={`${error}-${index}`}
               variant="destructive"
-              className="max-w-full text-left whitespace-normal"
+              className="max-w-full text-start whitespace-normal"
             >
               <AlertCircle className="size-3" />
               {error}
@@ -441,9 +443,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
           <div className="flex flex-col gap-4">
             <Card>
               <CardHeader>
-                <CardTitle className="font-bold">
-                  Informations générales
-                </CardTitle>
+                <CardTitle className="font-bold">{t("form.general")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <FieldGroup>
@@ -452,13 +452,11 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>
-                          Titre de l&apos;appel d&apos;offres
-                        </FieldLabel>
+                        <FieldLabel>{t("form.title")}</FieldLabel>
                         <Input
                           {...field}
                           aria-invalid={fieldState.invalid}
-                          placeholder="Ex: Fourniture de matériel informatique"
+                          placeholder={t("form.titlePlaceholder")}
                         />
                         {fieldState.invalid && (
                           <FieldError errors={[fieldState.error]} />
@@ -472,11 +470,11 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                     control={form.control}
                     render={({ field }) => (
                       <Field>
-                        <FieldLabel>Description</FieldLabel>
+                        <FieldLabel>{t("form.description")}</FieldLabel>
                         <Textarea
                           {...field}
                           rows={5}
-                          placeholder="Décrivez l'objet de l'appel d'offres..."
+                          placeholder={t("form.descriptionPlaceholder")}
                         />
                       </Field>
                     )}
@@ -484,14 +482,14 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
 
                   <Field>
                     <FieldLabel htmlFor="tender-image">
-                      Photo (optionnel)
+                      {t("form.photo")}
                     </FieldLabel>
                     {(imageFile || savedImage) && (
                       <div className="flex items-center gap-3">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={imagePreview ?? savedImage ?? undefined}
-                          alt="Aperçu de la photo"
+                          alt={t("form.photoPreview")}
                           className="h-20 w-32 rounded-md border object-cover"
                         />
                         <Button
@@ -503,7 +501,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                             setImageOverride(null);
                           }}
                         >
-                          Retirer
+                          {t("form.removePhoto")}
                         </Button>
                       </div>
                     )}
@@ -516,8 +514,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                       }
                     />
                     <p className="text-muted-foreground text-xs">
-                      Affichée sur la carte de l&apos;appel d&apos;offres. À
-                      défaut, le logo de votre structure est utilisé.
+                      {t("form.photoHint")}
                     </p>
                   </Field>
 
@@ -526,19 +523,21 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Type d&apos;appel d&apos;offres</FieldLabel>
+                        <FieldLabel>{t("form.type")}</FieldLabel>
                         <Select
-                          items={TYPE_ITEMS}
+                          items={typeItems}
                           value={field.value}
                           onValueChange={(val) => val && field.onChange(val)}
                         >
                           <SelectTrigger className="h-9 w-full">
-                            <SelectValue placeholder="Sélectionner un type" />
+                            <SelectValue
+                              placeholder={t("form.typePlaceholder")}
+                            />
                           </SelectTrigger>
                           <SelectContent>
                             {tenderTypeEnum.map((type) => (
                               <SelectItem key={type} value={type}>
-                                {TYPE_LABELS[type]}
+                                {t(`type.${type}`)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -555,7 +554,9 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
 
             <Card>
               <CardHeader>
-                <CardTitle className="font-bold">Catégorie</CardTitle>
+                <CardTitle className="font-bold">
+                  {t("form.categoryCard")}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
@@ -564,7 +565,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Catégorie</FieldLabel>
+                        <FieldLabel>{t("form.category")}</FieldLabel>
                         <Select
                           items={categoryItems}
                           value={field.value}
@@ -584,8 +585,8 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                             <SelectValue
                               placeholder={
                                 categories.isLoading
-                                  ? "Chargement..."
-                                  : "Sélectionner une catégorie"
+                                  ? t("form.loading")
+                                  : t("form.categoryPlaceholder")
                               }
                             />
                           </SelectTrigger>
@@ -609,7 +610,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Sous catégorie</FieldLabel>
+                        <FieldLabel>{t("form.subCategory")}</FieldLabel>
                         <Select
                           items={subCategoryItems}
                           value={field.value}
@@ -623,10 +624,10 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                             <SelectValue
                               placeholder={
                                 !categoryId
-                                  ? "Sélectionner une catégorie d'abord"
+                                  ? t("form.categoryFirst")
                                   : subCategories.isLoading
-                                    ? "Chargement..."
-                                    : "Sélectionner une sous-catégorie"
+                                    ? t("form.loading")
+                                    : t("form.subCategoryPlaceholder")
                               }
                             />
                           </SelectTrigger>
@@ -650,7 +651,9 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
 
             <Card>
               <CardHeader>
-                <CardTitle className="font-bold">Exigences</CardTitle>
+                <CardTitle className="font-bold">
+                  {t("form.requirementsCard")}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <Controller
@@ -658,11 +661,11 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                   control={form.control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Exigences (optionnel)</FieldLabel>
+                      <FieldLabel>{t("form.requirements")}</FieldLabel>
                       <Textarea
                         {...field}
                         rows={4}
-                        placeholder="Précisez les exigences, critères et conditions..."
+                        placeholder={t("form.requirementsPlaceholder")}
                       />
                     </Field>
                   )}
@@ -675,7 +678,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
           <div className="flex flex-col gap-4">
             <Card>
               <CardHeader>
-                <CardTitle className="font-bold">Budget</CardTitle>
+                <CardTitle className="font-bold">{t("form.budget")}</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-4">
                 <Controller
@@ -683,7 +686,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                   control={form.control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Devise</FieldLabel>
+                      <FieldLabel>{t("form.currency")}</FieldLabel>
                       <Select
                         value={field.value}
                         onValueChange={(val) => val && field.onChange(val)}
@@ -707,7 +710,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Budget minimum</FieldLabel>
+                        <FieldLabel>{t("form.budgetMin")}</FieldLabel>
                         <InputGroup>
                           <InputGroupAddon
                             align="inline-start"
@@ -737,7 +740,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Budget maximum</FieldLabel>
+                        <FieldLabel>{t("form.budgetMax")}</FieldLabel>
                         <InputGroup>
                           <InputGroupAddon
                             align="inline-start"
@@ -767,7 +770,9 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
 
             <Card>
               <CardHeader>
-                <CardTitle className="font-bold">Localisation</CardTitle>
+                <CardTitle className="font-bold">
+                  {t("form.location")}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <FieldGroup>
@@ -776,30 +781,28 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Pays</FieldLabel>
+                        <FieldLabel>{t("form.country")}</FieldLabel>
                         <Combobox
                           items={COUNTRY_CODES}
-                          itemToStringLabel={(code) =>
-                            COUNTRY_NAME_BY_CODE[code] ?? code
-                          }
+                          itemToStringLabel={(code) => countryName(code)}
                           value={field.value || null}
                           onValueChange={(value) => field.onChange(value ?? "")}
                         >
                           <ComboboxInput
-                            placeholder="Sélectionner un pays"
+                            placeholder={t("form.countryPlaceholder")}
                             showClear
                             className="w-full"
                             aria-invalid={fieldState.invalid}
                           />
                           <ComboboxContent>
-                            <ComboboxEmpty>Aucun pays trouvé.</ComboboxEmpty>
+                            <ComboboxEmpty>{t("form.noCountry")}</ComboboxEmpty>
                             <ComboboxList>
                               {countries.map((country) => (
                                 <ComboboxItem
                                   key={country.code}
                                   value={country.code}
                                 >
-                                  {country.name}
+                                  {countryName(country.code)}
                                 </ComboboxItem>
                               ))}
                             </ComboboxList>
@@ -817,8 +820,11 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                     control={form.control}
                     render={({ field }) => (
                       <Field>
-                        <FieldLabel>Lieu (optionnel)</FieldLabel>
-                        <Input {...field} placeholder="Ex: Dakar, Plateau" />
+                        <FieldLabel>{t("form.place")}</FieldLabel>
+                        <Input
+                          {...field}
+                          placeholder={t("form.placePlaceholder")}
+                        />
                       </Field>
                     )}
                   />
@@ -828,7 +834,9 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
 
             <Card>
               <CardHeader>
-                <CardTitle className="font-bold">Échéances</CardTitle>
+                <CardTitle className="font-bold">
+                  {t("form.deadlines")}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <FieldGroup>
@@ -837,9 +845,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                     control={form.control}
                     render={({ field }) => (
                       <Field>
-                        <FieldLabel>
-                          Date d&apos;ouverture du marché (optionnel)
-                        </FieldLabel>
+                        <FieldLabel>{t("form.opensAt")}</FieldLabel>
                         <Input {...field} type="datetime-local" />
                       </Field>
                     )}
@@ -850,7 +856,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Date de clôture du marché</FieldLabel>
+                        <FieldLabel>{t("form.submissionDeadline")}</FieldLabel>
                         <Input
                           {...field}
                           type="datetime-local"
@@ -868,9 +874,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                     control={form.control}
                     render={({ field }) => (
                       <Field>
-                        <FieldLabel>
-                          Date limite d&apos;évaluation (optionnel)
-                        </FieldLabel>
+                        <FieldLabel>{t("form.evaluationDeadline")}</FieldLabel>
                         <Input {...field} type="datetime-local" />
                       </Field>
                     )}
@@ -890,10 +894,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                 checked={field.value}
                 onCheckedChange={(checked) => field.onChange(checked === true)}
               />
-              <span>
-                Je déclare avoir lu et accepté les conditions
-                d&apos;enchérissement.
-              </span>
+              <span>{t("form.terms")}</span>
             </label>
           )}
         />
@@ -904,27 +905,26 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
           disabled={isMutating || deleteTender.isPending}
         >
           {createTender.isPending
-            ? "Création en cours..."
+            ? t("form.creating")
             : updateTender.isPending
-              ? "Mise à jour en cours..."
+              ? t("form.updating")
               : isEdit
-                ? "Enregistrer les modifications"
-                : "Publier l'appel d'offres"}
+                ? t("form.save")
+                : t("form.publish")}
         </Button>
       </form>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogTitle>{t("deleteDialog.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Voulez-vous vraiment supprimer cet appel d&apos;offres ? Cette
-              action est irréversible.
+              {t("deleteDialog.textUntitled")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleteTender.isPending}>
-              Annuler
+              {t("deleteDialog.cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
@@ -934,7 +934,9 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                 if (tenderId) deleteTender.mutate({ id: tenderId });
               }}
             >
-              {deleteTender.isPending ? "Suppression..." : "Supprimer"}
+              {deleteTender.isPending
+                ? t("deleteDialog.deleting")
+                : t("deleteDialog.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

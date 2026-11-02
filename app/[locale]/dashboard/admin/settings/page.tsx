@@ -1,5 +1,6 @@
 "use client";
 
+import { AccountSecurity } from "@/components/account-security";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,8 @@ export default function AdminSettingsPage() {
         title="Paramètres"
         description="Informations du compte administrateur actuellement connecté."
       />
+
+      <AccountSecurity className="max-w-2xl" />
 
       <Card className="max-w-2xl">
         <CardHeader>

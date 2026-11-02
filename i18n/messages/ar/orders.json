@@ -1,0 +1,103 @@
+{
+  "status": {
+    "PENDING": "قيد الانتظار",
+    "CONFIRMED": "مؤكد",
+    "PROCESSING": "قيد التجهيز",
+    "SHIPPED": "مشحون",
+    "DELIVERED": "مُسلَّم",
+    "CANCELLED": "ملغى",
+    "REFUNDED": "مسترد"
+  },
+  "paymentMethod": {
+    "CASH": "الدفع عند الاستلام",
+    "WAVE": "Wave",
+    "ORANGE_MONEY": "Orange Money",
+    "FREE_MONEY": "Free Money",
+    "EXPRESSO": "Expresso",
+    "CARD": "بطاقة بنكية",
+    "ONLINE": "الدفع عبر الإنترنت",
+    "OFFLINE": "تحويل أو إيداع",
+    "MTN_MOMO": "MTN Mobile Money",
+    "MOOV_MONEY": "Moov Money"
+  },
+  "list": {
+    "title": "الطلبات",
+    "description": "تابع جميع الطلبات المقدّمة إلى شركتك",
+    "count": "الطلبات ({count})",
+    "filterLabel": "التصفية حسب الحالة",
+    "allStatuses": "الكل",
+    "columns": {
+      "order": "الطلب",
+      "recipient": "المستلم",
+      "items": "المنتجات",
+      "date": "التاريخ",
+      "total": "الإجمالي",
+      "status": "الحالة",
+      "details": "التفاصيل"
+    },
+    "loading": "جارٍ تحميل الطلبات...",
+    "noBusiness": "لم يتم العثور على أي شركة نشطة.",
+    "loadError": "تعذّر تحميل الطلبات.",
+    "emptyTitle": "لم يتم العثور على أي طلب.",
+    "emptyText": "ستظهر الطلبات الجديدة هنا.",
+    "emptyFiltered": "لا توجد طلبات تطابق هذه الحالة.",
+    "notProvided": "غير محدد",
+    "view": "عرض الطلب"
+  },
+  "detail": {
+    "loading": "جارٍ تحميل الطلب...",
+    "notFoundTitle": "الطلب غير موجود",
+    "notFoundText": "هذا الطلب غير موجود أو لا تملك صلاحية الاطلاع على تفاصيله.",
+    "back": "العودة إلى الطلبات",
+    "unavailableTitle": "الطلب غير متاح",
+    "unavailableText": "هذا الطلب غير مرتبط بالشركة النشطة.",
+    "title": "الطلب {reference}",
+    "createdAt": "أُنشئ في {date}",
+    "updatedAt": "آخر تحديث",
+    "payment": "الدفع",
+    "delivery": "التسليم",
+    "deliveryNotProvided": "غير محدد",
+    "items": "المنتجات ({count})",
+    "columns": {
+      "product": "المنتج",
+      "unitPrice": "سعر الوحدة",
+      "quantity": "الكمية",
+      "subtotal": "المجموع الفرعي"
+    },
+    "noItems": "لا يوجد أي منتج في هذا الطلب مرتبط بالشركة النشطة.",
+    "total": "الإجمالي",
+    "shippingAddress": "عنوان التسليم",
+    "noAddress": "لم يُحدَّد عنوان تسليم.",
+    "customerNote": "ملاحظة العميل",
+    "history": "السجل",
+    "noHistory": "لا يوجد سجل متاح."
+  },
+  "actions": {
+    "label": {
+      "PENDING": "إعادة إلى الانتظار",
+      "CONFIRMED": "تأكيد",
+      "PROCESSING": "قيد التجهيز",
+      "SHIPPED": "شحن",
+      "DELIVERED": "تحديد كمُسلَّم",
+      "CANCELLED": "إلغاء الطلب",
+      "REFUNDED": "تحديد كمسترد"
+    },
+    "confirm": {
+      "CONFIRMED": "تؤكد أنك قادر على تنفيذ هذا الطلب.",
+      "PROCESSING": "ينتقل الطلب إلى مرحلة التجهيز.",
+      "SHIPPED": "يُسلَّم الطلب إلى شركة النقل.",
+      "DELIVERED": "تؤكد أن المشتري قد استلم الطلب.",
+      "CANCELLED": "يُلغى الطلب ويُعاد المخزون إلى البيع. أبلغ المشتري بالسبب.",
+      "REFUNDED": "تؤكد أن المشتري قد استرد أمواله."
+    },
+    "success": "الطلب: {action} ✓",
+    "error": "فشل التحديث.",
+    "carrier": "شركة النقل",
+    "trackingNumber": "رقم التتبع",
+    "reason": "السبب",
+    "note": "ملاحظة (اختيارية)",
+    "back": "رجوع",
+    "saving": "جارٍ الحفظ...",
+    "submit": "تأكيد"
+  }
+}

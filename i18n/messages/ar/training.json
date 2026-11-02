@@ -1,0 +1,26 @@
+{
+  "title": "التدريب",
+  "intro": "دورات للبدء بشكل جيد والتقدّم أكثر. يتم حفظ تقدّمك.",
+  "empty": "لا توجد دورات متاحة حاليًا.",
+  "level": {
+    "BEGINNER": "مبتدئ",
+    "ADVANCED": "متقدّم"
+  },
+  "kind": {
+    "VIDEO": "فيديو",
+    "PDF": "PDF",
+    "TEXT": "نص"
+  },
+  "courseProgress": "التقدّم في {title}",
+  "lessonCount": "الدروس: {done} من {total}",
+  "done": "مكتمل",
+  "openPdf": "فتح ملف PDF",
+  "loading": "جارٍ التحميل…",
+  "allCourses": "جميع الدورات",
+  "lessonMeta": "{kind}، {minutes} د",
+  "markDone": "أنهيت هذا الدرس",
+  "lessons": "الدروس",
+  "lessonsDone": "المكتملة: {done} من {total}",
+  "courseProgressLabel": "تقدّم الدورة",
+  "lessonDone": "مكتمل"
+}

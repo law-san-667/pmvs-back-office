@@ -1,0 +1,27 @@
+{
+  "type": {
+    "INVOICE": "Fatura",
+    "CREDIT_NOTE": "Nota de crédito"
+  },
+  "card": {
+    "title": "Faturas",
+    "invoice": "Fatura {number}",
+    "creditNote": "Nota de crédito {number}",
+    "openError": "Não foi possível abrir a fatura. Tente novamente."
+  },
+  "page": {
+    "title": "Faturas",
+    "description": "É emitida uma fatura quando cada encomenda é confirmada; um cancelamento ou reembolso emite uma nota de crédito.",
+    "documents": "Documentos ({count})",
+    "columns": {
+      "number": "Número",
+      "type": "Tipo",
+      "date": "Data",
+      "order": "Encomenda",
+      "amount": "Montante"
+    },
+    "loading": "A carregar faturas...",
+    "empty": "Ainda não há faturas.",
+    "openError": "Não foi possível abrir o documento."
+  }
+}

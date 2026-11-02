@@ -87,12 +87,12 @@ export default function AdminCustomersPage() {
           <CardTitle>Clients ({customers.length})</CardTitle>
           <CardAction>
             <div className="relative">
-              <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+              <SearchIcon className="text-muted-foreground absolute top-1/2 start-2.5 size-4 -translate-y-1/2" />
               <Input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Nom, email, téléphone..."
-                className="h-9 w-64 pl-8"
+                className="h-9 w-64 ps-8"
               />
             </div>
           </CardAction>

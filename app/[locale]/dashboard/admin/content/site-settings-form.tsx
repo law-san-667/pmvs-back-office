@@ -47,6 +47,7 @@ export function SiteSettingsForm({ site }: { site: SiteSettings }) {
   const save = trpc.content.saveSite.useMutation();
   const [contact, setContact] = useState(site.contact);
   const [tagline, setTagline] = useState(site.tagline ?? "");
+  const [offline, setOffline] = useState(site.offlinePaymentInstructions ?? "");
   const [social, setSocial] = useState(linksToText(site.socialLinks));
   const [columns, setColumns] = useState(columnsToText(site.footerColumns));
 
@@ -65,6 +66,7 @@ export function SiteSettingsForm({ site }: { site: SiteSettings }) {
           email: empty(contact.email),
         },
         tagline: empty(tagline),
+        offlinePaymentInstructions: empty(offline),
         socialLinks: textToLinks(social),
         footerColumns: textToColumns(columns),
       });
@@ -100,6 +102,20 @@ export function SiteSettingsForm({ site }: { site: SiteSettings }) {
           value={tagline}
           maxLength={500}
           onChange={(event) => setTagline(event.target.value)}
+        />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="offline">Instructions de paiement par virement</FieldLabel>
+        <FieldDescription>
+          Montrées à l’acheteur qui choisit « Virement ou dépôt » : banque,
+          titulaire, IBAN / RIB, référence à indiquer. Laisser vide retire
+          cette option du paiement.
+        </FieldDescription>
+        <Textarea
+          id="offline"
+          value={offline}
+          maxLength={2000}
+          onChange={(event) => setOffline(event.target.value)}
         />
       </Field>
       <Field>

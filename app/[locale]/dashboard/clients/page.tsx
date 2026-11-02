@@ -27,12 +27,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  formatDate,
-  formatMoney,
-  getInitials,
-  getVisiblePages,
-} from "@/lib/seller-dashboard-utils";
+import { formatAmount } from "@/lib/payment-utils";
+import { getInitials, getVisiblePages } from "@/lib/seller-dashboard-utils";
+import { formatDate } from "@/lib/utils";
+import { useLocale, useTranslations } from "next-intl";
 import { trpc } from "@/server/trpc/client";
 import { SearchIcon, UsersRoundIcon } from "lucide-react";
 import { useDeferredValue, useState } from "react";
@@ -42,6 +40,10 @@ const PAGE_SIZE = 10;
 type CustomerOrderBy = "lastOrderAt" | "totalOrders" | "name";
 
 export default function ClientsPage() {
+  const t = useTranslations("clients");
+  const locale = useLocale();
+  const formatMoney = (amountMinor: number, currency: string) =>
+    formatAmount(amountMinor, currency, locale);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [orderBy, setOrderBy] = useState<CustomerOrderBy>("lastOrderAt");
@@ -82,16 +84,14 @@ export default function ClientsPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <div>
-        <h1 className="text-2xl font-bold">Clients</h1>
-        <p className="text-muted-foreground text-sm">
-          Les clients ayant commandé auprès de votre entreprise
-        </p>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <p className="text-muted-foreground text-sm">{t("description")}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
         <Card className="h-fit min-w-0">
           <CardHeader>
-            <CardTitle>Liste des clients ({totalCustomers})</CardTitle>
+            <CardTitle>{t("list", { count: totalCustomers })}</CardTitle>
             <CardAction>
               <div className="flex items-center gap-2">
                 <select
@@ -100,19 +100,19 @@ export default function ClientsPage() {
                     updateOrderBy(event.target.value as CustomerOrderBy)
                   }
                   className="border-input bg-background h-8 rounded-md border px-2 text-sm"
-                  aria-label="Trier les clients"
+                  aria-label={t("sortLabel")}
                 >
-                  <option value="lastOrderAt">Plus récents</option>
-                  <option value="totalOrders">Plus de commandes</option>
-                  <option value="name">Nom</option>
+                  <option value="lastOrderAt">{t("sort.lastOrderAt")}</option>
+                  <option value="totalOrders">{t("sort.totalOrders")}</option>
+                  <option value="name">{t("sort.name")}</option>
                 </select>
                 <div className="relative">
-                  <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+                  <SearchIcon className="text-muted-foreground absolute start-2.5 top-1/2 size-4 -translate-y-1/2" />
                   <Input
-                    placeholder="Nom, email, téléphone..."
+                    placeholder={t("searchPlaceholder")}
                     value={search}
                     onChange={(event) => updateSearch(event.target.value)}
-                    className="h-8 w-56 pl-8"
+                    className="h-8 w-56 ps-8"
                   />
                 </div>
               </div>
@@ -122,11 +122,11 @@ export default function ClientsPage() {
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead>Client</TableHead>
-                  <TableHead>Téléphone</TableHead>
-                  <TableHead>Commandes</TableHead>
-                  <TableHead>Total dépensé</TableHead>
-                  <TableHead>Dernière commande</TableHead>
+                  <TableHead>{t("columns.client")}</TableHead>
+                  <TableHead>{t("columns.phone")}</TableHead>
+                  <TableHead>{t("columns.orders")}</TableHead>
+                  <TableHead>{t("columns.totalSpent")}</TableHead>
+                  <TableHead>{t("columns.lastOrder")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -134,7 +134,7 @@ export default function ClientsPage() {
                   <TableRow>
                     <TableCell colSpan={5} className="h-32 text-center">
                       <div className="text-muted-foreground flex items-center justify-center gap-2 text-sm">
-                        <Spinner /> Chargement des clients...
+                        <Spinner /> {t("loading")}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -143,9 +143,7 @@ export default function ClientsPage() {
                     <TableCell colSpan={5} className="h-40 text-center">
                       <div className="flex flex-col items-center gap-2 text-sm">
                         <UsersRoundIcon className="text-muted-foreground size-9" />
-                        <p className="font-medium">
-                          Impossible de charger les clients.
-                        </p>
+                        <p className="font-medium">{t("loadError")}</p>
                         <p className="text-muted-foreground">
                           {customers.error.message}
                         </p>
@@ -157,11 +155,9 @@ export default function ClientsPage() {
                     <TableCell colSpan={5} className="h-40 text-center">
                       <div className="flex flex-col items-center gap-2 text-sm">
                         <UsersRoundIcon className="text-muted-foreground size-9" />
-                        <p className="font-medium">Aucun client trouvé.</p>
+                        <p className="font-medium">{t("emptyTitle")}</p>
                         <p className="text-muted-foreground">
-                          {deferredSearch
-                            ? "Essayez avec une autre recherche."
-                            : "Les acheteurs apparaîtront ici après leur première commande."}
+                          {deferredSearch ? t("emptySearch") : t("emptyText")}
                         </p>
                       </div>
                     </TableCell>
@@ -212,7 +208,9 @@ export default function ClientsPage() {
                           </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground whitespace-nowrap">
-                          {formatDate(customer.lastOrderAt)}
+                          {formatDate(customer.lastOrderAt, locale, {
+                            dateStyle: "medium",
+                          })}
                         </TableCell>
                       </TableRow>
                     );
@@ -285,21 +283,17 @@ export default function ClientsPage() {
 
         <Card className="h-fit">
           <CardHeader>
-            <CardTitle>Meilleurs clients</CardTitle>
+            <CardTitle>{t("top.title")}</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             {topCustomers.isLoading ? (
               <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                <Spinner /> Chargement...
+                <Spinner /> {t("top.loading")}
               </div>
             ) : topCustomers.isError ? (
-              <p className="text-destructive text-sm">
-                Impossible de charger le classement.
-              </p>
+              <p className="text-destructive text-sm">{t("top.error")}</p>
             ) : !topCustomers.data?.items.length ? (
-              <p className="text-muted-foreground text-sm">
-                Aucun client pour le moment.
-              </p>
+              <p className="text-muted-foreground text-sm">{t("top.empty")}</p>
             ) : (
               topCustomers.data.items.map((customer, index) => {
                 const name =
@@ -320,11 +314,10 @@ export default function ClientsPage() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{name}</p>
                       <p className="text-muted-foreground text-xs">
-                        {customer.totalOrders} commande
-                        {customer.totalOrders > 1 ? "s" : ""}
+                        {t("top.orders", { count: customer.totalOrders })}
                       </p>
                     </div>
-                    <div className="text-right text-xs font-bold whitespace-nowrap">
+                    <div className="text-end text-xs font-bold whitespace-nowrap">
                       {customer.totals.map((total) => (
                         <p key={total.currency}>
                           {formatMoney(total.totalAmountMinor, total.currency)}

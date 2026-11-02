@@ -1,0 +1,45 @@
+{
+  "title": "Documents",
+  "intro": "Vos justificatifs et leur date d'expiration. Vous êtes prévenu 30, 7 et 1 jour avant l'expiration.",
+  "type": {
+    "REGISTRATION": "Registre de commerce (RCCM)",
+    "TAX": "Identifiant fiscal (NINEA)",
+    "IDENTITY": "Pièce d'identité",
+    "INSURANCE": "Assurance",
+    "CERTIFICATION": "Certification",
+    "OTHER": "Autre"
+  },
+  "expired": "Expiré",
+  "expiresIn": "Dans {days} j",
+  "status": {
+    "APPROVED": "Validé",
+    "REJECTED": "Refusé",
+    "PENDING": "En attente"
+  },
+  "errors": {
+    "uploadFailed": "Envoi du fichier impossible.",
+    "fileFailed": "Dépôt impossible.",
+    "withdrawFailed": "Retrait impossible."
+  },
+  "filed": "Document déposé : il sera examiné par l'équipe.",
+  "form": {
+    "title": "Déposer un document",
+    "description": "PDF ou image. Pour renouveler un document, déposez simplement le nouveau.",
+    "type": "Type",
+    "name": "Intitulé",
+    "reference": "Numéro (facultatif)",
+    "file": "Fichier",
+    "issuedOn": "Délivré le (facultatif)",
+    "expiresOn": "Expire le (si applicable)",
+    "submit": "Déposer"
+  },
+  "list": {
+    "title": "Mes documents ({count})",
+    "document": "Document",
+    "type": "Type",
+    "expiry": "Expiration",
+    "status": "État",
+    "withdraw": "Retirer",
+    "empty": "Aucun document déposé."
+  }
+}

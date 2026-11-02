@@ -1,0 +1,31 @@
+{
+  "title": "Clientes",
+  "description": "Os clientes que fizeram encomendas à sua empresa",
+  "list": "Lista de clientes ({count})",
+  "sortLabel": "Ordenar clientes",
+  "sort": {
+    "lastOrderAt": "Mais recentes",
+    "totalOrders": "Mais encomendas",
+    "name": "Nome"
+  },
+  "searchPlaceholder": "Nome, e-mail, telefone...",
+  "columns": {
+    "client": "Cliente",
+    "phone": "Telefone",
+    "orders": "Encomendas",
+    "totalSpent": "Total gasto",
+    "lastOrder": "Última encomenda"
+  },
+  "loading": "A carregar clientes...",
+  "loadError": "Não foi possível carregar os clientes.",
+  "emptyTitle": "Nenhum cliente encontrado.",
+  "emptySearch": "Experimente outra pesquisa.",
+  "emptyText": "Os compradores aparecerão aqui após a primeira encomenda.",
+  "top": {
+    "title": "Melhores clientes",
+    "loading": "A carregar...",
+    "error": "Não foi possível carregar a classificação.",
+    "empty": "Ainda não há clientes.",
+    "orders": "{count, plural, one {# encomenda} other {# encomendas}}"
+  }
+}

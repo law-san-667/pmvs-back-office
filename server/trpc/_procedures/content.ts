@@ -75,6 +75,7 @@ export const contentRouter = createTRPCRouter({
           email: z.string().nullable().optional(),
         }),
         tagline: z.string().nullable().optional(),
+        offlinePaymentInstructions: z.string().nullable().optional(),
         socialLinks: z.array(linkSchema),
         footerColumns: z.array(
           z.object({ title: z.string(), links: z.array(linkSchema) }),

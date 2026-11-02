@@ -1,0 +1,31 @@
+{
+  "title": "Customers",
+  "description": "Customers who have ordered from your business",
+  "list": "Customer list ({count})",
+  "sortLabel": "Sort customers",
+  "sort": {
+    "lastOrderAt": "Most recent",
+    "totalOrders": "Most orders",
+    "name": "Name"
+  },
+  "searchPlaceholder": "Name, email, phone...",
+  "columns": {
+    "client": "Customer",
+    "phone": "Phone",
+    "orders": "Orders",
+    "totalSpent": "Total spent",
+    "lastOrder": "Last order"
+  },
+  "loading": "Loading customers...",
+  "loadError": "Could not load the customers.",
+  "emptyTitle": "No customers found.",
+  "emptySearch": "Try another search.",
+  "emptyText": "Buyers will appear here after their first order.",
+  "top": {
+    "title": "Top customers",
+    "loading": "Loading...",
+    "error": "Could not load the ranking.",
+    "empty": "No customers yet.",
+    "orders": "{count, plural, one {# order} other {# orders}}"
+  }
+}

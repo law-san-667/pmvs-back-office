@@ -1,0 +1,51 @@
+{
+  "page": {
+    "title": "Statistiques de visite",
+    "subtitle": "Vues de vos produits et de votre boutique, ajouts au panier et commandes. Les robots et vos propres visites ne sont pas comptés ; rien n'est enregistré sur les visiteurs.",
+    "loading": "Chargement des statistiques..."
+  },
+  "window": {
+    "label": "Période",
+    "days": "{count, plural, one {# jour} other {# jours}}"
+  },
+  "metrics": {
+    "listingViews": "Vues des produits",
+    "shopViews": "Vues de la boutique",
+    "cartAdds": "Ajouts au panier",
+    "orders": "Commandes"
+  },
+  "tiles": {
+    "shopViews": "Boutique : {count} vue(s)",
+    "ofViews": "{rate} des vues",
+    "confirmed": "{count} confirmée(s)",
+    "conversion": "Taux de conversion",
+    "conversionHint": "Commandes pour 100 vues de produits"
+  },
+  "chart": {
+    "title": "{metric} par jour",
+    "description": "Du {from} au {to} (jours UTC ; la journée en cours n'est pas terminée).",
+    "metric": "Indicateur"
+  },
+  "funnel": {
+    "title": "Entonnoir de conversion",
+    "description": "Chaque étape avec sa part de l'étape précédente. Les commandes passées sans vue comptée (avant le suivi, anciennes versions de l'application) peuvent dépasser 100 %."
+  },
+  "topTen": "Dix au plus, sur la période.",
+  "noVisits": "Pas encore de visite sur la période.",
+  "columns": {
+    "orders": "Commandes",
+    "conversion": "Conversion"
+  },
+  "topListings": {
+    "title": "Produits les plus vus",
+    "product": "Produit",
+    "views": "Vues",
+    "carts": "Paniers"
+  },
+  "topBusinesses": {
+    "title": "Boutiques les plus visitées",
+    "shop": "Boutique",
+    "listingViews": "Vues produits",
+    "shopViews": "Vues boutique"
+  }
+}
