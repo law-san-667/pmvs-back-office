@@ -1,0 +1,331 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "savingEllipsis": "Enregistrement…",
+    "cancel": "Annuler",
+    "add": "Ajouter",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "loading": "Chargement...",
+    "loadingEllipsis": "Chargement…",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "activeFeminine": "Active",
+    "yes": "Oui",
+    "no": "Non",
+    "actionFailed": "Action impossible.",
+    "saveFailed": "Échec de l’enregistrement."
+  },
+  "configuration": {
+    "title": "Configuration",
+    "description": "Catégories du catalogue, zones géographiques et normes de qualité appliquées aux fournisseurs.",
+    "tabs": {
+      "categories": "Catégories",
+      "subCategories": "Sous-catégories",
+      "countries": "Pays",
+      "cities": "Villes",
+      "quality": "Normes de qualité"
+    },
+    "columns": {
+      "code": "Code",
+      "name": "Nom",
+      "slug": "Slug",
+      "type": "Type",
+      "status": "Statut",
+      "actions": "Actions",
+      "category": "Catégorie",
+      "country": "Pays",
+      "currency": "Devise",
+      "phonePrefix": "Indicatif",
+      "oapi": "OAPI",
+      "phase": "Phase",
+      "suppliers": "Fournisseurs",
+      "city": "Ville",
+      "createdAt": "Créée le"
+    },
+    "service": "Service",
+    "product": "Produit",
+    "registrationOpen": "Inscriptions ouvertes",
+    "closed": "Fermé",
+    "loadingCategories": "Chargement des catégories...",
+    "emptyCategories": "Aucune catégorie configurée.",
+    "loadingSubCategories": "Chargement des sous-catégories...",
+    "emptySubCategories": "Aucune sous-catégorie configurée.",
+    "loadingCountries": "Chargement des pays...",
+    "emptyCountries": "Aucun pays configuré.",
+    "loadingCities": "Chargement des villes...",
+    "emptyCities": "Aucune ville configurée."
+  },
+  "editor": {
+    "name": "Nom",
+    "slug": "Slug",
+    "description": "Description",
+    "category": {
+      "edit": "Modifier la catégorie",
+      "new": "Nouvelle catégorie",
+      "description": "Configurez le classement des produits ou services.",
+      "isService": "Catégorie de services"
+    },
+    "subCategory": {
+      "edit": "Modifier la sous-catégorie",
+      "new": "Nouvelle sous-catégorie",
+      "description": "Associez la sous-catégorie à une catégorie existante.",
+      "category": "Catégorie",
+      "selectCategory": "Sélectionner une catégorie",
+      "isService": "Sous-catégorie de services"
+    },
+    "country": {
+      "edit": "Modifier le pays",
+      "new": "Nouveau pays",
+      "description": "Configurez le code, la devise et l’indicatif du pays.",
+      "code": "Code pays",
+      "currency": "Devise",
+      "phonePrefix": "Indicatif téléphonique",
+      "phase": "Phase de déploiement",
+      "phaseNone": "Non définie",
+      "phase1": "Phase 1 : Sénégal et pays frontaliers",
+      "phase2": "Phase 2 : CEDEAO",
+      "phase3": "Phase 3 : autres pays",
+      "isActive": "Pays affiché sur la plateforme",
+      "isOapi": "Membre de l'OAPI",
+      "supplierRegistrationOpen": "Inscriptions de fournisseurs ouvertes"
+    },
+    "city": {
+      "edit": "Modifier la ville",
+      "new": "Nouvelle ville",
+      "description": "Associez la ville à un pays configuré.",
+      "country": "Pays",
+      "selectCountry": "Sélectionner un pays",
+      "latitude": "Latitude du centre",
+      "longitude": "Longitude du centre",
+      "coordinatesHint": "Sert à la recherche « Près de moi » pour les vendeurs de la ville qui n'ont pas indiqué leur siège.",
+      "isActive": "Ville active"
+    }
+  },
+  "deleteDialog": {
+    "title": "Confirmer la suppression",
+    "description": "« {label} » sera supprimé définitivement. Cette opération peut échouer si cet élément est encore utilisé.",
+    "deleting": "Suppression..."
+  },
+  "quality": {
+    "title": "Normes de qualité des fournisseurs",
+    "description": "Seuils appliqués à chaque fournisseur pour calculer son score de conformité.",
+    "lastUpdated": "Dernière modification le {date}.",
+    "defaults": "Valeurs par défaut de la plateforme.",
+    "saved": "Normes enregistrées. Les scores sont recalculés à la prochaine consultation.",
+    "saveFailed": "Impossible d'enregistrer les normes.",
+    "submit": "Enregistrer les normes",
+    "units": {
+      "percent": "%",
+      "days": "jours",
+      "units": "unités"
+    },
+    "fields": {
+      "maxNegativeFeedbackRate": {
+        "label": "Rétroaction négative maximale",
+        "hint": "Avis à 1 ou 2 étoiles."
+      },
+      "minResponseRate": {
+        "label": "Taux de réponse minimal",
+        "hint": "Conversations clients avec au moins une réponse."
+      },
+      "maxReturnRate": {
+        "label": "Taux de retour maximal",
+        "hint": "Commandes livrées puis remboursées."
+      },
+      "maxCancellationRate": {
+        "label": "Taux d'annulation maximal",
+        "hint": "Commandes annulées par le fournisseur."
+      },
+      "maxStockOutRate": {
+        "label": "Taux de rupture maximal",
+        "hint": "Annonces en rupture parmi celles publiées."
+      },
+      "maxShippingDelayDays": {
+        "label": "Délai d'expédition maximal",
+        "hint": "Entre la confirmation et l'expédition."
+      },
+      "minOnTimeShippingRate": {
+        "label": "Part minimale d'expéditions à temps",
+        "hint": "Commandes expédiées dans le délai."
+      },
+      "minStockPerProduct": {
+        "label": "Stock minimum par produit",
+        "hint": "Chaque produit publié doit en avoir au moins autant."
+      },
+      "evaluationWindowDays": {
+        "label": "Fenêtre d'évaluation",
+        "hint": "Période sur laquelle les indicateurs sont calculés."
+      }
+    }
+  },
+  "content": {
+    "title": "Contenus",
+    "description": "Pages d’aide, questions fréquentes, conditions d’utilisation et pied de page du site et de l’application.",
+    "pages": "Pages",
+    "page": "Page",
+    "published": "Publiée",
+    "draft": "Brouillon",
+    "newPage": "Nouvelle page",
+    "newTitlePlaceholder": "Titre (ex. Livraison)",
+    "newSlugPlaceholder": "Adresse (ex. livraison)",
+    "create": "Créer",
+    "createFailed": "Création impossible.",
+    "noPage": "Aucune page.",
+    "footerTitle": "Pied de page et coordonnées",
+    "siteUnavailable": "Coordonnées indisponibles."
+  },
+  "pageEditor": {
+    "languages": {
+      "fr": "Français",
+      "en": "Anglais",
+      "pt": "Portugais",
+      "ar": "Arabe"
+    },
+    "saved": "{locale, select, fr {Contenu français enregistré.} en {Contenu anglais enregistré.} pt {Contenu portugais enregistré.} ar {Contenu arabe enregistré.} other {Contenu enregistré.}}",
+    "unpublished": "Page retirée du site.",
+    "publishedToast": "Page publiée.",
+    "publishFailed": "Échec de la publication.",
+    "storefrontPath": "Adresse sur le site : {path}",
+    "unpublish": "Retirer du site",
+    "publish": "Publier",
+    "missingTranslation": "{locale, select, en {Pas encore de version anglaise : les visiteurs lisent la version française.} pt {Pas encore de version portugaise : les visiteurs lisent la version française.} ar {Pas encore de version arabe : les visiteurs lisent la version française.} other {Pas encore de version : les visiteurs lisent la version française.}}",
+    "title": "Titre",
+    "summary": "Résumé (sous le titre)",
+    "body": "Contenu",
+    "bodyHint": "« ## Titre » commence une section, « - » une ligne de liste ; une ligne vide sépare les paragraphes. Vous pouvez coller un texte entier.",
+    "sections": "{count, plural, one {# section} other {# sections}}",
+    "sectionsWithTitles": "{count, plural, one {# section} other {# sections}} : {titles}"
+  },
+  "siteSettings": {
+    "contact": {
+      "legalName": "Raison sociale",
+      "tradeName": "Nom commercial",
+      "address": "Adresse",
+      "city": "Ville et pays",
+      "phone": "Téléphone",
+      "whatsapp": "WhatsApp",
+      "email": "Adresse électronique"
+    },
+    "saved": "Pied de page et coordonnées enregistrés.",
+    "tagline": "Texte de présentation",
+    "offline": "Instructions de paiement par virement",
+    "offlineHint": "Montrées à l’acheteur qui choisit « Virement ou dépôt » : banque, titulaire, IBAN / RIB, référence à indiquer. Laisser vide retire cette option du paiement.",
+    "social": "Réseaux sociaux",
+    "socialHint": "Un lien par ligne : « Facebook | https://… »",
+    "columns": "Colonnes du pied de page",
+    "columnsHint": "Une colonne par bloc (séparés par une ligne vide) : le titre sur la première ligne, puis un lien par ligne « Libellé | /adresse »."
+  },
+  "settings": {
+    "title": "Paramètres",
+    "description": "Informations du compte administrateur actuellement connecté.",
+    "account": "Compte administrateur",
+    "role": "Administrateur",
+    "email": "Email",
+    "phone": "Téléphone",
+    "status": "Statut",
+    "id": "Identifiant",
+    "notProvided": "Non renseigné"
+  },
+  "compliance": {
+    "teamOnly": "Réservé à l'équipe Diarama.",
+    "runDone": "Contrôle terminé : {raised, plural, one {# nouveau point} other {# nouveaux points}}, {closed, plural, one {# résolu} other {# résolus}}, {reminders, plural, one {# relance} other {# relances}}.",
+    "runFailed": "Contrôle impossible.",
+    "title": "Conformité",
+    "description": "Documents des fournisseurs, termes interdits et journal d'audit. Contrôle automatique chaque matin.",
+    "descriptionLastRun": "Documents des fournisseurs, termes interdits et journal d'audit. Contrôle automatique chaque matin (dernier : {date}).",
+    "runNow": "Contrôler maintenant",
+    "tiles": {
+      "openFindings": "Points à examiner",
+      "pendingDocuments": "Documents à valider",
+      "expiringDocuments": "Expirent sous 30 jours",
+      "expiredDocuments": "Documents expirés"
+    },
+    "tabs": {
+      "findings": "Points à examiner",
+      "documents": "Documents",
+      "terms": "Termes interdits",
+      "audit": "Journal d'audit"
+    }
+  },
+  "audit": {
+    "before": "Avant",
+    "after": "Après",
+    "unknownAgent": "agent inconnu",
+    "title": "Journal d'audit ({count})",
+    "description": "Qui a fait quoi, quand et depuis où : actions financières, modération, catalogue, réglages. Cliquez sur une ligne pour voir les valeurs avant et après. L'export est limité à 10 000 lignes et lui-même journalisé.",
+    "search": "Rechercher",
+    "searchPlaceholder": "Action, e-mail, boutique, adresse IP…",
+    "from": "Du",
+    "to": "Au",
+    "export": "Exporter en CSV",
+    "columns": {
+      "date": "Date",
+      "action": "Action",
+      "author": "Auteur",
+      "shop": "Boutique",
+      "ip": "Adresse IP"
+    },
+    "system": "Système",
+    "empty": "Aucune entrée."
+  },
+  "documents": {
+    "views": {
+      "PENDING": "À valider",
+      "EXPIRING": "Expirent sous 30 jours ou expirés",
+      "APPROVED": "Validés",
+      "REJECTED": "Refusés"
+    },
+    "rejectReason": "Motif du refus (transmis au fournisseur)",
+    "view": "Vue",
+    "columns": {
+      "document": "Document",
+      "shop": "Boutique",
+      "expiry": "Expiration",
+      "status": "État"
+    },
+    "approve": "Valider",
+    "reject": "Refuser",
+    "empty": "Aucun document."
+  },
+  "findings": {
+    "statuses": {
+      "OPEN": "À examiner",
+      "DISMISSED": "Écartés",
+      "RESOLVED": "Résolus"
+    },
+    "kinds": {
+      "DOCUMENT_EXPIRING": "Document bientôt expiré",
+      "DOCUMENT_EXPIRED": "Document expiré",
+      "BANNED_TERM": "Terme surveillé"
+    },
+    "dismissPrompt": "Pourquoi écarter ce point ? (conservé dans le journal)",
+    "status": "État",
+    "columns": {
+      "finding": "Point",
+      "since": "Depuis"
+    },
+    "note": "Note : {note}",
+    "open": "Ouvrir",
+    "dismiss": "Écarter",
+    "reopen": "Rouvrir",
+    "empty": "Rien à signaler."
+  },
+  "terms": {
+    "title": "Termes interdits ({count})",
+    "description": "Recherchés en mots entiers dans le titre et la description des annonces, sans tenir compte des majuscules ni des accents (« arme » ne touche pas « charme »). « Refusé » empêche l'enregistrement ; « À surveiller » laisse passer et signale l'annonce à l'équipe. Le contrôle du matin vérifie aussi les annonces déjà en ligne.",
+    "term": "Terme",
+    "termPlaceholder": "Terme ou expression",
+    "action": "Action",
+    "reason": "Motif",
+    "reasonPlaceholder": "Motif (facultatif)",
+    "actions": {
+      "BLOCK": "Refusé",
+      "REVIEW": "À surveiller"
+    },
+    "suspend": "Suspendre",
+    "reactivate": "Réactiver",
+    "empty": "Aucun terme pour l'instant."
+  }
+}

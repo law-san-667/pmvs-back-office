@@ -11,6 +11,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { trpc } from "@/server/trpc/client";
+import { useTranslations } from "next-intl";
 
 export type ConfigurationDeleteTarget =
   | { kind: "category"; id: string; label: string }
@@ -27,6 +28,8 @@ export function ConfigurationDeleteDialog({
   onClose: () => void;
   onDeleted: () => Promise<void>;
 }) {
+  const t = useTranslations("adminSettings.deleteDialog");
+  const tc = useTranslations("adminSettings.common");
   const deleteCategory = trpc.admin.deleteCategory.useMutation();
   const deleteSubCategory = trpc.admin.deleteSubCategory.useMutation();
   const deleteCountry = trpc.admin.deleteCountry.useMutation();
@@ -63,15 +66,16 @@ export function ConfigurationDeleteDialog({
     <AlertDialog open onOpenChange={(open) => !open && onClose()}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+          <AlertDialogTitle>{t("title")}</AlertDialogTitle>
           <AlertDialogDescription>
-            « {target.label} » sera supprimé définitivement. Cette opération
-            peut échouer si cet élément est encore utilisé.
+            {t("description", { label: target.label })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         {error && <p className="text-destructive text-sm">{error.message}</p>}
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>
+            {tc("cancel")}
+          </AlertDialogCancel>
           <AlertDialogAction
             variant="destructive"
             disabled={isPending}
@@ -80,7 +84,7 @@ export function ConfigurationDeleteDialog({
               void confirmDelete();
             }}
           >
-            {isPending ? "Suppression..." : "Supprimer"}
+            {isPending ? t("deleting") : tc("delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

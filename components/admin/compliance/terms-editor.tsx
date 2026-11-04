@@ -7,10 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { BannedTerm } from "@/lib/compliance";
 import { trpc } from "@/server/trpc/client";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export function TermsEditor({ canEdit }: { canEdit: boolean }) {
+  const t = useTranslations("adminSettings.terms");
+  const tc = useTranslations("adminSettings.common");
   const utils = trpc.useUtils();
   const terms = trpc.compliance.terms.useQuery();
   const add = trpc.compliance.addTerm.useMutation();
@@ -27,7 +30,7 @@ export function TermsEditor({ canEdit }: { canEdit: boolean }) {
       await utils.compliance.overview.invalidate();
       return true;
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Action impossible.");
+      toast.error(error instanceof Error ? error.message : tc("actionFailed"));
       return false;
     }
   };
@@ -43,33 +46,27 @@ export function TermsEditor({ canEdit }: { canEdit: boolean }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Termes interdits ({terms.data?.length ?? 0})</CardTitle>
-        <CardDescription>
-          Recherchés en mots entiers dans le titre et la description des annonces,
-          sans tenir compte des majuscules ni des accents (« arme » ne touche pas
-          « charme »). « Refusé » empêche l&apos;enregistrement ; « À surveiller »
-          laisse passer et signale l&apos;annonce à l&apos;équipe. Le contrôle du
-          matin vérifie aussi les annonces déjà en ligne.
-        </CardDescription>
+        <CardTitle>{t("title", { count: terms.data?.length ?? 0 })}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {canEdit && (
           <form onSubmit={submit} className="flex flex-wrap items-center gap-2">
-            <Input aria-label="Terme" required minLength={2} maxLength={80} placeholder="Terme ou expression" value={term} onChange={(event) => setTerm(event.target.value)} className="w-56" />
-            <select aria-label="Action" value={action} onChange={(event) => setAction(event.target.value as BannedTerm["action"])} className="border-input bg-background h-9 rounded-md border px-2 text-sm">
-              <option value="BLOCK">Refusé</option>
-              <option value="REVIEW">À surveiller</option>
+            <Input aria-label={t("term")} required minLength={2} maxLength={80} placeholder={t("termPlaceholder")} value={term} onChange={(event) => setTerm(event.target.value)} className="w-56" />
+            <select aria-label={t("action")} value={action} onChange={(event) => setAction(event.target.value as BannedTerm["action"])} className="border-input bg-background h-9 rounded-md border px-2 text-sm">
+              <option value="BLOCK">{t("actions.BLOCK")}</option>
+              <option value="REVIEW">{t("actions.REVIEW")}</option>
             </select>
-            <Input aria-label="Motif" maxLength={200} placeholder="Motif (facultatif)" value={reason} onChange={(event) => setReason(event.target.value)} className="w-64" />
-            <Button type="submit" disabled={add.isPending}>Ajouter</Button>
+            <Input aria-label={t("reason")} maxLength={200} placeholder={t("reasonPlaceholder")} value={reason} onChange={(event) => setReason(event.target.value)} className="w-64" />
+            <Button type="submit" disabled={add.isPending}>{tc("add")}</Button>
           </form>
         )}
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Terme</TableHead>
-              <TableHead>Action</TableHead>
-              <TableHead>Motif</TableHead>
+              <TableHead>{t("term")}</TableHead>
+              <TableHead>{t("action")}</TableHead>
+              <TableHead>{t("reason")}</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -78,16 +75,16 @@ export function TermsEditor({ canEdit }: { canEdit: boolean }) {
               <TableRow key={row.id} className={row.isActive ? "" : "opacity-50"}>
                 <TableCell className="font-medium">{row.term}</TableCell>
                 <TableCell>
-                  {row.action === "BLOCK" ? <Badge variant="destructive">Refusé</Badge> : <Badge variant="secondary">À surveiller</Badge>}
+                  {row.action === "BLOCK" ? <Badge variant="destructive">{t("actions.BLOCK")}</Badge> : <Badge variant="secondary">{t("actions.REVIEW")}</Badge>}
                 </TableCell>
                 <TableCell className="whitespace-normal">{row.reason ?? "—"}</TableCell>
                 <TableCell className="text-end whitespace-nowrap">
                   {canEdit && (
                     <>
                       <Button size="sm" variant="ghost" onClick={() => guarded(() => update.mutateAsync({ id: row.id, isActive: !row.isActive }))}>
-                        {row.isActive ? "Suspendre" : "Réactiver"}
+                        {row.isActive ? t("suspend") : t("reactivate")}
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => guarded(() => remove.mutateAsync({ id: row.id }))}>Supprimer</Button>
+                      <Button size="sm" variant="ghost" onClick={() => guarded(() => remove.mutateAsync({ id: row.id }))}>{tc("delete")}</Button>
                     </>
                   )}
                 </TableCell>
@@ -95,7 +92,7 @@ export function TermsEditor({ canEdit }: { canEdit: boolean }) {
             ))}
             {terms.data && !terms.data.length && (
               <TableRow>
-                <TableCell colSpan={4} className="text-muted-foreground text-center">Aucun terme pour l&apos;instant.</TableCell>
+                <TableCell colSpan={4} className="text-muted-foreground text-center">{t("empty")}</TableCell>
               </TableRow>
             )}
           </TableBody>

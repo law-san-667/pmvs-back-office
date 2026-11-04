@@ -18,15 +18,7 @@ import type {
   QualityKpi,
 } from "@/lib/admin-types";
 import { getMutationErrorMessage } from "@/lib/mutation-error";
-import {
-  QUALITY_CHECK_LABELS,
-  QUALITY_KPI_LABELS,
-  describeKpiDetails,
-  formatKpiThreshold,
-  formatKpiValue,
-  scoreBarClass,
-  scoreClass,
-} from "@/lib/quality-utils";
+import { scoreBarClass, scoreClass } from "@/lib/quality-utils";
 import { formatDate } from "@/lib/seller-dashboard-utils";
 import { trpc } from "@/server/trpc/client";
 import {
@@ -37,6 +29,7 @@ import {
   ShieldOffIcon,
   XCircleIcon,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 const CHECK_KEYS: QualityCheckKey[] = [
@@ -45,14 +38,83 @@ const CHECK_KEYS: QualityCheckKey[] = [
   "productQualityVerified",
 ];
 
+type Translate = ReturnType<typeof useTranslations<"adminAccounts">>;
+
+const formatKpiValue = (t: Translate, kpi: QualityKpi) => {
+  if (kpi.value === null) return "—";
+  if (kpi.unit === "percent")
+    return t("qualityCard.units.percent", { value: kpi.value });
+  if (kpi.unit === "days") return t("qualityCard.units.days", { value: kpi.value });
+  return String(kpi.value);
+};
+
+const formatKpiThreshold = (t: Translate, kpi: QualityKpi) => {
+  const sign = kpi.direction === "max" ? "≤" : "≥";
+  if (kpi.key === "minimumStock") return t("qualityCard.minimumStockThreshold");
+  if (kpi.unit === "percent")
+    return `${sign} ${t("qualityCard.units.percent", { value: kpi.threshold })}`;
+  if (kpi.unit === "days")
+    return `${sign} ${t("qualityCard.units.days", { value: kpi.threshold })}`;
+  return `${sign} ${kpi.threshold}`;
+};
+
+/** Short, human sentence for the figures behind a KPI. */
+const describeKpiDetails = (t: Translate, kpi: QualityKpi) => {
+  const d = kpi.details;
+  switch (kpi.key) {
+    case "negativeFeedback":
+      return t("qualityCard.details.negativeFeedback", {
+        negative: d.negativeReviews ?? 0,
+        total: d.reviews ?? 0,
+      });
+    case "responseRate":
+      return t("qualityCard.details.responseRate", {
+        answered: d.answered ?? 0,
+        total: d.conversations ?? 0,
+      });
+    case "returnRate":
+      return t("qualityCard.details.returnRate", {
+        refunded: d.refunded ?? 0,
+        delivered: d.delivered ?? 0,
+      });
+    case "cancellationRate":
+      return t("qualityCard.details.cancellationRate", {
+        cancelled: d.cancelledBySupplier ?? 0,
+        orders: d.ordersReceived ?? 0,
+        stockOutRate:
+          d.stockOutRate === null || d.stockOutRate === undefined
+            ? "—"
+            : t("qualityCard.units.percent", { value: d.stockOutRate }),
+        listings: d.soldOutListings ?? 0,
+      });
+    case "shippingDelay":
+      return t("qualityCard.details.shippingDelay", {
+        onTime: d.onTime ?? 0,
+        shipped: d.shippedOrders ?? 0,
+        average:
+          d.averageHours === null || d.averageHours === undefined
+            ? "—"
+            : t("qualityCard.units.hours", { value: d.averageHours }),
+        maxDays: String(d.maxDays),
+      });
+    case "minimumStock":
+      return t("qualityCard.details.minimumStock", {
+        under: d.underMinimum ?? 0,
+        minimum: d.minimum ?? 0,
+        published: d.publishedProducts ?? 0,
+      });
+  }
+};
+
 function KpiVerdict({ met }: { met: boolean | null }) {
+  const t = useTranslations("adminAccounts");
   if (met === null) {
     return (
       <Badge
         variant="outline"
         className="border-slate-200 bg-slate-50 text-slate-600"
       >
-        <HelpCircleIcon className="size-3" /> Pas de données
+        <HelpCircleIcon className="size-3" /> {t("qualityCard.noData")}
       </Badge>
     );
   }
@@ -61,34 +123,40 @@ function KpiVerdict({ met }: { met: boolean | null }) {
       variant="outline"
       className="border-green-200 bg-green-50 text-green-700"
     >
-      <CheckCircle2Icon className="size-3" /> Conforme
+      <CheckCircle2Icon className="size-3" /> {t("qualityCard.met")}
     </Badge>
   ) : (
     <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700">
-      <XCircleIcon className="size-3" /> Non conforme
+      <XCircleIcon className="size-3" /> {t("qualityCard.notMet")}
     </Badge>
   );
 }
 
 function KpiRow({ kpi }: { kpi: QualityKpi }) {
-  const label = QUALITY_KPI_LABELS[kpi.key];
+  const t = useTranslations("adminAccounts");
   return (
     <div className="flex flex-col gap-1 border-b py-3 last:border-b-0">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="font-medium">{label.title}</p>
+        <p className="font-medium">{t(`qualityCard.kpi.${kpi.key}.title`)}</p>
         <div className="flex items-center gap-3">
           <span className="text-sm">
-            <span className="font-semibold">{formatKpiValue(kpi)}</span>
+            <span className="font-semibold">{formatKpiValue(t, kpi)}</span>
             <span className="text-muted-foreground">
               {" "}
-              · norme {formatKpiThreshold(kpi)}
+              {t("qualityCard.norm", {
+                threshold: formatKpiThreshold(t, kpi),
+              })}
             </span>
           </span>
           <KpiVerdict met={kpi.met} />
         </div>
       </div>
-      <p className="text-muted-foreground text-xs">{label.description}</p>
-      <p className="text-muted-foreground text-xs">{describeKpiDetails(kpi)}</p>
+      <p className="text-muted-foreground text-xs">
+        {t(`qualityCard.kpi.${kpi.key}.description`)}
+      </p>
+      <p className="text-muted-foreground text-xs">
+        {describeKpiDetails(t, kpi)}
+      </p>
     </div>
   );
 }
@@ -99,6 +167,7 @@ function KpiRow({ kpi }: { kpi: QualityKpi }) {
  * certification decision. Lives on the admin business page.
  */
 export function BusinessQualityCard({ businessId }: { businessId: string }) {
+  const t = useTranslations("adminAccounts");
   const quality = trpc.admin.businessQuality.useQuery({ businessId });
 
   // The form starts from the saved evaluation; remounting it on every
@@ -114,13 +183,13 @@ export function BusinessQualityCard({ businessId }: { businessId: string }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ShieldCheckIcon className="text-primary size-5" />
-          Qualité & certification
+          {t("qualityCard.title")}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {quality.isLoading && (
           <div className="text-muted-foreground flex items-center gap-2 text-sm">
-            <Spinner /> Calcul des indicateurs...
+            <Spinner /> {t("qualityCard.loading")}
           </div>
         )}
         {quality.error && (
@@ -138,6 +207,8 @@ function QualityCardContent({
   businessId: string;
   data: BusinessQuality;
 }) {
+  const t = useTranslations("adminAccounts");
+  const locale = useLocale();
   const utils = trpc.useUtils();
   const saveEvaluation = trpc.admin.updateBusinessEvaluation.useMutation();
   const setCertification = trpc.admin.updateBusinessCertification.useMutation();
@@ -167,7 +238,7 @@ function QualityCardContent({
       setError(
         getMutationErrorMessage(
           mutationError,
-          "Impossible d'enregistrer l'évaluation.",
+          t("qualityCard.saveError"),
         ),
       );
     }
@@ -185,7 +256,7 @@ function QualityCardContent({
       setError(
         getMutationErrorMessage(
           mutationError,
-          "Impossible de modifier la certification.",
+          t("qualityCard.certificationError"),
         ),
       );
     }
@@ -198,7 +269,7 @@ function QualityCardContent({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ShieldCheckIcon className="text-primary size-5" />
-          Qualité & certification
+          {t("qualityCard.title")}
         </CardTitle>
         <CardAction>
           <Badge
@@ -210,8 +281,8 @@ function QualityCardContent({
             }
           >
             {data.evaluation.isCertified
-              ? "Fournisseur certifié"
-              : "Non certifié"}
+              ? t("qualityCard.certified")
+              : t("qualityCard.notCertified")}
           </Badge>
         </CardAction>
       </CardHeader>
@@ -221,15 +292,18 @@ function QualityCardContent({
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="text-muted-foreground text-xs">
-                Score de conformité · {data.metCount} norme(s) respectée(s) sur{" "}
-                {data.judgedCount} évaluable(s) ({data.totalCount} au total)
+                {t("qualityCard.score", {
+                  met: data.metCount,
+                  judged: data.judgedCount,
+                  total: data.totalCount,
+                })}
               </p>
               <p className={`text-3xl font-bold ${scoreClass(data.score)}`}>
                 {data.score} %
               </p>
             </div>
             <p className="text-muted-foreground text-xs">
-              Fenêtre : {data.windowDays} jours
+              {t("qualityCard.window", { days: data.windowDays })}
             </p>
           </div>
           <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
@@ -241,15 +315,16 @@ function QualityCardContent({
           {data.pendingReports > 0 && (
             <p className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800">
               <AlertTriangleIcon className="size-4 shrink-0" />
-              {data.pendingReports} signalement(s) en attente concernant cette
-              entreprise ou ses annonces.
+              {t("qualityCard.pendingReports", { count: data.pendingReports })}
             </p>
           )}
         </div>
 
         {/* Measured KPIs */}
         <div>
-          <p className="mb-1 text-sm font-semibold">Indicateurs mesurés</p>
+          <p className="mb-1 text-sm font-semibold">
+            {t("qualityCard.measured")}
+          </p>
           {data.kpis.map((kpi) => (
             <KpiRow key={kpi.key} kpi={kpi} />
           ))}
@@ -257,7 +332,9 @@ function QualityCardContent({
 
         {/* Manual checks */}
         <div className="flex flex-col gap-3">
-          <p className="text-sm font-semibold">Contrôles de l&apos;équipe</p>
+          <p className="text-sm font-semibold">
+            {t("qualityCard.teamChecks")}
+          </p>
           {CHECK_KEYS.map((key) => (
             <label key={key} className="flex cursor-pointer items-start gap-3">
               <Checkbox
@@ -273,10 +350,10 @@ function QualityCardContent({
               />
               <span>
                 <span className="block text-sm font-medium">
-                  {QUALITY_CHECK_LABELS[key].title}
+                  {t(`qualityCard.check.${key}.title`)}
                 </span>
                 <span className="text-muted-foreground block text-xs">
-                  {QUALITY_CHECK_LABELS[key].description}
+                  {t(`qualityCard.check.${key}.description`)}
                 </span>
               </span>
             </label>
@@ -284,7 +361,7 @@ function QualityCardContent({
           <Textarea
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
-            placeholder="Notes internes sur l'évaluation (facultatif)"
+            placeholder={t("qualityCard.notesPlaceholder")}
             rows={3}
             disabled={isPending}
           />
@@ -295,13 +372,18 @@ function QualityCardContent({
               disabled={isPending}
             >
               {saveEvaluation.isPending
-                ? "Enregistrement..."
-                : "Enregistrer l'évaluation"}
+                ? t("actions.saving")
+                : t("qualityCard.saveEvaluation")}
             </Button>
             {(savedAt || data.evaluation.evaluatedAt) && (
               <span className="text-muted-foreground text-xs">
-                Dernière évaluation :{" "}
-                {formatDate(savedAt ?? data.evaluation.evaluatedAt!, true)}
+                {t("qualityCard.lastEvaluation", {
+                  date: formatDate(
+                    savedAt ?? data.evaluation.evaluatedAt!,
+                    true,
+                    locale,
+                  ),
+                })}
               </span>
             )}
           </div>
@@ -310,11 +392,15 @@ function QualityCardContent({
         {/* Certification */}
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border p-3">
           <div>
-            <p className="text-sm font-semibold">Certification</p>
+            <p className="text-sm font-semibold">
+              {t("qualityCard.certification")}
+            </p>
             <p className="text-muted-foreground text-xs">
               {data.evaluation.isCertified && data.evaluation.certifiedAt
-                ? `Certifié le ${formatDate(data.evaluation.certifiedAt, true)}.`
-                : "Le score guide la décision, il ne la remplace pas."}
+                ? t("qualityCard.certifiedOn", {
+                    date: formatDate(data.evaluation.certifiedAt, true, locale),
+                  })
+                : t("qualityCard.scoreHint")}
             </p>
           </div>
           <Button
@@ -325,11 +411,11 @@ function QualityCardContent({
           >
             {data.evaluation.isCertified ? (
               <>
-                <ShieldOffIcon /> Retirer la certification
+                <ShieldOffIcon /> {t("qualityCard.revoke")}
               </>
             ) : (
               <>
-                <ShieldCheckIcon /> Certifier ce fournisseur
+                <ShieldCheckIcon /> {t("qualityCard.certify")}
               </>
             )}
           </Button>

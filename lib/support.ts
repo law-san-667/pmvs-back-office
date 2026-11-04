@@ -41,7 +41,7 @@ export type SupportTicket = {
   business?: { name: string } | null;
 };
 
-/** French labels for the admin screens; supplier pages use their message files. */
+/** French labels; screens show the texts of their message files and use these for the codes. */
 export const TICKET_STATUS_LABELS: Record<TicketStatus, string> = {
   OPEN: "Ouverte",
   PENDING_CUSTOMER: "En attente de réponse",

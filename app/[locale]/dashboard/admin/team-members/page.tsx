@@ -19,31 +19,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type {
-  BusinessMemberRole,
-  BusinessMemberStatus,
-} from "@/lib/admin-types";
+import type { BusinessMemberRole } from "@/lib/admin-types";
 import { formatDate } from "@/lib/seller-dashboard-utils";
 import { trpc } from "@/server/trpc/client";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 const PAGE_SIZE = 10;
 type RoleFilter = "ALL" | BusinessMemberRole;
 
-const ROLE_LABELS: Record<BusinessMemberRole, string> = {
-  OWNER: "Propriétaire",
-  ADMIN: "Administrateur",
-  MEMBER: "Membre",
-};
-
-const STATUS_LABELS: Record<BusinessMemberStatus, string> = {
-  INVITED: "Invité",
-  ACTIVE: "Actif",
-  SUSPENDED: "Suspendu",
-  REMOVED: "Retiré",
-};
+const ROLES: BusinessMemberRole[] = ["OWNER", "ADMIN", "MEMBER"];
 
 export default function AdminTeamMembersPage() {
+  const t = useTranslations("adminAccounts");
+  const locale = useLocale();
   const [page, setPage] = useState(1);
   const [businessId, setBusinessId] = useState("ALL");
   const [role, setRole] = useState<RoleFilter>("ALL");
@@ -69,13 +58,15 @@ export default function AdminTeamMembersPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Utilisateurs"
-        description="Utilisateurs associés aux entreprises et rôles qui leur sont attribués."
+        title={t("teamMembers.title")}
+        description={t("teamMembers.description")}
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Utilisateurs ({members.data?.total ?? 0})</CardTitle>
+          <CardTitle>
+            {t("teamMembers.count", { count: members.data?.total ?? 0 })}
+          </CardTitle>
           <CardAction>
             <div className="flex items-center gap-2">
               <select
@@ -86,7 +77,7 @@ export default function AdminTeamMembersPage() {
                 }}
                 className="border-input bg-background h-9 max-w-56 rounded-md border px-3 text-sm"
               >
-                <option value="ALL">Toutes les entreprises</option>
+                <option value="ALL">{t("teamMembers.allBusinesses")}</option>
                 {businesses.data?.items.map((business) => (
                   <option key={business.id} value={business.id}>
                     {business.name}
@@ -101,10 +92,10 @@ export default function AdminTeamMembersPage() {
                 }}
                 className="border-input bg-background h-9 rounded-md border px-3 text-sm"
               >
-                <option value="ALL">Tous les rôles</option>
-                {Object.entries(ROLE_LABELS).map(([value, label]) => (
+                <option value="ALL">{t("teamMembers.allRoles")}</option>
+                {ROLES.map((value) => (
                   <option key={value} value={value}>
-                    {label}
+                    {t(`memberRole.${value}`)}
                   </option>
                 ))}
               </select>
@@ -115,12 +106,12 @@ export default function AdminTeamMembersPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Utilisateur</TableHead>
-                <TableHead>Entreprise</TableHead>
-                <TableHead>Rôle</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Ajouté le</TableHead>
-                <TableHead>Mis à jour</TableHead>
+                <TableHead>{t("teamMembers.columns.user")}</TableHead>
+                <TableHead>{t("teamMembers.columns.business")}</TableHead>
+                <TableHead>{t("teamMembers.columns.role")}</TableHead>
+                <TableHead>{t("teamMembers.columns.status")}</TableHead>
+                <TableHead>{t("teamMembers.columns.addedAt")}</TableHead>
+                <TableHead>{t("teamMembers.columns.updatedAt")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -129,8 +120,8 @@ export default function AdminTeamMembersPage() {
                 isLoading={members.isLoading}
                 error={members.error?.message}
                 isEmpty={!members.data?.items.length}
-                loadingLabel="Chargement des utilisateurs..."
-                emptyLabel="Aucun utilisateur trouvé."
+                loadingLabel={t("teamMembers.loading")}
+                emptyLabel={t("teamMembers.empty")}
               />
               {members.data?.items.map((member) => (
                 <TableRow key={member.id}>
@@ -157,17 +148,17 @@ export default function AdminTeamMembersPage() {
                       </span>
                     )}
                   </TableCell>
-                  <TableCell>{ROLE_LABELS[member.role]}</TableCell>
+                  <TableCell>{t(`memberRole.${member.role}`)}</TableCell>
                   <TableCell>
                     <Badge variant="outline">
-                      {STATUS_LABELS[member.status]}
+                      {t(`memberStatus.${member.status}`)}
                     </Badge>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {formatDate(member.createdAt)}
+                    {formatDate(member.createdAt, false, locale)}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {formatDate(member.updatedAt)}
+                    {formatDate(member.updatedAt, false, locale)}
                   </TableCell>
                 </TableRow>
               ))}

@@ -1,0 +1,556 @@
+{
+  "adminOnly": "Administrators only.",
+  "refresh": "Refresh",
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "Overview of the platform's activity and resources.",
+    "pendingModeration": "{count, plural, one {# listing awaiting approval.} other {# listings awaiting approval.}}",
+    "openModeration": "Open moderation",
+    "statsError": "Unable to load statistics: {error}",
+    "view": "View {title}",
+    "metrics": {
+      "totalBusinesses": "Suppliers",
+      "totalListings": "Published products & services",
+      "totalTenders": "Open tenders",
+      "totalOrders": "Orders",
+      "totalTransactions": "Transactions",
+      "totalTeamMembers": "Users"
+    }
+  },
+  "monitoring": {
+    "adminOnly": "Monitoring is restricted to administrators.",
+    "title": "Monitoring",
+    "description": "Status of the platform, scheduled jobs and external services. Alerts are sent by email, WhatsApp or SMS and in the app.",
+    "checkNow": "Check now",
+    "checkResult": "{findings, plural, one {# issue detected} other {# issues detected}}, {opened, plural, one {# new alert} other {# new alerts}}.",
+    "noProblem": "No issues detected.",
+    "checkFailed": "Check failed.",
+    "units": {
+      "kb": "{value} KB",
+      "mb": "{value} MB",
+      "gb": "{value} GB",
+      "everyMinutes": "every {count} min",
+      "daily": "daily",
+      "everyHours": "every {count} h",
+      "uptimeDays": "{days} d {hours} h",
+      "uptimeHours": "{hours} h {minutes} min",
+      "uptimeMinutes": "{minutes} min"
+    },
+    "columns": {
+      "job": "Job",
+      "start": "Start",
+      "duration": "Duration",
+      "state": "Status",
+      "result": "Result",
+      "alert": "Alert",
+      "severity": "Severity",
+      "end": "End",
+      "frequency": "Frequency",
+      "lastRun": "Last run",
+      "lastSuccess": "Last success",
+      "failures24h": "Failures (24 h)"
+    },
+    "runs": {
+      "title": "Recent runs",
+      "titleForJob": "Recent runs: {job}",
+      "hint": "Click a job above to see only its runs.",
+      "allJobs": "All jobs",
+      "empty": "No runs recorded."
+    },
+    "alerts": {
+      "title": "Alert history ({count})",
+      "hint": "An alert closes by itself once the issue is no longer detected; recipients are notified.",
+      "ongoing": "Ongoing",
+      "empty": "No alerts yet.",
+      "none": "No issues detected during the last check.",
+      "since": "Since {first} · last seen {last}"
+    },
+    "status": {
+      "messages24h": "24 h: {sent, plural, one {# sent} other {# sent}}, {failed} failed",
+      "api": "API",
+      "serverErrors": "{count, plural, one {# server error} other {# server errors}}",
+      "online": "Online",
+      "uptime": "Up for {duration}",
+      "requests15m": "15 min: {count, plural, one {# request recorded} other {# requests recorded}}, 95% under {p95} ms",
+      "database": "Database",
+      "dbLatency": "Response in {ms} ms",
+      "dbConnections": "{count, plural, one {# open connection} other {# open connections}}",
+      "largestTable": "Largest table: {name}",
+      "whatsapp": "WhatsApp (Evolution)",
+      "notConfigured": "Not configured",
+      "connected": "Connected",
+      "disconnected": "Disconnected ({state})",
+      "unreachable": "Unreachable",
+      "smsEmail": "SMS and email",
+      "allConfigured": "Configured",
+      "noneConfigured": "Not configured",
+      "emailNotConfigured": "Email not configured",
+      "smsNotConfigured": "SMS not configured",
+      "smsLine": "SMS — {summary}",
+      "updatedAt": "Updated {date}"
+    },
+    "jobState": {
+      "failed": "Failing",
+      "late": "Late",
+      "running": "Running",
+      "never": "Never run",
+      "ok": "OK"
+    },
+    "runStatus": {
+      "failed": "Failed",
+      "running": "Running",
+      "succeeded": "Succeeded"
+    },
+    "severity": {
+      "CRITICAL": "Critical",
+      "WARNING": "Warning"
+    },
+    "settings": {
+      "saved": "Settings saved.",
+      "saveFailed": "Unable to save.",
+      "testResult": "Test message: {sent, plural, one {# channel OK} other {# channels OK}}.",
+      "testResultWithFailures": "Test message: {sent, plural, one {# channel OK} other {# channels OK}}, {failed} failed.",
+      "sendFailed": "Unable to send.",
+      "title": "Recipients and thresholds",
+      "description": "Administrators also receive every alert in the app. An alert that is still ongoing is sent again after the chosen delay. To be notified if the whole API goes down, set up an external monitor (UptimeRobot or Better Stack, both free) on the API's <code>/v1/health</code> endpoint.",
+      "emails": "Emails (one per line)",
+      "phones": "WhatsApp / SMS phone numbers (one per line)",
+      "serverErrors": "Server errors in 15 min",
+      "slow": "Slowness: 95% of requests above (ms)",
+      "databaseSize": "Database size above (MB)",
+      "repeat": "Resend an ongoing alert every (h)",
+      "checkWhatsapp": "Alert when WhatsApp is disconnected",
+      "save": "Save",
+      "sendTest": "Send a test message"
+    },
+    "jobs": {
+      "title": "Scheduled jobs",
+      "hint": "A job is late after three missed runs. After an API restart, daily jobs show as “never run” until their next run."
+    },
+    "jobNames": {
+      "payment-reconciliation": "Online payment reconciliation",
+      "support-sla": "Customer service deadlines",
+      "after-sales-deadlines": "Returns and disputes deadlines",
+      "monitoring": "Monitoring",
+      "compliance-checks": "Compliance checks",
+      "automatic-reports": "Automatic reports",
+      "push-cleanup": "Inactive phones cleanup (push notifications)",
+      "marketing-cleanup": "Unconfirmed marketing sign-ups cleanup",
+      "popular-categories": "Popular categories",
+      "request-log-retention": "Request history cleanup",
+      "search-event-retention": "Searches cleanup"
+    }
+  },
+  "diagnostics": {
+    "loading": "Loading diagnostics...",
+    "adminOnly": "Diagnostics are restricted to administrators.",
+    "title": "Diagnostics",
+    "description": "History of failed requests and writes, with their payloads, to understand and reproduce an issue.",
+    "ranges": {
+      "15m": "15 min",
+      "1h": "1 h",
+      "6h": "6 h",
+      "24h": "24 h",
+      "7d": "7 d",
+      "30d": "30 d"
+    },
+    "live": "Live",
+    "goLive": "Live",
+    "chips": {
+      "status": "Status {status}",
+      "user": "User: {user}",
+      "ip": "IP: {ip}",
+      "route": "Route: {route}",
+      "remove": "Remove {label}",
+      "clearAll": "Clear all"
+    },
+    "history": {
+      "title": "Request history ({count})",
+      "hint": "Searches the path, error message, Request ID, IP, user agent and payload contents.",
+      "searchPlaceholder": "Search (e.g. +22177…, orders, too_small)",
+      "method": "Method",
+      "allMethods": "All methods",
+      "statusClass": "Status class",
+      "allStatuses": "All statuses",
+      "loading": "Loading history...",
+      "empty": "No requests match these criteria."
+    },
+    "columns": {
+      "date": "Date",
+      "request": "Request",
+      "status": "Status",
+      "error": "Error",
+      "user": "User",
+      "duration": "Duration"
+    },
+    "anonymous": "Anonymous",
+    "overview": {
+      "chart": {
+        "success": "Success",
+        "clientErrors": "4xx errors",
+        "serverErrors": "5xx errors"
+      },
+      "bucket": {
+        "days": "{count} d",
+        "hours": "{count} h",
+        "minutes": "{count} min"
+      },
+      "recorded": "Recorded requests",
+      "recordedHint": "Writes + failed reads",
+      "writeFailures": "Write failures",
+      "writeFailuresHint": "{failed} / {total} writes",
+      "clientErrorsHint": "Validation, permissions, not found",
+      "serverErrorsHint": "Server-side failures",
+      "affectedUsers": "Affected users",
+      "affectedUsersHint": "Signed in, with at least one error",
+      "latency": "Avg. latency / p95",
+      "p95": "p95: {value}",
+      "activityTitle": "Activity over time",
+      "activityDescription": "Recorded requests",
+      "activityDescriptionBucket": "Recorded requests, per {size} interval",
+      "codes": "Codes:",
+      "topRoutes": "Most failing routes",
+      "topRoutesHint": "Click to filter the history.",
+      "noRequests": "No requests in this period.",
+      "routeFailures": "{failures}/{total} failed",
+      "routeSummary": "{error} · {duration} avg.",
+      "noError": "No errors",
+      "topErrors": "Most frequent errors",
+      "topErrorsHint": "Click to open the most recent occurrence.",
+      "noErrors": "No errors in this period. 🎉",
+      "lastSeen": "Last: {date}"
+    },
+    "detail": {
+      "copied": "{label} copied",
+      "copyFailed": "Copying is not supported in this browser.",
+      "copy": "Copy",
+      "copyField": "Copy {label}",
+      "content": "Content",
+      "title": "Request details",
+      "loading": "Loading...",
+      "requestId": "Request ID",
+      "route": "Route",
+      "user": "User",
+      "deletedUser": "{id} (deleted)",
+      "ip": "IP",
+      "userAgent": "User agent",
+      "copyCurl": "Copy as cURL",
+      "userRequests": "Requests from this user",
+      "sameIp": "Same IP",
+      "sameRoute": "Same route",
+      "tabs": {
+        "request": "Request",
+        "response": "Response",
+        "headers": "Headers",
+        "error": "Error"
+      },
+      "queryParams": "Query parameters",
+      "body": "Request body (secrets masked)",
+      "noBody": "No request body.",
+      "successNotStored": "Successful responses are not recorded: they may contain tokens.",
+      "noResponse": "No response body.",
+      "noHeaders": "No headers.",
+      "noStack": "No stack trace: the error was returned by the API, not thrown.",
+      "noError": "No error."
+    }
+  },
+  "pages": {
+    "traffic": {
+      "title": "Traffic and conversion",
+      "description": "Product and shop views, add-to-carts and orders across the platform. Bots filtered out, no visitor data.",
+      "loading": "Loading statistics..."
+    },
+    "reports": {
+      "title": "Reports",
+      "description": "Platform-wide reports: build them, or receive them automatically by email."
+    },
+    "training": {
+      "title": "Training",
+      "description": "Courses offered to sellers: videos, PDFs and texts, by level."
+    },
+    "marketing": {
+      "title": "Marketing emails",
+      "description": "Campaigns sent to subscribers who confirmed their sign-up, and proof of their consent."
+    },
+    "vendability": {
+      "title": "Sellability",
+      "description": "The platform's best products, the score grid and the supplier questionnaire.",
+      "tabs": {
+        "top": "Best products",
+        "grid": "Score grid",
+        "questionnaire": "Questionnaire"
+      }
+    },
+    "afterSales": {
+      "title": "Returns and disputes",
+      "description": "Rule on cases the seller refused or left unanswered, and apply the ones they accepted.",
+      "loading": "Loading…",
+      "empty": "No cases.",
+      "order": "Order #{reference}",
+      "orderWithShop": "Order #{reference} · {shop}"
+    },
+    "support": {
+      "title": "Customer service",
+      "description": "Requests from buyers and sellers. First response time: 4 h for payments and orders, 24 h otherwise.",
+      "filters": {
+        "open": "Open",
+        "mine": "My requests",
+        "none": "Unassigned",
+        "overdue": "Overdue",
+        "resolved": "Resolved"
+      },
+      "columns": {
+        "request": "Request",
+        "requester": "Requester",
+        "subject": "Topic",
+        "priority": "Priority",
+        "responseDue": "Response due",
+        "status": "Status"
+      },
+      "loading": "Loading requests...",
+      "empty": "No requests.",
+      "answered": "Answered"
+    }
+  },
+  "marketing": {
+    "tabs": {
+      "campaigns": "Campaigns",
+      "subscribers": "Subscribers"
+    },
+    "newCampaign": "New campaign",
+    "cancel": "Cancel",
+    "toast": {
+      "draftSaved": "Draft saved.",
+      "testSent": "Test email sent to {to}.",
+      "sendStarted": "Sending started.",
+      "sendStopped": "Sending stopped.",
+      "draftDeleted": "Draft deleted."
+    },
+    "form": {
+      "createdBy": "{status} · created by {name} on {date}",
+      "intro": "Write the email, choose the audience, send yourself a test, then start sending.",
+      "subject": "Subject",
+      "preheader": "Preview text (optional)",
+      "preheaderPlaceholder": "Shown after the subject in the inbox",
+      "body": "Message",
+      "bodyHint": "A blank line between paragraphs, “##” at the start of a line for a heading, “-” for a list. https:// addresses become links. The reason for receiving, the unsubscribe link and the company address are added automatically.",
+      "ctaLabel": "Button text (optional)",
+      "ctaLabelPlaceholder": "See the offers",
+      "ctaUrl": "Button link",
+      "ctaUrlPlaceholder": "/listings or https://…",
+      "audience": "Audience",
+      "subscribers": "Subscribers",
+      "countries": "Countries (codes, optional)",
+      "countriesPlaceholder": "SN, CI, ML — empty: all countries",
+      "languages": "Subscriber language (none checked: all)",
+      "audienceCount": "{count, plural, one {# subscriber} other {# subscribers}} in this audience.",
+      "audienceCounting": "Calculating audience…",
+      "saving": "Saving…",
+      "saveDraft": "Save draft",
+      "sendTest": "Send me a test",
+      "sendEllipsis": "Send…",
+      "delete": "Delete"
+    },
+    "progress": {
+      "sentOf": "{sent, plural, one {# sent} other {# sent}} of {total}",
+      "failed": "{count, plural, one {# failure} other {# failures}} · ",
+      "skipped": "{count, plural, one {# not sent} other {# not sent}} (unsubscribed or sending stopped) · ",
+      "startedBy": "started by {name} on {date}",
+      "finished": ", finished on {date}",
+      "label": "Sending progress",
+      "stop": "Stop sending"
+    },
+    "confirmSend": {
+      "title": "Send this campaign?",
+      "description": "“{subject}” will go to {count, plural, one {# subscriber} other {# subscribers}} ({audience}). The draft is saved before sending. Once started, sending can be stopped but emails already sent cannot be recalled.",
+      "confirm": "Send"
+    },
+    "confirmDelete": {
+      "title": "Delete this draft?",
+      "description": "It has not been sent to anyone; it will be permanently deleted."
+    },
+    "campaigns": {
+      "intro": "Sent only to people who have confirmed their subscription.",
+      "subject": "Subject",
+      "status": "Status",
+      "audience": "Audience",
+      "sent": "Sent",
+      "date": "Date",
+      "empty": "No campaigns yet."
+    },
+    "consent": {
+      "unsubscribed": "Address unsubscribed.",
+      "description": "Proof of consent: every request, confirmation and unsubscription, with the accepted text.",
+      "by": "Via {source}",
+      "ip": " · IP address {ip}",
+      "quote": "“{text}”",
+      "browser": "Browser: {userAgent}",
+      "confirm": "Unsubscribe this address at the person's request? They will have to subscribe again themselves to receive campaigns.",
+      "unsubscribe": "Unsubscribe",
+      "unsubscribeOnRequest": "Unsubscribe at their request…"
+    },
+    "subscribers": {
+      "searchLabel": "Search for an address",
+      "searchPlaceholder": "Search for an address…",
+      "status": "Status",
+      "allStatuses": "All statuses",
+      "email": "Address",
+      "language": "Language",
+      "country": "Country",
+      "account": "Account",
+      "subscribedAt": "Subscribed on",
+      "yes": "Yes",
+      "no": "No",
+      "consent": "Consent",
+      "empty": "No addresses.",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "audience": {
+      "ALL": "All subscribers",
+      "BUYERS": "Buyers (at least one order)",
+      "SELLERS": "Sellers (shop members)",
+      "ACCOUNTS": "Subscribers with an account",
+      "NO_ACCOUNT": "Subscribers without an account"
+    },
+    "language": {
+      "fr": "French",
+      "en": "English",
+      "pt": "Portuguese",
+      "ar": "Arabic"
+    },
+    "campaignStatus": {
+      "DRAFT": "Draft",
+      "SENDING": "Sending",
+      "SENT": "Sent",
+      "CANCELLED": "Stopped"
+    },
+    "subscriberStatus": {
+      "PENDING": "Awaiting confirmation",
+      "SUBSCRIBED": "Subscribed",
+      "UNSUBSCRIBED": "Unsubscribed"
+    },
+    "consentEvent": {
+      "REQUESTED": "Subscription request",
+      "CONFIRMED": "Consent confirmed",
+      "UNSUBSCRIBED": "Unsubscription"
+    },
+    "consentSource": {
+      "WEB": "website form",
+      "MOBILE": "mobile app",
+      "ACCOUNT": "website account",
+      "EMAIL_LINK": "link received by email",
+      "ONE_CLICK": "email client button",
+      "ADMIN": "administrator, at the person's request"
+    }
+  },
+  "training": {
+    "lessonAdded": "Lesson added.",
+    "uploadFailed": "Upload failed.",
+    "addLessonTitle": "Add a lesson",
+    "title": "Title",
+    "type": "Type",
+    "durationMinutes": "Duration (minutes)",
+    "text": "Text",
+    "uploadVideo": "Upload the video (100 MB max)",
+    "uploadPdf": "Upload the PDF (10 MB max)",
+    "orUrl": "Or its URL",
+    "uploadingFile": "Uploading file...",
+    "addLesson": "Add lesson",
+    "published": "Published",
+    "draft": "Draft",
+    "courseStats": "{lessons, plural, one {# lesson} other {# lessons}}, {learners, plural, one {# seller has started} other {# sellers have started}}.",
+    "close": "Close",
+    "manageLessons": "Manage lessons",
+    "unpublish": "Unpublish",
+    "publish": "Publish",
+    "delete": "Delete",
+    "moveUp": "Move {title} up",
+    "moveDown": "Move {title} down",
+    "removeLesson": "Remove {title}",
+    "deleteTitle": "Delete this course?",
+    "deleteDescription": "“{title}”, its lessons and the sellers' progress will be permanently deleted.",
+    "cancel": "Cancel",
+    "courseCreated": "Course created.",
+    "newCourse": "New course",
+    "newCourseHint": "Sellers cannot see it until it is published.",
+    "summary": "Summary",
+    "level": "Level",
+    "create": "Create"
+  },
+  "vendabilityGrid": {
+    "saved": "Grid saved.",
+    "loading": "Loading...",
+    "weightsTitle": "Criteria weights",
+    "weightsDescription": "The score is the weighted average of the criteria that can be assessed. A criterion without data (no reviews, too few views) does not penalise the product. A weight of 0 removes the criterion. These values are provisional until the final grid is set.",
+    "criterion": {
+      "sales": "Units ordered",
+      "conversion": "Conversion rate",
+      "cartRate": "Add-to-cart rate",
+      "views": "Views",
+      "rating": "Buyer rating",
+      "availability": "Availability",
+      "completeness": "Listing quality",
+      "supplier": "Supplier questionnaire"
+    },
+    "totalWeight": "Total weight: {total}. Each criterion counts for its share of this total.",
+    "targetsTitle": "Targets and thresholds",
+    "targetsDescription": "A product that reaches the target scores 100 points on the criterion.",
+    "targetUnits": "Units ordered (target)",
+    "targetViews": "Views (target)",
+    "targetConversion": "Conversion (target, %)",
+    "targetCart": "Add to cart (target, %)",
+    "windowDays": "Period considered (days)",
+    "minViews": "Minimum views to assess rates",
+    "minScore": "Minimum score to be ranked",
+    "saving": "Saving...",
+    "save": "Save grid"
+  },
+  "vendabilityQuestionnaire": {
+    "yes": "Yes",
+    "no": "No",
+    "draftTitle": "Version {version} in preparation",
+    "draftDescription": "Hidden from suppliers until it is published. Once published, it can no longer be changed.",
+    "title": "Title",
+    "question": "Question {number}",
+    "moveUp": "Move question {number} up",
+    "moveDown": "Move question {number} down",
+    "removeQuestion": "Remove question {number}",
+    "questionLabelAria": "Wording of question {number}",
+    "questionLabel": "Question wording",
+    "type": "Type",
+    "typeChoice": "Choice (scored)",
+    "typeText": "Free text (not scored)",
+    "weight": "Weight in the result",
+    "required": "Required",
+    "options": "Answer options and points (0 to 100)",
+    "optionAria": "Answer {option} of question {number}",
+    "optionPointsAria": "Points for answer {option} of question {number}",
+    "removeOptionAria": "Remove answer {option} of question {number}",
+    "addOption": "Add an answer",
+    "addQuestion": "Add a question",
+    "draftSaved": "Draft saved.",
+    "saveDraft": "Save draft",
+    "publish": "Publish",
+    "draftDeleted": "Draft deleted.",
+    "discardDraft": "Discard this draft",
+    "publishTitle": "Publish version {version}?",
+    "publishDescription": "It replaces the current version and can no longer be changed. All active suppliers will be asked to answer it.",
+    "cancel": "Cancel",
+    "published": "Version published.",
+    "responsesTitle": "Answers to version {version}",
+    "responsesCount": "{count, plural, one {# supplier has answered.} other {# suppliers have answered.}}",
+    "loading": "Loading...",
+    "shop": "Shop",
+    "score": "Result",
+    "newVersion": "Prepare a new version",
+    "versions": "Versions",
+    "versionLine": "<b>Version {version}</b>: {title}, {count, plural, one {# question} other {# questions}}",
+    "status": {
+      "DRAFT": "In preparation",
+      "PUBLISHED": "Current",
+      "ARCHIVED": "Archived"
+    },
+    "viewResponses": "View answers"
+  }
+}

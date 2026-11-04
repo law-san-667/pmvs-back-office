@@ -13,29 +13,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useRouter } from "@/i18n/navigation";
-import {
-  TICKET_CATEGORY_LABELS,
-  TICKET_PRIORITY_LABELS,
-  TICKET_STATUS_LABELS,
-  ticketReference,
-} from "@/lib/support";
+import { intlLocale } from "@/i18n/config";
+import { ticketReference } from "@/lib/support";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/server/trpc/client";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 type Filter = "open" | "mine" | "none" | "overdue" | "resolved";
 
-const FILTERS: Record<Filter, string> = {
-  open: "En cours",
-  mine: "Mes demandes",
-  none: "Non attribuées",
-  overdue: "En retard",
-  resolved: "Résolues",
-};
+const FILTERS: Filter[] = ["open", "mine", "none", "overdue", "resolved"];
 
 /** Team queue: buyer and seller requests, most urgent first. */
 export default function AdminSupportPage() {
   const router = useRouter();
+  const t = useTranslations("adminSystem");
+  const tSupport = useTranslations("support");
+  const locale = useLocale();
   const [filter, setFilter] = useState<Filter>("open");
   const queue = trpc.support.queue.useQuery({
     page: 1,
@@ -48,11 +42,11 @@ export default function AdminSupportPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Service client"
-        description="Demandes des acheteurs et des vendeurs. Délai de première réponse : 4 h pour les paiements et commandes, 24 h sinon."
+        title={t("pages.support.title")}
+        description={t("pages.support.description")}
       />
       <div className="flex flex-wrap gap-2">
-        {(Object.keys(FILTERS) as Filter[]).map((key) => (
+        {FILTERS.map((key) => (
           <button
             key={key}
             type="button"
@@ -62,7 +56,7 @@ export default function AdminSupportPage() {
               filter === key && "bg-primary text-primary-foreground",
             )}
           >
-            {FILTERS[key]}
+            {t(`pages.support.filters.${key}`)}
           </button>
         ))}
       </div>
@@ -71,12 +65,12 @@ export default function AdminSupportPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Demande</TableHead>
-                <TableHead>Demandeur</TableHead>
-                <TableHead>Sujet</TableHead>
-                <TableHead>Priorité</TableHead>
-                <TableHead>Réponse attendue</TableHead>
-                <TableHead>Statut</TableHead>
+                <TableHead>{t("pages.support.columns.request")}</TableHead>
+                <TableHead>{t("pages.support.columns.requester")}</TableHead>
+                <TableHead>{t("pages.support.columns.subject")}</TableHead>
+                <TableHead>{t("pages.support.columns.priority")}</TableHead>
+                <TableHead>{t("pages.support.columns.responseDue")}</TableHead>
+                <TableHead>{t("pages.support.columns.status")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -85,8 +79,8 @@ export default function AdminSupportPage() {
                 isLoading={queue.isLoading}
                 error={queue.error?.message}
                 isEmpty={!queue.data?.items.length}
-                loadingLabel="Chargement des demandes..."
-                emptyLabel="Aucune demande."
+                loadingLabel={t("pages.support.loading")}
+                emptyLabel={t("pages.support.empty")}
               />
               {queue.data?.items.map((ticket) => {
                 const late =
@@ -112,28 +106,28 @@ export default function AdminSupportPage() {
                         : "—"}
                       {ticket.business && (
                         <p className="text-muted-foreground text-xs">
-                          Boutique {ticket.business.name}
+                          {tSupport("ticket.shop", { name: ticket.business.name })}
                         </p>
                       )}
                     </TableCell>
                     <TableCell>
-                      {TICKET_CATEGORY_LABELS[ticket.category]}
+                      {tSupport(`category.${ticket.category}`)}
                     </TableCell>
                     <TableCell>
-                      {TICKET_PRIORITY_LABELS[ticket.priority]}
+                      {tSupport(`priority.${ticket.priority}`)}
                     </TableCell>
                     <TableCell
                       className={cn(late && "font-medium text-red-600")}
                     >
                       {ticket.firstRespondedAt
-                        ? "Répondu"
+                        ? t("pages.support.answered")
                         : new Date(ticket.firstResponseDueAt).toLocaleString(
-                            "fr-FR",
+                            intlLocale(locale),
                           )}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">
-                        {TICKET_STATUS_LABELS[ticket.status]}
+                        {tSupport(`status.${ticket.status}`)}
                       </Badge>
                     </TableCell>
                   </TableRow>

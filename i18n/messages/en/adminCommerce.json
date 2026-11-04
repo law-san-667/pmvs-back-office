@@ -1,0 +1,282 @@
+{
+  "administration": "Administration",
+  "common": {
+    "search": "Search...",
+    "loading": "Loading…",
+    "failed": "Failed.",
+    "cancel": "Cancel",
+    "approve": "Approve",
+    "reject": "Reject",
+    "back": "Back"
+  },
+  "listingStatus": {
+    "DRAFT": "Draft",
+    "PUBLISHED": "Published",
+    "PAUSED": "Paused",
+    "SOLD": "Sold out",
+    "ARCHIVED": "Archived"
+  },
+  "listings": {
+    "title": "Product & service moderation",
+    "description": "Every listing published by a supplier must be approved before buyers can see it.",
+    "queue": {
+      "PENDING": "To review",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "ALL": "All"
+    },
+    "withCount": "{label} ({count})",
+    "filterType": "Filter by type",
+    "type": {
+      "ALL": "All",
+      "PRODUCT": "Products",
+      "SERVICE": "Services"
+    },
+    "columns": {
+      "item": "Item",
+      "type": "Type",
+      "country": "Country",
+      "price": "Price",
+      "submittedAt": "Submitted on",
+      "publication": "Publication",
+      "moderation": "Moderation",
+      "actions": "Actions"
+    },
+    "loading": "Loading catalogue...",
+    "emptyPending": "No listings awaiting review.",
+    "empty": "No products or services found.",
+    "service": "Service",
+    "product": "Product",
+    "onQuote": "On quote",
+    "actionsFor": "Actions for {title}",
+    "review": "Review"
+  },
+  "listing": {
+    "loading": "Loading listing...",
+    "notFound": "Listing not found.",
+    "backToModeration": "Back to moderation",
+    "submittedService": "Service submitted on {date}",
+    "submittedProduct": "Product submitted on {date}",
+    "rejectionReason": "Rejection reason sent to the seller",
+    "media": "Media ({count})",
+    "offer": "Offer",
+    "price": "Price",
+    "stock": "Stock",
+    "location": "Location",
+    "condition": "Condition",
+    "supplier": "Supplier",
+    "lastModeration": "Last moderation",
+    "description": "Description",
+    "noDescription": "No description provided."
+  },
+  "moderationDialog": {
+    "rejectTitle": "Reject listing",
+    "approveTitle": "Approve listing",
+    "rejectDescription": "“{title}” will stay hidden from buyers. The seller will receive the reason below.",
+    "approveDescription": "“{title}” will be visible on the marketplace immediately.",
+    "reason": "Rejection reason",
+    "reasonPlaceholder": "Explain to the seller what needs to be fixed.",
+    "sending": "Sending...",
+    "presets": {
+      "photos": "Poor-quality or non-compliant photos",
+      "description": "Insufficient or misleading description",
+      "prohibited": "Product not allowed for sale on the platform",
+      "price": "Obviously incorrect price",
+      "category": "Unsuitable category"
+    }
+  },
+  "moderation": {
+    "title": "Moderation",
+    "description": "User reports and customer reviews. Every decision is recorded.",
+    "tabs": {
+      "reports": "Reports",
+      "reviews": "Reviews"
+    },
+    "targetType": {
+      "LISTING": "Listing",
+      "REVIEW": "Review",
+      "BUSINESS": "Shop",
+      "USER": "User"
+    },
+    "hide": {
+      "LISTING": "Remove listing",
+      "REVIEW": "Hide review",
+      "BUSINESS": "Suspend shop",
+      "USER": "Suspend account"
+    },
+    "reason": {
+      "FRAUD": "Fraud",
+      "PROHIBITED_PRODUCT": "Prohibited product",
+      "COUNTERFEIT": "Counterfeit",
+      "OFFENSIVE": "Offensive content",
+      "SPAM": "Spam",
+      "WRONG_INFORMATION": "False information",
+      "OTHER": "Other"
+    },
+    "reportStatus": {
+      "PENDING": "To handle",
+      "RESOLVED": "Handled",
+      "DISMISSED": "Dismissed"
+    },
+    "noReports": "No reports.",
+    "deletedContent": "Deleted content",
+    "quote": "“{text}”",
+    "decision": "Decision: {note}",
+    "dismiss": "Nothing to report",
+    "dismissed": "Report dismissed.",
+    "reasonPrompt": "Reason (sent to the author):",
+    "removed": "Content removed.",
+    "reviewPublishing": "Review publishing",
+    "settingSaved": "Setting saved.",
+    "mode": {
+      "post": "Published immediately (removed if reported)",
+      "pre": "Published after approval by a moderator"
+    },
+    "reviewStatus": {
+      "PENDING": "Pending",
+      "APPROVED": "Published",
+      "REJECTED": "Hidden"
+    },
+    "noReviews": "No reviews.",
+    "publish": "Publish",
+    "published": "Review published.",
+    "hideReview": "Hide",
+    "hidden": "Review hidden."
+  },
+  "advertising": {
+    "title": "Ads and banners",
+    "description": "Home page banners and platform ads, plus supplier requests to review.",
+    "descriptionPending": "Home page banners and platform ads, plus supplier requests to review ({count} pending).",
+    "cardTitle": "Ads ({count})",
+    "status": {
+      "ALL": "All statuses",
+      "PENDING": "To review",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected"
+    },
+    "owner": {
+      "ALL": "All advertisers",
+      "business": "Suppliers"
+    },
+    "allPlacements": "All placements",
+    "new": "New ad",
+    "approved": "Ad approved.",
+    "published": "Ad published.",
+    "rejectTitle": "Reject “{title}”",
+    "reasonPlaceholder": "Reason sent to the supplier",
+    "rejected": "Ad rejected; the supplier has been notified."
+  },
+  "tenders": {
+    "title": "Tenders",
+    "description": "Open tenders visible on the platform.",
+    "cardTitle": "Tenders ({count})",
+    "allTypes": "All types",
+    "columns": {
+      "title": "Title",
+      "type": "Type",
+      "publisher": "Publisher",
+      "location": "Location",
+      "budget": "Budget",
+      "deadline": "Deadline",
+      "status": "Status"
+    },
+    "loading": "Loading tenders...",
+    "empty": "No tenders found.",
+    "individual": "Individual",
+    "budgetUnspecified": "Not specified"
+  },
+  "orders": {
+    "title": "Orders",
+    "description": "All orders recorded on the platform.",
+    "cardTitle": "Orders ({count})",
+    "columns": {
+      "order": "Order",
+      "client": "Customer",
+      "business": "Business",
+      "date": "Date",
+      "total": "Total",
+      "status": "Status",
+      "details": "Details"
+    },
+    "loading": "Loading orders...",
+    "empty": "No orders recorded.",
+    "view": "View order"
+  },
+  "payouts": {
+    "title": "Payments and payouts",
+    "description": "Confirm the transfers received, then pay out the suppliers' share once the order is delivered. Every decision is recorded.",
+    "confirmed": "Payment for order {ref} confirmed.",
+    "rejectPrompt": "Rejection reason (sent to the buyer):",
+    "rejectDefault": "No transfer received.",
+    "rejected": "Payment rejected, order cancelled.",
+    "released": "{count, plural, one {# payout made.} other {# payouts made.}}",
+    "processingToast": "{count, plural, one {# payout in progress with PayDunya.} other {# payouts in progress with PayDunya.}}",
+    "offlineTitle": "Offline payments to confirm ({count})",
+    "noPending": "No pending payments.",
+    "offlineOrder": "{amount} · Order <link>{ref}</link>",
+    "orderedBy": "{buyer} → {business} · ordered on {date}",
+    "transferReference": "Transfer reference",
+    "moneyReceived": "Money received",
+    "heldTitle": "Held supplier shares ({count})",
+    "processing": "· {count, plural, one {# payout in progress with PayDunya} other {# payouts in progress with PayDunya}}",
+    "onlyDelivered": "Delivered orders only",
+    "noShares": "No shares to pay out.",
+    "shareTo": "{amount} to {business}",
+    "deduction": "(share of {share} minus {refunded} refunded)",
+    "orderLine": "Order {ref} · {state} · {account}",
+    "delivered": "delivered",
+    "notDelivered": "not delivered yet",
+    "noAccount": "no payout account",
+    "selection": "{count, plural, one {# share} other {# shares}} · total <strong>{total}</strong>",
+    "payoutReference": "Reference of the transfer made",
+    "validatePayout": "Confirm payout",
+    "paydunyaHint": "Pays the net share to the supplier's mobile money account, from Diarama's PayDunya balance.",
+    "payByPaydunya": "Pay via PayDunya"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "description": "LawPay payments, supplier payouts and the platform's accounting ledger.",
+    "ledger": {
+      "SALES": "Sales collected",
+      "PROVIDER_FEES": "LawPay fees",
+      "PLATFORM_REVENUE": "Platform commissions",
+      "SUPPLIER_PAYABLE": "Owed to suppliers",
+      "SUPPLIER_PAID": "Paid out to suppliers",
+      "SUPPLIER_RECEIVABLE": "To recover (refunds)",
+      "REFUNDS": "Customer refunds"
+    },
+    "entries": "{count, plural, one {# entry} other {# entries}}",
+    "summary": {
+      "succeeded": "{count, plural, one {# successful payment} other {# successful payments}}",
+      "pending": "{count} pending",
+      "failed": "{count} failed/cancelled",
+      "refunded": "{count} refunded",
+      "payoutsPending": "{count, plural, one {# payout in progress} other {# payouts in progress}}",
+      "payoutsFailed": "{count, plural, one {# failed payout} other {# failed payouts}}"
+    },
+    "cardTitle": "Payments ({count})",
+    "filterPaymentStatus": "Filter by payment status",
+    "allPayments": "All payments",
+    "filterPayoutStatus": "Filter by payout status",
+    "allPayouts": "All payouts",
+    "searchPlaceholder": "Reference LP-...",
+    "columns": {
+      "reference": "Reference",
+      "payer": "Payer",
+      "method": "Method",
+      "amount": "Amount",
+      "lawpayFees": "LawPay fees",
+      "commission": "Commission",
+      "supplierNet": "Supplier net",
+      "payment": "Payment",
+      "payout": "Payout",
+      "date": "Date",
+      "actions": "Actions"
+    },
+    "loading": "Loading transactions...",
+    "empty": "No transactions found.",
+    "cash": "Cash",
+    "orderRef": "Order {ref}",
+    "resync": "Resync with LawPay"
+  }
+}

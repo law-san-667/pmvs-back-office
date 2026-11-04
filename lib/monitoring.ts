@@ -65,25 +65,3 @@ export type MonitoringSettings = {
   checkWhatsapp: boolean;
   repeatHours: number;
 };
-
-export const formatBytes = (bytes: number) => {
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} Ko`;
-  if (bytes < 1024 ** 3) return `${(bytes / 1024 / 1024).toFixed(1)} Mo`;
-  return `${(bytes / 1024 ** 3).toFixed(2)} Go`;
-};
-
-export const formatEvery = (minutes: number | null) => {
-  if (!minutes) return "—";
-  if (minutes < 60) return `toutes les ${minutes} min`;
-  if (minutes === 24 * 60) return "chaque jour";
-  return `toutes les ${Math.round(minutes / 60)} h`;
-};
-
-export const formatUptime = (seconds: number) => {
-  const days = Math.floor(seconds / 86_400);
-  const hours = Math.floor((seconds % 86_400) / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  if (days) return `${days} j ${hours} h`;
-  if (hours) return `${hours} h ${minutes} min`;
-  return `${minutes} min`;
-};

@@ -28,19 +28,13 @@ import type {
   PayoutStatus,
 } from "@/lib/admin-types";
 import {
-  LEDGER_ACCOUNT_LABELS,
   PAYMENT_STATUS_CLASSES,
-  PAYMENT_STATUS_LABELS,
   PAYOUT_STATUS_CLASSES,
-  PAYOUT_STATUS_LABELS,
 } from "@/lib/payment-utils";
-import {
-  formatDate,
-  formatMoney,
-  PAYMENT_METHOD_LABELS,
-} from "@/lib/seller-dashboard-utils";
+import { formatDate, formatMoney } from "@/lib/seller-dashboard-utils";
 import { trpc } from "@/server/trpc/client";
 import { RefreshCwIcon, SearchIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useDeferredValue, useState } from "react";
 
 const PAGE_SIZE = 10;
@@ -58,6 +52,10 @@ const HEADLINE_ACCOUNTS: LedgerAccount[] = [
 ];
 
 export default function AdminTransactionsPage() {
+  const t = useTranslations("adminCommerce");
+  const tTransactions = useTranslations("transactions");
+  const tOrders = useTranslations("orders");
+  const locale = useLocale();
   const utils = trpc.useUtils();
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<StatusFilter>("ALL");
@@ -90,8 +88,8 @@ export default function AdminTransactionsPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Transactions"
-        description="Paiements LawPay, reversements aux fournisseurs et journal comptable de la plateforme."
+        title={t("transactions.title")}
+        description={t("transactions.description")}
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -101,7 +99,7 @@ export default function AdminTransactionsPage() {
             <Card key={account}>
               <CardHeader>
                 <CardTitle className="text-muted-foreground text-sm font-normal">
-                  {LEDGER_ACCOUNT_LABELS[account]}
+                  {t(`transactions.ledger.${account}`)}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -110,12 +108,18 @@ export default function AdminTransactionsPage() {
                 ) : (
                   rows.map((row) => (
                     <p key={row.currency} className="text-2xl font-bold">
-                      {formatMoney(Math.abs(row.balanceMinor), row.currency)}
+                      {formatMoney(
+                        Math.abs(row.balanceMinor),
+                        row.currency,
+                        locale,
+                      )}
                     </p>
                   ))
                 )}
                 <p className="text-muted-foreground text-sm">
-                  {rows.reduce((sum, row) => sum + row.entryCount, 0)} écriture(s)
+                  {t("transactions.entries", {
+                    count: rows.reduce((sum, row) => sum + row.entryCount, 0),
+                  })}
                 </p>
               </CardContent>
             </Card>
@@ -125,24 +129,43 @@ export default function AdminTransactionsPage() {
 
       {summary.data && (
         <p className="text-muted-foreground text-sm">
-          {summary.data.payments.succeeded} paiement(s) réussi(s) ·{" "}
-          {summary.data.payments.pending} en attente ·{" "}
-          {summary.data.payments.failed} échoué(s)/annulé(s) ·{" "}
-          {summary.data.payments.refunded} remboursé(s) ·{" "}
-          {summary.data.payments.payoutsPending} reversement(s) en cours ·{" "}
+          {t("transactions.summary.succeeded", {
+            count: summary.data.payments.succeeded,
+          })}{" "}
+          ·{" "}
+          {t("transactions.summary.pending", {
+            count: summary.data.payments.pending,
+          })}{" "}
+          ·{" "}
+          {t("transactions.summary.failed", {
+            count: summary.data.payments.failed,
+          })}{" "}
+          ·{" "}
+          {t("transactions.summary.refunded", {
+            count: summary.data.payments.refunded,
+          })}{" "}
+          ·{" "}
+          {t("transactions.summary.payoutsPending", {
+            count: summary.data.payments.payoutsPending,
+          })}{" "}
+          ·{" "}
           <span
             className={
               summary.data.payments.payoutsFailed ? "text-destructive" : ""
             }
           >
-            {summary.data.payments.payoutsFailed} reversement(s) en échec
+            {t("transactions.summary.payoutsFailed", {
+              count: summary.data.payments.payoutsFailed,
+            })}
           </span>
         </p>
       )}
 
       <Card>
         <CardHeader>
-          <CardTitle>Paiements ({payments.data?.total ?? 0})</CardTitle>
+          <CardTitle>
+            {t("transactions.cardTitle", { count: payments.data?.total ?? 0 })}
+          </CardTitle>
           <CardAction>
             <div className="flex flex-wrap items-center gap-2">
               <select
@@ -152,14 +175,16 @@ export default function AdminTransactionsPage() {
                   setPage(1);
                 }}
                 className="border-input bg-background h-9 rounded-md border px-3 text-sm"
-                aria-label="Filtrer par statut de paiement"
+                aria-label={t("transactions.filterPaymentStatus")}
               >
-                <option value="ALL">Tous les paiements</option>
-                {Object.entries(PAYMENT_STATUS_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
+                <option value="ALL">{t("transactions.allPayments")}</option>
+                {(Object.keys(PAYMENT_STATUS_CLASSES) as PaymentStatus[]).map(
+                  (value) => (
+                    <option key={value} value={value}>
+                      {tTransactions(`paymentStatus.${value}`)}
+                    </option>
+                  ),
+                )}
               </select>
               <select
                 value={payoutStatus}
@@ -168,14 +193,14 @@ export default function AdminTransactionsPage() {
                   setPage(1);
                 }}
                 className="border-input bg-background h-9 rounded-md border px-3 text-sm"
-                aria-label="Filtrer par statut de reversement"
+                aria-label={t("transactions.filterPayoutStatus")}
               >
-                <option value="ALL">Tous les reversements</option>
-                {Object.entries(PAYOUT_STATUS_LABELS)
-                  .filter(([value]) => value !== "NOT_APPLICABLE")
-                  .map(([value, label]) => (
+                <option value="ALL">{t("transactions.allPayouts")}</option>
+                {(Object.keys(PAYOUT_STATUS_CLASSES) as PayoutStatus[])
+                  .filter((value) => value !== "NOT_APPLICABLE")
+                  .map((value) => (
                     <option key={value} value={value}>
-                      {label}
+                      {tTransactions(`payoutStatus.${value}`)}
                     </option>
                   ))}
               </select>
@@ -187,7 +212,7 @@ export default function AdminTransactionsPage() {
                     setSearch(event.target.value);
                     setPage(1);
                   }}
-                  placeholder="Référence LP-..."
+                  placeholder={t("transactions.searchPlaceholder")}
                   className="h-9 w-48 ps-8"
                 />
               </div>
@@ -201,17 +226,19 @@ export default function AdminTransactionsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Référence</TableHead>
-                <TableHead>Payeur</TableHead>
-                <TableHead>Moyen</TableHead>
-                <TableHead>Montant</TableHead>
-                <TableHead>Frais LawPay</TableHead>
-                <TableHead>Commission</TableHead>
-                <TableHead>Net fournisseur</TableHead>
-                <TableHead>Paiement</TableHead>
-                <TableHead>Reversement</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="w-[1%]">Actions</TableHead>
+                <TableHead>{t("transactions.columns.reference")}</TableHead>
+                <TableHead>{t("transactions.columns.payer")}</TableHead>
+                <TableHead>{t("transactions.columns.method")}</TableHead>
+                <TableHead>{t("transactions.columns.amount")}</TableHead>
+                <TableHead>{t("transactions.columns.lawpayFees")}</TableHead>
+                <TableHead>{t("transactions.columns.commission")}</TableHead>
+                <TableHead>{t("transactions.columns.supplierNet")}</TableHead>
+                <TableHead>{t("transactions.columns.payment")}</TableHead>
+                <TableHead>{t("transactions.columns.payout")}</TableHead>
+                <TableHead>{t("transactions.columns.date")}</TableHead>
+                <TableHead className="w-[1%]">
+                  {t("transactions.columns.actions")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -220,21 +247,23 @@ export default function AdminTransactionsPage() {
                 isLoading={payments.isLoading}
                 error={payments.error?.message}
                 isEmpty={!payments.data?.items.length}
-                loadingLabel="Chargement des transactions..."
-                emptyLabel="Aucune transaction trouvée."
+                loadingLabel={t("transactions.loading")}
+                emptyLabel={t("transactions.empty")}
               />
               {payments.data?.items.map((payment) => (
                 <TableRow key={payment.id}>
                   <TableCell>
                     <p className="font-medium">
                       {payment.transactionReference ??
-                        (payment.provider === "CASH" ? "Espèces" : "—")}
+                        (payment.provider === "CASH" ? t("transactions.cash") : "—")}
                     </p>
                     <Link
                       href={`/dashboard/admin/orders/${payment.orderId}`}
                       className="text-muted-foreground text-xs underline"
                     >
-                      Commande {payment.orderId.slice(0, 8).toUpperCase()}
+                      {t("transactions.orderRef", {
+                        ref: payment.orderId.slice(0, 8).toUpperCase(),
+                      })}
                     </Link>
                   </TableCell>
                   <TableCell>
@@ -247,20 +276,28 @@ export default function AdminTransactionsPage() {
                   </TableCell>
                   <TableCell>
                     {payment.providerPaymentMethod ??
-                      PAYMENT_METHOD_LABELS[payment.method]}
+                      tOrders(`paymentMethod.${payment.method}`)}
                   </TableCell>
                   <TableCell className="font-medium">
-                    {formatMoney(payment.amountMinor, payment.currency)}
+                    {formatMoney(payment.amountMinor, payment.currency, locale)}
                   </TableCell>
                   <TableCell>
-                    {formatMoney(payment.platformFeeMinor, payment.currency)}
+                    {formatMoney(payment.platformFeeMinor, payment.currency, locale)}
                   </TableCell>
                   <TableCell>
-                    {formatMoney(payment.applicationFeeMinor, payment.currency)}
+                    {formatMoney(
+                      payment.applicationFeeMinor,
+                      payment.currency,
+                      locale,
+                    )}
                   </TableCell>
                   <TableCell>
                     {payment.payoutAmountMinor !== null
-                      ? formatMoney(payment.payoutAmountMinor, payment.currency)
+                      ? formatMoney(
+                          payment.payoutAmountMinor,
+                          payment.currency,
+                          locale,
+                        )
                       : "—"}
                   </TableCell>
                   <TableCell>
@@ -269,7 +306,7 @@ export default function AdminTransactionsPage() {
                       className={PAYMENT_STATUS_CLASSES[payment.status]}
                       title={payment.failureReason ?? undefined}
                     >
-                      {PAYMENT_STATUS_LABELS[payment.status]}
+                      {tTransactions(`paymentStatus.${payment.status}`)}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -281,20 +318,20 @@ export default function AdminTransactionsPage() {
                         className={PAYOUT_STATUS_CLASSES[payment.payoutStatus]}
                         title={payment.payoutError ?? payment.payoutReference ?? undefined}
                       >
-                        {PAYOUT_STATUS_LABELS[payment.payoutStatus]}
+                        {tTransactions(`payoutStatus.${payment.payoutStatus}`)}
                       </Badge>
                     )}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {formatDate(payment.paidAt ?? payment.createdAt, true)}
+                    {formatDate(payment.paidAt ?? payment.createdAt, true, locale)}
                   </TableCell>
                   <TableCell>
                     {payment.provider === "LAWPAY" && (
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        aria-label="Resynchroniser avec LawPay"
-                        title="Resynchroniser avec LawPay"
+                        aria-label={t("transactions.resync")}
+                        title={t("transactions.resync")}
                         disabled={syncPayment.isPending}
                         onClick={() => syncPayment.mutate({ id: payment.id })}
                       >

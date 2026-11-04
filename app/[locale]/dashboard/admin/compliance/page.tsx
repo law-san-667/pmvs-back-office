@@ -12,6 +12,7 @@ import { useUser } from "@/contexts/user-context";
 import { formatDateTime } from "@/lib/compliance";
 import { trpc } from "@/server/trpc/client";
 import { ShieldCheckIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 function Tile({ label, value }: { label: string; value: number | undefined }) {
@@ -26,6 +27,8 @@ function Tile({ label, value }: { label: string; value: number | undefined }) {
 }
 
 export default function AdminCompliancePage() {
+  const t = useTranslations("adminSettings.compliance");
+  const locale = useLocale();
   const { user } = useUser();
   const utils = trpc.useUtils();
   const isAdmin = user?.role === "ADMIN";
@@ -36,7 +39,7 @@ export default function AdminCompliancePage() {
   if (user && !isTeam) {
     return (
       <div className="p-4 lg:p-6">
-        <p className="text-destructive text-sm">Réservé à l&apos;équipe Diarama.</p>
+        <p className="text-destructive text-sm">{t("teamOnly")}</p>
       </div>
     );
   }
@@ -45,11 +48,15 @@ export default function AdminCompliancePage() {
     try {
       const result = await run.mutateAsync();
       toast.success(
-        `Contrôle terminé : ${result.raised} nouveau(x) point(s), ${result.closed} résolu(s), ${result.reminders} relance(s).`,
+        t("runDone", {
+          raised: result.raised,
+          closed: result.closed,
+          reminders: result.reminders,
+        }),
       );
       await utils.compliance.invalidate();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Contrôle impossible.");
+      toast.error(error instanceof Error ? error.message : t("runFailed"));
     }
   };
 
@@ -59,28 +66,32 @@ export default function AdminCompliancePage() {
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <AdminPageHeader
-          title="Conformité"
-          description={`Documents des fournisseurs, termes interdits et journal d'audit. Contrôle automatique chaque matin${data?.lastRun ? ` (dernier : ${formatDateTime(data.lastRun.startedAt)})` : ""}.`}
+          title={t("title")}
+          description={
+            data?.lastRun
+              ? t("descriptionLastRun", { date: formatDateTime(data.lastRun.startedAt, locale) })
+              : t("description")
+          }
         />
         <Button size="sm" onClick={runNow} disabled={run.isPending}>
           <ShieldCheckIcon />
-          Contrôler maintenant
+          {t("runNow")}
         </Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Tile label="Points à examiner" value={data?.openFindings} />
-        <Tile label="Documents à valider" value={data?.pendingDocuments} />
-        <Tile label="Expirent sous 30 jours" value={data?.expiringDocuments} />
-        <Tile label="Documents expirés" value={data?.expiredDocuments} />
+        <Tile label={t("tiles.openFindings")} value={data?.openFindings} />
+        <Tile label={t("tiles.pendingDocuments")} value={data?.pendingDocuments} />
+        <Tile label={t("tiles.expiringDocuments")} value={data?.expiringDocuments} />
+        <Tile label={t("tiles.expiredDocuments")} value={data?.expiredDocuments} />
       </div>
 
       <Tabs defaultValue="findings">
         <TabsList className="flex-wrap">
-          <TabsTrigger value="findings">Points à examiner</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="terms">Termes interdits</TabsTrigger>
-          {isAdmin && <TabsTrigger value="audit">Journal d&apos;audit</TabsTrigger>}
+          <TabsTrigger value="findings">{t("tabs.findings")}</TabsTrigger>
+          <TabsTrigger value="documents">{t("tabs.documents")}</TabsTrigger>
+          <TabsTrigger value="terms">{t("tabs.terms")}</TabsTrigger>
+          {isAdmin && <TabsTrigger value="audit">{t("tabs.audit")}</TabsTrigger>}
         </TabsList>
         <TabsContent value="findings" className="pt-4"><FindingsList /></TabsContent>
         <TabsContent value="documents" className="pt-4"><DocumentsReview /></TabsContent>

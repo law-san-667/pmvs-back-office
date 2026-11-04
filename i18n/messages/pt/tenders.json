@@ -155,7 +155,11 @@
     "deleteError": "Erro ao eliminar o concurso.",
     "noUser": "Não foi possível identificar o utilizador. Inicie sessão novamente.",
     "invalidDeadline": "O prazo de apresentação é inválido.",
-    "uploadError": "O envio da foto falhou. Tente novamente."
+    "uploadError": "O envio da foto falhou. Tente novamente.",
+    "diffusion": "Zona de difusão",
+    "diffusionHelp": "Os fornecedores desta zona são avisados automaticamente e o concurso é apresentado nela.",
+    "diffusionCountries": "Outros países de difusão",
+    "diffusionCountriesPlaceholder": "Adicionar países"
   },
   "errors": {
     "titleRequired": "O título é obrigatório.",
@@ -164,6 +168,12 @@
     "countryRequired": "O país é obrigatório.",
     "deadlineRequired": "O prazo de apresentação é obrigatório.",
     "budgetInteger": "O orçamento deve ser um número inteiro positivo.",
-    "budgetMaxBelowMin": "O orçamento máximo deve ser superior ao mínimo."
+    "budgetMaxBelowMin": "O orçamento máximo deve ser superior ao mínimo.",
+    "diffusionCountriesRequired": "Escolha pelo menos outro país."
+  },
+  "diffusion": {
+    "COUNTRY": "O país do concurso",
+    "COUNTRIES": "O país do concurso e outros países",
+    "ZLECAF": "Toda a zona ZCLCA"
   }
 }

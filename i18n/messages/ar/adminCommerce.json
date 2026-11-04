@@ -1,0 +1,282 @@
+{
+  "administration": "الإدارة",
+  "common": {
+    "search": "بحث...",
+    "loading": "جارٍ التحميل…",
+    "failed": "فشلت العملية.",
+    "cancel": "إلغاء",
+    "approve": "اعتماد",
+    "reject": "رفض",
+    "back": "رجوع"
+  },
+  "listingStatus": {
+    "DRAFT": "مسودة",
+    "PUBLISHED": "منشور",
+    "PAUSED": "متوقف مؤقتًا",
+    "SOLD": "نفد",
+    "ARCHIVED": "مؤرشف"
+  },
+  "listings": {
+    "title": "مراجعة المنتجات والخدمات",
+    "description": "يجب اعتماد كل إعلان ينشره مورّد قبل أن يظهر للمشترين.",
+    "queue": {
+      "PENDING": "بانتظار الاعتماد",
+      "APPROVED": "معتمدة",
+      "REJECTED": "مرفوضة",
+      "ALL": "الكل"
+    },
+    "withCount": "{label} ({count})",
+    "filterType": "تصفية حسب النوع",
+    "type": {
+      "ALL": "الكل",
+      "PRODUCT": "المنتجات",
+      "SERVICE": "الخدمات"
+    },
+    "columns": {
+      "item": "العنصر",
+      "type": "النوع",
+      "country": "البلد",
+      "price": "السعر",
+      "submittedAt": "تاريخ الإرسال",
+      "publication": "النشر",
+      "moderation": "المراجعة",
+      "actions": "الإجراءات"
+    },
+    "loading": "جارٍ تحميل الكتالوج...",
+    "emptyPending": "لا توجد إعلانات بانتظار الاعتماد.",
+    "empty": "لم يُعثر على أي منتج أو خدمة.",
+    "service": "خدمة",
+    "product": "منتج",
+    "onQuote": "حسب عرض السعر",
+    "actionsFor": "إجراءات {title}",
+    "review": "فحص"
+  },
+  "listing": {
+    "loading": "جارٍ تحميل الإعلان...",
+    "notFound": "الإعلان غير موجود.",
+    "backToModeration": "العودة إلى المراجعة",
+    "submittedService": "خدمة أُرسلت في {date}",
+    "submittedProduct": "منتج أُرسل في {date}",
+    "rejectionReason": "سبب الرفض المُبلَّغ إلى البائع",
+    "media": "الوسائط ({count})",
+    "offer": "العرض",
+    "price": "السعر",
+    "stock": "المخزون",
+    "location": "الموقع",
+    "condition": "الحالة",
+    "supplier": "المورّد",
+    "lastModeration": "آخر مراجعة",
+    "description": "الوصف",
+    "noDescription": "لم يُقدَّم أي وصف."
+  },
+  "moderationDialog": {
+    "rejectTitle": "رفض الإعلان",
+    "approveTitle": "اعتماد الإعلان",
+    "rejectDescription": "سيبقى «{title}» مخفيًا عن المشترين. سيتلقى البائع السبب أدناه.",
+    "approveDescription": "سيظهر «{title}» فورًا في السوق.",
+    "reason": "سبب الرفض",
+    "reasonPlaceholder": "اشرح للبائع ما يجب تصحيحه.",
+    "sending": "جارٍ الإرسال...",
+    "presets": {
+      "photos": "صور رديئة الجودة أو غير مطابقة",
+      "description": "وصف غير كافٍ أو مضلِّل",
+      "prohibited": "منتج يُحظر بيعه على المنصة",
+      "price": "سعر خاطئ بشكل واضح",
+      "category": "فئة غير مناسبة"
+    }
+  },
+  "moderation": {
+    "title": "الإشراف",
+    "description": "بلاغات المستخدمين وتقييمات العملاء. تُسجَّل كل القرارات.",
+    "tabs": {
+      "reports": "البلاغات",
+      "reviews": "التقييمات"
+    },
+    "targetType": {
+      "LISTING": "إعلان",
+      "REVIEW": "تقييم",
+      "BUSINESS": "متجر",
+      "USER": "مستخدم"
+    },
+    "hide": {
+      "LISTING": "سحب الإعلان",
+      "REVIEW": "إخفاء التقييم",
+      "BUSINESS": "تعليق المتجر",
+      "USER": "تعليق الحساب"
+    },
+    "reason": {
+      "FRAUD": "احتيال",
+      "PROHIBITED_PRODUCT": "منتج محظور",
+      "COUNTERFEIT": "تقليد",
+      "OFFENSIVE": "محتوى مسيء",
+      "SPAM": "رسائل مزعجة",
+      "WRONG_INFORMATION": "معلومات خاطئة",
+      "OTHER": "أخرى"
+    },
+    "reportStatus": {
+      "PENDING": "قيد المعالجة",
+      "RESOLVED": "تمت معالجتها",
+      "DISMISSED": "مرفوضة"
+    },
+    "noReports": "لا توجد بلاغات.",
+    "deletedContent": "محتوى محذوف",
+    "quote": "«{text}»",
+    "decision": "القرار: {note}",
+    "dismiss": "لا شيء يُبلَّغ عنه",
+    "dismissed": "تم رفض البلاغ.",
+    "reasonPrompt": "السبب (يُبلَّغ إلى الكاتب):",
+    "removed": "تم سحب المحتوى.",
+    "reviewPublishing": "نشر التقييمات",
+    "settingSaved": "تم حفظ الإعداد.",
+    "mode": {
+      "post": "تُنشر فورًا (وتُسحب عند الإبلاغ عنها)",
+      "pre": "تُنشر بعد اعتماد أحد المشرفين"
+    },
+    "reviewStatus": {
+      "PENDING": "قيد الانتظار",
+      "APPROVED": "منشورة",
+      "REJECTED": "مخفية"
+    },
+    "noReviews": "لا توجد تقييمات.",
+    "publish": "نشر",
+    "published": "تم نشر التقييم.",
+    "hideReview": "إخفاء",
+    "hidden": "تم إخفاء التقييم."
+  },
+  "advertising": {
+    "title": "الإعلانات واللافتات",
+    "description": "لافتات الصفحة الرئيسية وإعلانات المنصة، وطلبات المورّدين المطلوب اعتمادها.",
+    "descriptionPending": "لافتات الصفحة الرئيسية وإعلانات المنصة، وطلبات المورّدين المطلوب اعتمادها ({count} قيد الانتظار).",
+    "cardTitle": "الإعلانات ({count})",
+    "status": {
+      "ALL": "جميع الحالات",
+      "PENDING": "بانتظار الاعتماد",
+      "APPROVED": "معتمدة",
+      "REJECTED": "مرفوضة"
+    },
+    "owner": {
+      "ALL": "جميع المعلنين",
+      "business": "المورّدون"
+    },
+    "allPlacements": "جميع المواضع",
+    "new": "إعلان جديد",
+    "approved": "تم اعتماد الإعلان.",
+    "published": "تم نشر الإعلان.",
+    "rejectTitle": "رفض «{title}»",
+    "reasonPlaceholder": "السبب المُبلَّغ إلى المورّد",
+    "rejected": "تم رفض الإعلان وإبلاغ المورّد."
+  },
+  "tenders": {
+    "title": "طلبات العروض",
+    "description": "طلبات العروض المفتوحة والظاهرة على المنصة.",
+    "cardTitle": "طلبات العروض ({count})",
+    "allTypes": "جميع الأنواع",
+    "columns": {
+      "title": "العنوان",
+      "type": "النوع",
+      "publisher": "الناشر",
+      "location": "الموقع",
+      "budget": "الميزانية",
+      "deadline": "الموعد النهائي",
+      "status": "الحالة"
+    },
+    "loading": "جارٍ تحميل طلبات العروض...",
+    "empty": "لم يُعثر على أي طلب عروض.",
+    "individual": "فرد",
+    "budgetUnspecified": "غير محددة"
+  },
+  "orders": {
+    "title": "الطلبات",
+    "description": "جميع الطلبات المسجلة على المنصة.",
+    "cardTitle": "الطلبات ({count})",
+    "columns": {
+      "order": "الطلب",
+      "client": "العميل",
+      "business": "المؤسسة",
+      "date": "التاريخ",
+      "total": "الإجمالي",
+      "status": "الحالة",
+      "details": "التفاصيل"
+    },
+    "loading": "جارٍ تحميل الطلبات...",
+    "empty": "لا توجد طلبات مسجلة.",
+    "view": "عرض الطلب"
+  },
+  "payouts": {
+    "title": "المدفوعات والتحويلات",
+    "description": "أكّد التحويلات المستلمة، ثم حوّل حصة المورّدين بعد تسليم الطلب. تُسجَّل كل القرارات.",
+    "confirmed": "تم تأكيد دفع الطلب {ref}.",
+    "rejectPrompt": "سبب الرفض (يُبلَّغ إلى المشتري):",
+    "rejectDefault": "لم يُستلم أي تحويل.",
+    "rejected": "تم رفض الدفع وإلغاء الطلب.",
+    "released": "{count, plural, zero {لم يُنفَّذ أي تحويل.} one {تم تنفيذ تحويل واحد.} two {تم تنفيذ تحويلين.} few {تم تنفيذ # تحويلات.} many {تم تنفيذ # تحويلًا.} other {تم تنفيذ # تحويل.}}",
+    "processingToast": "{count, plural, zero {لا تحويلات قيد التنفيذ لدى PayDunya.} one {تحويل واحد قيد التنفيذ لدى PayDunya.} two {تحويلان قيد التنفيذ لدى PayDunya.} few {# تحويلات قيد التنفيذ لدى PayDunya.} many {# تحويلًا قيد التنفيذ لدى PayDunya.} other {# تحويل قيد التنفيذ لدى PayDunya.}}",
+    "offlineTitle": "مدفوعات غير إلكترونية بانتظار التأكيد ({count})",
+    "noPending": "لا توجد مدفوعات قيد الانتظار.",
+    "offlineOrder": "{amount} · الطلب <link>{ref}</link>",
+    "orderedBy": "{buyer} ← {business} · طُلب في {date}",
+    "transferReference": "مرجع التحويل",
+    "moneyReceived": "تم استلام المبلغ",
+    "heldTitle": "حصص المورّدين المحتجزة ({count})",
+    "processing": "· {count, plural, zero {لا تحويلات قيد التنفيذ لدى PayDunya} one {تحويل واحد قيد التنفيذ لدى PayDunya} two {تحويلان قيد التنفيذ لدى PayDunya} few {# تحويلات قيد التنفيذ لدى PayDunya} many {# تحويلًا قيد التنفيذ لدى PayDunya} other {# تحويل قيد التنفيذ لدى PayDunya}}",
+    "onlyDelivered": "الطلبات المسلَّمة فقط",
+    "noShares": "لا توجد حصص للتحويل.",
+    "shareTo": "{amount} إلى {business}",
+    "deduction": "(حصة {share} ناقص {refunded} مستردة)",
+    "orderLine": "الطلب {ref} · {state} · {account}",
+    "delivered": "تم التسليم",
+    "notDelivered": "لم يُسلَّم بعد",
+    "noAccount": "لا يوجد حساب للتحويل",
+    "selection": "{count, plural, zero {لا حصص} one {حصة واحدة} two {حصتان} few {# حصص} many {# حصة} other {# حصة}} · الإجمالي <strong>{total}</strong>",
+    "payoutReference": "مرجع التحويل المُنفَّذ",
+    "validatePayout": "تأكيد التحويل",
+    "paydunyaHint": "يحوّل الحصة الصافية إلى حساب الدفع عبر الهاتف المحمول الخاص بالمورّد، من رصيد Diarama لدى PayDunya.",
+    "payByPaydunya": "التحويل عبر PayDunya"
+  },
+  "transactions": {
+    "title": "المعاملات",
+    "description": "مدفوعات LawPay، والتحويلات إلى المورّدين، والدفتر المحاسبي للمنصة.",
+    "ledger": {
+      "SALES": "المبيعات المحصَّلة",
+      "PROVIDER_FEES": "رسوم LawPay",
+      "PLATFORM_REVENUE": "عمولات المنصة",
+      "SUPPLIER_PAYABLE": "المستحق للمورّدين",
+      "SUPPLIER_PAID": "المحوَّل إلى المورّدين",
+      "SUPPLIER_RECEIVABLE": "مبالغ للاسترداد (المبالغ المستردة)",
+      "REFUNDS": "المبالغ المستردة للعملاء"
+    },
+    "entries": "{count, plural, zero {لا قيود} one {قيد واحد} two {قيدان} few {# قيود} many {# قيدًا} other {# قيد}}",
+    "summary": {
+      "succeeded": "{count, plural, zero {لا مدفوعات ناجحة} one {دفعة ناجحة واحدة} two {دفعتان ناجحتان} few {# دفعات ناجحة} many {# دفعة ناجحة} other {# دفعة ناجحة}}",
+      "pending": "{count} قيد الانتظار",
+      "failed": "{count} فاشلة/ملغاة",
+      "refunded": "{count} مستردة",
+      "payoutsPending": "{count, plural, zero {لا تحويلات قيد التنفيذ} one {تحويل واحد قيد التنفيذ} two {تحويلان قيد التنفيذ} few {# تحويلات قيد التنفيذ} many {# تحويلًا قيد التنفيذ} other {# تحويل قيد التنفيذ}}",
+      "payoutsFailed": "{count, plural, zero {لا تحويلات فاشلة} one {تحويل فاشل واحد} two {تحويلان فاشلان} few {# تحويلات فاشلة} many {# تحويلًا فاشلًا} other {# تحويل فاشل}}"
+    },
+    "cardTitle": "المدفوعات ({count})",
+    "filterPaymentStatus": "تصفية حسب حالة الدفع",
+    "allPayments": "جميع المدفوعات",
+    "filterPayoutStatus": "تصفية حسب حالة التحويل",
+    "allPayouts": "جميع التحويلات",
+    "searchPlaceholder": "المرجع LP-...",
+    "columns": {
+      "reference": "المرجع",
+      "payer": "الدافع",
+      "method": "الوسيلة",
+      "amount": "المبلغ",
+      "lawpayFees": "رسوم LawPay",
+      "commission": "العمولة",
+      "supplierNet": "صافي المورّد",
+      "payment": "الدفع",
+      "payout": "التحويل",
+      "date": "التاريخ",
+      "actions": "الإجراءات"
+    },
+    "loading": "جارٍ تحميل المعاملات...",
+    "empty": "لم يُعثر على أي معاملة.",
+    "cash": "نقدًا",
+    "orderRef": "الطلب {ref}",
+    "resync": "إعادة المزامنة مع LawPay"
+  }
+}

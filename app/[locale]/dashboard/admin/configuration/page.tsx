@@ -32,9 +32,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDate } from "@/lib/seller-dashboard-utils";
 import { trpc } from "@/server/trpc/client";
 import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 function ActiveBadge({ active }: { active: boolean }) {
+  const t = useTranslations("adminSettings.common");
   return (
     <Badge
       variant="outline"
@@ -44,12 +46,15 @@ function ActiveBadge({ active }: { active: boolean }) {
           : "border-slate-200 bg-slate-50 text-slate-600"
       }
     >
-      {active ? "Actif" : "Inactif"}
+      {active ? t("active") : t("inactive")}
     </Badge>
   );
 }
 
 export default function AdminConfigurationPage() {
+  const t = useTranslations("adminSettings.configuration");
+  const tc = useTranslations("adminSettings.common");
+  const locale = useLocale();
   const utils = trpc.useUtils();
   const [editorTarget, setEditorTarget] =
     useState<ConfigurationEditorTarget | null>(null);
@@ -98,17 +103,19 @@ export default function AdminConfigurationPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Configuration"
-        description="Catégories du catalogue, zones géographiques et normes de qualité appliquées aux fournisseurs."
+        title={t("title")}
+        description={t("description")}
       />
 
       <Tabs defaultValue="categories">
         <TabsList className="h-auto w-full justify-start overflow-x-auto">
-          <TabsTrigger value="categories">Catégories</TabsTrigger>
-          <TabsTrigger value="sub-categories">Sous-catégories</TabsTrigger>
-          <TabsTrigger value="countries">Pays</TabsTrigger>
-          <TabsTrigger value="cities">Villes</TabsTrigger>
-          <TabsTrigger value="quality">Normes de qualité</TabsTrigger>
+          <TabsTrigger value="categories">{t("tabs.categories")}</TabsTrigger>
+          <TabsTrigger value="sub-categories">
+            {t("tabs.subCategories")}
+          </TabsTrigger>
+          <TabsTrigger value="countries">{t("tabs.countries")}</TabsTrigger>
+          <TabsTrigger value="cities">{t("tabs.cities")}</TabsTrigger>
+          <TabsTrigger value="quality">{t("tabs.quality")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="quality">
@@ -118,7 +125,7 @@ export default function AdminConfigurationPage() {
         <TabsContent value="categories">
           <Card>
             <CardHeader>
-              <CardTitle>Catégories</CardTitle>
+              <CardTitle>{t("tabs.categories")}</CardTitle>
               <CardAction>
                 <Button
                   size="sm"
@@ -126,7 +133,7 @@ export default function AdminConfigurationPage() {
                     setEditorTarget({ kind: "category", value: null })
                   }
                 >
-                  <PlusIcon className="size-4" /> Ajouter
+                  <PlusIcon className="size-4" /> {tc("add")}
                 </Button>
               </CardAction>
             </CardHeader>
@@ -134,12 +141,14 @@ export default function AdminConfigurationPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Nom</TableHead>
-                    <TableHead>Slug</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead className="text-end">Actions</TableHead>
+                    <TableHead>{t("columns.code")}</TableHead>
+                    <TableHead>{t("columns.name")}</TableHead>
+                    <TableHead>{t("columns.slug")}</TableHead>
+                    <TableHead>{t("columns.type")}</TableHead>
+                    <TableHead>{t("columns.status")}</TableHead>
+                    <TableHead className="text-end">
+                      {t("columns.actions")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -148,8 +157,8 @@ export default function AdminConfigurationPage() {
                     isLoading={categories.isLoading}
                     error={categories.error?.message}
                     isEmpty={!categories.data?.length}
-                    loadingLabel="Chargement des catégories..."
-                    emptyLabel="Aucune catégorie configurée."
+                    loadingLabel={t("loadingCategories")}
+                    emptyLabel={t("emptyCategories")}
                   />
                   {categories.data?.map((category) => (
                     <TableRow key={category.id}>
@@ -163,7 +172,7 @@ export default function AdminConfigurationPage() {
                         {category.slug}
                       </TableCell>
                       <TableCell>
-                        {category.isService ? "Service" : "Produit"}
+                        {category.isService ? t("service") : t("product")}
                       </TableCell>
                       <TableCell>
                         <ActiveBadge active={category.isActive} />
@@ -181,7 +190,7 @@ export default function AdminConfigurationPage() {
                             }
                           >
                             <PencilIcon className="size-4" />
-                            <span className="sr-only">Modifier</span>
+                            <span className="sr-only">{tc("edit")}</span>
                           </Button>
                           <Button
                             variant="ghost"
@@ -196,7 +205,7 @@ export default function AdminConfigurationPage() {
                             }
                           >
                             <Trash2Icon className="size-4" />
-                            <span className="sr-only">Supprimer</span>
+                            <span className="sr-only">{tc("delete")}</span>
                           </Button>
                         </div>
                       </TableCell>
@@ -211,7 +220,7 @@ export default function AdminConfigurationPage() {
         <TabsContent value="sub-categories">
           <Card>
             <CardHeader>
-              <CardTitle>Sous-catégories</CardTitle>
+              <CardTitle>{t("tabs.subCategories")}</CardTitle>
               <CardAction>
                 <Button
                   size="sm"
@@ -220,7 +229,7 @@ export default function AdminConfigurationPage() {
                   }
                   disabled={!categories.data?.length}
                 >
-                  <PlusIcon className="size-4" /> Ajouter
+                  <PlusIcon className="size-4" /> {tc("add")}
                 </Button>
               </CardAction>
             </CardHeader>
@@ -228,13 +237,15 @@ export default function AdminConfigurationPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Nom</TableHead>
-                    <TableHead>Catégorie</TableHead>
-                    <TableHead>Slug</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead className="text-end">Actions</TableHead>
+                    <TableHead>{t("columns.code")}</TableHead>
+                    <TableHead>{t("columns.name")}</TableHead>
+                    <TableHead>{t("columns.category")}</TableHead>
+                    <TableHead>{t("columns.slug")}</TableHead>
+                    <TableHead>{t("columns.type")}</TableHead>
+                    <TableHead>{t("columns.status")}</TableHead>
+                    <TableHead className="text-end">
+                      {t("columns.actions")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -243,8 +254,8 @@ export default function AdminConfigurationPage() {
                     isLoading={subCategories.isLoading}
                     error={subCategories.error?.message}
                     isEmpty={!subCategories.data?.length}
-                    loadingLabel="Chargement des sous-catégories..."
-                    emptyLabel="Aucune sous-catégorie configurée."
+                    loadingLabel={t("loadingSubCategories")}
+                    emptyLabel={t("emptySubCategories")}
                   />
                   {subCategories.data?.map((subCategory) => (
                     <TableRow key={subCategory.id}>
@@ -262,7 +273,7 @@ export default function AdminConfigurationPage() {
                         {subCategory.slug}
                       </TableCell>
                       <TableCell>
-                        {subCategory.isService ? "Service" : "Produit"}
+                        {subCategory.isService ? t("service") : t("product")}
                       </TableCell>
                       <TableCell>
                         <ActiveBadge active={subCategory.isActive} />
@@ -280,7 +291,7 @@ export default function AdminConfigurationPage() {
                             }
                           >
                             <PencilIcon className="size-4" />
-                            <span className="sr-only">Modifier</span>
+                            <span className="sr-only">{tc("edit")}</span>
                           </Button>
                           <Button
                             variant="ghost"
@@ -295,7 +306,7 @@ export default function AdminConfigurationPage() {
                             }
                           >
                             <Trash2Icon className="size-4" />
-                            <span className="sr-only">Supprimer</span>
+                            <span className="sr-only">{tc("delete")}</span>
                           </Button>
                         </div>
                       </TableCell>
@@ -310,7 +321,7 @@ export default function AdminConfigurationPage() {
         <TabsContent value="countries">
           <Card>
             <CardHeader>
-              <CardTitle>Pays</CardTitle>
+              <CardTitle>{t("tabs.countries")}</CardTitle>
               <CardAction>
                 <Button
                   size="sm"
@@ -318,7 +329,7 @@ export default function AdminConfigurationPage() {
                     setEditorTarget({ kind: "country", value: null })
                   }
                 >
-                  <PlusIcon className="size-4" /> Ajouter
+                  <PlusIcon className="size-4" /> {tc("add")}
                 </Button>
               </CardAction>
             </CardHeader>
@@ -326,15 +337,17 @@ export default function AdminConfigurationPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Pays</TableHead>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Devise</TableHead>
-                    <TableHead>Indicatif</TableHead>
-                    <TableHead>OAPI</TableHead>
-                    <TableHead>Phase</TableHead>
-                    <TableHead>Fournisseurs</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead className="text-end">Actions</TableHead>
+                    <TableHead>{t("columns.country")}</TableHead>
+                    <TableHead>{t("columns.code")}</TableHead>
+                    <TableHead>{t("columns.currency")}</TableHead>
+                    <TableHead>{t("columns.phonePrefix")}</TableHead>
+                    <TableHead>{t("columns.oapi")}</TableHead>
+                    <TableHead>{t("columns.phase")}</TableHead>
+                    <TableHead>{t("columns.suppliers")}</TableHead>
+                    <TableHead>{t("columns.status")}</TableHead>
+                    <TableHead className="text-end">
+                      {t("columns.actions")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -343,8 +356,8 @@ export default function AdminConfigurationPage() {
                     isLoading={countries.isLoading}
                     error={countries.error?.message}
                     isEmpty={!countries.data?.items.length}
-                    loadingLabel="Chargement des pays..."
-                    emptyLabel="Aucun pays configuré."
+                    loadingLabel={t("loadingCountries")}
+                    emptyLabel={t("emptyCountries")}
                   />
                   {countries.data?.items.map((country) => (
                     <TableRow key={country.code}>
@@ -354,12 +367,12 @@ export default function AdminConfigurationPage() {
                       <TableCell>{country.code}</TableCell>
                       <TableCell>{country.currencyCode}</TableCell>
                       <TableCell>{country.phonePrefix}</TableCell>
-                      <TableCell>{country.isOapi ? "Oui" : "Non"}</TableCell>
+                      <TableCell>{country.isOapi ? tc("yes") : tc("no")}</TableCell>
                       <TableCell>{country.deploymentPhase ?? "-"}</TableCell>
                       <TableCell>
                         {country.supplierRegistrationOpen
-                          ? "Inscriptions ouvertes"
-                          : "Fermé"}
+                          ? t("registrationOpen")
+                          : t("closed")}
                       </TableCell>
                       <TableCell>
                         <ActiveBadge active={country.isActive} />
@@ -377,7 +390,7 @@ export default function AdminConfigurationPage() {
                             }
                           >
                             <PencilIcon className="size-4" />
-                            <span className="sr-only">Modifier</span>
+                            <span className="sr-only">{tc("edit")}</span>
                           </Button>
                           <Button
                             variant="ghost"
@@ -392,7 +405,7 @@ export default function AdminConfigurationPage() {
                             }
                           >
                             <Trash2Icon className="size-4" />
-                            <span className="sr-only">Supprimer</span>
+                            <span className="sr-only">{tc("delete")}</span>
                           </Button>
                         </div>
                       </TableCell>
@@ -407,14 +420,14 @@ export default function AdminConfigurationPage() {
         <TabsContent value="cities">
           <Card>
             <CardHeader>
-              <CardTitle>Villes</CardTitle>
+              <CardTitle>{t("tabs.cities")}</CardTitle>
               <CardAction>
                 <Button
                   size="sm"
                   onClick={() => setEditorTarget({ kind: "city", value: null })}
                   disabled={!countries.data?.items.length}
                 >
-                  <PlusIcon className="size-4" /> Ajouter
+                  <PlusIcon className="size-4" /> {tc("add")}
                 </Button>
               </CardAction>
             </CardHeader>
@@ -422,12 +435,14 @@ export default function AdminConfigurationPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Ville</TableHead>
-                    <TableHead>Slug</TableHead>
-                    <TableHead>Pays</TableHead>
-                    <TableHead>Créée le</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead className="text-end">Actions</TableHead>
+                    <TableHead>{t("columns.city")}</TableHead>
+                    <TableHead>{t("columns.slug")}</TableHead>
+                    <TableHead>{t("columns.country")}</TableHead>
+                    <TableHead>{t("columns.createdAt")}</TableHead>
+                    <TableHead>{t("columns.status")}</TableHead>
+                    <TableHead className="text-end">
+                      {t("columns.actions")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -436,8 +451,8 @@ export default function AdminConfigurationPage() {
                     isLoading={cities.isLoading}
                     error={cities.error?.message}
                     isEmpty={!cities.data?.items.length}
-                    loadingLabel="Chargement des villes..."
-                    emptyLabel="Aucune ville configurée."
+                    loadingLabel={t("loadingCities")}
+                    emptyLabel={t("emptyCities")}
                   />
                   {cities.data?.items.map((city) => (
                     <TableRow key={`${city.countryCode}-${city.slug}`}>
@@ -446,7 +461,7 @@ export default function AdminConfigurationPage() {
                         {city.slug}
                       </TableCell>
                       <TableCell>{city.countryCode}</TableCell>
-                      <TableCell>{formatDate(city.createdAt)}</TableCell>
+                      <TableCell>{formatDate(city.createdAt, false, locale)}</TableCell>
                       <TableCell>
                         <ActiveBadge active={city.isActive} />
                       </TableCell>
@@ -460,7 +475,7 @@ export default function AdminConfigurationPage() {
                             }
                           >
                             <PencilIcon className="size-4" />
-                            <span className="sr-only">Modifier</span>
+                            <span className="sr-only">{tc("edit")}</span>
                           </Button>
                           <Button
                             variant="ghost"
@@ -475,7 +490,7 @@ export default function AdminConfigurationPage() {
                             }
                           >
                             <Trash2Icon className="size-4" />
-                            <span className="sr-only">Supprimer</span>
+                            <span className="sr-only">{tc("delete")}</span>
                           </Button>
                         </div>
                       </TableCell>

@@ -34,16 +34,6 @@ export type TenderResponse = {
   };
 };
 
-/** French labels (admin screens); supplier pages use tenders.responseStatus. */
-export const RESPONSE_STATUS_LABELS: Record<TenderResponseStatus, string> = {
-  SUBMITTED: "Reçue",
-  UNDER_REVIEW: "En examen",
-  SHORTLISTED: "Présélectionnée",
-  ACCEPTED: "Retenue",
-  REJECTED: "Non retenue",
-  WITHDRAWN: "Retirée",
-};
-
 export const RESPONSE_STATUS_CLASSES: Record<TenderResponseStatus, string> = {
   SUBMITTED: "border-slate-200 bg-slate-50 text-slate-700",
   UNDER_REVIEW: "border-blue-200 bg-blue-50 text-blue-700",

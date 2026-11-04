@@ -1,0 +1,556 @@
+{
+  "adminOnly": "Réservé aux administrateurs.",
+  "refresh": "Actualiser",
+  "dashboard": {
+    "title": "Tableau de bord",
+    "description": "Vue d’ensemble de l’activité et des ressources de la plateforme.",
+    "pendingModeration": "{count, plural, one {# annonce en attente de validation.} other {# annonces en attente de validation.}}",
+    "openModeration": "Ouvrir la modération",
+    "statsError": "Impossible de charger les statistiques : {error}",
+    "view": "Voir {title}",
+    "metrics": {
+      "totalBusinesses": "Fournisseurs",
+      "totalListings": "Produits & services publiés",
+      "totalTenders": "Appels d’offres ouverts",
+      "totalOrders": "Commandes",
+      "totalTransactions": "Transactions",
+      "totalTeamMembers": "Utilisateurs"
+    }
+  },
+  "monitoring": {
+    "adminOnly": "La supervision est réservée aux administrateurs.",
+    "title": "Supervision",
+    "description": "État de la plateforme, des tâches planifiées et des services externes. Les alertes partent par e-mail, WhatsApp ou SMS et dans l'application.",
+    "checkNow": "Vérifier maintenant",
+    "checkResult": "{findings, plural, one {# problème détecté} other {# problèmes détectés}}, {opened, plural, one {# nouvelle alerte} other {# nouvelles alertes}}.",
+    "noProblem": "Aucun problème détecté.",
+    "checkFailed": "Vérification impossible.",
+    "units": {
+      "kb": "{value} Ko",
+      "mb": "{value} Mo",
+      "gb": "{value} Go",
+      "everyMinutes": "toutes les {count} min",
+      "daily": "chaque jour",
+      "everyHours": "toutes les {count} h",
+      "uptimeDays": "{days} j {hours} h",
+      "uptimeHours": "{hours} h {minutes} min",
+      "uptimeMinutes": "{minutes} min"
+    },
+    "columns": {
+      "job": "Tâche",
+      "start": "Début",
+      "duration": "Durée",
+      "state": "État",
+      "result": "Résultat",
+      "alert": "Alerte",
+      "severity": "Gravité",
+      "end": "Fin",
+      "frequency": "Fréquence",
+      "lastRun": "Dernière exécution",
+      "lastSuccess": "Dernière réussite",
+      "failures24h": "Échecs (24 h)"
+    },
+    "runs": {
+      "title": "Exécutions récentes",
+      "titleForJob": "Exécutions récentes : {job}",
+      "hint": "Cliquez sur une tâche ci-dessus pour ne voir que ses exécutions.",
+      "allJobs": "Toutes les tâches",
+      "empty": "Aucune exécution enregistrée."
+    },
+    "alerts": {
+      "title": "Historique des alertes ({count})",
+      "hint": "Une alerte se ferme d'elle-même quand le problème n'est plus détecté ; les destinataires en sont prévenus.",
+      "ongoing": "En cours",
+      "empty": "Aucune alerte pour l'instant.",
+      "none": "Aucun problème détecté lors de la dernière vérification.",
+      "since": "Depuis le {first} · vu le {last}"
+    },
+    "status": {
+      "messages24h": "24 h : {sent, plural, one {# envoyé} other {# envoyés}}, {failed} en échec",
+      "api": "API",
+      "serverErrors": "{count, plural, one {# erreur serveur} other {# erreurs serveur}}",
+      "online": "En ligne",
+      "uptime": "Démarrée depuis {duration}",
+      "requests15m": "15 min : {count, plural, one {# requête enregistrée} other {# requêtes enregistrées}}, 95 % sous {p95} ms",
+      "database": "Base de données",
+      "dbLatency": "Réponse en {ms} ms",
+      "dbConnections": "{count, plural, one {# connexion ouverte} other {# connexions ouvertes}}",
+      "largestTable": "Plus grosse table : {name}",
+      "whatsapp": "WhatsApp (Evolution)",
+      "notConfigured": "Non configuré",
+      "connected": "Connecté",
+      "disconnected": "Déconnecté ({state})",
+      "unreachable": "Injoignable",
+      "smsEmail": "SMS et e-mail",
+      "allConfigured": "Configurés",
+      "noneConfigured": "Non configurés",
+      "emailNotConfigured": "E-mail non configuré",
+      "smsNotConfigured": "SMS non configuré",
+      "smsLine": "SMS — {summary}",
+      "updatedAt": "Mis à jour le {date}"
+    },
+    "jobState": {
+      "failed": "En échec",
+      "late": "En retard",
+      "running": "En cours",
+      "never": "Jamais exécutée",
+      "ok": "OK"
+    },
+    "runStatus": {
+      "failed": "Échec",
+      "running": "En cours",
+      "succeeded": "Réussie"
+    },
+    "severity": {
+      "CRITICAL": "Critique",
+      "WARNING": "Avertissement"
+    },
+    "settings": {
+      "saved": "Réglages enregistrés.",
+      "saveFailed": "Enregistrement impossible.",
+      "testResult": "Message de test : {sent, plural, one {# canal OK} other {# canaux OK}}.",
+      "testResultWithFailures": "Message de test : {sent, plural, one {# canal OK} other {# canaux OK}}, {failed} en échec.",
+      "sendFailed": "Envoi impossible.",
+      "title": "Destinataires et seuils",
+      "description": "Les administrateurs reçoivent aussi chaque alerte dans l'application. Une alerte toujours en cours est renvoyée après le délai choisi. Pour être prévenu si l'API entière tombe, branchez une sonde externe (UptimeRobot ou Better Stack, gratuits) sur l'adresse <code>/v1/health</code> de l'API.",
+      "emails": "E-mails (un par ligne)",
+      "phones": "Téléphones WhatsApp / SMS (un par ligne)",
+      "serverErrors": "Erreurs serveur en 15 min",
+      "slow": "Lenteur : 95 % des requêtes au-delà de (ms)",
+      "databaseSize": "Taille de la base au-delà de (Mo)",
+      "repeat": "Renvoyer une alerte en cours toutes les (h)",
+      "checkWhatsapp": "Alerter quand WhatsApp est déconnecté",
+      "save": "Enregistrer",
+      "sendTest": "Envoyer un message de test"
+    },
+    "jobs": {
+      "title": "Tâches planifiées",
+      "hint": "Une tâche est en retard après trois exécutions manquées. Après un redémarrage de l'API, les tâches quotidiennes apparaissent « jamais exécutées » jusqu'à leur prochain passage."
+    },
+    "jobNames": {
+      "payment-reconciliation": "Rapprochement des paiements en ligne",
+      "support-sla": "Délais du service client",
+      "after-sales-deadlines": "Délais des retours et litiges",
+      "monitoring": "Supervision",
+      "compliance-checks": "Contrôles de conformité",
+      "automatic-reports": "Rapports automatiques",
+      "push-cleanup": "Purge des téléphones inactifs (notifications push)",
+      "marketing-cleanup": "Purge des inscriptions marketing non confirmées",
+      "popular-categories": "Catégories populaires",
+      "request-log-retention": "Purge de l'historique des requêtes",
+      "search-event-retention": "Purge des recherches"
+    }
+  },
+  "diagnostics": {
+    "loading": "Chargement du diagnostic...",
+    "adminOnly": "Le diagnostic est réservé aux administrateurs.",
+    "title": "Diagnostic",
+    "description": "Historique des requêtes en échec et des écritures, avec leurs payloads, pour comprendre et reproduire un problème.",
+    "ranges": {
+      "15m": "15 min",
+      "1h": "1 h",
+      "6h": "6 h",
+      "24h": "24 h",
+      "7d": "7 j",
+      "30d": "30 j"
+    },
+    "live": "En direct",
+    "goLive": "Direct",
+    "chips": {
+      "status": "Statut {status}",
+      "user": "Utilisateur : {user}",
+      "ip": "IP : {ip}",
+      "route": "Route : {route}",
+      "remove": "Retirer {label}",
+      "clearAll": "Tout effacer"
+    },
+    "history": {
+      "title": "Historique des requêtes ({count})",
+      "hint": "Recherche dans le chemin, le message d'erreur, le Request ID, l'IP, le user agent et le contenu des payloads.",
+      "searchPlaceholder": "Rechercher (ex. +22177…, orders, too_small)",
+      "method": "Méthode",
+      "allMethods": "Toutes méthodes",
+      "statusClass": "Classe de statut",
+      "allStatuses": "Tous statuts",
+      "loading": "Chargement de l'historique...",
+      "empty": "Aucune requête ne correspond à ces critères."
+    },
+    "columns": {
+      "date": "Date",
+      "request": "Requête",
+      "status": "Statut",
+      "error": "Erreur",
+      "user": "Utilisateur",
+      "duration": "Durée"
+    },
+    "anonymous": "Anonyme",
+    "overview": {
+      "chart": {
+        "success": "Succès",
+        "clientErrors": "Erreurs 4xx",
+        "serverErrors": "Erreurs 5xx"
+      },
+      "bucket": {
+        "days": "{count} j",
+        "hours": "{count} h",
+        "minutes": "{count} min"
+      },
+      "recorded": "Requêtes enregistrées",
+      "recordedHint": "Écritures + lectures en échec",
+      "writeFailures": "Échec des écritures",
+      "writeFailuresHint": "{failed} / {total} écritures",
+      "clientErrorsHint": "Validation, droits, introuvable",
+      "serverErrorsHint": "Pannes côté serveur",
+      "affectedUsers": "Utilisateurs impactés",
+      "affectedUsersHint": "Connectés, avec au moins une erreur",
+      "latency": "Latence moy. / p95",
+      "p95": "p95 : {value}",
+      "activityTitle": "Activité dans le temps",
+      "activityDescription": "Requêtes enregistrées",
+      "activityDescriptionBucket": "Requêtes enregistrées, par tranche de {size}",
+      "codes": "Codes :",
+      "topRoutes": "Routes les plus en échec",
+      "topRoutesHint": "Cliquez pour filtrer l'historique.",
+      "noRequests": "Aucune requête sur la période.",
+      "routeFailures": "{failures}/{total} en échec",
+      "routeSummary": "{error} · {duration} moy.",
+      "noError": "Aucune erreur",
+      "topErrors": "Erreurs les plus fréquentes",
+      "topErrorsHint": "Cliquez pour ouvrir l'occurrence la plus récente.",
+      "noErrors": "Aucune erreur sur la période. 🎉",
+      "lastSeen": "Dernière : {date}"
+    },
+    "detail": {
+      "copied": "{label} copié",
+      "copyFailed": "Copie impossible dans ce navigateur.",
+      "copy": "Copier",
+      "copyField": "Copier {label}",
+      "content": "Contenu",
+      "title": "Détail de la requête",
+      "loading": "Chargement...",
+      "requestId": "Request ID",
+      "route": "Route",
+      "user": "Utilisateur",
+      "deletedUser": "{id} (supprimé)",
+      "ip": "IP",
+      "userAgent": "User agent",
+      "copyCurl": "Copier en cURL",
+      "userRequests": "Requêtes de cet utilisateur",
+      "sameIp": "Même IP",
+      "sameRoute": "Même route",
+      "tabs": {
+        "request": "Requête",
+        "response": "Réponse",
+        "headers": "En-têtes",
+        "error": "Erreur"
+      },
+      "queryParams": "Paramètres de requête",
+      "body": "Corps envoyé (secrets masqués)",
+      "noBody": "Aucun corps de requête.",
+      "successNotStored": "Les réponses réussies ne sont pas enregistrées : elles peuvent contenir des jetons.",
+      "noResponse": "Aucun corps de réponse.",
+      "noHeaders": "Aucun en-tête.",
+      "noStack": "Pas de trace : l'erreur a été renvoyée par l'API, pas levée.",
+      "noError": "Aucune erreur."
+    }
+  },
+  "pages": {
+    "traffic": {
+      "title": "Trafic et conversion",
+      "description": "Vues des produits et des boutiques, ajouts au panier et commandes sur toute la plateforme. Robots filtrés, aucune donnée sur les visiteurs.",
+      "loading": "Chargement des statistiques..."
+    },
+    "reports": {
+      "title": "Rapports",
+      "description": "Rapports sur toute la plateforme : composez-les, ou recevez-les automatiquement par e-mail."
+    },
+    "training": {
+      "title": "Formation",
+      "description": "Les cours proposés aux vendeurs : vidéos, PDF et textes, par niveau."
+    },
+    "marketing": {
+      "title": "E-mails marketing",
+      "description": "Campagnes envoyées aux abonnés ayant confirmé leur inscription, et preuve de leur consentement."
+    },
+    "vendability": {
+      "title": "Vendabilité",
+      "description": "Les meilleurs produits de la plateforme, la grille du score et le questionnaire des fournisseurs.",
+      "tabs": {
+        "top": "Meilleurs produits",
+        "grid": "Grille du score",
+        "questionnaire": "Questionnaire"
+      }
+    },
+    "afterSales": {
+      "title": "Retours et litiges",
+      "description": "Tranchez les dossiers refusés par le vendeur ou restés sans réponse, et appliquez ceux qu’il a acceptés.",
+      "loading": "Chargement…",
+      "empty": "Aucun dossier.",
+      "order": "Commande #{reference}",
+      "orderWithShop": "Commande #{reference} · {shop}"
+    },
+    "support": {
+      "title": "Service client",
+      "description": "Demandes des acheteurs et des vendeurs. Délai de première réponse : 4 h pour les paiements et commandes, 24 h sinon.",
+      "filters": {
+        "open": "En cours",
+        "mine": "Mes demandes",
+        "none": "Non attribuées",
+        "overdue": "En retard",
+        "resolved": "Résolues"
+      },
+      "columns": {
+        "request": "Demande",
+        "requester": "Demandeur",
+        "subject": "Sujet",
+        "priority": "Priorité",
+        "responseDue": "Réponse attendue",
+        "status": "Statut"
+      },
+      "loading": "Chargement des demandes...",
+      "empty": "Aucune demande.",
+      "answered": "Répondu"
+    }
+  },
+  "marketing": {
+    "tabs": {
+      "campaigns": "Campagnes",
+      "subscribers": "Abonnés"
+    },
+    "newCampaign": "Nouvelle campagne",
+    "cancel": "Annuler",
+    "toast": {
+      "draftSaved": "Brouillon enregistré.",
+      "testSent": "E-mail de test envoyé à {to}.",
+      "sendStarted": "Envoi lancé.",
+      "sendStopped": "Envoi arrêté.",
+      "draftDeleted": "Brouillon supprimé."
+    },
+    "form": {
+      "createdBy": "{status} · créée par {name} le {date}",
+      "intro": "Rédigez l'e-mail, choisissez le public, envoyez-vous un test, puis lancez l'envoi.",
+      "subject": "Objet",
+      "preheader": "Texte d'aperçu (facultatif)",
+      "preheaderPlaceholder": "Affiché après l'objet dans la boîte de réception",
+      "body": "Message",
+      "bodyHint": "Une ligne vide entre deux paragraphes, « ## » au début d'une ligne pour un titre, « - » pour une liste. Les adresses https:// deviennent des liens. Le motif de réception, le lien de désinscription et l'adresse de la société sont ajoutés automatiquement.",
+      "ctaLabel": "Texte du bouton (facultatif)",
+      "ctaLabelPlaceholder": "Voir les offres",
+      "ctaUrl": "Adresse du bouton",
+      "ctaUrlPlaceholder": "/listings ou https://…",
+      "audience": "Public",
+      "subscribers": "Abonnés",
+      "countries": "Pays (codes, facultatif)",
+      "countriesPlaceholder": "SN, CI, ML — vide : tous les pays",
+      "languages": "Langue de l'abonné (aucune cochée : toutes)",
+      "audienceCount": "{count, plural, one {# abonné inscrit} other {# abonnés inscrits}} dans ce public.",
+      "audienceCounting": "Calcul du public…",
+      "saving": "Enregistrement…",
+      "saveDraft": "Enregistrer le brouillon",
+      "sendTest": "M'envoyer un test",
+      "sendEllipsis": "Envoyer…",
+      "delete": "Supprimer"
+    },
+    "progress": {
+      "sentOf": "{sent, plural, one {# envoyé} other {# envoyés}} sur {total}",
+      "failed": "{count, plural, one {# échec} other {# échecs}} · ",
+      "skipped": "{count, plural, one {# non envoyé} other {# non envoyés}} (désinscrits ou envoi arrêté) · ",
+      "startedBy": "lancé par {name} le {date}",
+      "finished": ", terminé le {date}",
+      "label": "Avancement de l'envoi",
+      "stop": "Arrêter l'envoi"
+    },
+    "confirmSend": {
+      "title": "Envoyer cette campagne ?",
+      "description": "« {subject} » partira vers {count, plural, one {# abonné} other {# abonnés}} ({audience}). Le brouillon est enregistré avant l'envoi. Une fois lancé, l'envoi peut être arrêté mais pas annulé pour les e-mails déjà partis.",
+      "confirm": "Envoyer"
+    },
+    "confirmDelete": {
+      "title": "Supprimer ce brouillon ?",
+      "description": "Il n'a été envoyé à personne ; il sera définitivement supprimé."
+    },
+    "campaigns": {
+      "intro": "Envoyées uniquement aux personnes ayant confirmé leur inscription.",
+      "subject": "Objet",
+      "status": "Statut",
+      "audience": "Public",
+      "sent": "Envoyés",
+      "date": "Date",
+      "empty": "Aucune campagne pour l'instant."
+    },
+    "consent": {
+      "unsubscribed": "Adresse désinscrite.",
+      "description": "Preuve du consentement : chaque demande, confirmation et désinscription, avec le texte accepté.",
+      "by": "Par {source}",
+      "ip": " · adresse IP {ip}",
+      "quote": "« {text} »",
+      "browser": "Navigateur : {userAgent}",
+      "confirm": "Désinscrire cette adresse à la demande de la personne ? Elle devra se réinscrire elle-même pour recevoir de nouveau les campagnes.",
+      "unsubscribe": "Désinscrire",
+      "unsubscribeOnRequest": "Désinscrire à sa demande…"
+    },
+    "subscribers": {
+      "searchLabel": "Rechercher une adresse",
+      "searchPlaceholder": "Rechercher une adresse…",
+      "status": "Statut",
+      "allStatuses": "Tous les statuts",
+      "email": "Adresse",
+      "language": "Langue",
+      "country": "Pays",
+      "account": "Compte",
+      "subscribedAt": "Inscrit le",
+      "yes": "Oui",
+      "no": "Non",
+      "consent": "Consentement",
+      "empty": "Aucune adresse.",
+      "previous": "Précédent",
+      "next": "Suivant"
+    },
+    "audience": {
+      "ALL": "Tous les abonnés",
+      "BUYERS": "Acheteurs (au moins une commande)",
+      "SELLERS": "Vendeurs (membres d'une boutique)",
+      "ACCOUNTS": "Abonnés ayant un compte",
+      "NO_ACCOUNT": "Abonnés sans compte"
+    },
+    "language": {
+      "fr": "Français",
+      "en": "Anglais",
+      "pt": "Portugais",
+      "ar": "Arabe"
+    },
+    "campaignStatus": {
+      "DRAFT": "Brouillon",
+      "SENDING": "Envoi en cours",
+      "SENT": "Envoyée",
+      "CANCELLED": "Arrêtée"
+    },
+    "subscriberStatus": {
+      "PENDING": "En attente de confirmation",
+      "SUBSCRIBED": "Inscrit",
+      "UNSUBSCRIBED": "Désinscrit"
+    },
+    "consentEvent": {
+      "REQUESTED": "Demande d'inscription",
+      "CONFIRMED": "Consentement confirmé",
+      "UNSUBSCRIBED": "Désinscription"
+    },
+    "consentSource": {
+      "WEB": "formulaire du site",
+      "MOBILE": "application mobile",
+      "ACCOUNT": "compte sur le site",
+      "EMAIL_LINK": "lien reçu par e-mail",
+      "ONE_CLICK": "bouton de la messagerie",
+      "ADMIN": "administrateur, à la demande de la personne"
+    }
+  },
+  "training": {
+    "lessonAdded": "Leçon ajoutée.",
+    "uploadFailed": "Envoi impossible.",
+    "addLessonTitle": "Ajouter une leçon",
+    "title": "Titre",
+    "type": "Type",
+    "durationMinutes": "Durée (minutes)",
+    "text": "Texte",
+    "uploadVideo": "Envoyer la vidéo (100 Mo au plus)",
+    "uploadPdf": "Envoyer le PDF (10 Mo au plus)",
+    "orUrl": "Ou son adresse",
+    "uploadingFile": "Envoi du fichier...",
+    "addLesson": "Ajouter la leçon",
+    "published": "Publié",
+    "draft": "Brouillon",
+    "courseStats": "{lessons, plural, one {# leçon} other {# leçons}}, {learners, plural, one {# vendeur a commencé} other {# vendeurs ont commencé}}.",
+    "close": "Fermer",
+    "manageLessons": "Gérer les leçons",
+    "unpublish": "Dépublier",
+    "publish": "Publier",
+    "delete": "Supprimer",
+    "moveUp": "Monter {title}",
+    "moveDown": "Descendre {title}",
+    "removeLesson": "Retirer {title}",
+    "deleteTitle": "Supprimer ce cours ?",
+    "deleteDescription": "« {title} », ses leçons et la progression des vendeurs seront supprimés définitivement.",
+    "cancel": "Annuler",
+    "courseCreated": "Cours créé.",
+    "newCourse": "Nouveau cours",
+    "newCourseHint": "Il reste invisible des vendeurs tant qu'il n'est pas publié.",
+    "summary": "Résumé",
+    "level": "Niveau",
+    "create": "Créer"
+  },
+  "vendabilityGrid": {
+    "saved": "Grille enregistrée.",
+    "loading": "Chargement...",
+    "weightsTitle": "Poids des critères",
+    "weightsDescription": "Le score est la moyenne pondérée des critères évaluables. Un critère sans donnée (pas d'avis, trop peu de vues) ne pénalise pas le produit. Un poids de 0 retire le critère. Ces valeurs sont provisoires en attendant la grille définitive.",
+    "criterion": {
+      "sales": "Unités commandées",
+      "conversion": "Taux de conversion",
+      "cartRate": "Taux d'ajout au panier",
+      "views": "Vues",
+      "rating": "Note des acheteurs",
+      "availability": "Disponibilité",
+      "completeness": "Qualité de la fiche",
+      "supplier": "Questionnaire du fournisseur"
+    },
+    "totalWeight": "Total des poids : {total}. Chaque critère compte pour sa part de ce total.",
+    "targetsTitle": "Objectifs et seuils",
+    "targetsDescription": "Un produit qui atteint l'objectif obtient 100 points sur le critère.",
+    "targetUnits": "Unités commandées (objectif)",
+    "targetViews": "Vues (objectif)",
+    "targetConversion": "Conversion (objectif, %)",
+    "targetCart": "Ajout au panier (objectif, %)",
+    "windowDays": "Période prise en compte (jours)",
+    "minViews": "Vues minimum pour juger les taux",
+    "minScore": "Score minimum pour être classé",
+    "saving": "Enregistrement...",
+    "save": "Enregistrer la grille"
+  },
+  "vendabilityQuestionnaire": {
+    "yes": "Oui",
+    "no": "Non",
+    "draftTitle": "Version {version} en préparation",
+    "draftDescription": "Invisible des fournisseurs tant qu'elle n'est pas publiée. Une fois publiée, elle ne se modifie plus.",
+    "title": "Titre",
+    "question": "Question {number}",
+    "moveUp": "Monter la question {number}",
+    "moveDown": "Descendre la question {number}",
+    "removeQuestion": "Retirer la question {number}",
+    "questionLabelAria": "Intitulé de la question {number}",
+    "questionLabel": "Intitulé de la question",
+    "type": "Type",
+    "typeChoice": "Choix (noté)",
+    "typeText": "Texte libre (non noté)",
+    "weight": "Poids dans le résultat",
+    "required": "Obligatoire",
+    "options": "Réponses proposées et points (0 à 100)",
+    "optionAria": "Réponse {option} de la question {number}",
+    "optionPointsAria": "Points de la réponse {option} de la question {number}",
+    "removeOptionAria": "Retirer la réponse {option} de la question {number}",
+    "addOption": "Ajouter une réponse",
+    "addQuestion": "Ajouter une question",
+    "draftSaved": "Brouillon enregistré.",
+    "saveDraft": "Enregistrer le brouillon",
+    "publish": "Publier",
+    "draftDeleted": "Brouillon supprimé.",
+    "discardDraft": "Abandonner ce brouillon",
+    "publishTitle": "Publier la version {version} ?",
+    "publishDescription": "Elle remplace la version en vigueur et ne pourra plus être modifiée. Tous les fournisseurs actifs seront invités à y répondre.",
+    "cancel": "Annuler",
+    "published": "Version publiée.",
+    "responsesTitle": "Réponses à la version {version}",
+    "responsesCount": "{count, plural, one {# fournisseur a répondu.} other {# fournisseurs ont répondu.}}",
+    "loading": "Chargement...",
+    "shop": "Boutique",
+    "score": "Résultat",
+    "newVersion": "Préparer une nouvelle version",
+    "versions": "Versions",
+    "versionLine": "<b>Version {version}</b> : {title}, {count, plural, one {# question} other {# questions}}",
+    "status": {
+      "DRAFT": "En préparation",
+      "PUBLISHED": "En vigueur",
+      "ARCHIVED": "Archivée"
+    },
+    "viewResponses": "Voir les réponses"
+  }
+}

@@ -8,6 +8,8 @@ import { Link } from "@/i18n/navigation";
 import { formatMoney } from "@/lib/seller-dashboard-utils";
 import { trpc } from "@/server/trpc/client";
 import type { OperationPayment } from "@/server/trpc/_procedures/payment-operations";
+import { intlLocale } from "@/i18n/config";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -18,6 +20,8 @@ const orderRef = (id: string) => `#${id.slice(0, 8).toUpperCase()}`;
  * account, then supplier shares to release once the order is delivered.
  */
 export default function PaymentOperationsPage() {
+  const t = useTranslations("adminCommerce");
+  const locale = useLocale();
   const utils = trpc.useUtils();
   const offline = trpc.paymentOperations.pendingOffline.useQuery();
   const [onlyReady, setOnlyReady] = useState(true);
@@ -33,7 +37,7 @@ export default function PaymentOperationsPage() {
 
   const refresh = () => utils.paymentOperations.invalidate();
   const fail = (error: unknown) =>
-    toast.error(error instanceof Error ? error.message : "Échec.");
+    toast.error(error instanceof Error ? error.message : t("common.failed"));
 
   const confirmPayment = async (payment: OperationPayment) => {
     try {
@@ -42,7 +46,7 @@ export default function PaymentOperationsPage() {
         reference: (references[payment.id] ?? "").trim(),
       });
       toast.success(
-        `Paiement de la commande ${orderRef(payment.orderId)} confirmé.`,
+        t("payouts.confirmed", { ref: orderRef(payment.orderId) }),
       );
       await refresh();
     } catch (error) {
@@ -52,13 +56,13 @@ export default function PaymentOperationsPage() {
 
   const rejectPayment = async (payment: OperationPayment) => {
     const reason = window.prompt(
-      "Motif du refus (communiqué à l'acheteur) :",
-      "Aucun virement reçu.",
+      t("payouts.rejectPrompt"),
+      t("payouts.rejectDefault"),
     );
     if (!reason?.trim()) return;
     try {
       await reject.mutateAsync({ id: payment.id, reason });
-      toast.success("Paiement refusé, commande annulée.");
+      toast.success(t("payouts.rejected"));
       await refresh();
     } catch (error) {
       fail(error);
@@ -72,9 +76,13 @@ export default function PaymentOperationsPage() {
         method,
         ...(method === "MANUAL" ? { reference: payoutReference.trim() } : {}),
       });
-      toast.success(`${result.released.length} versement(s) effectué(s).`);
+      toast.success(
+        t("payouts.released", { count: result.released.length }),
+      );
       if (result.processing?.length) {
-        toast.info(`${result.processing.length} versement(s) en cours chez PayDunya.`);
+        toast.info(
+          t("payouts.processingToast", { count: result.processing.length }),
+        );
       }
       for (const skip of result.skipped) toast.warning(skip.reason);
       setSelected([]);
@@ -95,20 +103,22 @@ export default function PaymentOperationsPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Paiements et versements"
-        description="Confirmez les virements reçus, puis versez la part des fournisseurs une fois la commande livrée. Chaque décision est enregistrée."
+        title={t("payouts.title")}
+        description={t("payouts.description")}
       />
 
       <Card>
         <CardHeader>
           <CardTitle>
-            Paiements hors ligne à confirmer ({offline.data?.total ?? 0})
+            {t("payouts.offlineTitle", { count: offline.data?.total ?? 0 })}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           {!offline.data?.items.length && (
             <p className="text-muted-foreground text-sm">
-              {offline.isLoading ? "Chargement…" : "Aucun paiement en attente."}
+              {offline.isLoading
+                ? t("common.loading")
+                : t("payouts.noPending")}
             </p>
           )}
           {offline.data?.items.map((payment) => (
@@ -118,25 +128,37 @@ export default function PaymentOperationsPage() {
             >
               <div className="min-w-0 text-sm">
                 <p className="font-semibold">
-                  {formatMoney(payment.amountMinor, payment.currency)} ·
-                  Commande{" "}
-                  <Link
-                    className="text-primary hover:underline"
-                    href={`/dashboard/admin/orders/${payment.orderId}`}
-                  >
-                    {orderRef(payment.orderId)}
-                  </Link>
+                  {t.rich("payouts.offlineOrder", {
+                    amount: formatMoney(
+                      payment.amountMinor,
+                      payment.currency,
+                      locale,
+                    ),
+                    ref: orderRef(payment.orderId),
+                    link: (chunks) => (
+                      <Link
+                        className="text-primary hover:underline"
+                        href={`/dashboard/admin/orders/${payment.orderId}`}
+                      >
+                        {chunks}
+                      </Link>
+                    ),
+                  })}
                 </p>
                 <p className="text-muted-foreground">
-                  {payment.order.buyer.firstName} {payment.order.buyer.lastName}{" "}
-                  → {payment.order.business.name} · commandé le{" "}
-                  {new Date(payment.createdAt).toLocaleDateString("fr-FR")}
+                  {t("payouts.orderedBy", {
+                    buyer: `${payment.order.buyer.firstName} ${payment.order.buyer.lastName}`,
+                    business: payment.order.business.name,
+                    date: new Date(payment.createdAt).toLocaleDateString(
+                      intlLocale(locale),
+                    ),
+                  })}
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <Input
                   className="h-9 w-48"
-                  placeholder="Référence du virement"
+                  placeholder={t("payouts.transferReference")}
                   value={references[payment.id] ?? ""}
                   onChange={(event) =>
                     setReferences({
@@ -153,7 +175,7 @@ export default function PaymentOperationsPage() {
                   }
                   onClick={() => void confirmPayment(payment)}
                 >
-                  Argent reçu
+                  {t("payouts.moneyReceived")}
                 </Button>
                 <Button
                   size="sm"
@@ -161,7 +183,7 @@ export default function PaymentOperationsPage() {
                   disabled={reject.isPending}
                   onClick={() => void rejectPayment(payment)}
                 >
-                  Refuser
+                  {t("common.reject")}
                 </Button>
               </div>
             </div>
@@ -172,10 +194,12 @@ export default function PaymentOperationsPage() {
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
           <CardTitle>
-            Parts fournisseurs retenues ({held.data?.total ?? 0})
+            {t("payouts.heldTitle", { count: held.data?.total ?? 0 })}
             {(payoutInfo?.processing ?? 0) > 0 && (
               <span className="text-muted-foreground ms-2 text-sm font-normal">
-                · {payoutInfo?.processing} versement(s) en cours chez PayDunya
+                {t("payouts.processing", {
+                  count: payoutInfo?.processing ?? 0,
+                })}
               </span>
             )}
           </CardTitle>
@@ -188,13 +212,13 @@ export default function PaymentOperationsPage() {
                 setSelected([]);
               }}
             />
-            Seulement les commandes livrées
+            {t("payouts.onlyDelivered")}
           </label>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           {!heldItems.length && (
             <p className="text-muted-foreground text-sm">
-              {held.isLoading ? "Chargement…" : "Aucune part à verser."}
+              {held.isLoading ? t("common.loading") : t("payouts.noShares")}
             </p>
           )}
           {heldItems.map((payment) => {
@@ -220,25 +244,36 @@ export default function PaymentOperationsPage() {
                 />
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold">
-                    {formatMoney(
-                      payment.payoutDueMinor ?? payment.payoutAmountMinor ?? 0,
-                      payment.currency,
-                    )}{" "}
-                    à {payment.order.business.name}
+                    {t("payouts.shareTo", {
+                      amount: formatMoney(
+                        payment.payoutDueMinor ??
+                          payment.payoutAmountMinor ??
+                          0,
+                        payment.currency,
+                        locale,
+                      ),
+                      business: payment.order.business.name,
+                    })}
                     {(payment.refundedPayoutMinor ?? 0) > 0 && (
                       <span className="text-muted-foreground font-normal">
                         {" "}
-                        (part de {formatMoney(payment.payoutAmountMinor ?? 0, payment.currency)} moins{" "}
-                        {formatMoney(payment.refundedPayoutMinor ?? 0, payment.currency)} remboursés)
+                        {t("payouts.deduction", {
+                          share: formatMoney(payment.payoutAmountMinor ?? 0, payment.currency, locale),
+                          refunded: formatMoney(payment.refundedPayoutMinor ?? 0, payment.currency, locale),
+                        })}
                       </span>
                     )}
                   </p>
                   <p className="text-muted-foreground">
-                    Commande {orderRef(payment.orderId)} ·{" "}
-                    {ready ? "livrée" : "pas encore livrée"} ·{" "}
-                    {account
-                      ? `${account.service} ${account.destinationNumber}`
-                      : "aucun compte de versement"}
+                    {t("payouts.orderLine", {
+                      ref: orderRef(payment.orderId),
+                      state: ready
+                        ? t("payouts.delivered")
+                        : t("payouts.notDelivered"),
+                      account: account
+                        ? `${account.service} ${account.destinationNumber}`
+                        : t("payouts.noAccount"),
+                    })}
                   </p>
                 </div>
               </label>
@@ -247,14 +282,19 @@ export default function PaymentOperationsPage() {
           {selected.length > 0 && (
             <div className="flex flex-wrap items-center justify-end gap-2 border-t pt-3">
               <span className="text-sm">
-                {selected.length} part(s) · total{" "}
-                <strong>
-                  {formatMoney(selectedTotal, heldItems[0]?.currency ?? "XOF")}
-                </strong>
+                {t.rich("payouts.selection", {
+                  count: selected.length,
+                  total: formatMoney(
+                    selectedTotal,
+                    heldItems[0]?.currency ?? "XOF",
+                    locale,
+                  ),
+                  strong: (chunks) => <strong>{chunks}</strong>,
+                })}
               </span>
               <Input
                 className="h-9 w-56"
-                placeholder="Référence du transfert effectué"
+                placeholder={t("payouts.payoutReference")}
                 value={payoutReference}
                 onChange={(event) => setPayoutReference(event.target.value)}
               />
@@ -265,15 +305,15 @@ export default function PaymentOperationsPage() {
                 }
                 onClick={() => void releaseSelected("MANUAL")}
               >
-                Valider le versement
+                {t("payouts.validatePayout")}
               </Button>
               {payoutInfo?.paydunyaPayouts && (
                 <Button
                   disabled={release.isPending}
                   onClick={() => void releaseSelected("PAYDUNYA")}
-                  title="Verse la part nette sur le compte mobile money du fournisseur, depuis le solde PayDunya de Diarama."
+                  title={t("payouts.paydunyaHint")}
                 >
-                  Verser par PayDunya
+                  {t("payouts.payByPaydunya")}
                 </Button>
               )}
             </div>

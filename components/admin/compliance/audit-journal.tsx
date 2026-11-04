@@ -8,30 +8,34 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { type AuditEntry, formatDateTime } from "@/lib/compliance";
 import { trpc } from "@/server/trpc/client";
 import { DownloadIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { Fragment, useDeferredValue, useState } from "react";
 
 const dayStart = (day: string) => (day ? new Date(`${day}T00:00:00Z`).toISOString() : undefined);
 const dayEnd = (day: string) => (day ? new Date(`${day}T23:59:59Z`).toISOString() : undefined);
 
 function Values({ entry }: { entry: AuditEntry }) {
+  const t = useTranslations("adminSettings.audit");
   return (
     <div className="grid gap-2 text-xs md:grid-cols-2">
       <div className="min-w-0">
-        <p className="font-medium">Avant</p>
+        <p className="font-medium">{t("before")}</p>
         <pre className="bg-muted overflow-x-auto rounded p-2">{JSON.stringify(entry.oldValues, null, 2) ?? "—"}</pre>
       </div>
       <div className="min-w-0">
-        <p className="font-medium">Après</p>
+        <p className="font-medium">{t("after")}</p>
         <pre className="bg-muted overflow-x-auto rounded p-2">{JSON.stringify(entry.newValues, null, 2) ?? "—"}</pre>
       </div>
       <p className="text-muted-foreground break-all md:col-span-2">
-        {entry.entityId ?? "—"} · {entry.userAgent ?? "agent inconnu"}
+        {entry.entityId ?? "—"} · {entry.userAgent ?? t("unknownAgent")}
       </p>
     </div>
   );
 }
 
 export function AuditJournal() {
+  const t = useTranslations("adminSettings.audit");
+  const locale = useLocale();
   const [search, setSearch] = useState("");
   const deferred = useDeferredValue(search.trim());
   const [from, setFrom] = useState("");
@@ -54,18 +58,14 @@ export function AuditJournal() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Journal d&apos;audit ({audit.data?.total ?? 0})</CardTitle>
-        <CardDescription>
-          Qui a fait quoi, quand et depuis où : actions financières, modération,
-          catalogue, réglages. Cliquez sur une ligne pour voir les valeurs avant
-          et après. L&apos;export est limité à 10 000 lignes et lui-même journalisé.
-        </CardDescription>
+        <CardTitle>{t("title", { count: audit.data?.total ?? 0 })}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <Input
-            aria-label="Rechercher"
-            placeholder="Action, e-mail, boutique, adresse IP…"
+            aria-label={t("search")}
+            placeholder={t("searchPlaceholder")}
             value={search}
             onChange={(event) => {
               setSearch(event.target.value);
@@ -73,34 +73,34 @@ export function AuditJournal() {
             }}
             className="w-72"
           />
-          <Input aria-label="Du" type="date" value={from} onChange={(event) => { setFrom(event.target.value); setPage(1); }} className="w-40" />
-          <Input aria-label="Au" type="date" value={to} onChange={(event) => { setTo(event.target.value); setPage(1); }} className="w-40" />
+          <Input aria-label={t("from")} type="date" value={from} onChange={(event) => { setFrom(event.target.value); setPage(1); }} className="w-40" />
+          <Input aria-label={t("to")} type="date" value={to} onChange={(event) => { setTo(event.target.value); setPage(1); }} className="w-40" />
           <Button size="sm" variant="outline" nativeButton={false} render={<a href={`/api/audit-export?${exportParams}`} />}>
             <DownloadIcon />
-            Exporter en CSV
+            {t("export")}
           </Button>
         </div>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Action</TableHead>
-              <TableHead>Auteur</TableHead>
-              <TableHead>Boutique</TableHead>
-              <TableHead>Adresse IP</TableHead>
+              <TableHead>{t("columns.date")}</TableHead>
+              <TableHead>{t("columns.action")}</TableHead>
+              <TableHead>{t("columns.author")}</TableHead>
+              <TableHead>{t("columns.shop")}</TableHead>
+              <TableHead>{t("columns.ip")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {audit.data?.items.map((entry) => (
               <Fragment key={entry.id}>
                 <TableRow className="cursor-pointer" onClick={() => setOpen(open === entry.id ? null : entry.id)}>
-                  <TableCell>{formatDateTime(entry.createdAt)}</TableCell>
+                  <TableCell>{formatDateTime(entry.createdAt, locale)}</TableCell>
                   <TableCell className="whitespace-normal">
                     <p className="font-medium break-all">{entry.action}</p>
                     <p className="text-muted-foreground text-xs">{entry.entityType}</p>
                   </TableCell>
                   <TableCell className="whitespace-normal">
-                    {entry.userName ?? "Système"}
+                    {entry.userName ?? t("system")}
                     {entry.userEmail && <p className="text-muted-foreground text-xs break-all">{entry.userEmail}</p>}
                   </TableCell>
                   <TableCell>{entry.businessName ?? "—"}</TableCell>
@@ -115,7 +115,7 @@ export function AuditJournal() {
             ))}
             {audit.data && !audit.data.items.length && (
               <TableRow>
-                <TableCell colSpan={5} className="text-muted-foreground text-center">Aucune entrée.</TableCell>
+                <TableCell colSpan={5} className="text-muted-foreground text-center">{t("empty")}</TableCell>
               </TableRow>
             )}
           </TableBody>

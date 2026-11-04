@@ -31,11 +31,7 @@ import {
 } from "@/components/ui/table";
 import { useRouter } from "@/i18n/navigation";
 import type { AdminListing } from "@/lib/admin-types";
-import {
-  LISTING_STATUS_LABELS,
-  MODERATION_STATUS_CLASSES,
-  MODERATION_STATUS_LABELS,
-} from "@/lib/moderation-utils";
+import { MODERATION_STATUS_CLASSES } from "@/lib/moderation-utils";
 import {
   formatDate,
   formatMoney,
@@ -51,6 +47,7 @@ import {
   SearchIcon,
   XCircleIcon,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useDeferredValue, useState } from "react";
 
 const PAGE_SIZE = 10;
@@ -62,14 +59,12 @@ type ModerationTarget = {
   decision: "APPROVED" | "REJECTED";
 };
 
-const QUEUE_TABS: { label: string; value: ModerationFilter }[] = [
-  { label: "À valider", value: "PENDING" },
-  { label: "Validés", value: "APPROVED" },
-  { label: "Refusés", value: "REJECTED" },
-  { label: "Tout", value: "ALL" },
-];
+const QUEUE_TABS: ModerationFilter[] = ["PENDING", "APPROVED", "REJECTED", "ALL"];
 
 export default function AdminListingsPage() {
+  const t = useTranslations("adminCommerce");
+  const tProducts = useTranslations("products");
+  const locale = useLocale();
   const router = useRouter();
   const utils = trpc.useUtils();
   const [page, setPage] = useState(1);
@@ -117,15 +112,17 @@ export default function AdminListingsPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Modération des produits & services"
-        description="Chaque annonce publiée par un fournisseur doit être validée avant d'être visible par les acheteurs."
+        title={t("listings.title")}
+        description={t("listings.description")}
       />
 
       <Card>
         <CardHeader>
           <CardTitle>
-            {QUEUE_TABS.find((tab) => tab.value === moderationFilter)?.label} (
-            {listings.data?.total ?? 0})
+            {t("listings.withCount", {
+              label: t(`listings.queue.${moderationFilter}`),
+              count: listings.data?.total ?? 0,
+            })}
           </CardTitle>
           <CardAction>
             <div className="flex flex-wrap items-center gap-2">
@@ -136,11 +133,11 @@ export default function AdminListingsPage() {
                   setPage(1);
                 }}
                 className="border-input bg-background h-9 rounded-md border px-3 text-sm"
-                aria-label="Filtrer par type"
+                aria-label={t("listings.filterType")}
               >
-                <option value="ALL">Tout</option>
-                <option value="PRODUCT">Produits</option>
-                <option value="SERVICE">Services</option>
+                <option value="ALL">{t("listings.type.ALL")}</option>
+                <option value="PRODUCT">{t("listings.type.PRODUCT")}</option>
+                <option value="SERVICE">{t("listings.type.SERVICE")}</option>
               </select>
               <div className="relative">
                 <SearchIcon className="text-muted-foreground absolute top-1/2 start-2.5 size-4 -translate-y-1/2" />
@@ -150,7 +147,7 @@ export default function AdminListingsPage() {
                     setSearch(event.target.value);
                     setPage(1);
                   }}
-                  placeholder="Rechercher..."
+                  placeholder={t("common.search")}
                   className="h-9 w-56 ps-8"
                 />
               </div>
@@ -160,21 +157,23 @@ export default function AdminListingsPage() {
         <CardContent className="flex flex-col gap-4 overflow-x-auto">
           <div className="flex flex-wrap gap-2">
             {QUEUE_TABS.map((tab) => {
-              const count = countFor(tab.value);
+              const count = countFor(tab);
+              const label = t(`listings.queue.${tab}`);
               return (
                 <Button
-                  key={tab.value}
+                  key={tab}
                   size="sm"
                   variant={
-                    moderationFilter === tab.value ? "default" : "outline"
+                    moderationFilter === tab ? "default" : "outline"
                   }
                   onClick={() => {
-                    setModerationFilter(tab.value);
+                    setModerationFilter(tab);
                     setPage(1);
                   }}
                 >
-                  {tab.label}
-                  {count !== null && ` (${count})`}
+                  {count !== null
+                    ? t("listings.withCount", { label, count })
+                    : label}
                 </Button>
               );
             })}
@@ -183,14 +182,16 @@ export default function AdminListingsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Élément</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Pays</TableHead>
-                <TableHead>Prix</TableHead>
-                <TableHead>Soumis le</TableHead>
-                <TableHead>Publication</TableHead>
-                <TableHead>Modération</TableHead>
-                <TableHead className="w-[1%] text-end">Actions</TableHead>
+                <TableHead>{t("listings.columns.item")}</TableHead>
+                <TableHead>{t("listings.columns.type")}</TableHead>
+                <TableHead>{t("listings.columns.country")}</TableHead>
+                <TableHead>{t("listings.columns.price")}</TableHead>
+                <TableHead>{t("listings.columns.submittedAt")}</TableHead>
+                <TableHead>{t("listings.columns.publication")}</TableHead>
+                <TableHead>{t("listings.columns.moderation")}</TableHead>
+                <TableHead className="w-[1%] text-end">
+                  {t("listings.columns.actions")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -199,11 +200,11 @@ export default function AdminListingsPage() {
                 isLoading={listings.isLoading}
                 error={listings.error?.message}
                 isEmpty={!listings.data?.items.length}
-                loadingLabel="Chargement du catalogue..."
+                loadingLabel={t("listings.loading")}
                 emptyLabel={
                   moderationFilter === "PENDING"
-                    ? "Aucune annonce en attente de validation."
-                    : "Aucun produit ou service trouvé."
+                    ? t("listings.emptyPending")
+                    : t("listings.empty")
                 }
               />
               {listings.data?.items.map((listing) => {
@@ -243,26 +244,32 @@ export default function AdminListingsPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {listing.isService ? "Service" : "Produit"}
+                      {listing.isService
+                        ? t("listings.service")
+                        : t("listings.product")}
                     </TableCell>
                     <TableCell>{listing.countryCode}</TableCell>
                     <TableCell className="font-medium whitespace-nowrap">
                       {listing.priceAmountMinor < 0
-                        ? "Sur devis"
+                        ? t("listings.onQuote")
                         : formatMoney(
                             listing.priceAmountMinor,
                             listing.currency,
+                            locale,
                           )}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
                       {formatDate(
                         listing.submittedForReviewAt ?? listing.createdAt,
+                        false,
+                        locale,
                       )}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">
-                        {LISTING_STATUS_LABELS[listing.status] ??
-                          listing.status}
+                        {t.has(`listingStatus.${listing.status}`)
+                          ? t(`listingStatus.${listing.status}`)
+                          : listing.status}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -272,7 +279,7 @@ export default function AdminListingsPage() {
                           MODERATION_STATUS_CLASSES[listing.moderationStatus]
                         }
                       >
-                        {MODERATION_STATUS_LABELS[listing.moderationStatus]}
+                        {tProducts(`moderation.${listing.moderationStatus}`)}
                       </Badge>
                     </TableCell>
                     <TableCell
@@ -285,7 +292,9 @@ export default function AdminListingsPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              aria-label={`Actions pour ${listing.title}`}
+                              aria-label={t("listings.actionsFor", {
+                                title: listing.title,
+                              })}
                             />
                           }
                         >
@@ -299,7 +308,7 @@ export default function AdminListingsPage() {
                               )
                             }
                           >
-                            <EyeIcon /> Examiner
+                            <EyeIcon /> {t("listings.review")}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           {listing.moderationStatus !== "APPROVED" && (
@@ -308,7 +317,7 @@ export default function AdminListingsPage() {
                                 setTarget({ listing, decision: "APPROVED" })
                               }
                             >
-                              <CheckCircle2Icon /> Valider
+                              <CheckCircle2Icon /> {t("common.approve")}
                             </DropdownMenuItem>
                           )}
                           {listing.moderationStatus !== "REJECTED" && (
@@ -318,7 +327,7 @@ export default function AdminListingsPage() {
                                 setTarget({ listing, decision: "REJECTED" })
                               }
                             >
-                              <XCircleIcon /> Refuser
+                              <XCircleIcon /> {t("common.reject")}
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>

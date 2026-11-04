@@ -14,32 +14,29 @@ import {
   serializeContent,
 } from "@/lib/content-format";
 import { trpc } from "@/server/trpc/client";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
-
-const LOCALE_LABELS: Record<ContentLocale, string> = {
-  fr: "Français",
-  en: "Anglais",
-  pt: "Portugais",
-  ar: "Arabe",
-};
 
 const STOREFRONT_PATH = (slug: string) =>
   slug === "cgu" ? "/cgu" : `/pages/${slug}`;
 
 /** Edits one page, one language at a time, in the plain-text format. */
 export function PageEditor({ page }: { page: AdminContentPage }) {
+  const t = useTranslations("adminSettings.pageEditor");
+  const tc = useTranslations("adminSettings.common");
+  const tContent = useTranslations("adminSettings.content");
   const utils = trpc.useUtils();
   const save = trpc.content.saveTranslation.useMutation();
   const publish = trpc.content.setPublished.useMutation();
   const [locale, setLocale] = useState<ContentLocale>("fr");
 
   const translation = (l: ContentLocale) =>
-    page.translations.find((t) => t.locale === l);
+    page.translations.find((tr) => tr.locale === l);
   const load = (l: ContentLocale) => {
-    const t = translation(l) ?? translation("fr");
+    const fallback = translation(l) ?? translation("fr");
     return {
-      title: translation(l)?.title ?? t?.title ?? "",
+      title: translation(l)?.title ?? fallback?.title ?? "",
       summary: translation(l)?.summary ?? "",
       body: translation(l) ? serializeContent(translation(l)!.sections) : "",
     };
@@ -61,13 +58,11 @@ export function PageEditor({ page }: { page: AdminContentPage }) {
         summary: draft.summary.trim() || null,
         sections,
       });
-      toast.success(
-        `Contenu ${LOCALE_LABELS[locale].toLowerCase()} enregistré.`,
-      );
+      toast.success(t("saved", { locale }));
       await utils.content.pages.invalidate();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Échec de l’enregistrement.",
+        error instanceof Error ? error.message : tc("saveFailed"),
       );
     }
   };
@@ -79,12 +74,12 @@ export function PageEditor({ page }: { page: AdminContentPage }) {
         isPublished: !page.isPublished,
       });
       toast.success(
-        page.isPublished ? "Page retirée du site." : "Page publiée.",
+        page.isPublished ? t("unpublished") : t("publishedToast"),
       );
       await utils.content.pages.invalidate();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Échec de la publication.",
+        error instanceof Error ? error.message : t("publishFailed"),
       );
     }
   };
@@ -101,10 +96,10 @@ export function PageEditor({ page }: { page: AdminContentPage }) {
                 : "border-slate-200 bg-slate-50 text-slate-600"
             }
           >
-            {page.isPublished ? "Publiée" : "Brouillon"}
+            {page.isPublished ? tContent("published") : tContent("draft")}
           </Badge>
           <span className="text-muted-foreground text-sm">
-            Adresse sur le site : {STOREFRONT_PATH(page.slug)}
+            {t("storefrontPath", { path: STOREFRONT_PATH(page.slug) })}
           </span>
         </div>
         <Button
@@ -112,7 +107,7 @@ export function PageEditor({ page }: { page: AdminContentPage }) {
           disabled={publish.isPending}
           onClick={() => void togglePublished()}
         >
-          {page.isPublished ? "Retirer du site" : "Publier"}
+          {page.isPublished ? t("unpublish") : t("publish")}
         </Button>
       </div>
 
@@ -123,7 +118,7 @@ export function PageEditor({ page }: { page: AdminContentPage }) {
         <TabsList>
           {CONTENT_LOCALES.map((l) => (
             <TabsTrigger key={l} value={l}>
-              {LOCALE_LABELS[l]}
+              {t(`languages.${l}`)}
               {!translation(l) && (
                 <span className="text-muted-foreground ms-1">·</span>
               )}
@@ -134,8 +129,7 @@ export function PageEditor({ page }: { page: AdminContentPage }) {
 
       {locale !== "fr" && !translation(locale) && (
         <p className="text-muted-foreground text-sm">
-          Pas encore de version {LOCALE_LABELS[locale].toLowerCase()} : les
-          visiteurs lisent la version française.
+          {t("missingTranslation", { locale })}
         </p>
       )}
 
@@ -144,7 +138,7 @@ export function PageEditor({ page }: { page: AdminContentPage }) {
         className="flex flex-col gap-4"
       >
         <Field>
-          <FieldLabel htmlFor="page-title">Titre</FieldLabel>
+          <FieldLabel htmlFor="page-title">{t("title")}</FieldLabel>
           <Input
             id="page-title"
             value={draft.title}
@@ -155,7 +149,7 @@ export function PageEditor({ page }: { page: AdminContentPage }) {
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor="page-summary">Résumé (sous le titre)</FieldLabel>
+          <FieldLabel htmlFor="page-summary">{t("summary")}</FieldLabel>
           <Input
             id="page-summary"
             value={draft.summary}
@@ -166,12 +160,8 @@ export function PageEditor({ page }: { page: AdminContentPage }) {
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor="page-body">Contenu</FieldLabel>
-          <FieldDescription>
-            « ## Titre » commence une section, « - » une ligne de liste ; une
-            ligne vide sépare les paragraphes. Vous pouvez coller un texte
-            entier.
-          </FieldDescription>
+          <FieldLabel htmlFor="page-body">{t("body")}</FieldLabel>
+          <FieldDescription>{t("bodyHint")}</FieldDescription>
           <Textarea
             id="page-body"
             value={draft.body}
@@ -185,18 +175,21 @@ export function PageEditor({ page }: { page: AdminContentPage }) {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-muted-foreground text-sm">
-          {sections.length} section{sections.length > 1 ? "s" : ""}
-          {sections.length > 0 &&
-            ` : ${sections
-              .map((s) => s.title)
-              .slice(0, 4)
-              .join(", ")}${sections.length > 4 ? "…" : ""}`}
+          {sections.length > 0
+            ? t("sectionsWithTitles", {
+                count: sections.length,
+                titles: `${sections
+                  .map((s) => s.title)
+                  .slice(0, 4)
+                  .join(", ")}${sections.length > 4 ? "…" : ""}`,
+              })
+            : t("sections", { count: sections.length })}
         </p>
         <Button
           disabled={!draft.title.trim() || save.isPending}
           onClick={() => void submit()}
         >
-          {save.isPending ? "Enregistrement…" : "Enregistrer"}
+          {save.isPending ? tc("savingEllipsis") : tc("save")}
         </Button>
       </div>
     </div>

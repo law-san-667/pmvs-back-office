@@ -7,34 +7,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/server/trpc/client";
-import type { ContentReport } from "@/server/trpc/_procedures/moderation";
+import { intlLocale } from "@/i18n/config";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
-const TYPE_LABELS: Record<ContentReport["type"], string> = {
-  LISTING: "Annonce",
-  REVIEW: "Avis",
-  BUSINESS: "Boutique",
-  USER: "Utilisateur",
-};
-const HIDE_LABELS: Record<ContentReport["type"], string> = {
-  LISTING: "Retirer l’annonce",
-  REVIEW: "Masquer l’avis",
-  BUSINESS: "Suspendre la boutique",
-  USER: "Suspendre le compte",
-};
-const REASON_LABELS: Record<string, string> = {
-  FRAUD: "Fraude",
-  PROHIBITED_PRODUCT: "Produit interdit",
-  COUNTERFEIT: "Contrefaçon",
-  OFFENSIVE: "Contenu offensant",
-  SPAM: "Spam",
-  WRONG_INFORMATION: "Informations fausses",
-  OTHER: "Autre",
-};
+const REPORT_REASONS = [
+  "FRAUD",
+  "PROHIBITED_PRODUCT",
+  "COUNTERFEIT",
+  "OFFENSIVE",
+  "SPAM",
+  "WRONG_INFORMATION",
+  "OTHER",
+] as const;
+const isKnownReason = (
+  reason: string,
+): reason is (typeof REPORT_REASONS)[number] =>
+  (REPORT_REASONS as readonly string[]).includes(reason);
 
 /** Reports from users and reviews to moderate. */
 export default function ModerationPage() {
+  const t = useTranslations("adminCommerce");
+  const locale = useLocale();
+  const reasonLabel = (reason: string) =>
+    isKnownReason(reason) ? t(`moderation.reason.${reason}`) : reason;
   const utils = trpc.useUtils();
   const [reportStatus, setReportStatus] = useState<
     "PENDING" | "RESOLVED" | "DISMISSED"
@@ -55,7 +52,7 @@ export default function ModerationPage() {
       toast.success(done);
       await utils.moderation.invalidate();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Échec.");
+      toast.error(error instanceof Error ? error.message : t("common.failed"));
     }
   };
 
@@ -68,13 +65,17 @@ export default function ModerationPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Modération"
-        description="Signalements des utilisateurs et avis clients. Chaque décision est enregistrée."
+        title={t("moderation.title")}
+        description={t("moderation.description")}
       />
       <Tabs defaultValue="reports">
         <TabsList>
-          <TabsTrigger value="reports">Signalements</TabsTrigger>
-          <TabsTrigger value="reviews">Avis</TabsTrigger>
+          <TabsTrigger value="reports">
+            {t("moderation.tabs.reports")}
+          </TabsTrigger>
+          <TabsTrigger value="reviews">
+            {t("moderation.tabs.reviews")}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="reports" className="flex flex-col gap-4">
@@ -86,19 +87,15 @@ export default function ModerationPage() {
                 className={chip(reportStatus === s)}
                 onClick={() => setReportStatus(s)}
               >
-                {
-                  {
-                    PENDING: "À traiter",
-                    RESOLVED: "Traités",
-                    DISMISSED: "Rejetés",
-                  }[s]
-                }
+                {t(`moderation.reportStatus.${s}`)}
               </button>
             ))}
           </div>
           {!reports.data?.items.length && (
             <p className="text-muted-foreground text-sm">
-              {reports.isLoading ? "Chargement…" : "Aucun signalement."}
+              {reports.isLoading
+                ? t("common.loading")
+                : t("moderation.noReports")}
             </p>
           )}
           {reports.data?.items.map((report) => (
@@ -106,25 +103,29 @@ export default function ModerationPage() {
               <CardContent className="flex flex-col gap-3 pt-6 text-sm md:flex-row md:items-start md:justify-between">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="outline">{TYPE_LABELS[report.type]}</Badge>
+                    <Badge variant="outline">{t(`moderation.targetType.${report.type}`)}</Badge>
                     <span className="font-semibold">
-                      {REASON_LABELS[report.reason] ?? report.reason}
+                      {reasonLabel(report.reason)}
                     </span>
                     <span className="text-muted-foreground text-xs">
-                      {new Date(report.createdAt).toLocaleDateString("fr-FR")}
+                      {new Date(report.createdAt).toLocaleDateString(
+                        intlLocale(locale),
+                      )}
                     </span>
                   </div>
                   <p className="mt-1">
-                    {report.target?.label ?? "Contenu supprimé"}
+                    {report.target?.label ?? t("moderation.deletedContent")}
                   </p>
                   {report.description && (
                     <p className="text-muted-foreground mt-1">
-                      « {report.description} »
+                      {t("moderation.quote", { text: report.description })}
                     </p>
                   )}
                   {report.resolutionNote && (
                     <p className="text-muted-foreground mt-1">
-                      Décision : {report.resolutionNote}
+                      {t("moderation.decision", {
+                        note: report.resolutionNote,
+                      })}
                     </p>
                   )}
                 </div>
@@ -143,19 +144,21 @@ export default function ModerationPage() {
                               hideTarget: false,
                               note: null,
                             }),
-                          "Signalement rejeté.",
+                          t("moderation.dismissed"),
                         )
                       }
                     >
-                      Rien à signaler
+                      {t("moderation.dismiss")}
                     </Button>
                     <Button
                       size="sm"
                       disabled={handle.isPending}
                       onClick={() => {
                         const note = window.prompt(
-                          "Motif (communiqué à l’auteur) :",
-                          REASON_LABELS[report.reason] ?? "",
+                          t("moderation.reasonPrompt"),
+                          isKnownReason(report.reason)
+                            ? t(`moderation.reason.${report.reason}`)
+                            : "",
                         );
                         if (note === null) return;
                         void run(
@@ -166,11 +169,11 @@ export default function ModerationPage() {
                               hideTarget: true,
                               note: note.trim() || null,
                             }),
-                          "Contenu retiré.",
+                          t("moderation.removed"),
                         );
                       }}
                     >
-                      {HIDE_LABELS[report.type]}
+                      {t(`moderation.hide.${report.type}`)}
                     </Button>
                   </div>
                 )}
@@ -182,7 +185,9 @@ export default function ModerationPage() {
         <TabsContent value="reviews" className="flex flex-col gap-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Publication des avis</CardTitle>
+              <CardTitle className="text-base">
+                {t("moderation.reviewPublishing")}
+              </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-wrap items-center gap-3 text-sm">
               {(["post", "pre"] as const).map((mode) => (
@@ -195,13 +200,11 @@ export default function ModerationPage() {
                     onChange={() =>
                       void run(
                         () => saveSetting.mutateAsync({ mode }),
-                        "Réglage enregistré.",
+                        t("moderation.settingSaved"),
                       )
                     }
                   />
-                  {mode === "post"
-                    ? "Publiés tout de suite (retirés sur signalement)"
-                    : "Publiés après validation d’un modérateur"}
+                  {t(`moderation.mode.${mode}`)}
                 </label>
               ))}
             </CardContent>
@@ -214,19 +217,15 @@ export default function ModerationPage() {
                 className={chip(reviewStatus === s)}
                 onClick={() => setReviewStatus(s)}
               >
-                {
-                  {
-                    PENDING: "En attente",
-                    APPROVED: "Publiés",
-                    REJECTED: "Masqués",
-                  }[s]
-                }
+                {t(`moderation.reviewStatus.${s}`)}
               </button>
             ))}
           </div>
           {!reviews.data?.items.length && (
             <p className="text-muted-foreground text-sm">
-              {reviews.isLoading ? "Chargement…" : "Aucun avis."}
+              {reviews.isLoading
+                ? t("common.loading")
+                : t("moderation.noReviews")}
             </p>
           )}
           {reviews.data?.items.map((review) => (
@@ -242,7 +241,9 @@ export default function ModerationPage() {
                     {review.reviewer
                       ? `${review.reviewer.firstName} ${review.reviewer.lastName} · `
                       : ""}
-                    {new Date(review.createdAt).toLocaleDateString("fr-FR")}
+                    {new Date(review.createdAt).toLocaleDateString(
+                      intlLocale(locale),
+                    )}
                   </p>
                 </div>
                 <div className="flex shrink-0 gap-2">
@@ -258,11 +259,11 @@ export default function ModerationPage() {
                               status: "APPROVED",
                               reason: null,
                             }),
-                          "Avis publié.",
+                          t("moderation.published"),
                         )
                       }
                     >
-                      Publier
+                      {t("moderation.publish")}
                     </Button>
                   )}
                   {review.moderationStatus !== "REJECTED" && (
@@ -272,7 +273,7 @@ export default function ModerationPage() {
                       disabled={moderate.isPending}
                       onClick={() => {
                         const reason = window.prompt(
-                          "Motif (communiqué à l’auteur) :",
+                          t("moderation.reasonPrompt"),
                           "",
                         );
                         if (reason === null) return;
@@ -283,11 +284,11 @@ export default function ModerationPage() {
                               status: "REJECTED",
                               reason: reason.trim() || null,
                             }),
-                          "Avis masqué.",
+                          t("moderation.hidden"),
                         );
                       }}
                     >
-                      Masquer
+                      {t("moderation.hideReview")}
                     </Button>
                   )}
                 </div>

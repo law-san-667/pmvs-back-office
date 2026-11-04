@@ -1,0 +1,556 @@
+{
+  "adminOnly": "مخصص للمسؤولين.",
+  "refresh": "تحديث",
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "description": "نظرة عامة على نشاط المنصة ومواردها.",
+    "pendingModeration": "{count, plural, zero {لا توجد إعلانات بانتظار الموافقة.} one {إعلان واحد بانتظار الموافقة.} two {إعلانان بانتظار الموافقة.} few {# إعلانات بانتظار الموافقة.} many {# إعلانًا بانتظار الموافقة.} other {# إعلان بانتظار الموافقة.}}",
+    "openModeration": "فتح الإشراف",
+    "statsError": "تعذّر تحميل الإحصاءات: {error}",
+    "view": "عرض {title}",
+    "metrics": {
+      "totalBusinesses": "الموردون",
+      "totalListings": "المنتجات والخدمات المنشورة",
+      "totalTenders": "طلبات العروض المفتوحة",
+      "totalOrders": "الطلبات",
+      "totalTransactions": "المعاملات",
+      "totalTeamMembers": "المستخدمون"
+    }
+  },
+  "monitoring": {
+    "adminOnly": "المراقبة مخصصة للمسؤولين.",
+    "title": "المراقبة",
+    "description": "حالة المنصة والمهام المجدولة والخدمات الخارجية. تُرسل التنبيهات عبر البريد الإلكتروني أو واتساب أو الرسائل القصيرة وداخل التطبيق.",
+    "checkNow": "التحقق الآن",
+    "checkResult": "{findings, plural, zero {لم تُرصد أي مشكلة} one {رُصدت مشكلة واحدة} two {رُصدت مشكلتان} few {رُصدت # مشكلات} many {رُصدت # مشكلة} other {رُصدت # مشكلة}}، {opened, plural, zero {لا تنبيهات جديدة} one {تنبيه جديد واحد} two {تنبيهان جديدان} few {# تنبيهات جديدة} many {# تنبيهًا جديدًا} other {# تنبيه جديد}}.",
+    "noProblem": "لم تُرصد أي مشكلة.",
+    "checkFailed": "تعذّر التحقق.",
+    "units": {
+      "kb": "{value} ك.ب",
+      "mb": "{value} م.ب",
+      "gb": "{value} ج.ب",
+      "everyMinutes": "كل {count} د",
+      "daily": "يوميًا",
+      "everyHours": "كل {count} س",
+      "uptimeDays": "{days} ي {hours} س",
+      "uptimeHours": "{hours} س {minutes} د",
+      "uptimeMinutes": "{minutes} د"
+    },
+    "columns": {
+      "job": "المهمة",
+      "start": "البداية",
+      "duration": "المدة",
+      "state": "الحالة",
+      "result": "النتيجة",
+      "alert": "التنبيه",
+      "severity": "الخطورة",
+      "end": "النهاية",
+      "frequency": "التكرار",
+      "lastRun": "آخر تنفيذ",
+      "lastSuccess": "آخر نجاح",
+      "failures24h": "الإخفاقات (24 س)"
+    },
+    "runs": {
+      "title": "عمليات التنفيذ الأخيرة",
+      "titleForJob": "عمليات التنفيذ الأخيرة: {job}",
+      "hint": "انقر على مهمة أعلاه لعرض عمليات تنفيذها فقط.",
+      "allJobs": "كل المهام",
+      "empty": "لا توجد عمليات تنفيذ مسجلة."
+    },
+    "alerts": {
+      "title": "سجل التنبيهات ({count})",
+      "hint": "يُغلق التنبيه تلقائيًا عندما لا تعود المشكلة مرصودة، ويُبلَّغ المستلمون بذلك.",
+      "ongoing": "جارٍ",
+      "empty": "لا توجد تنبيهات حتى الآن.",
+      "none": "لم تُرصد أي مشكلة خلال آخر تحقق.",
+      "since": "منذ {first} · آخر رصد {last}"
+    },
+    "status": {
+      "messages24h": "24 س: {sent, plural, zero {لا رسائل مرسلة} one {رسالة واحدة مرسلة} two {رسالتان مرسلتان} few {# رسائل مرسلة} many {# رسالة مرسلة} other {# رسالة مرسلة}}، {failed} فاشلة",
+      "api": "API",
+      "serverErrors": "{count, plural, zero {لا أخطاء خادم} one {خطأ خادم واحد} two {خطآن في الخادم} few {# أخطاء خادم} many {# خطأ خادم} other {# خطأ خادم}}",
+      "online": "متصل",
+      "uptime": "يعمل منذ {duration}",
+      "requests15m": "15 د: {count, plural, zero {لا طلبات مسجلة} one {طلب واحد مسجل} two {طلبان مسجلان} few {# طلبات مسجلة} many {# طلبًا مسجلًا} other {# طلب مسجل}}، 95 % أقل من {p95} م.ث",
+      "database": "قاعدة البيانات",
+      "dbLatency": "الاستجابة في {ms} م.ث",
+      "dbConnections": "{count, plural, zero {لا اتصالات مفتوحة} one {اتصال مفتوح واحد} two {اتصالان مفتوحان} few {# اتصالات مفتوحة} many {# اتصالًا مفتوحًا} other {# اتصال مفتوح}}",
+      "largestTable": "أكبر جدول: {name}",
+      "whatsapp": "واتساب (Evolution)",
+      "notConfigured": "غير مُهيّأ",
+      "connected": "متصل",
+      "disconnected": "غير متصل ({state})",
+      "unreachable": "يتعذّر الوصول إليه",
+      "smsEmail": "الرسائل القصيرة والبريد الإلكتروني",
+      "allConfigured": "مُهيّأة",
+      "noneConfigured": "غير مُهيّأة",
+      "emailNotConfigured": "البريد الإلكتروني غير مُهيّأ",
+      "smsNotConfigured": "الرسائل القصيرة غير مُهيّأة",
+      "smsLine": "الرسائل القصيرة — {summary}",
+      "updatedAt": "آخر تحديث {date}"
+    },
+    "jobState": {
+      "failed": "فاشلة",
+      "late": "متأخرة",
+      "running": "قيد التنفيذ",
+      "never": "لم تُنفَّذ قط",
+      "ok": "سليمة"
+    },
+    "runStatus": {
+      "failed": "فشل",
+      "running": "قيد التنفيذ",
+      "succeeded": "نجح"
+    },
+    "severity": {
+      "CRITICAL": "حرج",
+      "WARNING": "تحذير"
+    },
+    "settings": {
+      "saved": "تم حفظ الإعدادات.",
+      "saveFailed": "تعذّر الحفظ.",
+      "testResult": "رسالة اختبار: {sent, plural, zero {لا قنوات ناجحة} one {قناة واحدة ناجحة} two {قناتان ناجحتان} few {# قنوات ناجحة} many {# قناة ناجحة} other {# قناة ناجحة}}.",
+      "testResultWithFailures": "رسالة اختبار: {sent, plural, zero {لا قنوات ناجحة} one {قناة واحدة ناجحة} two {قناتان ناجحتان} few {# قنوات ناجحة} many {# قناة ناجحة} other {# قناة ناجحة}}، {failed} فاشلة.",
+      "sendFailed": "تعذّر الإرسال.",
+      "title": "المستلمون والحدود",
+      "description": "يتلقى المسؤولون أيضًا كل تنبيه داخل التطبيق. يُعاد إرسال التنبيه الذي لا يزال جاريًا بعد المهلة المختارة. لتُبلَّغ إذا توقفت الـAPI بالكامل، اربط أداة مراقبة خارجية (UptimeRobot أو Better Stack، مجانيتان) بالعنوان <code>/v1/health</code> الخاص بالـAPI.",
+      "emails": "عناوين البريد الإلكتروني (واحد في كل سطر)",
+      "phones": "أرقام هاتف واتساب / الرسائل القصيرة (واحد في كل سطر)",
+      "serverErrors": "أخطاء الخادم خلال 15 د",
+      "slow": "البطء: 95 % من الطلبات تتجاوز (م.ث)",
+      "databaseSize": "حجم القاعدة يتجاوز (م.ب)",
+      "repeat": "إعادة إرسال التنبيه الجاري كل (س)",
+      "checkWhatsapp": "التنبيه عند انقطاع اتصال واتساب",
+      "save": "حفظ",
+      "sendTest": "إرسال رسالة اختبار"
+    },
+    "jobs": {
+      "title": "المهام المجدولة",
+      "hint": "تُعدّ المهمة متأخرة بعد ثلاث عمليات تشغيل فائتة. بعد إعادة تشغيل واجهة البرمجة، تظهر المهام اليومية «لم تُنفَّذ قط» حتى تشغيلها التالي."
+    },
+    "jobNames": {
+      "payment-reconciliation": "مطابقة المدفوعات الإلكترونية",
+      "support-sla": "مهل خدمة العملاء",
+      "after-sales-deadlines": "مهل المرتجعات والنزاعات",
+      "monitoring": "المراقبة",
+      "compliance-checks": "فحوص الامتثال",
+      "automatic-reports": "التقارير التلقائية",
+      "push-cleanup": "حذف الهواتف غير النشطة (الإشعارات الفورية)",
+      "marketing-cleanup": "حذف اشتراكات التسويق غير المؤكدة",
+      "popular-categories": "الفئات الشائعة",
+      "request-log-retention": "حذف سجل الطلبات",
+      "search-event-retention": "حذف عمليات البحث"
+    }
+  },
+  "diagnostics": {
+    "loading": "جارٍ تحميل التشخيص...",
+    "adminOnly": "التشخيص مخصص للمسؤولين.",
+    "title": "التشخيص",
+    "description": "سجل الطلبات الفاشلة وعمليات الكتابة مع حمولاتها، لفهم المشكلة وإعادة إنتاجها.",
+    "ranges": {
+      "15m": "15 د",
+      "1h": "1 س",
+      "6h": "6 س",
+      "24h": "24 س",
+      "7d": "7 ي",
+      "30d": "30 ي"
+    },
+    "live": "مباشر الآن",
+    "goLive": "مباشر",
+    "chips": {
+      "status": "الحالة {status}",
+      "user": "المستخدم: {user}",
+      "ip": "IP: {ip}",
+      "route": "المسار: {route}",
+      "remove": "إزالة {label}",
+      "clearAll": "مسح الكل"
+    },
+    "history": {
+      "title": "سجل الطلبات ({count})",
+      "hint": "يبحث في المسار ورسالة الخطأ وRequest ID وعنوان IP ووكيل المستخدم ومحتوى الحمولات.",
+      "searchPlaceholder": "بحث (مثلًا ‎+22177…، orders، too_small)",
+      "method": "الطريقة",
+      "allMethods": "كل الطرق",
+      "statusClass": "فئة الحالة",
+      "allStatuses": "كل الحالات",
+      "loading": "جارٍ تحميل السجل...",
+      "empty": "لا توجد طلبات تطابق هذه المعايير."
+    },
+    "columns": {
+      "date": "التاريخ",
+      "request": "الطلب",
+      "status": "الحالة",
+      "error": "الخطأ",
+      "user": "المستخدم",
+      "duration": "المدة"
+    },
+    "anonymous": "مجهول",
+    "overview": {
+      "chart": {
+        "success": "نجاح",
+        "clientErrors": "أخطاء 4xx",
+        "serverErrors": "أخطاء 5xx"
+      },
+      "bucket": {
+        "days": "{count} ي",
+        "hours": "{count} س",
+        "minutes": "{count} د"
+      },
+      "recorded": "الطلبات المسجلة",
+      "recordedHint": "عمليات الكتابة + القراءات الفاشلة",
+      "writeFailures": "فشل عمليات الكتابة",
+      "writeFailuresHint": "{failed} / {total} عمليات كتابة",
+      "clientErrorsHint": "تحقق، صلاحيات، غير موجود",
+      "serverErrorsHint": "أعطال من جهة الخادم",
+      "affectedUsers": "المستخدمون المتأثرون",
+      "affectedUsersHint": "مسجلو الدخول ممن واجهوا خطأً واحدًا على الأقل",
+      "latency": "متوسط زمن الاستجابة / p95",
+      "p95": "p95: {value}",
+      "activityTitle": "النشاط عبر الزمن",
+      "activityDescription": "الطلبات المسجلة",
+      "activityDescriptionBucket": "الطلبات المسجلة، لكل فترة {size}",
+      "codes": "الرموز:",
+      "topRoutes": "المسارات الأكثر فشلًا",
+      "topRoutesHint": "انقر لتصفية السجل.",
+      "noRequests": "لا توجد طلبات خلال الفترة.",
+      "routeFailures": "{failures}/{total} فاشلة",
+      "routeSummary": "{error} · متوسط {duration}",
+      "noError": "لا أخطاء",
+      "topErrors": "الأخطاء الأكثر تكرارًا",
+      "topErrorsHint": "انقر لفتح أحدث حدوث.",
+      "noErrors": "لا أخطاء خلال الفترة. 🎉",
+      "lastSeen": "آخرها: {date}"
+    },
+    "detail": {
+      "copied": "تم نسخ {label}",
+      "copyFailed": "يتعذّر النسخ في هذا المتصفح.",
+      "copy": "نسخ",
+      "copyField": "نسخ {label}",
+      "content": "المحتوى",
+      "title": "تفاصيل الطلب",
+      "loading": "جارٍ التحميل...",
+      "requestId": "Request ID",
+      "route": "المسار",
+      "user": "المستخدم",
+      "deletedUser": "{id} (محذوف)",
+      "ip": "IP",
+      "userAgent": "وكيل المستخدم",
+      "copyCurl": "نسخ بصيغة cURL",
+      "userRequests": "طلبات هذا المستخدم",
+      "sameIp": "نفس عنوان IP",
+      "sameRoute": "نفس المسار",
+      "tabs": {
+        "request": "الطلب",
+        "response": "الاستجابة",
+        "headers": "الترويسات",
+        "error": "الخطأ"
+      },
+      "queryParams": "معاملات الطلب",
+      "body": "المحتوى المرسل (الأسرار مخفية)",
+      "noBody": "لا يوجد محتوى للطلب.",
+      "successNotStored": "لا تُسجَّل الاستجابات الناجحة لأنها قد تحتوي على رموز مميزة.",
+      "noResponse": "لا يوجد محتوى للاستجابة.",
+      "noHeaders": "لا توجد ترويسات.",
+      "noStack": "لا يوجد تتبع: أعادت الـAPI الخطأ ولم يُرمَ كاستثناء.",
+      "noError": "لا يوجد خطأ."
+    }
+  },
+  "pages": {
+    "traffic": {
+      "title": "الزيارات والتحويل",
+      "description": "مشاهدات المنتجات والمتاجر والإضافات إلى السلة والطلبات على مستوى المنصة. مع استبعاد الروبوتات ودون أي بيانات عن الزوار.",
+      "loading": "جارٍ تحميل الإحصاءات..."
+    },
+    "reports": {
+      "title": "التقارير",
+      "description": "تقارير على مستوى المنصة: أنشئها بنفسك أو استلمها تلقائيًا عبر البريد الإلكتروني."
+    },
+    "training": {
+      "title": "التدريب",
+      "description": "الدورات المقدمة للبائعين: فيديوهات وملفات PDF ونصوص، حسب المستوى."
+    },
+    "marketing": {
+      "title": "رسائل التسويق",
+      "description": "الحملات المرسلة إلى المشتركين الذين أكدوا اشتراكهم، وإثبات موافقتهم."
+    },
+    "vendability": {
+      "title": "قابلية البيع",
+      "description": "أفضل منتجات المنصة وشبكة التقييم واستبيان الموردين.",
+      "tabs": {
+        "top": "أفضل المنتجات",
+        "grid": "شبكة التقييم",
+        "questionnaire": "الاستبيان"
+      }
+    },
+    "afterSales": {
+      "title": "الإرجاع والنزاعات",
+      "description": "احسم الملفات التي رفضها البائع أو بقيت دون رد، ونفّذ تلك التي قبلها.",
+      "loading": "جارٍ التحميل…",
+      "empty": "لا توجد ملفات.",
+      "order": "الطلب #{reference}",
+      "orderWithShop": "الطلب #{reference} · {shop}"
+    },
+    "support": {
+      "title": "خدمة العملاء",
+      "description": "طلبات المشترين والبائعين. مهلة الرد الأول: 4 س للمدفوعات والطلبات، و24 س في غير ذلك.",
+      "filters": {
+        "open": "قيد المعالجة",
+        "mine": "طلباتي",
+        "none": "غير مُسندة",
+        "overdue": "متأخرة",
+        "resolved": "تم حلها"
+      },
+      "columns": {
+        "request": "الطلب",
+        "requester": "مقدم الطلب",
+        "subject": "الموضوع",
+        "priority": "الأولوية",
+        "responseDue": "الرد المتوقع",
+        "status": "الحالة"
+      },
+      "loading": "جارٍ تحميل الطلبات...",
+      "empty": "لا توجد طلبات.",
+      "answered": "تم الرد"
+    }
+  },
+  "marketing": {
+    "tabs": {
+      "campaigns": "الحملات",
+      "subscribers": "المشتركون"
+    },
+    "newCampaign": "حملة جديدة",
+    "cancel": "إلغاء",
+    "toast": {
+      "draftSaved": "تم حفظ المسودة.",
+      "testSent": "تم إرسال بريد تجريبي إلى {to}.",
+      "sendStarted": "بدأ الإرسال.",
+      "sendStopped": "تم إيقاف الإرسال.",
+      "draftDeleted": "تم حذف المسودة."
+    },
+    "form": {
+      "createdBy": "{status} · أنشأها {name} في {date}",
+      "intro": "اكتب البريد الإلكتروني، واختر الجمهور، وأرسل لنفسك نسخة تجريبية، ثم ابدأ الإرسال.",
+      "subject": "الموضوع",
+      "preheader": "نص المعاينة (اختياري)",
+      "preheaderPlaceholder": "يظهر بعد الموضوع في صندوق الوارد",
+      "body": "الرسالة",
+      "bodyHint": "سطر فارغ بين فقرتين، و«##» في بداية السطر لعنوان، و«-» لقائمة. تتحول عناوين https:// إلى روابط. تُضاف تلقائيًا أسباب الاستلام ورابط إلغاء الاشتراك وعنوان الشركة.",
+      "ctaLabel": "نص الزر (اختياري)",
+      "ctaLabelPlaceholder": "عرض العروض",
+      "ctaUrl": "رابط الزر",
+      "ctaUrlPlaceholder": "/listings أو https://…",
+      "audience": "الجمهور",
+      "subscribers": "المشتركون",
+      "countries": "الدول (رموز، اختياري)",
+      "countriesPlaceholder": "SN، CI، ML — فارغ: جميع الدول",
+      "languages": "لغة المشترك (بلا تحديد: جميع اللغات)",
+      "audienceCount": "{count, plural, zero {لا يوجد مشتركون} one {مشترك واحد} two {مشتركان} few {# مشتركين} many {# مشتركًا} other {# مشترك}} في هذا الجمهور.",
+      "audienceCounting": "جارٍ حساب الجمهور…",
+      "saving": "جارٍ الحفظ…",
+      "saveDraft": "حفظ المسودة",
+      "sendTest": "أرسل لي نسخة تجريبية",
+      "sendEllipsis": "إرسال…",
+      "delete": "حذف"
+    },
+    "progress": {
+      "sentOf": "{sent, plural, zero {لم يُرسل أي بريد} one {أُرسل بريد واحد} two {أُرسل بريدان} few {أُرسلت # رسائل} many {أُرسلت # رسالة} other {أُرسلت # رسالة}} من أصل {total}",
+      "failed": "{count, plural, zero {لا إخفاقات} one {إخفاق واحد} two {إخفاقان} few {# إخفاقات} many {# إخفاقًا} other {# إخفاق}} · ",
+      "skipped": "{count, plural, zero {لا رسائل غير مرسلة} one {رسالة واحدة غير مرسلة} two {رسالتان غير مرسلتين} few {# رسائل غير مرسلة} many {# رسالة غير مرسلة} other {# رسالة غير مرسلة}} (ألغوا الاشتراك أو أُوقف الإرسال) · ",
+      "startedBy": "بدأه {name} في {date}",
+      "finished": "، واكتمل في {date}",
+      "label": "تقدّم الإرسال",
+      "stop": "إيقاف الإرسال"
+    },
+    "confirmSend": {
+      "title": "إرسال هذه الحملة؟",
+      "description": "ستُرسل «{subject}» إلى {count, plural, zero {لا أحد من المشتركين} one {مشترك واحد} two {مشتركَين} few {# مشتركين} many {# مشتركًا} other {# مشترك}} ({audience}). تُحفظ المسودة قبل الإرسال. بعد البدء يمكن إيقاف الإرسال، لكن لا يمكن التراجع عن الرسائل التي أُرسلت بالفعل.",
+      "confirm": "إرسال"
+    },
+    "confirmDelete": {
+      "title": "حذف هذه المسودة؟",
+      "description": "لم تُرسل إلى أي أحد؛ وستُحذف نهائيًا."
+    },
+    "campaigns": {
+      "intro": "تُرسل فقط إلى الأشخاص الذين أكدوا اشتراكهم.",
+      "subject": "الموضوع",
+      "status": "الحالة",
+      "audience": "الجمهور",
+      "sent": "المُرسلة",
+      "date": "التاريخ",
+      "empty": "لا توجد حملات حتى الآن."
+    },
+    "consent": {
+      "unsubscribed": "تم إلغاء اشتراك العنوان.",
+      "description": "إثبات الموافقة: كل طلب وتأكيد وإلغاء اشتراك، مع النص الذي تمت الموافقة عليه.",
+      "by": "عبر {source}",
+      "ip": " · عنوان IP {ip}",
+      "quote": "«{text}»",
+      "browser": "المتصفح: {userAgent}",
+      "confirm": "إلغاء اشتراك هذا العنوان بناءً على طلب صاحبه؟ سيتعين عليه إعادة الاشتراك بنفسه لتلقي الحملات مجددًا.",
+      "unsubscribe": "إلغاء الاشتراك",
+      "unsubscribeOnRequest": "إلغاء الاشتراك بناءً على طلبه…"
+    },
+    "subscribers": {
+      "searchLabel": "البحث عن عنوان",
+      "searchPlaceholder": "البحث عن عنوان…",
+      "status": "الحالة",
+      "allStatuses": "جميع الحالات",
+      "email": "العنوان",
+      "language": "اللغة",
+      "country": "الدولة",
+      "account": "الحساب",
+      "subscribedAt": "تاريخ الاشتراك",
+      "yes": "نعم",
+      "no": "لا",
+      "consent": "الموافقة",
+      "empty": "لا توجد عناوين.",
+      "previous": "السابق",
+      "next": "التالي"
+    },
+    "audience": {
+      "ALL": "جميع المشتركين",
+      "BUYERS": "المشترون (طلب واحد على الأقل)",
+      "SELLERS": "البائعون (أعضاء متجر)",
+      "ACCOUNTS": "المشتركون الذين لديهم حساب",
+      "NO_ACCOUNT": "المشتركون بدون حساب"
+    },
+    "language": {
+      "fr": "الفرنسية",
+      "en": "الإنجليزية",
+      "pt": "البرتغالية",
+      "ar": "العربية"
+    },
+    "campaignStatus": {
+      "DRAFT": "مسودة",
+      "SENDING": "قيد الإرسال",
+      "SENT": "مُرسلة",
+      "CANCELLED": "متوقفة"
+    },
+    "subscriberStatus": {
+      "PENDING": "بانتظار التأكيد",
+      "SUBSCRIBED": "مشترك",
+      "UNSUBSCRIBED": "ألغى الاشتراك"
+    },
+    "consentEvent": {
+      "REQUESTED": "طلب اشتراك",
+      "CONFIRMED": "تأكيد الموافقة",
+      "UNSUBSCRIBED": "إلغاء الاشتراك"
+    },
+    "consentSource": {
+      "WEB": "نموذج الموقع",
+      "MOBILE": "تطبيق الجوال",
+      "ACCOUNT": "حساب على الموقع",
+      "EMAIL_LINK": "رابط مستلم عبر البريد الإلكتروني",
+      "ONE_CLICK": "زر برنامج البريد",
+      "ADMIN": "المسؤول، بناءً على طلب الشخص"
+    }
+  },
+  "training": {
+    "lessonAdded": "تمت إضافة الدرس.",
+    "uploadFailed": "تعذّر الإرسال.",
+    "addLessonTitle": "إضافة درس",
+    "title": "العنوان",
+    "type": "النوع",
+    "durationMinutes": "المدة (بالدقائق)",
+    "text": "النص",
+    "uploadVideo": "رفع الفيديو (100 ميغابايت كحد أقصى)",
+    "uploadPdf": "رفع ملف PDF (10 ميغابايت كحد أقصى)",
+    "orUrl": "أو رابطه",
+    "uploadingFile": "جارٍ رفع الملف...",
+    "addLesson": "إضافة الدرس",
+    "published": "منشور",
+    "draft": "مسودة",
+    "courseStats": "{lessons, plural, zero {لا دروس} one {درس واحد} two {درسان} few {# دروس} many {# درسًا} other {# درس}}، {learners, plural, zero {لم يبدأ أي بائع} one {بدأ بائع واحد} two {بدأ بائعان} few {بدأ # بائعين} many {بدأ # بائعًا} other {بدأ # بائع}}.",
+    "close": "إغلاق",
+    "manageLessons": "إدارة الدروس",
+    "unpublish": "إلغاء النشر",
+    "publish": "نشر",
+    "delete": "حذف",
+    "moveUp": "نقل {title} إلى الأعلى",
+    "moveDown": "نقل {title} إلى الأسفل",
+    "removeLesson": "إزالة {title}",
+    "deleteTitle": "حذف هذه الدورة؟",
+    "deleteDescription": "سيتم حذف «{title}» ودروسها وتقدّم البائعين نهائيًا.",
+    "cancel": "إلغاء",
+    "courseCreated": "تم إنشاء الدورة.",
+    "newCourse": "دورة جديدة",
+    "newCourseHint": "تبقى غير مرئية للبائعين ما لم تُنشر.",
+    "summary": "الملخص",
+    "level": "المستوى",
+    "create": "إنشاء"
+  },
+  "vendabilityGrid": {
+    "saved": "تم حفظ الشبكة.",
+    "loading": "جارٍ التحميل...",
+    "weightsTitle": "أوزان المعايير",
+    "weightsDescription": "النتيجة هي المتوسط المرجّح للمعايير القابلة للتقييم. المعيار الذي لا تتوفر له بيانات (لا تقييمات، أو مشاهدات قليلة جدًا) لا يُضعف المنتج. الوزن 0 يلغي المعيار. هذه القيم مؤقتة إلى حين اعتماد الشبكة النهائية.",
+    "criterion": {
+      "sales": "الوحدات المطلوبة",
+      "conversion": "معدل التحويل",
+      "cartRate": "معدل الإضافة إلى السلة",
+      "views": "المشاهدات",
+      "rating": "تقييم المشترين",
+      "availability": "التوفر",
+      "completeness": "جودة البطاقة",
+      "supplier": "استبيان المورّد"
+    },
+    "totalWeight": "مجموع الأوزان: {total}. يُحتسب كل معيار بحسب حصته من هذا المجموع.",
+    "targetsTitle": "الأهداف والحدود",
+    "targetsDescription": "المنتج الذي يبلغ الهدف يحصل على 100 نقطة في المعيار.",
+    "targetUnits": "الوحدات المطلوبة (الهدف)",
+    "targetViews": "المشاهدات (الهدف)",
+    "targetConversion": "التحويل (الهدف، %)",
+    "targetCart": "الإضافة إلى السلة (الهدف، %)",
+    "windowDays": "الفترة المعتمدة (بالأيام)",
+    "minViews": "الحد الأدنى من المشاهدات لتقييم المعدلات",
+    "minScore": "الحد الأدنى من النتيجة للتصنيف",
+    "saving": "جارٍ الحفظ...",
+    "save": "حفظ الشبكة"
+  },
+  "vendabilityQuestionnaire": {
+    "yes": "نعم",
+    "no": "لا",
+    "draftTitle": "الإصدار {version} قيد الإعداد",
+    "draftDescription": "غير مرئي للمورّدين ما لم يُنشر. بعد نشره لا يمكن تعديله.",
+    "title": "العنوان",
+    "question": "السؤال {number}",
+    "moveUp": "نقل السؤال {number} إلى الأعلى",
+    "moveDown": "نقل السؤال {number} إلى الأسفل",
+    "removeQuestion": "إزالة السؤال {number}",
+    "questionLabelAria": "نص السؤال {number}",
+    "questionLabel": "نص السؤال",
+    "type": "النوع",
+    "typeChoice": "اختيار (مُقيَّم)",
+    "typeText": "نص حر (غير مُقيَّم)",
+    "weight": "الوزن في النتيجة",
+    "required": "إلزامي",
+    "options": "الإجابات المقترحة والنقاط (من 0 إلى 100)",
+    "optionAria": "الإجابة {option} للسؤال {number}",
+    "optionPointsAria": "نقاط الإجابة {option} للسؤال {number}",
+    "removeOptionAria": "إزالة الإجابة {option} للسؤال {number}",
+    "addOption": "إضافة إجابة",
+    "addQuestion": "إضافة سؤال",
+    "draftSaved": "تم حفظ المسودة.",
+    "saveDraft": "حفظ المسودة",
+    "publish": "نشر",
+    "draftDeleted": "تم حذف المسودة.",
+    "discardDraft": "التخلي عن هذه المسودة",
+    "publishTitle": "نشر الإصدار {version}؟",
+    "publishDescription": "سيحل محل الإصدار الساري ولن يمكن تعديله بعد ذلك. ستتم دعوة جميع المورّدين النشطين للإجابة عنه.",
+    "cancel": "إلغاء",
+    "published": "تم نشر الإصدار.",
+    "responsesTitle": "الإجابات على الإصدار {version}",
+    "responsesCount": "{count, plural, zero {لم يُجب أي مورّد.} one {أجاب مورّد واحد.} two {أجاب مورّدان.} few {أجاب # مورّدين.} many {أجاب # مورّدًا.} other {أجاب # مورّد.}}",
+    "loading": "جارٍ التحميل...",
+    "shop": "المتجر",
+    "score": "النتيجة",
+    "newVersion": "إعداد إصدار جديد",
+    "versions": "الإصدارات",
+    "versionLine": "<b>الإصدار {version}</b>: {title}، {count, plural, zero {لا أسئلة} one {سؤال واحد} two {سؤالان} few {# أسئلة} many {# سؤالًا} other {# سؤال}}",
+    "status": {
+      "DRAFT": "قيد الإعداد",
+      "PUBLISHED": "ساري",
+      "ARCHIVED": "مؤرشف"
+    },
+    "viewResponses": "عرض الإجابات"
+  }
+}

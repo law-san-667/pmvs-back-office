@@ -33,14 +33,15 @@ import {
 import { trpc } from "@/server/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, RotateCcw } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Controller, useForm, type Resolver } from "react-hook-form";
 import { PhoneInput } from "../phone-input";
 
-const ROLE_OPTIONS: Array<{ value: CreateAdminFormInput["role"]; label: string }> = [
-  { value: "ADMIN", label: "Administrateur — accès complet" },
-  { value: "MODERATOR", label: "Modérateur — modération des contenus" },
-  { value: "OPERATOR", label: "Opérateur — suivi de l'activité" },
+const ROLE_OPTIONS: Array<CreateAdminFormInput["role"]> = [
+  "ADMIN",
+  "MODERATOR",
+  "OPERATOR",
 ];
 
 const defaultValues: CreateAdminFormInput = {
@@ -70,6 +71,7 @@ type PendingAdmin = {
  * entered here, so a mistyped phone or email never becomes a live admin.
  */
 export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
+  const t = useTranslations("adminAccounts.createAdmin");
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<PendingAdmin | null>(null);
@@ -109,8 +111,8 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
       });
       setNotice(
         result.otp.debugCode
-          ? `Code de test : ${result.otp.debugCode}`
-          : `Un code a été envoyé à ${result.otp.identifier}.`,
+          ? t("testCode", { code: result.otp.debugCode })
+          : t("codeSent", { identifier: result.otp.identifier }),
       );
       // The account exists (pending): the list can show it already.
       onCreated();
@@ -118,7 +120,7 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
       setError(
         getMutationErrorMessage(
           mutationError,
-          "Impossible de créer ce compte administrateur.",
+          t("createError"),
         ),
       );
     }
@@ -129,7 +131,7 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
     setError(null);
 
     if (code.length !== 4) {
-      setError("Entrez le code à 4 chiffres.");
+      setError(t("enterCode"));
       return;
     }
 
@@ -139,7 +141,7 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
       close();
     } catch (mutationError) {
       setError(
-        getMutationErrorMessage(mutationError, "Code invalide ou expiré."),
+        getMutationErrorMessage(mutationError, t("invalidCode")),
       );
     }
   };
@@ -156,11 +158,11 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
       });
       setNotice(
         result.otp?.debugCode
-          ? `Code de test : ${result.otp.debugCode}`
-          : `Un nouveau code a été envoyé à ${pending.displayIdentifier}.`,
+          ? t("testCode", { code: result.otp.debugCode })
+          : t("newCodeSent", { identifier: pending.displayIdentifier }),
       );
     } catch (mutationError) {
-      setError(getMutationErrorMessage(mutationError, "Renvoi impossible."));
+      setError(getMutationErrorMessage(mutationError, t("resendError")));
     }
   };
 
@@ -175,19 +177,22 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
       <DialogTrigger
         render={
           <Button size="sm">
-            <PlusIcon /> Nouvel administrateur
+            <PlusIcon /> {t("title")}
           </Button>
         }
       />
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {pending ? "Validation du compte" : "Nouvel administrateur"}
+            {pending ? t("verifyTitle") : t("title")}
           </DialogTitle>
           <DialogDescription>
             {pending
-              ? `Entrez le code à 4 chiffres reçu par ${pending.channel === "EMAIL" ? "email" : "message"} à ${pending.displayIdentifier}. Le compte reste inactif tant qu'il n'est pas validé.`
-              : "Le compte sera activé après validation du code envoyé à la personne. Communiquez-lui son mot de passe : aucun email d'invitation n'est envoyé."}
+              ? t("verifyDescription", {
+                  channel: pending.channel,
+                  identifier: pending.displayIdentifier,
+                })
+              : t("description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -219,7 +224,7 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
               onClick={() => void onResend()}
               disabled={isPending}
             >
-              <RotateCcw /> Renvoyer le code
+              <RotateCcw /> {t("resend")}
             </Button>
             {error && <p className="text-destructive text-sm">{error}</p>}
           </div>
@@ -236,7 +241,7 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Prénom</FieldLabel>
+                      <FieldLabel>{t("firstName")}</FieldLabel>
                       <Input
                         {...field}
                         aria-invalid={fieldState.invalid}
@@ -253,7 +258,7 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Nom</FieldLabel>
+                      <FieldLabel>{t("lastName")}</FieldLabel>
                       <Input
                         {...field}
                         aria-invalid={fieldState.invalid}
@@ -272,14 +277,14 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Email</FieldLabel>
+                    <FieldLabel>{t("email")}</FieldLabel>
                     <Input
                       {...field}
                       value={field.value ?? ""}
                       type="email"
                       inputMode="email"
                       autoComplete="email"
-                      placeholder="nom@exemple.com"
+                      placeholder={t("emailPlaceholder")}
                       aria-invalid={fieldState.invalid}
                       disabled={isPending}
                     />
@@ -295,7 +300,7 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Numéro</FieldLabel>
+                    <FieldLabel>{t("phone")}</FieldLabel>
                     <PhoneInput
                       value={field.value ?? ""}
                       onChange={(value) => field.onChange(value ?? "")}
@@ -305,8 +310,7 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
                       disabled={isPending}
                     />
                     <p className="text-muted-foreground text-xs">
-                      Le code de validation est envoyé au numéro, ou à
-                      l&apos;email s&apos;il n&apos;y a pas de numéro.
+                      {t("phoneHint")}
                     </p>
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -320,7 +324,7 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
                 control={form.control}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel htmlFor="admin-role">Rôle</FieldLabel>
+                    <FieldLabel htmlFor="admin-role">{t("role")}</FieldLabel>
                     <select
                       id="admin-role"
                       value={field.value}
@@ -329,8 +333,8 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
                       className="border-input bg-background h-9 rounded-md border px-3 text-sm"
                     >
                       {ROLE_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
+                        <option key={option} value={option}>
+                          {t(`roleOptions.${option}`)}
                         </option>
                       ))}
                     </select>
@@ -344,12 +348,12 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Mot de passe</FieldLabel>
+                      <FieldLabel>{t("password")}</FieldLabel>
                       <Input
                         {...field}
                         type="password"
                         autoComplete="new-password"
-                        placeholder="6 car. min., majuscule, chiffre"
+                        placeholder={t("passwordPlaceholder")}
                         aria-invalid={fieldState.invalid}
                         disabled={isPending}
                       />
@@ -364,7 +368,7 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Confirmation du mot de passe</FieldLabel>
+                      <FieldLabel>{t("confirmPassword")}</FieldLabel>
                       <Input
                         {...field}
                         type="password"
@@ -393,15 +397,17 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
                         className="mt-0.5"
                       />
                       <span>
-                        La personne accepte les{" "}
-                        <Link
-                          href="/cgu"
-                          className="text-primary font-medium hover:underline"
-                          target="_blank"
-                        >
-                          conditions générales d&apos;utilisation
-                        </Link>{" "}
-                        de Diarama.
+                        {t.rich("acceptTerms", {
+                          link: (chunks) => (
+                            <Link
+                              href="/cgu"
+                              className="text-primary font-medium hover:underline"
+                              target="_blank"
+                            >
+                              {chunks}
+                            </Link>
+                          ),
+                        })}
                       </span>
                     </label>
                     {fieldState.invalid && (
@@ -420,17 +426,17 @@ export function CreateAdminDialog({ onCreated }: { onCreated: () => void }) {
           <DialogClose
             render={
               <Button variant="outline" disabled={isPending}>
-                {pending ? "Valider plus tard" : "Annuler"}
+                {pending ? t("validateLater") : t("cancel")}
               </Button>
             }
           />
           {pending ? (
             <Button type="button" onClick={() => void onVerify()} disabled={isPending}>
-              {verifyAdmin.isPending ? "Validation..." : "Activer le compte"}
+              {verifyAdmin.isPending ? t("validating") : t("activate")}
             </Button>
           ) : (
             <Button type="submit" form="create-admin-form" disabled={isPending}>
-              {createAdmin.isPending ? "Création..." : "Créer et envoyer le code"}
+              {createAdmin.isPending ? t("creating") : t("create")}
             </Button>
           )}
         </DialogFooter>

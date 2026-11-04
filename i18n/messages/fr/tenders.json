@@ -155,7 +155,11 @@
     "deleteError": "Erreur lors de la suppression de l'appel d'offres.",
     "noUser": "Impossible d'identifier l'utilisateur. Veuillez vous reconnecter.",
     "invalidDeadline": "La date limite de soumission est invalide.",
-    "uploadError": "L'envoi de la photo a échoué. Réessayez."
+    "uploadError": "L'envoi de la photo a échoué. Réessayez.",
+    "diffusion": "Zone de diffusion",
+    "diffusionHelp": "Les fournisseurs de cette zone sont prévenus automatiquement, et l'appel d'offres y est affiché.",
+    "diffusionCountries": "Autres pays de diffusion",
+    "diffusionCountriesPlaceholder": "Ajouter des pays"
   },
   "errors": {
     "titleRequired": "Le titre est requis.",
@@ -164,6 +168,12 @@
     "countryRequired": "Le pays est requis.",
     "deadlineRequired": "La date limite de soumission est requise.",
     "budgetInteger": "Le budget doit être un nombre entier positif.",
-    "budgetMaxBelowMin": "Le budget maximum doit être supérieur au minimum."
+    "budgetMaxBelowMin": "Le budget maximum doit être supérieur au minimum.",
+    "diffusionCountriesRequired": "Choisissez au moins un autre pays."
+  },
+  "diffusion": {
+    "COUNTRY": "Le pays de l'appel d'offres",
+    "COUNTRIES": "Le pays de l'appel d'offres et d'autres pays",
+    "ZLECAF": "Toute la zone ZLECAf"
   }
 }

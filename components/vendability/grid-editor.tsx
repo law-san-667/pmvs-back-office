@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CRITERION_LABELS, type VendabilitySettings } from "@/lib/vendability";
 import { trpc } from "@/server/trpc/client";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -41,6 +42,7 @@ function NumberField({
 
 /** The vendability grid: every weight, target and threshold can be changed. */
 export function GridEditor() {
+  const t = useTranslations("adminSystem.vendabilityGrid");
   const utils = trpc.useUtils();
   const settings = trpc.vendability.settings.useQuery();
   const [grid, setGrid] = useState<VendabilitySettings | null>(null);
@@ -50,13 +52,13 @@ export function GridEditor() {
   const save = trpc.vendability.updateSettings.useMutation({
     onSuccess: async () => {
       await Promise.all([utils.vendability.settings.invalidate(), utils.vendability.platformTop.invalidate()]);
-      toast.success("Grille enregistrée.");
+      toast.success(t("saved"));
     },
     onError: (error) => toast.error(error.message),
   });
 
   if (settings.error) return <p className="text-destructive text-sm">{settings.error.message}</p>;
-  if (!grid) return <p className="text-muted-foreground text-sm">Chargement...</p>;
+  if (!grid) return <p className="text-muted-foreground text-sm">{t("loading")}</p>;
   const totalWeight = CRITERIA.reduce((sum, key) => sum + grid.weights[key], 0);
 
   return (
@@ -69,11 +71,9 @@ export function GridEditor() {
     >
       <Card>
         <CardHeader>
-          <CardTitle>Poids des critères</CardTitle>
+          <CardTitle>{t("weightsTitle")}</CardTitle>
           <CardDescription>
-            Le score est la moyenne pondérée des critères évaluables. Un critère sans donnée (pas
-            d&apos;avis, trop peu de vues) ne pénalise pas le produit. Un poids de 0 retire le critère.
-            Ces valeurs sont provisoires en attendant la grille définitive.
+            {t("weightsDescription")}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
@@ -82,37 +82,37 @@ export function GridEditor() {
               <NumberField
                 key={key}
                 id={`weight-${key}`}
-                label={CRITERION_LABELS[key]}
+                label={t(`criterion.${key}`)}
                 value={grid.weights[key]}
                 onChange={(value) => setGrid({ ...grid, weights: { ...grid.weights, [key]: value } })}
               />
             ))}
           </div>
           <p className="text-muted-foreground text-xs">
-            Total des poids : {totalWeight}. Chaque critère compte pour sa part de ce total.
+            {t("totalWeight", { total: totalWeight })}
           </p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Objectifs et seuils</CardTitle>
+          <CardTitle>{t("targetsTitle")}</CardTitle>
           <CardDescription>
-            Un produit qui atteint l&apos;objectif obtient 100 points sur le critère.
+            {t("targetsDescription")}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <NumberField id="t-units" label="Unités commandées (objectif)" value={grid.targets.units} onChange={(units) => setGrid({ ...grid, targets: { ...grid.targets, units } })} />
-          <NumberField id="t-views" label="Vues (objectif)" value={grid.targets.views} onChange={(views) => setGrid({ ...grid, targets: { ...grid.targets, views } })} />
-          <NumberField id="t-conversion" label="Conversion (objectif, %)" step={0.1} value={grid.targets.conversionRate} onChange={(conversionRate) => setGrid({ ...grid, targets: { ...grid.targets, conversionRate } })} />
-          <NumberField id="t-cart" label="Ajout au panier (objectif, %)" step={0.1} value={grid.targets.cartRate} onChange={(cartRate) => setGrid({ ...grid, targets: { ...grid.targets, cartRate } })} />
-          <NumberField id="s-window" label="Période prise en compte (jours)" value={grid.windowDays} onChange={(windowDays) => setGrid({ ...grid, windowDays })} />
-          <NumberField id="s-views" label="Vues minimum pour juger les taux" value={grid.minViews} onChange={(minViews) => setGrid({ ...grid, minViews })} />
-          <NumberField id="s-score" label="Score minimum pour être classé" value={grid.minScore} onChange={(minScore) => setGrid({ ...grid, minScore })} />
+          <NumberField id="t-units" label={t("targetUnits")} value={grid.targets.units} onChange={(units) => setGrid({ ...grid, targets: { ...grid.targets, units } })} />
+          <NumberField id="t-views" label={t("targetViews")} value={grid.targets.views} onChange={(views) => setGrid({ ...grid, targets: { ...grid.targets, views } })} />
+          <NumberField id="t-conversion" label={t("targetConversion")} step={0.1} value={grid.targets.conversionRate} onChange={(conversionRate) => setGrid({ ...grid, targets: { ...grid.targets, conversionRate } })} />
+          <NumberField id="t-cart" label={t("targetCart")} step={0.1} value={grid.targets.cartRate} onChange={(cartRate) => setGrid({ ...grid, targets: { ...grid.targets, cartRate } })} />
+          <NumberField id="s-window" label={t("windowDays")} value={grid.windowDays} onChange={(windowDays) => setGrid({ ...grid, windowDays })} />
+          <NumberField id="s-views" label={t("minViews")} value={grid.minViews} onChange={(minViews) => setGrid({ ...grid, minViews })} />
+          <NumberField id="s-score" label={t("minScore")} value={grid.minScore} onChange={(minScore) => setGrid({ ...grid, minScore })} />
         </CardContent>
       </Card>
       <div>
         <Button type="submit" disabled={save.isPending}>
-          {save.isPending ? "Enregistrement..." : "Enregistrer la grille"}
+          {save.isPending ? t("saving") : t("save")}
         </Button>
       </div>
     </form>

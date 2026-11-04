@@ -1,0 +1,331 @@
+{
+  "common": {
+    "save": "Save",
+    "saving": "Saving...",
+    "savingEllipsis": "Saving…",
+    "cancel": "Cancel",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "loadingEllipsis": "Loading…",
+    "active": "Active",
+    "inactive": "Inactive",
+    "activeFeminine": "Active",
+    "yes": "Yes",
+    "no": "No",
+    "actionFailed": "Action failed.",
+    "saveFailed": "Saving failed."
+  },
+  "configuration": {
+    "title": "Configuration",
+    "description": "Catalogue categories, geographic areas and quality standards applied to suppliers.",
+    "tabs": {
+      "categories": "Categories",
+      "subCategories": "Subcategories",
+      "countries": "Countries",
+      "cities": "Cities",
+      "quality": "Quality standards"
+    },
+    "columns": {
+      "code": "Code",
+      "name": "Name",
+      "slug": "Slug",
+      "type": "Type",
+      "status": "Status",
+      "actions": "Actions",
+      "category": "Category",
+      "country": "Country",
+      "currency": "Currency",
+      "phonePrefix": "Dialling code",
+      "oapi": "OAPI",
+      "phase": "Phase",
+      "suppliers": "Suppliers",
+      "city": "City",
+      "createdAt": "Created on"
+    },
+    "service": "Service",
+    "product": "Product",
+    "registrationOpen": "Registration open",
+    "closed": "Closed",
+    "loadingCategories": "Loading categories...",
+    "emptyCategories": "No categories configured.",
+    "loadingSubCategories": "Loading subcategories...",
+    "emptySubCategories": "No subcategories configured.",
+    "loadingCountries": "Loading countries...",
+    "emptyCountries": "No countries configured.",
+    "loadingCities": "Loading cities...",
+    "emptyCities": "No cities configured."
+  },
+  "editor": {
+    "name": "Name",
+    "slug": "Slug",
+    "description": "Description",
+    "category": {
+      "edit": "Edit category",
+      "new": "New category",
+      "description": "Set up how products or services are classified.",
+      "isService": "Service category"
+    },
+    "subCategory": {
+      "edit": "Edit subcategory",
+      "new": "New subcategory",
+      "description": "Link the subcategory to an existing category.",
+      "category": "Category",
+      "selectCategory": "Select a category",
+      "isService": "Service subcategory"
+    },
+    "country": {
+      "edit": "Edit country",
+      "new": "New country",
+      "description": "Set the country's code, currency and dialling code.",
+      "code": "Country code",
+      "currency": "Currency",
+      "phonePrefix": "Dialling code",
+      "phase": "Rollout phase",
+      "phaseNone": "Not set",
+      "phase1": "Phase 1: Senegal and neighbouring countries",
+      "phase2": "Phase 2: ECOWAS",
+      "phase3": "Phase 3: other countries",
+      "isActive": "Country shown on the platform",
+      "isOapi": "OAPI member",
+      "supplierRegistrationOpen": "Supplier registration open"
+    },
+    "city": {
+      "edit": "Edit city",
+      "new": "New city",
+      "description": "Link the city to a configured country.",
+      "country": "Country",
+      "selectCountry": "Select a country",
+      "latitude": "Centre latitude",
+      "longitude": "Centre longitude",
+      "coordinatesHint": "Used by the “Near me” search for sellers in the city who have not entered their head office.",
+      "isActive": "City active"
+    }
+  },
+  "deleteDialog": {
+    "title": "Confirm deletion",
+    "description": "“{label}” will be permanently deleted. This may fail if the item is still in use.",
+    "deleting": "Deleting..."
+  },
+  "quality": {
+    "title": "Supplier quality standards",
+    "description": "Thresholds applied to each supplier to calculate their compliance score.",
+    "lastUpdated": "Last updated on {date}.",
+    "defaults": "Platform default values.",
+    "saved": "Standards saved. Scores are recalculated the next time they are viewed.",
+    "saveFailed": "Unable to save the standards.",
+    "submit": "Save standards",
+    "units": {
+      "percent": "%",
+      "days": "days",
+      "units": "units"
+    },
+    "fields": {
+      "maxNegativeFeedbackRate": {
+        "label": "Maximum negative feedback",
+        "hint": "1- or 2-star reviews."
+      },
+      "minResponseRate": {
+        "label": "Minimum response rate",
+        "hint": "Customer conversations with at least one reply."
+      },
+      "maxReturnRate": {
+        "label": "Maximum return rate",
+        "hint": "Orders delivered and then refunded."
+      },
+      "maxCancellationRate": {
+        "label": "Maximum cancellation rate",
+        "hint": "Orders cancelled by the supplier."
+      },
+      "maxStockOutRate": {
+        "label": "Maximum out-of-stock rate",
+        "hint": "Out-of-stock listings among published ones."
+      },
+      "maxShippingDelayDays": {
+        "label": "Maximum shipping time",
+        "hint": "Between confirmation and shipment."
+      },
+      "minOnTimeShippingRate": {
+        "label": "Minimum on-time shipping share",
+        "hint": "Orders shipped on time."
+      },
+      "minStockPerProduct": {
+        "label": "Minimum stock per product",
+        "hint": "Each published product must have at least this many."
+      },
+      "evaluationWindowDays": {
+        "label": "Evaluation window",
+        "hint": "Period over which the indicators are calculated."
+      }
+    }
+  },
+  "content": {
+    "title": "Content",
+    "description": "Help pages, FAQ, terms of use and footer of the website and the app.",
+    "pages": "Pages",
+    "page": "Page",
+    "published": "Published",
+    "draft": "Draft",
+    "newPage": "New page",
+    "newTitlePlaceholder": "Title (e.g. Delivery)",
+    "newSlugPlaceholder": "Address (e.g. delivery)",
+    "create": "Create",
+    "createFailed": "Unable to create the page.",
+    "noPage": "No pages.",
+    "footerTitle": "Footer and contact details",
+    "siteUnavailable": "Contact details unavailable."
+  },
+  "pageEditor": {
+    "languages": {
+      "fr": "French",
+      "en": "English",
+      "pt": "Portuguese",
+      "ar": "Arabic"
+    },
+    "saved": "{locale, select, fr {French content saved.} en {English content saved.} pt {Portuguese content saved.} ar {Arabic content saved.} other {Content saved.}}",
+    "unpublished": "Page removed from the site.",
+    "publishedToast": "Page published.",
+    "publishFailed": "Publishing failed.",
+    "storefrontPath": "Address on the site: {path}",
+    "unpublish": "Remove from site",
+    "publish": "Publish",
+    "missingTranslation": "{locale, select, en {No English version yet: visitors see the French version.} pt {No Portuguese version yet: visitors see the French version.} ar {No Arabic version yet: visitors see the French version.} other {No version yet: visitors see the French version.}}",
+    "title": "Title",
+    "summary": "Summary (below the title)",
+    "body": "Content",
+    "bodyHint": "“## Title” starts a section, “- ” a list item; a blank line separates paragraphs. You can paste an entire text.",
+    "sections": "{count, plural, one {# section} other {# sections}}",
+    "sectionsWithTitles": "{count, plural, one {# section} other {# sections}}: {titles}"
+  },
+  "siteSettings": {
+    "contact": {
+      "legalName": "Company name",
+      "tradeName": "Trade name",
+      "address": "Address",
+      "city": "City and country",
+      "phone": "Phone",
+      "whatsapp": "WhatsApp",
+      "email": "Email address"
+    },
+    "saved": "Footer and contact details saved.",
+    "tagline": "Tagline",
+    "offline": "Bank transfer payment instructions",
+    "offlineHint": "Shown to buyers who choose “Transfer or deposit”: bank, account holder, IBAN / bank details, reference to include. Leave empty to remove this payment option.",
+    "social": "Social networks",
+    "socialHint": "One link per line: “Facebook | https://…”",
+    "columns": "Footer columns",
+    "columnsHint": "One column per block (separated by a blank line): the title on the first line, then one link per line “Label | /address”."
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Details of the administrator account currently signed in.",
+    "account": "Administrator account",
+    "role": "Administrator",
+    "email": "Email",
+    "phone": "Phone",
+    "status": "Status",
+    "id": "ID",
+    "notProvided": "Not provided"
+  },
+  "compliance": {
+    "teamOnly": "Restricted to the Diarama team.",
+    "runDone": "Check complete: {raised, plural, one {# new issue} other {# new issues}}, {closed, plural, one {# resolved} other {# resolved}}, {reminders, plural, one {# reminder} other {# reminders}}.",
+    "runFailed": "Check failed.",
+    "title": "Compliance",
+    "description": "Supplier documents, banned terms and audit log. Automatic check every morning.",
+    "descriptionLastRun": "Supplier documents, banned terms and audit log. Automatic check every morning (last: {date}).",
+    "runNow": "Check now",
+    "tiles": {
+      "openFindings": "Issues to review",
+      "pendingDocuments": "Documents to approve",
+      "expiringDocuments": "Expiring within 30 days",
+      "expiredDocuments": "Expired documents"
+    },
+    "tabs": {
+      "findings": "Issues to review",
+      "documents": "Documents",
+      "terms": "Banned terms",
+      "audit": "Audit log"
+    }
+  },
+  "audit": {
+    "before": "Before",
+    "after": "After",
+    "unknownAgent": "unknown agent",
+    "title": "Audit log ({count})",
+    "description": "Who did what, when and from where: financial actions, moderation, catalogue, settings. Click a row to see the values before and after. Exports are limited to 10,000 rows and are themselves logged.",
+    "search": "Search",
+    "searchPlaceholder": "Action, email, shop, IP address…",
+    "from": "From",
+    "to": "To",
+    "export": "Export to CSV",
+    "columns": {
+      "date": "Date",
+      "action": "Action",
+      "author": "User",
+      "shop": "Shop",
+      "ip": "IP address"
+    },
+    "system": "System",
+    "empty": "No entries."
+  },
+  "documents": {
+    "views": {
+      "PENDING": "To approve",
+      "EXPIRING": "Expiring within 30 days or expired",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected"
+    },
+    "rejectReason": "Reason for rejection (sent to the supplier)",
+    "view": "View",
+    "columns": {
+      "document": "Document",
+      "shop": "Shop",
+      "expiry": "Expiry",
+      "status": "Status"
+    },
+    "approve": "Approve",
+    "reject": "Reject",
+    "empty": "No documents."
+  },
+  "findings": {
+    "statuses": {
+      "OPEN": "To review",
+      "DISMISSED": "Dismissed",
+      "RESOLVED": "Resolved"
+    },
+    "kinds": {
+      "DOCUMENT_EXPIRING": "Document expiring soon",
+      "DOCUMENT_EXPIRED": "Document expired",
+      "BANNED_TERM": "Flagged term"
+    },
+    "dismissPrompt": "Why dismiss this issue? (kept in the log)",
+    "status": "Status",
+    "columns": {
+      "finding": "Issue",
+      "since": "Since"
+    },
+    "note": "Note: {note}",
+    "open": "Open",
+    "dismiss": "Dismiss",
+    "reopen": "Reopen",
+    "empty": "Nothing to report."
+  },
+  "terms": {
+    "title": "Banned terms ({count})",
+    "description": "Matched as whole words in listing titles and descriptions, ignoring case and accents (“arm” does not match “charm”). “Rejected” prevents saving; “Monitor” lets it through and flags the listing to the team. The morning check also scans listings already online.",
+    "term": "Term",
+    "termPlaceholder": "Term or phrase",
+    "action": "Action",
+    "reason": "Reason",
+    "reasonPlaceholder": "Reason (optional)",
+    "actions": {
+      "BLOCK": "Rejected",
+      "REVIEW": "Monitor"
+    },
+    "suspend": "Suspend",
+    "reactivate": "Reactivate",
+    "empty": "No terms yet."
+  }
+}

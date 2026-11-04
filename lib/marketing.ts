@@ -3,32 +3,12 @@
 export const AUDIENCES = ["ALL", "BUYERS", "SELLERS", "ACCOUNTS", "NO_ACCOUNT"] as const;
 export type Audience = (typeof AUDIENCES)[number];
 
-export const AUDIENCE_LABELS: Record<Audience, string> = {
-  ALL: "Tous les abonnés",
-  BUYERS: "Acheteurs (au moins une commande)",
-  SELLERS: "Vendeurs (membres d'une boutique)",
-  ACCOUNTS: "Abonnés ayant un compte",
-  NO_ACCOUNT: "Abonnés sans compte",
-};
-
 export const LANGUAGES = ["fr", "en", "pt", "ar"] as const;
 export type Language = (typeof LANGUAGES)[number];
-export const LANGUAGE_LABELS: Record<Language, string> = {
-  fr: "Français",
-  en: "Anglais",
-  pt: "Portugais",
-  ar: "Arabe",
-};
 
 export type Segment = { audience: Audience; countryCodes: string[]; languages: Language[] };
 
 export type CampaignStatus = "DRAFT" | "SENDING" | "SENT" | "CANCELLED";
-export const CAMPAIGN_STATUS_LABELS: Record<CampaignStatus, string> = {
-  DRAFT: "Brouillon",
-  SENDING: "Envoi en cours",
-  SENT: "Envoyée",
-  CANCELLED: "Arrêtée",
-};
 
 export type Campaign = {
   id: string;
@@ -58,11 +38,6 @@ export type CampaignInput = {
 };
 
 export type SubscriberStatus = "PENDING" | "SUBSCRIBED" | "UNSUBSCRIBED";
-export const SUBSCRIBER_STATUS_LABELS: Record<SubscriberStatus, string> = {
-  PENDING: "En attente de confirmation",
-  SUBSCRIBED: "Inscrit",
-  UNSUBSCRIBED: "Désinscrit",
-};
 
 export type Subscriber = {
   id: string;
@@ -96,17 +71,3 @@ export type ConsentEvent = {
   createdAt: string;
 };
 
-export const CONSENT_EVENT_LABELS: Record<ConsentEvent["event"], string> = {
-  REQUESTED: "Demande d'inscription",
-  CONFIRMED: "Consentement confirmé",
-  UNSUBSCRIBED: "Désinscription",
-};
-
-export const CONSENT_SOURCE_LABELS: Record<string, string> = {
-  WEB: "formulaire du site",
-  MOBILE: "application mobile",
-  ACCOUNT: "compte sur le site",
-  EMAIL_LINK: "lien reçu par e-mail",
-  ONE_CLICK: "bouton de la messagerie",
-  ADMIN: "administrateur, à la demande de la personne",
-};

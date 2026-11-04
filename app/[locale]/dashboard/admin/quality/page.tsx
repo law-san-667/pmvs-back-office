@@ -22,21 +22,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useRouter } from "@/i18n/navigation";
-import {
-  BUSINESS_STATUS_BADGE_CLASSES,
-  BUSINESS_STATUS_LABELS,
-} from "@/lib/admin-business-utils";
+import { BUSINESS_STATUS_BADGE_CLASSES } from "@/lib/admin-business-utils";
 import type { BusinessStatus } from "@/lib/backend-resource-types";
 import { scoreBarClass, scoreClass } from "@/lib/quality-utils";
 import { formatDate, getInitials } from "@/lib/seller-dashboard-utils";
 import { trpc } from "@/server/trpc/client";
 import { AlertTriangleIcon, EyeIcon, ShieldCheckIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 const PAGE_SIZE = 20;
 type CertifiedFilter = "ALL" | "CERTIFIED" | "NOT_CERTIFIED";
 
 export default function AdminQualityPage() {
+  const t = useTranslations("adminAccounts");
+  const locale = useLocale();
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [certified, setCertified] = useState<CertifiedFilter>("ALL");
@@ -51,13 +51,15 @@ export default function AdminQualityPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Qualité des fournisseurs"
-        description="Classement des fournisseurs selon les normes de qualité de la plateforme. Ouvrez une entreprise pour voir le détail, l'évaluer et la certifier."
+        title={t("qualityPage.title")}
+        description={t("qualityPage.description")}
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Classement ({ranking.data?.total ?? 0})</CardTitle>
+          <CardTitle>
+            {t("qualityPage.count", { count: ranking.data?.total ?? 0 })}
+          </CardTitle>
           <CardAction>
             <div className="flex items-center gap-2">
               <select
@@ -67,18 +69,22 @@ export default function AdminQualityPage() {
                   setPage(1);
                 }}
                 className="border-input bg-background h-9 rounded-md border px-3 text-sm"
-                aria-label="Filtrer par certification"
+                aria-label={t("qualityPage.filterByCertification")}
               >
-                <option value="ALL">Tous les fournisseurs</option>
-                <option value="CERTIFIED">Certifiés</option>
-                <option value="NOT_CERTIFIED">Non certifiés</option>
+                <option value="ALL">{t("qualityPage.allSuppliers")}</option>
+                <option value="CERTIFIED">
+                  {t("qualityPage.certifiedFilter")}
+                </option>
+                <option value="NOT_CERTIFIED">
+                  {t("qualityPage.notCertifiedFilter")}
+                </option>
               </select>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => router.push("/dashboard/admin/configuration")}
               >
-                Régler les normes
+                {t("qualityPage.adjustNorms")}
               </Button>
             </div>
           </CardAction>
@@ -88,12 +94,14 @@ export default function AdminQualityPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">#</TableHead>
-                <TableHead>Fournisseur</TableHead>
-                <TableHead>Score</TableHead>
-                <TableHead>Normes</TableHead>
-                <TableHead>Certification</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="w-[1%] text-end">Détail</TableHead>
+                <TableHead>{t("qualityPage.columns.supplier")}</TableHead>
+                <TableHead>{t("qualityPage.columns.score")}</TableHead>
+                <TableHead>{t("qualityPage.columns.norms")}</TableHead>
+                <TableHead>{t("qualityPage.columns.certification")}</TableHead>
+                <TableHead>{t("qualityPage.columns.status")}</TableHead>
+                <TableHead className="w-[1%] text-end">
+                  {t("qualityPage.columns.detail")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -102,8 +110,8 @@ export default function AdminQualityPage() {
                 isLoading={ranking.isLoading}
                 error={ranking.error?.message}
                 isEmpty={!ranking.data?.items.length}
-                loadingLabel="Calcul des scores..."
-                emptyLabel="Aucun fournisseur à classer."
+                loadingLabel={t("qualityPage.loading")}
+                emptyLabel={t("qualityPage.empty")}
               />
               {ranking.data?.items.map((row) => (
                 <TableRow key={row.businessId}>
@@ -124,7 +132,7 @@ export default function AdminQualityPage() {
                         {row.pendingReports > 0 && (
                           <p className="flex items-center gap-1 text-xs text-amber-700">
                             <AlertTriangleIcon className="size-3" />
-                            {row.pendingReports} signalement(s)
+                            {t("qualityPage.reports", { count: row.pendingReports })}
                           </p>
                         )}
                       </div>
@@ -144,10 +152,16 @@ export default function AdminQualityPage() {
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
-                    {row.metCount} / {row.judgedCount} évaluables
                     {row.judgedCount < row.totalCount
-                      ? ` (${row.totalCount - row.judgedCount} sans données)`
-                      : ""}
+                      ? t("qualityPage.normsWithMissing", {
+                          met: row.metCount,
+                          judged: row.judgedCount,
+                          missing: row.totalCount - row.judgedCount,
+                        })
+                      : t("qualityPage.norms", {
+                          met: row.metCount,
+                          judged: row.judgedCount,
+                        })}
                   </TableCell>
                   <TableCell>
                     {row.isCertified ? (
@@ -155,15 +169,18 @@ export default function AdminQualityPage() {
                         variant="outline"
                         className="border-green-200 bg-green-50 text-green-700"
                       >
-                        <ShieldCheckIcon className="size-3" /> Certifié
-                        {row.certifiedAt ? ` · ${formatDate(row.certifiedAt)}` : ""}
+                        <ShieldCheckIcon className="size-3" />{" "}
+                        {t("qualityPage.certified")}
+                        {row.certifiedAt
+                          ? ` · ${formatDate(row.certifiedAt, false, locale)}`
+                          : ""}
                       </Badge>
                     ) : (
                       <Badge
                         variant="outline"
                         className="border-slate-200 bg-slate-50 text-slate-600"
                       >
-                        Non certifié
+                        {t("qualityPage.notCertified")}
                       </Badge>
                     )}
                   </TableCell>
@@ -174,8 +191,9 @@ export default function AdminQualityPage() {
                         BUSINESS_STATUS_BADGE_CLASSES[row.businessStatus as BusinessStatus]
                       }
                     >
-                      {BUSINESS_STATUS_LABELS[row.businessStatus as BusinessStatus] ??
-                        row.businessStatus}
+                      {t.has(`businessStatus.${row.businessStatus as BusinessStatus}`)
+                        ? t(`businessStatus.${row.businessStatus as BusinessStatus}`)
+                        : row.businessStatus}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-end">
@@ -186,7 +204,7 @@ export default function AdminQualityPage() {
                         router.push(`/dashboard/admin/businesses/${row.businessId}`)
                       }
                     >
-                      <EyeIcon /> Voir
+                      <EyeIcon /> {t("actions.view")}
                     </Button>
                   </TableCell>
                 </TableRow>

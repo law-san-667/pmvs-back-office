@@ -13,16 +13,17 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { AdminListing } from "@/lib/admin-types";
 import { trpc } from "@/server/trpc/client";
+import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 
 /** Reasons offered as one-click shortcuts when refusing a listing. */
 const REJECTION_PRESETS = [
-  "Photos de mauvaise qualité ou non conformes",
-  "Description insuffisante ou trompeuse",
-  "Produit interdit à la vente sur la plateforme",
-  "Prix manifestement erroné",
-  "Catégorie inadaptée",
-];
+  "photos",
+  "description",
+  "prohibited",
+  "price",
+  "category",
+] as const;
 
 export function ListingModerationDialog({
   listing,
@@ -35,6 +36,7 @@ export function ListingModerationDialog({
   onClose: () => void;
   onModerated: () => Promise<void>;
 }) {
+  const t = useTranslations("adminCommerce");
   const [reason, setReason] = useState(listing.moderationReason ?? "");
   const moderate = trpc.admin.moderateListing.useMutation();
   const isRejection = decision === "REJECTED";
@@ -61,30 +63,41 @@ export function ListingModerationDialog({
         <form onSubmit={submit} className="flex flex-col gap-4">
           <DialogHeader>
             <DialogTitle>
-              {isRejection ? "Refuser l'annonce" : "Valider l'annonce"}
+              {isRejection
+                ? t("moderationDialog.rejectTitle")
+                : t("moderationDialog.approveTitle")}
             </DialogTitle>
             <DialogDescription>
               {isRejection
-                ? `« ${listing.title} » restera invisible pour les acheteurs. Le vendeur recevra le motif ci-dessous.`
-                : `« ${listing.title} » sera immédiatement visible sur la marketplace.`}
+                ? t("moderationDialog.rejectDescription", {
+                    title: listing.title,
+                  })
+                : t("moderationDialog.approveDescription", {
+                    title: listing.title,
+                  })}
             </DialogDescription>
           </DialogHeader>
 
           {isRejection && (
             <div className="flex flex-col gap-2">
-              <Label htmlFor="moderation-reason">Motif du refus</Label>
+              <Label htmlFor="moderation-reason">
+                {t("moderationDialog.reason")}
+              </Label>
               <div className="flex flex-wrap gap-2">
-                {REJECTION_PRESETS.map((preset) => (
-                  <Button
-                    key={preset}
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setReason(preset)}
-                  >
-                    {preset}
-                  </Button>
-                ))}
+                {REJECTION_PRESETS.map((preset) => {
+                  const text = t(`moderationDialog.presets.${preset}`);
+                  return (
+                    <Button
+                      key={preset}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setReason(text)}
+                    >
+                      {text}
+                    </Button>
+                  );
+                })}
               </div>
               <Textarea
                 id="moderation-reason"
@@ -92,7 +105,7 @@ export function ListingModerationDialog({
                 onChange={(event) => setReason(event.target.value)}
                 rows={3}
                 required
-                placeholder="Expliquez au vendeur ce qui doit être corrigé."
+                placeholder={t("moderationDialog.reasonPlaceholder")}
               />
             </div>
           )}
@@ -108,7 +121,7 @@ export function ListingModerationDialog({
               onClick={onClose}
               disabled={moderate.isPending}
             >
-              Annuler
+              {t("common.cancel")}
             </Button>
             <Button
               type="submit"
@@ -118,10 +131,10 @@ export function ListingModerationDialog({
               }
             >
               {moderate.isPending
-                ? "Envoi..."
+                ? t("moderationDialog.sending")
                 : isRejection
-                  ? "Refuser"
-                  : "Valider"}
+                  ? t("common.reject")
+                  : t("common.approve")}
             </Button>
           </DialogFooter>
         </form>

@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/seller-dashboard-utils";
 import { trpc } from "@/server/trpc/client";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -28,6 +29,8 @@ const selectClass =
  * those shops only). Every assignment change is kept in the audit log.
  */
 export default function AdminOperatorsPage() {
+  const t = useTranslations("adminAccounts");
+  const locale = useLocale();
   const utils = trpc.useUtils();
   const [operatorUserId, setOperatorUserId] = useState("");
   const [businessId, setBusinessId] = useState("");
@@ -54,13 +57,15 @@ export default function AdminOperatorsPage() {
         businessId,
         notes: notes.trim() || null,
       });
-      toast.success("Boutique affectée.");
+      toast.success(t("operators.toasts.assigned"));
       setBusinessId("");
       setNotes("");
       await utils.operators.assignments.invalidate();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "L’affectation a échoué.",
+        error instanceof Error
+          ? error.message
+          : t("operators.toasts.assignFailed"),
       );
     }
   };
@@ -69,12 +74,16 @@ export default function AdminOperatorsPage() {
     try {
       await setActive.mutateAsync({ id, isActive });
       toast.success(
-        isActive ? "Affectation reprise." : "Affectation terminée.",
+        isActive
+          ? t("operators.toasts.resumed")
+          : t("operators.toasts.ended"),
       );
       await utils.operators.assignments.invalidate();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "La mise à jour a échoué.",
+        error instanceof Error
+          ? error.message
+          : t("operators.toasts.updateFailed"),
       );
     }
   };
@@ -82,17 +91,17 @@ export default function AdminOperatorsPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Opérateurs"
-        description="Affectez des boutiques aux opérateurs : ils gèrent le catalogue, les commandes et les versements de ces boutiques uniquement."
+        title={t("operators.title")}
+        description={t("operators.description")}
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Nouvelle affectation</CardTitle>
+          <CardTitle>{t("operators.newAssignment")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Field>
-            <FieldLabel htmlFor="operator">Opérateur</FieldLabel>
+            <FieldLabel htmlFor="operator">{t("operators.operator")}</FieldLabel>
             <select
               id="operator"
               value={operatorUserId}
@@ -101,8 +110,8 @@ export default function AdminOperatorsPage() {
             >
               <option value="">
                 {operators.data?.items.length
-                  ? "Choisir un opérateur"
-                  : "Aucun compte opérateur actif"}
+                  ? t("operators.chooseOperator")
+                  : t("operators.noOperator")}
               </option>
               {operators.data?.items.map((operator) => (
                 <option key={operator.id} value={operator.id}>
@@ -112,20 +121,20 @@ export default function AdminOperatorsPage() {
             </select>
           </Field>
           <Field>
-            <FieldLabel htmlFor="shop-search">Boutique</FieldLabel>
+            <FieldLabel htmlFor="shop-search">{t("operators.shop")}</FieldLabel>
             <Input
               id="shop-search"
               value={shopSearch}
               onChange={(event) => setShopSearch(event.target.value)}
-              placeholder="Rechercher par nom…"
+              placeholder={t("operators.searchShop")}
             />
             <select
-              aria-label="Boutique"
+              aria-label={t("operators.shop")}
               value={businessId}
               onChange={(event) => setBusinessId(event.target.value)}
               className={selectClass}
             >
-              <option value="">Choisir une boutique</option>
+              <option value="">{t("operators.chooseShop")}</option>
               {shops.data?.items.map((shop) => (
                 <option key={shop.id} value={shop.id}>
                   {shop.name}
@@ -134,13 +143,13 @@ export default function AdminOperatorsPage() {
             </select>
           </Field>
           <Field>
-            <FieldLabel htmlFor="notes">Note (facultative)</FieldLabel>
+            <FieldLabel htmlFor="notes">{t("operators.note")}</FieldLabel>
             <Input
               id="notes"
               value={notes}
               maxLength={500}
               onChange={(event) => setNotes(event.target.value)}
-              placeholder="Ex. accompagnement à la mise en ligne"
+              placeholder={t("operators.notePlaceholder")}
             />
           </Field>
           <div className="flex items-end">
@@ -149,7 +158,7 @@ export default function AdminOperatorsPage() {
               disabled={!operatorUserId || !businessId || assign.isPending}
               onClick={() => void submit()}
             >
-              {assign.isPending ? "Affectation…" : "Affecter"}
+              {assign.isPending ? t("operators.assigning") : t("operators.assign")}
             </Button>
           </div>
         </CardContent>
@@ -157,17 +166,21 @@ export default function AdminOperatorsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Affectations ({assignments.data?.length ?? 0})</CardTitle>
+          <CardTitle>
+            {t("operators.assignments", {
+              count: assignments.data?.length ?? 0,
+            })}
+          </CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Opérateur</TableHead>
-                <TableHead>Boutique</TableHead>
-                <TableHead>Note</TableHead>
-                <TableHead>Depuis le</TableHead>
-                <TableHead>État</TableHead>
+                <TableHead>{t("operators.columns.operator")}</TableHead>
+                <TableHead>{t("operators.columns.shop")}</TableHead>
+                <TableHead>{t("operators.columns.note")}</TableHead>
+                <TableHead>{t("operators.columns.since")}</TableHead>
+                <TableHead>{t("operators.columns.state")}</TableHead>
                 <TableHead />
               </TableRow>
             </TableHeader>
@@ -177,8 +190,8 @@ export default function AdminOperatorsPage() {
                 isLoading={assignments.isLoading}
                 error={assignments.error?.message}
                 isEmpty={!assignments.data?.length}
-                loadingLabel="Chargement des affectations..."
-                emptyLabel="Aucune boutique n’est encore affectée."
+                loadingLabel={t("operators.loading")}
+                emptyLabel={t("operators.empty")}
               />
               {assignments.data?.map((assignment) => (
                 <TableRow key={assignment.id}>
@@ -192,7 +205,7 @@ export default function AdminOperatorsPage() {
                     {assignment.notes ?? "—"}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {formatDate(assignment.createdAt)}
+                    {formatDate(assignment.createdAt, false, locale)}
                   </TableCell>
                   <TableCell>
                     <Badge
@@ -203,7 +216,9 @@ export default function AdminOperatorsPage() {
                           : "border-slate-200 bg-slate-50 text-slate-600"
                       }
                     >
-                      {assignment.isActive ? "Active" : "Terminée"}
+                      {assignment.isActive
+                        ? t("operators.active")
+                        : t("operators.ended")}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-end">
@@ -215,7 +230,9 @@ export default function AdminOperatorsPage() {
                         void toggle(assignment.id, !assignment.isActive)
                       }
                     >
-                      {assignment.isActive ? "Terminer" : "Reprendre"}
+                      {assignment.isActive
+                        ? t("operators.end")
+                        : t("operators.resume")}
                     </Button>
                   </TableCell>
                 </TableRow>

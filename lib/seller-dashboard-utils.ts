@@ -1,31 +1,4 @@
 import { intlLocale } from "@/i18n/config";
-import type { OrderStatus, PaymentMethod } from "./seller-dashboard-types";
-
-// French labels for the admin screens (which stay French); supplier screens
-// translate the status codes with their own messages.
-
-export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
-  PENDING: "En attente",
-  CONFIRMED: "Confirmée",
-  PROCESSING: "En préparation",
-  SHIPPED: "Expédiée",
-  DELIVERED: "Livrée",
-  CANCELLED: "Annulée",
-  REFUNDED: "Remboursée",
-};
-
-export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
-  CASH: "Paiement à la livraison",
-  WAVE: "Wave",
-  ORANGE_MONEY: "Orange Money",
-  FREE_MONEY: "Free Money",
-  EXPRESSO: "Expresso",
-  CARD: "Carte bancaire",
-  ONLINE: "Paiement en ligne",
-  OFFLINE: "Virement ou dépôt",
-  MTN_MOMO: "MTN Mobile Money",
-  MOOV_MONEY: "Moov Money",
-};
 
 export const formatMoney = (
   amountMinor: number,

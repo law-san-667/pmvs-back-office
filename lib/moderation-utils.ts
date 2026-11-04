@@ -1,16 +1,5 @@
 import type { ListingModerationStatus } from "@/lib/backend-resource-types";
 
-/**
- * French labels for the admin screens (which stay in French). Supplier pages
- * translate the status with the "products.moderation.<status>" messages.
- */
-export const MODERATION_STATUS_LABELS: Record<ListingModerationStatus, string> =
-  {
-    PENDING: "En attente de validation",
-    APPROVED: "Validé",
-    REJECTED: "Refusé",
-  };
-
 export const MODERATION_STATUS_CLASSES: Record<ListingModerationStatus, string> =
   {
     PENDING: "border-amber-200 bg-amber-50 text-amber-700",
@@ -18,10 +7,3 @@ export const MODERATION_STATUS_CLASSES: Record<ListingModerationStatus, string> 
     REJECTED: "border-red-200 bg-red-50 text-red-700",
   };
 
-export const LISTING_STATUS_LABELS: Record<string, string> = {
-  DRAFT: "Brouillon",
-  PUBLISHED: "Publié",
-  PAUSED: "En pause",
-  SOLD: "Épuisé",
-  ARCHIVED: "Archivé",
-};

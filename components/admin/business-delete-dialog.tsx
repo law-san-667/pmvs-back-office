@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { AdminBusiness } from "@/lib/admin-types";
 import { trpc } from "@/server/trpc/client";
+import { useTranslations } from "next-intl";
 
 export function BusinessDeleteDialog({
   business,
@@ -22,6 +23,7 @@ export function BusinessDeleteDialog({
   onClose: () => void;
   onDeleted: () => Promise<void>;
 }) {
+  const t = useTranslations("adminAccounts");
   const remove = trpc.admin.deleteBusiness.useMutation();
 
   const confirmDelete = async () => {
@@ -38,10 +40,9 @@ export function BusinessDeleteDialog({
     <AlertDialog open onOpenChange={(open) => !open && onClose()}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+          <AlertDialogTitle>{t("deleteDialog.title")}</AlertDialogTitle>
           <AlertDialogDescription>
-            « {business.name} » sera supprimée définitivement, ainsi que ses
-            annonces et données associées. Cette opération est irréversible.
+            {t("deleteDialog.description", { name: business.name })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         {remove.error && (
@@ -49,7 +50,7 @@ export function BusinessDeleteDialog({
         )}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={remove.isPending}>
-            Annuler
+            {t("actions.cancel")}
           </AlertDialogCancel>
           <AlertDialogAction
             variant="destructive"
@@ -59,7 +60,7 @@ export function BusinessDeleteDialog({
               void confirmDelete();
             }}
           >
-            {remove.isPending ? "Suppression..." : "Supprimer"}
+            {remove.isPending ? t("actions.deleting") : t("actions.delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -81,8 +81,3 @@ export type VendabilitySettings = {
   targets: { units: number; views: number; conversionRate: number; cartRate: number };
 };
 
-export const VERSION_STATUS_LABELS: Record<QuestionnaireVersion["status"], string> = {
-  DRAFT: "En préparation",
-  PUBLISHED: "En vigueur",
-  ARCHIVED: "Archivée",
-};

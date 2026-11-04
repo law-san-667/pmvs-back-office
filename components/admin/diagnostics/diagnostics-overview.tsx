@@ -11,6 +11,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
+import { intlLocale } from "@/i18n/config";
 import type { DiagnosticsOverview } from "@/lib/diagnostics-types";
 import { cn } from "@/lib/utils";
 import {
@@ -21,6 +22,7 @@ import {
   UsersIcon,
   XCircleIcon,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   formatDuration,
@@ -30,14 +32,10 @@ import {
   statusClasses,
 } from "./diagnostics-utils";
 
-const chartConfig = {
-  success: { label: "Succès", color: "#22c55e" },
-  clientErrors: { label: "Erreurs 4xx", color: "#f59e0b" },
-  serverErrors: { label: "Erreurs 5xx", color: "#ef4444" },
-} satisfies ChartConfig;
+type T = ReturnType<typeof useTranslations<"adminSystem">>;
 
-const bucketLabel = (value: string, bucketSeconds: number) =>
-  new Intl.DateTimeFormat("fr-FR", {
+const bucketLabel = (value: string, bucketSeconds: number, locale: string) =>
+  new Intl.DateTimeFormat(intlLocale(locale), {
     ...(bucketSeconds >= 86400
       ? { day: "2-digit", month: "short" }
       : bucketSeconds >= 3600
@@ -45,12 +43,12 @@ const bucketLabel = (value: string, bucketSeconds: number) =>
         : { hour: "2-digit", minute: "2-digit" }),
   }).format(new Date(value));
 
-const bucketSizeLabel = (seconds: number) =>
+const bucketSizeLabel = (seconds: number, t: T) =>
   seconds >= 86400
-    ? `${seconds / 86400} j`
+    ? t("diagnostics.overview.bucket.days", { count: seconds / 86400 })
     : seconds >= 3600
-      ? `${seconds / 3600} h`
-      : `${seconds / 60} min`;
+      ? t("diagnostics.overview.bucket.hours", { count: seconds / 3600 })
+      : t("diagnostics.overview.bucket.minutes", { count: seconds / 60 });
 
 function Kpi({
   title,
@@ -102,64 +100,85 @@ export function DiagnosticsOverviewPanel({
   onRouteClick: (method: string, route: string) => void;
   onErrorClick: (sampleId: string) => void;
 }) {
+  const t = useTranslations("adminSystem");
+  const locale = useLocale();
+  const chartConfig = {
+    success: { label: t("diagnostics.overview.chart.success"), color: "#22c55e" },
+    clientErrors: { label: t("diagnostics.overview.chart.clientErrors"), color: "#f59e0b" },
+    serverErrors: { label: t("diagnostics.overview.chart.serverErrors"), color: "#ef4444" },
+  } satisfies ChartConfig;
   const totals = overview?.totals;
   const format = (value: number | undefined) =>
-    value === undefined ? undefined : value.toLocaleString("fr-FR");
+    value === undefined ? undefined : value.toLocaleString(intlLocale(locale));
 
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <Kpi
-          title="Requêtes enregistrées"
+          title={t("diagnostics.overview.recorded")}
           value={format(totals?.recorded)}
-          hint="Écritures + lectures en échec"
+          hint={t("diagnostics.overview.recordedHint")}
           icon={ActivityIcon}
         />
         <Kpi
-          title="Échec des écritures"
-          value={totals ? formatPercent(totals.writeErrorRate) : undefined}
-          hint={totals ? `${totals.failedWrites} / ${totals.writes} écritures` : undefined}
+          title={t("diagnostics.overview.writeFailures")}
+          value={totals ? formatPercent(totals.writeErrorRate, locale) : undefined}
+          hint={
+            totals
+              ? t("diagnostics.overview.writeFailuresHint", {
+                  failed: totals.failedWrites,
+                  total: totals.writes,
+                })
+              : undefined
+          }
           icon={XCircleIcon}
           tone={totals && totals.writeErrorRate > 0.05 ? "danger" : "default"}
         />
         <Kpi
-          title="Erreurs 4xx"
+          title={t("diagnostics.overview.chart.clientErrors")}
           value={format(totals?.clientErrors)}
-          hint="Validation, droits, introuvable"
+          hint={t("diagnostics.overview.clientErrorsHint")}
           icon={AlertTriangleIcon}
           tone={totals?.clientErrors ? "warn" : "default"}
         />
         <Kpi
-          title="Erreurs 5xx"
+          title={t("diagnostics.overview.chart.serverErrors")}
           value={format(totals?.serverErrors)}
-          hint="Pannes côté serveur"
+          hint={t("diagnostics.overview.serverErrorsHint")}
           icon={ServerCrashIcon}
           tone={totals?.serverErrors ? "danger" : "default"}
         />
         <Kpi
-          title="Utilisateurs impactés"
+          title={t("diagnostics.overview.affectedUsers")}
           value={format(totals?.affectedUsers)}
-          hint="Connectés, avec au moins une erreur"
+          hint={t("diagnostics.overview.affectedUsersHint")}
           icon={UsersIcon}
         />
         <Kpi
-          title="Latence moy. / p95"
+          title={t("diagnostics.overview.latency")}
           value={
             totals
               ? `${formatDuration(totals.avgDurationMs)}`
               : undefined
           }
-          hint={totals ? `p95 : ${formatDuration(totals.p95DurationMs)}` : undefined}
+          hint={
+            totals
+              ? t("diagnostics.overview.p95", { value: formatDuration(totals.p95DurationMs) })
+              : undefined
+          }
           icon={GaugeIcon}
         />
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Activité dans le temps</CardTitle>
+          <CardTitle>{t("diagnostics.overview.activityTitle")}</CardTitle>
           <CardDescription>
-            Requêtes enregistrées
-            {overview ? `, par tranche de ${bucketSizeLabel(overview.bucketSeconds)}` : ""}
+            {overview
+              ? t("diagnostics.overview.activityDescriptionBucket", {
+                  size: bucketSizeLabel(overview.bucketSeconds, t),
+                })
+              : t("diagnostics.overview.activityDescription")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -172,7 +191,7 @@ export function DiagnosticsOverviewPanel({
                   tickLine={false}
                   axisLine={false}
                   minTickGap={32}
-                  tickFormatter={(value) => bucketLabel(value, overview.bucketSeconds)}
+                  tickFormatter={(value) => bucketLabel(value, overview.bucketSeconds, locale)}
                 />
                 <YAxis tickLine={false} axisLine={false} allowDecimals={false} width={32} />
                 <ChartTooltip
@@ -180,7 +199,7 @@ export function DiagnosticsOverviewPanel({
                     <ChartTooltipContent
                       labelFormatter={(_, payload) => {
                         const bucket = payload?.[0]?.payload?.bucket;
-                        return bucket ? formatTime(bucket, false) : "";
+                        return bucket ? formatTime(bucket, locale, false) : "";
                       }}
                     />
                   }
@@ -201,7 +220,7 @@ export function DiagnosticsOverviewPanel({
           )}
           {overview && overview.statusCodes.length > 0 && (
             <div className="mt-3 flex flex-wrap items-center gap-1.5">
-              <span className="text-muted-foreground text-xs">Codes :</span>
+              <span className="text-muted-foreground text-xs">{t("diagnostics.overview.codes")}</span>
               {overview.statusCodes.map((item) => (
                 <button
                   key={item.status}
@@ -222,13 +241,13 @@ export function DiagnosticsOverviewPanel({
       <div className="grid gap-4 xl:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Routes les plus en échec</CardTitle>
-            <CardDescription>Cliquez pour filtrer l&apos;historique.</CardDescription>
+            <CardTitle>{t("diagnostics.overview.topRoutes")}</CardTitle>
+            <CardDescription>{t("diagnostics.overview.topRoutesHint")}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-1">
             {!overview && <Skeleton className="h-40 w-full" />}
             {overview?.topRoutes.length === 0 && (
-              <p className="text-muted-foreground py-6 text-center text-sm">Aucune requête sur la période.</p>
+              <p className="text-muted-foreground py-6 text-center text-sm">{t("diagnostics.overview.noRequests")}</p>
             )}
             {overview?.topRoutes.map((route) => (
               <button
@@ -253,11 +272,17 @@ export function DiagnosticsOverviewPanel({
                       route.failures ? "text-red-600" : "text-muted-foreground",
                     )}
                   >
-                    {route.failures}/{route.total} en échec
+                    {t("diagnostics.overview.routeFailures", {
+                      failures: route.failures,
+                      total: route.total,
+                    })}
                   </span>
                 </span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {route.lastError ?? "Aucune erreur"} · {formatDuration(route.avgDurationMs)} moy.
+                  {t("diagnostics.overview.routeSummary", {
+                    error: route.lastError ?? t("diagnostics.overview.noError"),
+                    duration: formatDuration(route.avgDurationMs),
+                  })}
                 </span>
               </button>
             ))}
@@ -266,13 +291,13 @@ export function DiagnosticsOverviewPanel({
 
         <Card>
           <CardHeader>
-            <CardTitle>Erreurs les plus fréquentes</CardTitle>
-            <CardDescription>Cliquez pour ouvrir l&apos;occurrence la plus récente.</CardDescription>
+            <CardTitle>{t("diagnostics.overview.topErrors")}</CardTitle>
+            <CardDescription>{t("diagnostics.overview.topErrorsHint")}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-1">
             {!overview && <Skeleton className="h-40 w-full" />}
             {overview?.topErrors.length === 0 && (
-              <p className="text-muted-foreground py-6 text-center text-sm">Aucune erreur sur la période. 🎉</p>
+              <p className="text-muted-foreground py-6 text-center text-sm">{t("diagnostics.overview.noErrors")}</p>
             )}
             {overview?.topErrors.map((error) => (
               <button
@@ -287,7 +312,9 @@ export function DiagnosticsOverviewPanel({
                 <span className="min-w-0 flex-1">
                   <span className="line-clamp-2 text-xs">{error.errorMessage}</span>
                   <span className="text-muted-foreground text-xs">
-                    Dernière : {formatTime(error.lastSeenAt, false)}
+                    {t("diagnostics.overview.lastSeen", {
+                      date: formatTime(error.lastSeenAt, locale, false),
+                    })}
                   </span>
                 </span>
                 <span className="shrink-0 text-sm font-semibold">×{error.count}</span>

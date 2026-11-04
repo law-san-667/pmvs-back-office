@@ -17,6 +17,9 @@ export const tenderStatusEnum = [
   "CANCELLED",
 ] as const;
 
+/** The tender's country, that country plus a list, or the whole ZLECAf. */
+export const tenderDiffusionScopes = ["COUNTRY", "COUNTRIES", "ZLECAF"] as const;
+
 const tenderTypeSchema = z.enum(tenderTypeEnum);
 const tenderStatusSchema = z.enum(tenderStatusEnum);
 
@@ -37,6 +40,8 @@ export const createTenderSchema = z.object({
   documents: z.unknown().nullable().optional(),
   location: z.string().trim().min(1).nullable().optional(),
   countryCode: z.string().trim().min(2),
+  diffusionScope: z.enum(tenderDiffusionScopes).optional(),
+  diffusionCountries: z.array(z.string().trim().length(2)).optional(),
   opensAt: z.string().nullable().optional(),
   submissionDeadline: z.string().min(1),
   evaluationDeadline: z.string().nullable().optional(),

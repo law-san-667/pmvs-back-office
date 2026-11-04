@@ -19,13 +19,13 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   type AdminTrainingCourse,
   KIND_LABELS,
-  LEVEL_LABELS,
   type LessonKind,
   type TrainingLevel,
 } from "@/lib/training";
 import { uploadFileToR2FromBrowser } from "@/lib/upload-to-r2";
 import { trpc } from "@/server/trpc/client";
 import { ArrowDownIcon, ArrowUpIcon, Trash2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -33,6 +33,8 @@ const SELECT_CLASS = "border-input bg-background h-9 w-full rounded-md border px
 const fail = { onError: (error: { message: string }) => toast.error(error.message) };
 
 function NewLesson({ courseId, onAdded }: { courseId: string; onAdded: () => Promise<unknown> }) {
+  const t = useTranslations("adminSystem.training");
+  const tTraining = useTranslations("training");
   const [title, setTitle] = useState("");
   const [kind, setKind] = useState<LessonKind>("VIDEO");
   const [body, setBody] = useState("");
@@ -48,7 +50,7 @@ function NewLesson({ courseId, onAdded }: { courseId: string; onAdded: () => Pro
       setFileUrl("");
       setDuration("");
       await onAdded();
-      toast.success("Leçon ajoutée.");
+      toast.success(t("lessonAdded"));
     },
   });
   const upload = async (file: File) => {
@@ -59,7 +61,7 @@ function NewLesson({ courseId, onAdded }: { courseId: string; onAdded: () => Pro
       );
       setFileUrl(url ?? "");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Envoi impossible.");
+      toast.error(error instanceof Error ? error.message : t("uploadFailed"));
     } finally {
       setUploading(false);
     }
@@ -80,14 +82,14 @@ function NewLesson({ courseId, onAdded }: { courseId: string; onAdded: () => Pro
         });
       }}
     >
-      <span className="text-sm font-medium">Ajouter une leçon</span>
+      <span className="text-sm font-medium">{t("addLessonTitle")}</span>
       <div className="grid gap-3 sm:grid-cols-[2fr_1fr_1fr]">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor={`l-title-${courseId}`}>Titre</Label>
+          <Label htmlFor={`l-title-${courseId}`}>{t("title")}</Label>
           <Input id={`l-title-${courseId}`} value={title} maxLength={200} onChange={(event) => setTitle(event.target.value)} />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor={`l-kind-${courseId}`}>Type</Label>
+          <Label htmlFor={`l-kind-${courseId}`}>{t("type")}</Label>
           <select
             id={`l-kind-${courseId}`}
             className={SELECT_CLASS}
@@ -99,26 +101,26 @@ function NewLesson({ courseId, onAdded }: { courseId: string; onAdded: () => Pro
           >
             {(Object.keys(KIND_LABELS) as LessonKind[]).map((value) => (
               <option key={value} value={value}>
-                {KIND_LABELS[value]}
+                {tTraining(`kind.${value}`)}
               </option>
             ))}
           </select>
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor={`l-duration-${courseId}`}>Durée (minutes)</Label>
+          <Label htmlFor={`l-duration-${courseId}`}>{t("durationMinutes")}</Label>
           <Input id={`l-duration-${courseId}`} type="number" min={1} max={1000} value={duration} onChange={(event) => setDuration(event.target.value)} />
         </div>
       </div>
       {kind === "TEXT" ? (
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor={`l-body-${courseId}`}>Texte</Label>
+          <Label htmlFor={`l-body-${courseId}`}>{t("text")}</Label>
           <Textarea id={`l-body-${courseId}`} rows={5} value={body} onChange={(event) => setBody(event.target.value)} />
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor={`l-file-${courseId}`}>
-              {kind === "VIDEO" ? "Envoyer la vidéo (100 Mo au plus)" : "Envoyer le PDF (10 Mo au plus)"}
+              {kind === "VIDEO" ? t("uploadVideo") : t("uploadPdf")}
             </Label>
             <Input
               id={`l-file-${courseId}`}
@@ -132,14 +134,14 @@ function NewLesson({ courseId, onAdded }: { courseId: string; onAdded: () => Pro
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor={`l-url-${courseId}`}>Ou son adresse</Label>
+            <Label htmlFor={`l-url-${courseId}`}>{t("orUrl")}</Label>
             <Input id={`l-url-${courseId}`} type="url" placeholder="https://" value={fileUrl} onChange={(event) => setFileUrl(event.target.value)} />
           </div>
         </div>
       )}
       <div>
         <Button type="submit" size="sm" disabled={title.trim().length < 3 || uploading || create.isPending}>
-          {uploading ? "Envoi du fichier..." : "Ajouter la leçon"}
+          {uploading ? t("uploadingFile") : t("addLesson")}
         </Button>
       </div>
     </form>
@@ -147,6 +149,8 @@ function NewLesson({ courseId, onAdded }: { courseId: string; onAdded: () => Pro
 }
 
 function CourseCard({ course, onChanged }: { course: AdminTrainingCourse; onChanged: () => Promise<unknown> }) {
+  const t = useTranslations("adminSystem.training");
+  const tTraining = useTranslations("training");
   const utils = trpc.useUtils();
   const [opened, setOpened] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -170,19 +174,19 @@ function CourseCard({ course, onChanged }: { course: AdminTrainingCourse; onChan
       <CardHeader>
         <CardTitle className="flex flex-wrap items-center gap-2">
           {course.title}
-          <Badge variant="outline">{LEVEL_LABELS[course.level]}</Badge>
+          <Badge variant="outline">{tTraining(`level.${course.level}`)}</Badge>
           <Badge variant={course.isPublished ? "default" : "secondary"}>
-            {course.isPublished ? "Publié" : "Brouillon"}
+            {course.isPublished ? t("published") : t("draft")}
           </Badge>
         </CardTitle>
         <CardDescription>
-          {course.lessonCount} leçon(s), {course.learners} vendeur(s) ont commencé.
+          {t("courseStats", { lessons: course.lessonCount, learners: course.learners })}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex flex-wrap gap-2">
           <Button size="sm" variant="outline" onClick={() => setOpened(!opened)}>
-            {opened ? "Fermer" : "Gérer les leçons"}
+            {opened ? t("close") : t("manageLessons")}
           </Button>
           <Button
             size="sm"
@@ -190,10 +194,10 @@ function CourseCard({ course, onChanged }: { course: AdminTrainingCourse; onChan
             disabled={update.isPending}
             onClick={() => update.mutate({ id: course.id, isPublished: !course.isPublished })}
           >
-            {course.isPublished ? "Dépublier" : "Publier"}
+            {course.isPublished ? t("unpublish") : t("publish")}
           </Button>
           <Button size="sm" variant="ghost" onClick={() => setDeleting(true)}>
-            Supprimer
+            {t("delete")}
           </Button>
         </div>
         {opened && (
@@ -204,16 +208,16 @@ function CourseCard({ course, onChanged }: { course: AdminTrainingCourse; onChan
                 <li key={lesson.id} className="flex items-center justify-between gap-2 py-2 text-sm">
                   <span className="min-w-0">
                     {index + 1}. {lesson.title}
-                    <span className="text-muted-foreground ms-2 text-xs">{KIND_LABELS[lesson.kind]}</span>
+                    <span className="text-muted-foreground ms-2 text-xs">{tTraining(`kind.${lesson.kind}`)}</span>
                   </span>
                   <span className="flex shrink-0">
-                    <Button size="icon" variant="ghost" aria-label={`Monter ${lesson.title}`} disabled={index === 0 || order.isPending} onClick={() => move(index, -1)}>
+                    <Button size="icon" variant="ghost" aria-label={t("moveUp", { title: lesson.title })} disabled={index === 0 || order.isPending} onClick={() => move(index, -1)}>
                       <ArrowUpIcon />
                     </Button>
-                    <Button size="icon" variant="ghost" aria-label={`Descendre ${lesson.title}`} disabled={index === lessons.length - 1 || order.isPending} onClick={() => move(index, 1)}>
+                    <Button size="icon" variant="ghost" aria-label={t("moveDown", { title: lesson.title })} disabled={index === lessons.length - 1 || order.isPending} onClick={() => move(index, 1)}>
                       <ArrowDownIcon />
                     </Button>
-                    <Button size="icon" variant="ghost" aria-label={`Retirer ${lesson.title}`} disabled={removeLesson.isPending} onClick={() => removeLesson.mutate({ id: lesson.id })}>
+                    <Button size="icon" variant="ghost" aria-label={t("removeLesson", { title: lesson.title })} disabled={removeLesson.isPending} onClick={() => removeLesson.mutate({ id: lesson.id })}>
                       <Trash2Icon />
                     </Button>
                   </span>
@@ -228,14 +232,13 @@ function CourseCard({ course, onChanged }: { course: AdminTrainingCourse; onChan
         <AlertDialog open onOpenChange={(open) => !open && setDeleting(false)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Supprimer ce cours ?</AlertDialogTitle>
+              <AlertDialogTitle>{t("deleteTitle")}</AlertDialogTitle>
               <AlertDialogDescription>
-                « {course.title} », ses leçons et la progression des vendeurs seront supprimés
-                définitivement.
+                {t("deleteDescription", { title: course.title })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Annuler</AlertDialogCancel>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
               <AlertDialogAction
                 variant="destructive"
                 disabled={remove.isPending}
@@ -244,7 +247,7 @@ function CourseCard({ course, onChanged }: { course: AdminTrainingCourse; onChan
                   remove.mutate({ id: course.id });
                 }}
               >
-                Supprimer
+                {t("delete")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -256,6 +259,8 @@ function CourseCard({ course, onChanged }: { course: AdminTrainingCourse; onChan
 
 /** Create courses, add their lessons, publish. */
 export function TrainingEditor() {
+  const t = useTranslations("adminSystem.training");
+  const tTraining = useTranslations("training");
   const utils = trpc.useUtils();
   const courses = trpc.training.adminCourses.useQuery();
   const [title, setTitle] = useState("");
@@ -268,7 +273,7 @@ export function TrainingEditor() {
       setTitle("");
       setSummary("");
       await refresh();
-      toast.success("Cours créé.");
+      toast.success(t("courseCreated"));
     },
   });
 
@@ -276,8 +281,8 @@ export function TrainingEditor() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Nouveau cours</CardTitle>
-          <CardDescription>Il reste invisible des vendeurs tant qu&apos;il n&apos;est pas publié.</CardDescription>
+          <CardTitle>{t("newCourse")}</CardTitle>
+          <CardDescription>{t("newCourseHint")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -288,22 +293,22 @@ export function TrainingEditor() {
             }}
           >
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="c-title">Titre</Label>
+              <Label htmlFor="c-title">{t("title")}</Label>
               <Input id="c-title" value={title} maxLength={200} onChange={(event) => setTitle(event.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="c-summary">Résumé</Label>
+              <Label htmlFor="c-summary">{t("summary")}</Label>
               <Input id="c-summary" value={summary} maxLength={1000} onChange={(event) => setSummary(event.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="c-level">Niveau</Label>
+              <Label htmlFor="c-level">{t("level")}</Label>
               <select id="c-level" className={SELECT_CLASS} value={level} onChange={(event) => setLevel(event.target.value as TrainingLevel)}>
-                <option value="BEGINNER">{LEVEL_LABELS.BEGINNER}</option>
-                <option value="ADVANCED">{LEVEL_LABELS.ADVANCED}</option>
+                <option value="BEGINNER">{tTraining("level.BEGINNER")}</option>
+                <option value="ADVANCED">{tTraining("level.ADVANCED")}</option>
               </select>
             </div>
             <Button type="submit" disabled={title.trim().length < 3 || create.isPending}>
-              Créer
+              {t("create")}
             </Button>
           </form>
         </CardContent>

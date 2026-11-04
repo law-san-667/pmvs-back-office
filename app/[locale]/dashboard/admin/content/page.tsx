@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/server/trpc/client";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { PageEditor } from "./page-editor";
@@ -16,6 +17,8 @@ import { SiteSettingsForm } from "./site-settings-form";
  * and shown by the site and the app without a new release.
  */
 export default function AdminContentPage() {
+  const t = useTranslations("adminSettings.content");
+  const tc = useTranslations("adminSettings.common");
   const utils = trpc.useUtils();
   const pages = trpc.content.pages.useQuery();
   const site = trpc.content.site.useQuery();
@@ -27,7 +30,7 @@ export default function AdminContentPage() {
   const selected =
     pages.data?.find((page) => page.id === selectedId) ?? pages.data?.[0];
   const title = (page: NonNullable<typeof selected>) =>
-    page.translations.find((t) => t.locale === "fr")?.title ?? page.slug;
+    page.translations.find((tr) => tr.locale === "fr")?.title ?? page.slug;
 
   const create = async () => {
     try {
@@ -41,7 +44,7 @@ export default function AdminContentPage() {
       setSelectedId(page.id);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Création impossible.",
+        error instanceof Error ? error.message : t("createFailed"),
       );
     }
   };
@@ -49,18 +52,20 @@ export default function AdminContentPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Contenus"
-        description="Pages d’aide, questions fréquentes, conditions d’utilisation et pied de page du site et de l’application."
+        title={t("title")}
+        description={t("description")}
       />
 
       <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
         <Card>
           <CardHeader>
-            <CardTitle>Pages</CardTitle>
+            <CardTitle>{t("pages")}</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-1">
             {pages.isLoading && (
-              <p className="text-muted-foreground text-sm">Chargement…</p>
+              <p className="text-muted-foreground text-sm">
+                {tc("loadingEllipsis")}
+              </p>
             )}
             {pages.data?.map((page) => (
               <button
@@ -78,23 +83,23 @@ export default function AdminContentPage() {
                     "size-2 shrink-0 rounded-full",
                     page.isPublished ? "bg-green-500" : "bg-slate-300",
                   )}
-                  aria-label={page.isPublished ? "Publiée" : "Brouillon"}
+                  aria-label={page.isPublished ? t("published") : t("draft")}
                 />
               </button>
             ))}
             <div className="mt-4 flex flex-col gap-2 border-t pt-4">
-              <p className="text-sm font-medium">Nouvelle page</p>
+              <p className="text-sm font-medium">{t("newPage")}</p>
               <Input
                 value={newTitle}
                 onChange={(event) => setNewTitle(event.target.value)}
-                placeholder="Titre (ex. Livraison)"
+                placeholder={t("newTitlePlaceholder")}
               />
               <Input
                 value={newSlug}
                 onChange={(event) =>
                   setNewSlug(event.target.value.toLowerCase())
                 }
-                placeholder="Adresse (ex. livraison)"
+                placeholder={t("newSlugPlaceholder")}
               />
               <Button
                 variant="outline"
@@ -103,7 +108,7 @@ export default function AdminContentPage() {
                 }
                 onClick={() => void create()}
               >
-                Créer
+                {t("create")}
               </Button>
             </div>
           </CardContent>
@@ -111,7 +116,7 @@ export default function AdminContentPage() {
 
         <Card className="min-w-0">
           <CardHeader>
-            <CardTitle>{selected ? title(selected) : "Page"}</CardTitle>
+            <CardTitle>{selected ? title(selected) : t("page")}</CardTitle>
           </CardHeader>
           <CardContent>
             {selected ? (
@@ -120,7 +125,7 @@ export default function AdminContentPage() {
                 page={selected}
               />
             ) : (
-              <p className="text-muted-foreground text-sm">Aucune page.</p>
+              <p className="text-muted-foreground text-sm">{t("noPage")}</p>
             )}
           </CardContent>
         </Card>
@@ -128,14 +133,14 @@ export default function AdminContentPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Pied de page et coordonnées</CardTitle>
+          <CardTitle>{t("footerTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           {site.data ? (
             <SiteSettingsForm site={site.data} />
           ) : (
             <p className="text-muted-foreground text-sm">
-              {site.isLoading ? "Chargement…" : "Coordonnées indisponibles."}
+              {site.isLoading ? tc("loadingEllipsis") : t("siteUnavailable")}
             </p>
           )}
         </CardContent>

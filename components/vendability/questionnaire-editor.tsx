@@ -20,27 +20,29 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import {
   type Question,
   type QuestionnaireVersion,
-  VERSION_STATUS_LABELS,
 } from "@/lib/vendability";
 import { trpc } from "@/server/trpc/client";
 import { ArrowDownIcon, ArrowUpIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
 const newId = () => crypto.randomUUID();
-const newQuestion = (): Question => ({
+const newQuestion = (yes: string, no: string): Question => ({
   id: newId(),
   label: "",
   type: "CHOICE",
   required: true,
   weight: 1,
   options: [
-    { id: newId(), label: "Oui", points: 100 },
-    { id: newId(), label: "Non", points: 0 },
+    { id: newId(), label: yes, points: 100 },
+    { id: newId(), label: no, points: 0 },
   ],
 });
 
 function DraftEditor({ draft, onDone }: { draft: QuestionnaireVersion; onDone: () => Promise<unknown> }) {
+  const t = useTranslations("adminSystem.vendabilityQuestionnaire");
+  const defaultQuestion = () => newQuestion(t("yes"), t("no"));
   const [title, setTitle] = useState(draft.title);
   const [questions, setQuestions] = useState<Question[]>(draft.questions);
   const [confirming, setConfirming] = useState(false);
@@ -67,15 +69,14 @@ function DraftEditor({ draft, onDone }: { draft: QuestionnaireVersion; onDone: (
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Version {draft.version} en préparation</CardTitle>
+        <CardTitle>{t("draftTitle", { version: draft.version })}</CardTitle>
         <CardDescription>
-          Invisible des fournisseurs tant qu&apos;elle n&apos;est pas publiée. Une fois publiée, elle ne se
-          modifie plus.
+          {t("draftDescription")}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="q-title">Titre</Label>
+          <Label htmlFor="q-title">{t("title")}</Label>
           <Input
             id="q-title"
             value={title}
@@ -89,45 +90,45 @@ function DraftEditor({ draft, onDone }: { draft: QuestionnaireVersion; onDone: (
         {questions.map((question, index) => (
           <div key={question.id} className="flex flex-col gap-3 rounded-lg border p-4">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-sm font-medium">Question {index + 1}</span>
+              <span className="text-sm font-medium">{t("question", { number: index + 1 })}</span>
               <div className="flex gap-1">
-                <Button type="button" size="icon" variant="ghost" aria-label={`Monter la question ${index + 1}`} disabled={index === 0} onClick={() => move(index, -1)}>
+                <Button type="button" size="icon" variant="ghost" aria-label={t("moveUp", { number: index + 1 })} disabled={index === 0} onClick={() => move(index, -1)}>
                   <ArrowUpIcon />
                 </Button>
-                <Button type="button" size="icon" variant="ghost" aria-label={`Descendre la question ${index + 1}`} disabled={index === questions.length - 1} onClick={() => move(index, 1)}>
+                <Button type="button" size="icon" variant="ghost" aria-label={t("moveDown", { number: index + 1 })} disabled={index === questions.length - 1} onClick={() => move(index, 1)}>
                   <ArrowDownIcon />
                 </Button>
-                <Button type="button" size="icon" variant="ghost" aria-label={`Retirer la question ${index + 1}`} onClick={() => change(questions.filter((_, at) => at !== index))}>
+                <Button type="button" size="icon" variant="ghost" aria-label={t("removeQuestion", { number: index + 1 })} onClick={() => change(questions.filter((_, at) => at !== index))}>
                   <Trash2Icon />
                 </Button>
               </div>
             </div>
             <Input
-              aria-label={`Intitulé de la question ${index + 1}`}
-              placeholder="Intitulé de la question"
+              aria-label={t("questionLabelAria", { number: index + 1 })}
+              placeholder={t("questionLabel")}
               value={question.label}
               maxLength={500}
               onChange={(event) => patch(index, { label: event.target.value })}
             />
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor={`q-type-${question.id}`}>Type</Label>
+                <Label htmlFor={`q-type-${question.id}`}>{t("type")}</Label>
                 <select
                   id={`q-type-${question.id}`}
                   className="border-input bg-background h-9 rounded-md border px-2 text-sm"
                   value={question.type}
                   onChange={(event) => {
                     const type = event.target.value as Question["type"];
-                    patch(index, { type, options: type === "TEXT" ? [] : newQuestion().options });
+                    patch(index, { type, options: type === "TEXT" ? [] : defaultQuestion().options });
                   }}
                 >
-                  <option value="CHOICE">Choix (noté)</option>
-                  <option value="TEXT">Texte libre (non noté)</option>
+                  <option value="CHOICE">{t("typeChoice")}</option>
+                  <option value="TEXT">{t("typeText")}</option>
                 </select>
               </div>
               {question.type === "CHOICE" && (
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor={`q-weight-${question.id}`}>Poids dans le résultat</Label>
+                  <Label htmlFor={`q-weight-${question.id}`}>{t("weight")}</Label>
                   <Input
                     id={`q-weight-${question.id}`}
                     type="number"
@@ -143,12 +144,12 @@ function DraftEditor({ draft, onDone }: { draft: QuestionnaireVersion; onDone: (
                   checked={question.required}
                   onCheckedChange={(checked) => patch(index, { required: Boolean(checked) })}
                 />
-                Obligatoire
+                {t("required")}
               </Label>
             </div>
             {question.type === "CHOICE" && (
               <div className="flex flex-col gap-2">
-                <span className="text-muted-foreground text-xs">Réponses proposées et points (0 à 100)</span>
+                <span className="text-muted-foreground text-xs">{t("options")}</span>
                 {question.options.map((option, optionIndex) => {
                   const setOption = (value: Partial<typeof option>) =>
                     patch(index, {
@@ -157,13 +158,13 @@ function DraftEditor({ draft, onDone }: { draft: QuestionnaireVersion; onDone: (
                   return (
                     <div key={option.id} className="flex items-center gap-2">
                       <Input
-                        aria-label={`Réponse ${optionIndex + 1} de la question ${index + 1}`}
+                        aria-label={t("optionAria", { option: optionIndex + 1, number: index + 1 })}
                         value={option.label}
                         maxLength={200}
                         onChange={(event) => setOption({ label: event.target.value })}
                       />
                       <Input
-                        aria-label={`Points de la réponse ${optionIndex + 1} de la question ${index + 1}`}
+                        aria-label={t("optionPointsAria", { option: optionIndex + 1, number: index + 1 })}
                         type="number"
                         min={0}
                         max={100}
@@ -175,7 +176,7 @@ function DraftEditor({ draft, onDone }: { draft: QuestionnaireVersion; onDone: (
                         type="button"
                         size="icon"
                         variant="ghost"
-                        aria-label={`Retirer la réponse ${optionIndex + 1} de la question ${index + 1}`}
+                        aria-label={t("removeOptionAria", { option: optionIndex + 1, number: index + 1 })}
                         disabled={question.options.length <= 2}
                         onClick={() => patch(index, { options: question.options.filter((_, at) => at !== optionIndex) })}
                       >
@@ -192,7 +193,7 @@ function DraftEditor({ draft, onDone }: { draft: QuestionnaireVersion; onDone: (
                     onClick={() => patch(index, { options: [...question.options, { id: newId(), label: "", points: 0 }] })}
                   >
                     <PlusIcon />
-                    Ajouter une réponse
+                    {t("addOption")}
                   </Button>
                 </div>
               </div>
@@ -200,9 +201,9 @@ function DraftEditor({ draft, onDone }: { draft: QuestionnaireVersion; onDone: (
           </div>
         ))}
         <div>
-          <Button type="button" variant="outline" onClick={() => change([...questions, newQuestion()])}>
+          <Button type="button" variant="outline" onClick={() => change([...questions, defaultQuestion()])}>
             <PlusIcon />
-            Ajouter une question
+            {t("addQuestion")}
           </Button>
         </div>
         <div className="flex flex-wrap gap-2 border-t pt-4">
@@ -212,15 +213,15 @@ function DraftEditor({ draft, onDone }: { draft: QuestionnaireVersion; onDone: (
               void persist()
                 .then(() => {
                   setDirty(false);
-                  toast.success("Brouillon enregistré.");
+                  toast.success(t("draftSaved"));
                 })
                 .catch(() => undefined)
             }
           >
-            Enregistrer le brouillon
+            {t("saveDraft")}
           </Button>
           <Button variant="outline" disabled={!questions.length} onClick={() => setConfirming(true)}>
-            Publier
+            {t("publish")}
           </Button>
           <Button
             variant="ghost"
@@ -230,12 +231,12 @@ function DraftEditor({ draft, onDone }: { draft: QuestionnaireVersion; onDone: (
                 .mutateAsync({ id: draft.id })
                 .then(async () => {
                   await onDone();
-                  toast.success("Brouillon supprimé.");
+                  toast.success(t("draftDeleted"));
                 })
                 .catch(() => undefined)
             }
           >
-            Abandonner ce brouillon
+            {t("discardDraft")}
           </Button>
         </div>
       </CardContent>
@@ -243,14 +244,13 @@ function DraftEditor({ draft, onDone }: { draft: QuestionnaireVersion; onDone: (
         <AlertDialog open onOpenChange={(open) => !open && setConfirming(false)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Publier la version {draft.version} ?</AlertDialogTitle>
+              <AlertDialogTitle>{t("publishTitle", { version: draft.version })}</AlertDialogTitle>
               <AlertDialogDescription>
-                Elle remplace la version en vigueur et ne pourra plus être modifiée. Tous les fournisseurs
-                actifs seront invités à y répondre.
+                {t("publishDescription")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={publish.isPending}>Annuler</AlertDialogCancel>
+              <AlertDialogCancel disabled={publish.isPending}>{t("cancel")}</AlertDialogCancel>
               <AlertDialogAction
                 disabled={publish.isPending}
                 onClick={async (event) => {
@@ -259,13 +259,13 @@ function DraftEditor({ draft, onDone }: { draft: QuestionnaireVersion; onDone: (
                     await persist();
                     await publish.mutateAsync({ id: draft.id });
                     await onDone();
-                    toast.success("Version publiée.");
+                    toast.success(t("published"));
                   } catch {
                     setConfirming(false);
                   }
                 }}
               >
-                Publier
+                {t("publish")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -276,15 +276,16 @@ function DraftEditor({ draft, onDone }: { draft: QuestionnaireVersion; onDone: (
 }
 
 function VersionResponses({ version }: { version: QuestionnaireVersion }) {
+  const t = useTranslations("adminSystem.vendabilityQuestionnaire");
   const responses = trpc.vendability.responses.useQuery({ id: version.id, page: 1, limit: 50 });
   const answerText = (question: Question, answer?: string) =>
     (question.type === "TEXT" ? answer : question.options.find((option) => option.id === answer)?.label) ?? "-";
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Réponses à la version {version.version}</CardTitle>
+        <CardTitle>{t("responsesTitle", { version: version.version })}</CardTitle>
         <CardDescription>
-          {responses.data ? `${responses.data.total} fournisseur(s) ont répondu.` : "Chargement..."}
+          {responses.data ? t("responsesCount", { count: responses.data.total }) : t("loading")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -292,8 +293,8 @@ function VersionResponses({ version }: { version: QuestionnaireVersion }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Boutique</TableHead>
-              <TableHead className="text-end">Résultat</TableHead>
+              <TableHead>{t("shop")}</TableHead>
+              <TableHead className="text-end">{t("score")}</TableHead>
               {version.questions.map((question) => (
                 <TableHead key={question.id} className="max-w-48 whitespace-normal">
                   {question.label}
@@ -322,6 +323,7 @@ function VersionResponses({ version }: { version: QuestionnaireVersion }) {
 
 /** Versions of the questionnaire: prepare, publish, read the answers. */
 export function QuestionnaireEditor() {
+  const t = useTranslations("adminSystem.vendabilityQuestionnaire");
   const utils = trpc.useUtils();
   const versions = trpc.vendability.versions.useQuery();
   const create = trpc.vendability.createDraft.useMutation({
@@ -331,7 +333,7 @@ export function QuestionnaireEditor() {
   const [selected, setSelected] = useState<string | null>(null);
 
   if (versions.error) return <p className="text-destructive text-sm">{versions.error.message}</p>;
-  if (!versions.data) return <p className="text-muted-foreground text-sm">Chargement...</p>;
+  if (!versions.data) return <p className="text-muted-foreground text-sm">{t("loading")}</p>;
   const draft = versions.data.find((version) => version.status === "DRAFT");
   const shown =
     versions.data.find((version) => version.id === selected && version.status !== "DRAFT") ??
@@ -349,14 +351,14 @@ export function QuestionnaireEditor() {
         <div>
           <Button disabled={create.isPending} onClick={() => create.mutate()}>
             <PlusIcon />
-            Préparer une nouvelle version
+            {t("newVersion")}
           </Button>
         </div>
       )}
       {versions.data.some((version) => version.status !== "DRAFT") && (
         <Card>
           <CardHeader>
-            <CardTitle>Versions</CardTitle>
+            <CardTitle>{t("versions")}</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col divide-y">
             {versions.data
@@ -364,15 +366,19 @@ export function QuestionnaireEditor() {
               .map((version) => (
                 <div key={version.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
                   <span className="text-sm">
-                    <span className="font-medium">Version {version.version}</span> : {version.title},{" "}
-                    {version.questions.length} question(s)
+                    {t.rich("versionLine", {
+                      version: version.version,
+                      title: version.title,
+                      count: version.questions.length,
+                      b: (chunks) => <span className="font-medium">{chunks}</span>,
+                    })}
                   </span>
                   <span className="flex items-center gap-2">
                     <Badge variant={version.status === "PUBLISHED" ? "default" : "secondary"}>
-                      {VERSION_STATUS_LABELS[version.status]}
+                      {t(`status.${version.status}`)}
                     </Badge>
                     <Button size="sm" variant="ghost" onClick={() => setSelected(version.id)}>
-                      Voir les réponses
+                      {t("viewResponses")}
                     </Button>
                   </span>
                 </div>

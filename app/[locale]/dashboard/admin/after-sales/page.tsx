@@ -6,18 +6,21 @@ import { Link } from "@/i18n/navigation";
 import { type CaseStatus, CASE_STATUS_LABELS } from "@/lib/after-sales";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/server/trpc/client";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 /** Cases waiting for a decision first: escalated, then accepted. */
 export default function AdminAfterSalesPage() {
   const [status, setStatus] = useState<CaseStatus>("ESCALATED");
   const cases = trpc.afterSales.all.useQuery({ status });
+  const t = useTranslations("adminSystem");
+  const tStatus = useTranslations("afterSales");
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-6">
       <AdminPageHeader
-        title="Retours et litiges"
-        description="Tranchez les dossiers refusés par le vendeur ou restés sans réponse, et appliquez ceux qu’il a acceptés."
+        title={t("pages.afterSales.title")}
+        description={t("pages.afterSales.description")}
       />
       <div className="flex flex-wrap gap-2">
         {(Object.keys(CASE_STATUS_LABELS) as CaseStatus[]).map((key) => (
@@ -30,13 +33,13 @@ export default function AdminAfterSalesPage() {
               status === key && "bg-primary text-primary-foreground",
             )}
           >
-            {CASE_STATUS_LABELS[key]}
+            {tStatus(`status.${key}`)}
           </button>
         ))}
       </div>
       {!cases.data?.items.length && (
         <p className="text-muted-foreground text-sm">
-          {cases.isLoading ? "Chargement…" : "Aucun dossier."}
+          {cases.isLoading ? t("pages.afterSales.loading") : t("pages.afterSales.empty")}
         </p>
       )}
       {cases.data?.items.map((item) => (
@@ -45,8 +48,14 @@ export default function AdminAfterSalesPage() {
             href={`/dashboard/admin/orders/${item.orderId}`}
             className="text-primary text-sm hover:underline"
           >
-            Commande #{item.orderId.slice(0, 8).toUpperCase()}
-            {item.business ? ` · ${item.business.name}` : ""}
+            {item.business
+              ? t("pages.afterSales.orderWithShop", {
+                  reference: item.orderId.slice(0, 8).toUpperCase(),
+                  shop: item.business.name,
+                })
+              : t("pages.afterSales.order", {
+                  reference: item.orderId.slice(0, 8).toUpperCase(),
+                })}
           </Link>
           <CaseCard key={item.id + item.status} item={item} />
         </div>

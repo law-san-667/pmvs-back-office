@@ -27,33 +27,31 @@ import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { intlLocale } from "@/i18n/config";
 import {
   AUDIENCES,
-  AUDIENCE_LABELS,
   type Audience,
-  CAMPAIGN_STATUS_LABELS,
-  CONSENT_EVENT_LABELS,
-  CONSENT_SOURCE_LABELS,
   type Campaign,
   type CampaignInput,
   LANGUAGES,
-  LANGUAGE_LABELS,
   type Language,
-  SUBSCRIBER_STATUS_LABELS,
   type Subscriber,
   type SubscriberStatus,
 } from "@/lib/marketing";
 import { trpc } from "@/server/trpc/client";
+import { useLocale, useTranslations } from "next-intl";
 import { useId, useState } from "react";
 import { toast } from "sonner";
 
 const SELECT_CLASS = "border-input bg-background h-9 w-full rounded-md border px-2 text-sm";
 const fail = { onError: (error: { message: string }) => toast.error(error.message) };
-const formatDate = (value: string | null) =>
+const formatDate = (value: string | null, locale: string) =>
   value
-    ? new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value))
+    ? new Intl.DateTimeFormat(intlLocale(locale), { dateStyle: "medium", timeStyle: "short" }).format(new Date(value))
     : "—";
-const plural = (count: number, word: string) => `${count} ${word}${count > 1 ? "s" : ""}`;
+const CONSENT_SOURCES = ["WEB", "MOBILE", "ACCOUNT", "EMAIL_LINK", "ONE_CLICK", "ADMIN"] as const;
+const isConsentSource = (source: string): source is (typeof CONSENT_SOURCES)[number] =>
+  (CONSENT_SOURCES as readonly string[]).includes(source);
 
 const EMPTY: CampaignInput = {
   subject: "",
@@ -67,14 +65,17 @@ const EMPTY: CampaignInput = {
 const statusVariant = (status: Campaign["status"]) =>
   status === "SENT" ? "default" : status === "SENDING" ? "secondary" : status === "CANCELLED" ? "destructive" : "outline";
 
-const audienceSummary = (segment: Campaign["segment"]) =>
-  [
-    AUDIENCE_LABELS[segment.audience],
-    segment.countryCodes.length ? segment.countryCodes.join(", ") : null,
-    segment.languages.length ? segment.languages.map((l) => LANGUAGE_LABELS[l]).join(", ") : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+const useAudienceSummary = () => {
+  const t = useTranslations("adminSystem");
+  return (segment: Campaign["segment"]) =>
+    [
+      t(`marketing.audience.${segment.audience}`),
+      segment.countryCodes.length ? segment.countryCodes.join(", ") : null,
+      segment.languages.length ? segment.languages.map((l) => t(`marketing.language.${l}`)).join(", ") : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+};
 
 // ─── Campaign form ──────────────────────────────────────────────────────────
 
@@ -85,6 +86,9 @@ function CampaignForm({
   campaign: Campaign | null;
   onDone: (id: string | null) => void;
 }) {
+  const t = useTranslations("adminSystem");
+  const locale = useLocale();
+  const audienceSummary = useAudienceSummary();
   const id = useId();
   const utils = trpc.useUtils();
   const [form, setForm] = useState<CampaignInput>(
@@ -126,7 +130,7 @@ function CampaignForm({
     ...fail,
     onSuccess: async (saved) => {
       await refresh();
-      toast.success("Brouillon enregistré.");
+      toast.success(t("marketing.toast.draftSaved"));
       onDone(saved.id);
     },
   });
@@ -134,32 +138,32 @@ function CampaignForm({
     ...fail,
     onSuccess: async () => {
       await refresh();
-      toast.success("Brouillon enregistré.");
+      toast.success(t("marketing.toast.draftSaved"));
     },
   });
   const test = trpc.marketing.testCampaign.useMutation({
     ...fail,
-    onSuccess: (result) => toast.success(`E-mail de test envoyé à ${result.to}.`),
+    onSuccess: (result) => toast.success(t("marketing.toast.testSent", { to: result.to })),
   });
   const send = trpc.marketing.sendCampaign.useMutation({
     ...fail,
     onSuccess: async () => {
       await refresh();
-      toast.success("Envoi lancé.");
+      toast.success(t("marketing.toast.sendStarted"));
     },
   });
   const cancel = trpc.marketing.cancelCampaign.useMutation({
     ...fail,
     onSuccess: async () => {
       await refresh();
-      toast.success("Envoi arrêté.");
+      toast.success(t("marketing.toast.sendStopped"));
     },
   });
   const remove = trpc.marketing.deleteCampaign.useMutation({
     ...fail,
     onSuccess: async () => {
       await refresh();
-      toast.success("Brouillon supprimé.");
+      toast.success(t("marketing.toast.draftDeleted"));
       onDone(null);
     },
   });
@@ -193,11 +197,15 @@ function CampaignForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{campaign ? campaign.subject : "Nouvelle campagne"}</CardTitle>
+        <CardTitle>{campaign ? campaign.subject : t("marketing.newCampaign")}</CardTitle>
         <CardDescription>
           {campaign
-            ? `${CAMPAIGN_STATUS_LABELS[campaign.status]} · créée par ${campaign.createdByName ?? "—"} le ${formatDate(campaign.createdAt)}`
-            : "Rédigez l'e-mail, choisissez le public, envoyez-vous un test, puis lancez l'envoi."}
+            ? t("marketing.form.createdBy", {
+                status: t(`marketing.campaignStatus.${campaign.status}`),
+                name: campaign.createdByName ?? "—",
+                date: formatDate(campaign.createdAt, locale),
+              })
+            : t("marketing.form.intro")}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
@@ -205,20 +213,24 @@ function CampaignForm({
           <div className="flex flex-col gap-2 rounded-lg border p-4">
             <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
               <span className="font-medium">
-                {plural(r.sent, "envoyé")} sur {r.total}
+                {t("marketing.progress.sentOf", { sent: r.sent, total: r.total })}
               </span>
               <span className="text-muted-foreground text-xs">
-                {r.failed > 0 && `${plural(r.failed, "échec")} · `}
-                {r.skipped > 0 && `${r.skipped} non envoyé(s) (désinscrits ou envoi arrêté) · `}
-                lancé par {campaign.sentByName ?? "—"} le {formatDate(campaign.sendStartedAt)}
-                {campaign.sendFinishedAt && `, terminé le ${formatDate(campaign.sendFinishedAt)}`}
+                {r.failed > 0 && t("marketing.progress.failed", { count: r.failed })}
+                {r.skipped > 0 && t("marketing.progress.skipped", { count: r.skipped })}
+                {t("marketing.progress.startedBy", {
+                  name: campaign.sentByName ?? "—",
+                  date: formatDate(campaign.sendStartedAt, locale),
+                })}
+                {campaign.sendFinishedAt &&
+                  t("marketing.progress.finished", { date: formatDate(campaign.sendFinishedAt, locale) })}
               </span>
             </div>
-            <Progress value={r.total ? (done / r.total) * 100 : 0} aria-label="Avancement de l'envoi" />
+            <Progress value={r.total ? (done / r.total) * 100 : 0} aria-label={t("marketing.progress.label")} />
             {campaign.status === "SENDING" && (
               <div>
                 <Button variant="outline" size="sm" disabled={cancel.isPending} onClick={() => cancel.mutate({ id: campaign.id })}>
-                  Arrêter l&apos;envoi
+                  {t("marketing.progress.stop")}
                 </Button>
               </div>
             )}
@@ -228,22 +240,22 @@ function CampaignForm({
         <fieldset disabled={!editable} className="flex flex-col gap-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor={`${id}-subject`}>Objet</Label>
+              <Label htmlFor={`${id}-subject`}>{t("marketing.form.subject")}</Label>
               <Input id={`${id}-subject`} value={form.subject} maxLength={150} onChange={(e) => set("subject", e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor={`${id}-preheader`}>Texte d&apos;aperçu (facultatif)</Label>
+              <Label htmlFor={`${id}-preheader`}>{t("marketing.form.preheader")}</Label>
               <Input
                 id={`${id}-preheader`}
                 value={form.preheader ?? ""}
                 maxLength={150}
-                placeholder="Affiché après l'objet dans la boîte de réception"
+                placeholder={t("marketing.form.preheaderPlaceholder")}
                 onChange={(e) => set("preheader", e.target.value)}
               />
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor={`${id}-body`}>Message</Label>
+            <Label htmlFor={`${id}-body`}>{t("marketing.form.body")}</Label>
             <Textarea
               id={`${id}-body`}
               value={form.body}
@@ -252,39 +264,37 @@ function CampaignForm({
               onChange={(e) => set("body", e.target.value)}
             />
             <p className="text-muted-foreground text-xs">
-              Une ligne vide entre deux paragraphes, « ## » au début d&apos;une ligne pour un titre, « - » pour une
-              liste. Les adresses https:// deviennent des liens. Le motif de réception, le lien de désinscription et
-              l&apos;adresse de la société sont ajoutés automatiquement.
+              {t("marketing.form.bodyHint")}
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor={`${id}-cta-label`}>Texte du bouton (facultatif)</Label>
+              <Label htmlFor={`${id}-cta-label`}>{t("marketing.form.ctaLabel")}</Label>
               <Input
                 id={`${id}-cta-label`}
                 value={form.ctaLabel ?? ""}
                 maxLength={60}
-                placeholder="Voir les offres"
+                placeholder={t("marketing.form.ctaLabelPlaceholder")}
                 onChange={(e) => set("ctaLabel", e.target.value)}
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor={`${id}-cta-url`}>Adresse du bouton</Label>
+              <Label htmlFor={`${id}-cta-url`}>{t("marketing.form.ctaUrl")}</Label>
               <Input
                 id={`${id}-cta-url`}
                 value={form.ctaUrl ?? ""}
                 maxLength={500}
-                placeholder="/listings ou https://…"
+                placeholder={t("marketing.form.ctaUrlPlaceholder")}
                 onChange={(e) => set("ctaUrl", e.target.value)}
               />
             </div>
           </div>
 
           <div className="flex flex-col gap-4 rounded-lg border p-4">
-            <p className="text-sm font-medium">Public</p>
+            <p className="text-sm font-medium">{t("marketing.form.audience")}</p>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor={`${id}-audience`}>Abonnés</Label>
+                <Label htmlFor={`${id}-audience`}>{t("marketing.form.subscribers")}</Label>
                 <select
                   id={`${id}-audience`}
                   className={SELECT_CLASS}
@@ -293,23 +303,23 @@ function CampaignForm({
                 >
                   {AUDIENCES.map((audience) => (
                     <option key={audience} value={audience}>
-                      {AUDIENCE_LABELS[audience]}
+                      {t(`marketing.audience.${audience}`)}
                     </option>
                   ))}
                 </select>
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor={`${id}-countries`}>Pays (codes, facultatif)</Label>
+                <Label htmlFor={`${id}-countries`}>{t("marketing.form.countries")}</Label>
                 <Input
                   id={`${id}-countries`}
                   value={countries}
-                  placeholder="SN, CI, ML — vide : tous les pays"
+                  placeholder={t("marketing.form.countriesPlaceholder")}
                   onChange={(e) => setCountries(e.target.value)}
                 />
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <span className="text-sm">Langue de l&apos;abonné (aucune cochée : toutes)</span>
+              <span className="text-sm">{t("marketing.form.languages")}</span>
               <div className="flex flex-wrap gap-x-5 gap-y-2">
                 {LANGUAGES.map((language) => (
                   <label key={language} className="flex items-center gap-2 text-sm">
@@ -317,7 +327,7 @@ function CampaignForm({
                       checked={form.segment.languages.includes(language)}
                       onCheckedChange={(checked) => toggleLanguage(language, Boolean(checked))}
                     />
-                    {LANGUAGE_LABELS[language]}
+                    {t(`marketing.language.${language}`)}
                   </label>
                 ))}
               </div>
@@ -325,8 +335,8 @@ function CampaignForm({
             {editable && (
               <p role="status" className="text-sm">
                 {count.data
-                  ? `${plural(count.data.count, "abonné")} inscrit${count.data.count > 1 ? "s" : ""} dans ce public.`
-                  : "Calcul du public…"}
+                  ? t("marketing.form.audienceCount", { count: count.data.count })
+                  : t("marketing.form.audienceCounting")}
               </p>
             )}
           </div>
@@ -335,25 +345,25 @@ function CampaignForm({
         {editable && (
           <div className="flex flex-wrap gap-2">
             <Button onClick={() => void save()} disabled={saving}>
-              {saving ? "Enregistrement…" : "Enregistrer le brouillon"}
+              {saving ? t("marketing.form.saving") : t("marketing.form.saveDraft")}
             </Button>
             <Button
               variant="outline"
               disabled={!campaign || saving || test.isPending}
               onClick={() => void saveThen(() => campaign && test.mutate({ id: campaign.id }))}
             >
-              M&apos;envoyer un test
+              {t("marketing.form.sendTest")}
             </Button>
             <Button
               variant="outline"
               disabled={!campaign || saving || send.isPending || !count.data?.count}
               onClick={() => setConfirmSend(true)}
             >
-              Envoyer…
+              {t("marketing.form.sendEllipsis")}
             </Button>
             {campaign && (
               <Button variant="ghost" className="text-destructive" onClick={() => setConfirmDelete(true)}>
-                Supprimer
+                {t("marketing.form.delete")}
               </Button>
             )}
           </div>
@@ -363,19 +373,21 @@ function CampaignForm({
       <AlertDialog open={confirmSend} onOpenChange={setConfirmSend}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Envoyer cette campagne ?</AlertDialogTitle>
+            <AlertDialogTitle>{t("marketing.confirmSend.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              « {form.subject} » partira vers {plural(count.data?.count ?? 0, "abonné")} ({audienceSummary(segment)}).
-              Le brouillon est enregistré avant l&apos;envoi. Une fois lancé, l&apos;envoi peut être arrêté mais pas
-              annulé pour les e-mails déjà partis.
+              {t("marketing.confirmSend.description", {
+                subject: form.subject,
+                count: count.data?.count ?? 0,
+                audience: audienceSummary(segment),
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>{t("marketing.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => void saveThen(() => campaign && send.mutate({ id: campaign.id }))}
             >
-              Envoyer
+              {t("marketing.confirmSend.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -384,12 +396,12 @@ function CampaignForm({
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer ce brouillon ?</AlertDialogTitle>
-            <AlertDialogDescription>Il n&apos;a été envoyé à personne ; il sera définitivement supprimé.</AlertDialogDescription>
+            <AlertDialogTitle>{t("marketing.confirmDelete.title")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("marketing.confirmDelete.description")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={() => campaign && remove.mutate({ id: campaign.id })}>Supprimer</AlertDialogAction>
+            <AlertDialogCancel>{t("marketing.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => campaign && remove.mutate({ id: campaign.id })}>{t("marketing.form.delete")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -400,6 +412,9 @@ function CampaignForm({
 // ─── Campaigns ──────────────────────────────────────────────────────────────
 
 function Campaigns() {
+  const t = useTranslations("adminSystem");
+  const locale = useLocale();
+  const audienceSummary = useAudienceSummary();
   const [selected, setSelected] = useState<string | "new" | null>(null);
   const campaigns = trpc.marketing.campaigns.useQuery(undefined, {
     // Follow a sending while it runs.
@@ -411,9 +426,9 @@ function Campaigns() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-muted-foreground text-sm">
-          Envoyées uniquement aux personnes ayant confirmé leur inscription.
+          {t("marketing.campaigns.intro")}
         </p>
-        <Button onClick={() => setSelected("new")}>Nouvelle campagne</Button>
+        <Button onClick={() => setSelected("new")}>{t("marketing.newCampaign")}</Button>
       </div>
       {campaigns.error && <p className="text-destructive text-sm">{campaigns.error.message}</p>}
       {campaigns.data && (
@@ -422,11 +437,11 @@ function Campaigns() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Objet</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Public</TableHead>
-                  <TableHead className="text-end">Envoyés</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>{t("marketing.campaigns.subject")}</TableHead>
+                  <TableHead>{t("marketing.campaigns.status")}</TableHead>
+                  <TableHead>{t("marketing.campaigns.audience")}</TableHead>
+                  <TableHead className="text-end">{t("marketing.campaigns.sent")}</TableHead>
+                  <TableHead>{t("marketing.campaigns.date")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -443,7 +458,7 @@ function Campaigns() {
                       </button>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={statusVariant(campaign.status)}>{CAMPAIGN_STATUS_LABELS[campaign.status]}</Badge>
+                      <Badge variant={statusVariant(campaign.status)}>{t(`marketing.campaignStatus.${campaign.status}`)}</Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground max-w-64 truncate text-xs">
                       {audienceSummary(campaign.segment)}
@@ -452,14 +467,14 @@ function Campaigns() {
                       {campaign.status === "DRAFT" ? "—" : `${campaign.recipients.sent} / ${campaign.recipients.total}`}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
-                      {formatDate(campaign.sendStartedAt ?? campaign.createdAt)}
+                      {formatDate(campaign.sendStartedAt ?? campaign.createdAt, locale)}
                     </TableCell>
                   </TableRow>
                 ))}
                 {!campaigns.data.length && (
                   <TableRow>
                     <TableCell colSpan={5} className="text-muted-foreground text-center">
-                      Aucune campagne pour l&apos;instant.
+                      {t("marketing.campaigns.empty")}
                     </TableCell>
                   </TableRow>
                 )}
@@ -477,6 +492,8 @@ function Campaigns() {
 // ─── Subscribers ────────────────────────────────────────────────────────────
 
 function ConsentDialog({ subscriber, onClose }: { subscriber: Subscriber | null; onClose: () => void }) {
+  const t = useTranslations("adminSystem");
+  const locale = useLocale();
   const utils = trpc.useUtils();
   const [asking, setAsking] = useState(false);
   const events = trpc.marketing.consent.useQuery({ id: subscriber?.id ?? "" }, { enabled: Boolean(subscriber) });
@@ -486,7 +503,7 @@ function ConsentDialog({ subscriber, onClose }: { subscriber: Subscriber | null;
       utils.marketing.consent.setData({ id: subscriber!.id }, saved);
       await utils.marketing.subscribers.invalidate();
       setAsking(false);
-      toast.success("Adresse désinscrite.");
+      toast.success(t("marketing.consent.unsubscribed"));
     },
   });
   const unsubscribed = events.data?.at(-1)?.event === "UNSUBSCRIBED" || subscriber?.status === "UNSUBSCRIBED";
@@ -497,23 +514,29 @@ function ConsentDialog({ subscriber, onClose }: { subscriber: Subscriber | null;
         <DialogHeader>
           <DialogTitle className="break-all">{subscriber?.email}</DialogTitle>
           <DialogDescription>
-            Preuve du consentement : chaque demande, confirmation et désinscription, avec le texte accepté.
+            {t("marketing.consent.description")}
           </DialogDescription>
         </DialogHeader>
         <ol className="flex flex-col gap-3">
           {events.data?.map((event) => (
             <li key={event.id} className="rounded-lg border p-3 text-sm">
               <p className="font-medium">
-                {CONSENT_EVENT_LABELS[event.event]} · {formatDate(event.createdAt)}
+                {t(`marketing.consentEvent.${event.event}`)} · {formatDate(event.createdAt, locale)}
               </p>
               <p className="text-muted-foreground text-xs">
-                Par {CONSENT_SOURCE_LABELS[event.source] ?? event.source}
+                {t("marketing.consent.by", {
+                  source: isConsentSource(event.source) ? t(`marketing.consentSource.${event.source}`) : event.source,
+                })}
                 {event.actorName && ` (${event.actorName})`}
-                {event.ipAddress && ` · adresse IP ${event.ipAddress}`}
+                {event.ipAddress && t("marketing.consent.ip", { ip: event.ipAddress })}
               </p>
-              {event.consentText && <p className="mt-2 text-xs italic">« {event.consentText} »</p>}
+              {event.consentText && (
+                <p className="mt-2 text-xs italic">{t("marketing.consent.quote", { text: event.consentText })}</p>
+              )}
               {event.userAgent && (
-                <p className="text-muted-foreground mt-1 text-xs break-all">Navigateur : {event.userAgent}</p>
+                <p className="text-muted-foreground mt-1 text-xs break-all">
+                  {t("marketing.consent.browser", { userAgent: event.userAgent })}
+                </p>
               )}
             </li>
           ))}
@@ -523,22 +546,21 @@ function ConsentDialog({ subscriber, onClose }: { subscriber: Subscriber | null;
             {asking ? (
               <>
                 <p className="text-sm">
-                  Désinscrire cette adresse à la demande de la personne ? Elle devra se réinscrire elle-même pour
-                  recevoir de nouveau les campagnes.
+                  {t("marketing.consent.confirm")}
                 </p>
                 <div className="flex gap-2">
                   <Button variant="destructive" disabled={unsubscribe.isPending} onClick={() => unsubscribe.mutate({ id: subscriber.id })}>
-                    Désinscrire
+                    {t("marketing.consent.unsubscribe")}
                   </Button>
                   <Button variant="ghost" onClick={() => setAsking(false)}>
-                    Annuler
+                    {t("marketing.cancel")}
                   </Button>
                 </div>
               </>
             ) : (
               <div>
                 <Button variant="outline" onClick={() => setAsking(true)}>
-                  Désinscrire à sa demande…
+                  {t("marketing.consent.unsubscribeOnRequest")}
                 </Button>
               </div>
             )}
@@ -550,6 +572,8 @@ function ConsentDialog({ subscriber, onClose }: { subscriber: Subscriber | null;
 }
 
 function Subscribers() {
+  const t = useTranslations("adminSystem");
+  const locale = useLocale();
   const [status, setStatus] = useState<SubscriberStatus | "">("SUBSCRIBED");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -564,7 +588,7 @@ function Subscribers() {
           {(["SUBSCRIBED", "PENDING", "UNSUBSCRIBED"] as const).map((key) => (
             <Card key={key} size="sm">
               <CardHeader>
-                <CardDescription>{SUBSCRIBER_STATUS_LABELS[key]}</CardDescription>
+                <CardDescription>{t(`marketing.subscriberStatus.${key}`)}</CardDescription>
                 <p className="text-2xl font-semibold tabular-nums">{data.counts[key]}</p>
               </CardHeader>
             </Card>
@@ -573,8 +597,8 @@ function Subscribers() {
       )}
       <div className="flex flex-col gap-2 sm:flex-row">
         <Input
-          aria-label="Rechercher une adresse"
-          placeholder="Rechercher une adresse…"
+          aria-label={t("marketing.subscribers.searchLabel")}
+          placeholder={t("marketing.subscribers.searchPlaceholder")}
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
@@ -583,7 +607,7 @@ function Subscribers() {
           className="sm:max-w-xs"
         />
         <select
-          aria-label="Statut"
+          aria-label={t("marketing.subscribers.status")}
           className={`${SELECT_CLASS} sm:w-60`}
           value={status}
           onChange={(e) => {
@@ -591,10 +615,10 @@ function Subscribers() {
             setPage(1);
           }}
         >
-          <option value="">Tous les statuts</option>
+          <option value="">{t("marketing.subscribers.allStatuses")}</option>
           {(["SUBSCRIBED", "PENDING", "UNSUBSCRIBED"] as const).map((key) => (
             <option key={key} value={key}>
-              {SUBSCRIBER_STATUS_LABELS[key]}
+              {t(`marketing.subscriberStatus.${key}`)}
             </option>
           ))}
         </select>
@@ -606,12 +630,12 @@ function Subscribers() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Adresse</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Langue</TableHead>
-                  <TableHead>Pays</TableHead>
-                  <TableHead>Compte</TableHead>
-                  <TableHead>Inscrit le</TableHead>
+                  <TableHead>{t("marketing.subscribers.email")}</TableHead>
+                  <TableHead>{t("marketing.subscribers.status")}</TableHead>
+                  <TableHead>{t("marketing.subscribers.language")}</TableHead>
+                  <TableHead>{t("marketing.subscribers.country")}</TableHead>
+                  <TableHead>{t("marketing.subscribers.account")}</TableHead>
+                  <TableHead>{t("marketing.subscribers.subscribedAt")}</TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
@@ -621,16 +645,16 @@ function Subscribers() {
                     <TableCell className="max-w-64 truncate font-medium" title={item.email}>
                       {item.email}
                     </TableCell>
-                    <TableCell className="text-xs">{SUBSCRIBER_STATUS_LABELS[item.status]}</TableCell>
+                    <TableCell className="text-xs">{t(`marketing.subscriberStatus.${item.status}`)}</TableCell>
                     <TableCell className="text-xs uppercase">{item.language}</TableCell>
                     <TableCell className="text-xs">{item.countryCode ?? "—"}</TableCell>
-                    <TableCell className="text-xs">{item.hasAccount ? "Oui" : "Non"}</TableCell>
+                    <TableCell className="text-xs">{item.hasAccount ? t("marketing.subscribers.yes") : t("marketing.subscribers.no")}</TableCell>
                     <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
-                      {formatDate(item.subscribedAt)}
+                      {formatDate(item.subscribedAt, locale)}
                     </TableCell>
                     <TableCell className="text-end">
                       <Button variant="ghost" size="sm" onClick={() => setOpen(item)}>
-                        Consentement
+                        {t("marketing.subscribers.consent")}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -638,7 +662,7 @@ function Subscribers() {
                 {!data.items.length && (
                   <TableRow>
                     <TableCell colSpan={7} className="text-muted-foreground text-center">
-                      Aucune adresse.
+                      {t("marketing.subscribers.empty")}
                     </TableCell>
                   </TableRow>
                 )}
@@ -650,13 +674,13 @@ function Subscribers() {
       {data && data.totalPages > 1 && (
         <div className="flex items-center justify-end gap-2 text-sm">
           <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
-            Précédent
+            {t("marketing.subscribers.previous")}
           </Button>
           <span className="tabular-nums">
             {page} / {data.totalPages}
           </span>
           <Button variant="outline" size="sm" disabled={page >= data.totalPages} onClick={() => setPage(page + 1)}>
-            Suivant
+            {t("marketing.subscribers.next")}
           </Button>
         </div>
       )}
@@ -666,11 +690,12 @@ function Subscribers() {
 }
 
 export function MarketingAdmin() {
+  const t = useTranslations("adminSystem");
   return (
     <Tabs defaultValue="campaigns">
       <TabsList>
-        <TabsTrigger value="campaigns">Campagnes</TabsTrigger>
-        <TabsTrigger value="subscribers">Abonnés</TabsTrigger>
+        <TabsTrigger value="campaigns">{t("marketing.tabs.campaigns")}</TabsTrigger>
+        <TabsTrigger value="subscribers">{t("marketing.tabs.subscribers")}</TabsTrigger>
       </TabsList>
       <TabsContent value="campaigns" className="pt-4">
         <Campaigns />

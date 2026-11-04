@@ -1,6 +1,6 @@
 /**
- * Compliance types and labels (client-safe). The French labels serve the
- * admin screens; supplier pages use the "documents" messages.
+ * Compliance types (client-safe). Screens show the "documents" and
+ * "adminSettings" messages.
  */
 
 import { intlLocale } from "@/i18n/config";
@@ -12,15 +12,6 @@ export type ComplianceDocumentType =
   | "INSURANCE"
   | "CERTIFICATION"
   | "OTHER";
-
-export const DOCUMENT_TYPE_LABELS: Record<ComplianceDocumentType, string> = {
-  REGISTRATION: "Registre de commerce (RCCM)",
-  TAX: "Identifiant fiscal (NINEA)",
-  IDENTITY: "Pièce d'identité",
-  INSURANCE: "Assurance",
-  CERTIFICATION: "Certification",
-  OTHER: "Autre",
-};
 
 export type ComplianceDocument = {
   id: string;
@@ -59,12 +50,6 @@ export type ComplianceFinding = {
   firstSeenAt: string;
   lastSeenAt: string;
   closedAt: string | null;
-};
-
-export const FINDING_KIND_LABELS: Record<ComplianceFinding["kind"], string> = {
-  DOCUMENT_EXPIRING: "Document bientôt expiré",
-  DOCUMENT_EXPIRED: "Document expiré",
-  BANNED_TERM: "Terme surveillé",
 };
 
 export type ComplianceOverview = {

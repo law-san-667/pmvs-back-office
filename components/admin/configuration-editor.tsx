@@ -21,6 +21,7 @@ import type {
 } from "@/lib/backend-resource-types";
 import { slugify } from "@/lib/utils";
 import { trpc } from "@/server/trpc/client";
+import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 
 export type ConfigurationEditorTarget =
@@ -62,6 +63,8 @@ function CategoryEditor({
   onClose,
   onSaved,
 }: SharedProps & { value: Category | null }) {
+  const t = useTranslations("adminSettings.editor");
+  const tc = useTranslations("adminSettings.common");
   const [name, setName] = useState(value?.name ?? "");
   const slug = slugify(name);
   const [description, setDescription] = useState(value?.description ?? "");
@@ -96,15 +99,15 @@ function CategoryEditor({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {value ? "Modifier la catégorie" : "Nouvelle catégorie"}
+            {value ? t("category.edit") : t("category.new")}
           </DialogTitle>
           <DialogDescription>
-            Configurez le classement des produits ou services.
+            {t("category.description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={(event) => void submit(event)} className="space-y-4">
           <div className="grid gap-2">
-            <Label htmlFor="category-name">Nom</Label>
+            <Label htmlFor="category-name">{t("name")}</Label>
             <Input
               id="category-name"
               value={name}
@@ -113,7 +116,7 @@ function CategoryEditor({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="category-slug">Slug</Label>
+            <Label htmlFor="category-slug">{t("slug")}</Label>
             <Input
               id="category-slug"
               value={slug}
@@ -123,7 +126,7 @@ function CategoryEditor({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="category-description">Description</Label>
+            <Label htmlFor="category-description">{t("description")}</Label>
             <Textarea
               id="category-description"
               value={description}
@@ -133,13 +136,13 @@ function CategoryEditor({
           <div className="flex flex-wrap gap-5">
             <BooleanField
               id="category-service"
-              label="Catégorie de services"
+              label={t("category.isService")}
               checked={isService}
               onCheckedChange={setIsService}
             />
             <BooleanField
               id="category-active"
-              label="Active"
+              label={tc("activeFeminine")}
               checked={isActive}
               onCheckedChange={setIsActive}
             />
@@ -147,10 +150,10 @@ function CategoryEditor({
           <FormError message={mutation.error?.message} />
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
+              {tc("cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Enregistrement..." : "Enregistrer"}
+              {mutation.isPending ? tc("saving") : tc("save")}
             </Button>
           </DialogFooter>
         </form>
@@ -165,6 +168,8 @@ function SubCategoryEditor({
   onClose,
   onSaved,
 }: SharedProps & { value: SubCategory | null; categories: Category[] }) {
+  const t = useTranslations("adminSettings.editor");
+  const tc = useTranslations("adminSettings.common");
   const [categoryId, setCategoryId] = useState(
     value?.categoryId ?? categories[0]?.id ?? "",
   );
@@ -203,15 +208,17 @@ function SubCategoryEditor({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {value ? "Modifier la sous-catégorie" : "Nouvelle sous-catégorie"}
+            {value ? t("subCategory.edit") : t("subCategory.new")}
           </DialogTitle>
           <DialogDescription>
-            Associez la sous-catégorie à une catégorie existante.
+            {t("subCategory.description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={(event) => void submit(event)} className="space-y-4">
           <div className="grid gap-2">
-            <Label htmlFor="subcategory-category">Catégorie</Label>
+            <Label htmlFor="subcategory-category">
+              {t("subCategory.category")}
+            </Label>
             <select
               id="subcategory-category"
               value={categoryId}
@@ -220,7 +227,7 @@ function SubCategoryEditor({
               required
             >
               <option value="" disabled>
-                Sélectionner une catégorie
+                {t("subCategory.selectCategory")}
               </option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
@@ -231,7 +238,7 @@ function SubCategoryEditor({
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
-              <Label htmlFor="subcategory-name">Nom</Label>
+              <Label htmlFor="subcategory-name">{t("name")}</Label>
               <Input
                 id="subcategory-name"
                 value={name}
@@ -240,7 +247,7 @@ function SubCategoryEditor({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="subcategory-slug">Slug</Label>
+              <Label htmlFor="subcategory-slug">{t("slug")}</Label>
               <Input
                 id="subcategory-slug"
                 value={slug}
@@ -251,7 +258,7 @@ function SubCategoryEditor({
             </div>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="subcategory-description">Description</Label>
+            <Label htmlFor="subcategory-description">{t("description")}</Label>
             <Textarea
               id="subcategory-description"
               value={description}
@@ -261,13 +268,13 @@ function SubCategoryEditor({
           <div className="flex flex-wrap gap-5">
             <BooleanField
               id="subcategory-service"
-              label="Sous-catégorie de services"
+              label={t("subCategory.isService")}
               checked={isService}
               onCheckedChange={setIsService}
             />
             <BooleanField
               id="subcategory-active"
-              label="Active"
+              label={tc("activeFeminine")}
               checked={isActive}
               onCheckedChange={setIsActive}
             />
@@ -275,10 +282,10 @@ function SubCategoryEditor({
           <FormError message={mutation.error?.message} />
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
+              {tc("cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending || !categoryId}>
-              {mutation.isPending ? "Enregistrement..." : "Enregistrer"}
+              {mutation.isPending ? tc("saving") : tc("save")}
             </Button>
           </DialogFooter>
         </form>
@@ -292,6 +299,8 @@ function CountryEditor({
   onClose,
   onSaved,
 }: SharedProps & { value: Country | null }) {
+  const t = useTranslations("adminSettings.editor");
+  const tc = useTranslations("adminSettings.common");
   const [code, setCode] = useState(value?.code ?? "");
   const [name, setName] = useState(value?.name ?? "");
   const [currencyCode, setCurrencyCode] = useState(value?.currencyCode ?? "");
@@ -335,16 +344,16 @@ function CountryEditor({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {value ? "Modifier le pays" : "Nouveau pays"}
+            {value ? t("country.edit") : t("country.new")}
           </DialogTitle>
           <DialogDescription>
-            Configurez le code, la devise et l’indicatif du pays.
+            {t("country.description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={(event) => void submit(event)} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
-              <Label htmlFor="country-code">Code pays</Label>
+              <Label htmlFor="country-code">{t("country.code")}</Label>
               <Input
                 id="country-code"
                 value={code}
@@ -355,7 +364,9 @@ function CountryEditor({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="country-currency">Devise</Label>
+              <Label htmlFor="country-currency">
+                {t("country.currency")}
+              </Label>
               <Input
                 id="country-currency"
                 value={currencyCode}
@@ -368,7 +379,7 @@ function CountryEditor({
             </div>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="country-name">Nom</Label>
+            <Label htmlFor="country-name">{t("name")}</Label>
             <Input
               id="country-name"
               value={name}
@@ -377,7 +388,9 @@ function CountryEditor({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="country-prefix">Indicatif téléphonique</Label>
+            <Label htmlFor="country-prefix">
+              {t("country.phonePrefix")}
+            </Label>
             <Input
               id="country-prefix"
               value={phonePrefix}
@@ -387,44 +400,44 @@ function CountryEditor({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="country-phase">Phase de déploiement</Label>
+            <Label htmlFor="country-phase">{t("country.phase")}</Label>
             <select
               id="country-phase"
               value={deploymentPhase}
               onChange={(event) => setDeploymentPhase(event.target.value)}
               className="border-input bg-background h-9 rounded-md border px-3 text-sm"
             >
-              <option value="">Non définie</option>
-              <option value="1">Phase 1 : Sénégal et pays frontaliers</option>
-              <option value="2">Phase 2 : CEDEAO</option>
-              <option value="3">Phase 3 : autres pays</option>
+              <option value="">{t("country.phaseNone")}</option>
+              <option value="1">{t("country.phase1")}</option>
+              <option value="2">{t("country.phase2")}</option>
+              <option value="3">{t("country.phase3")}</option>
             </select>
           </div>
           <BooleanField
             id="country-active"
-            label="Pays affiché sur la plateforme"
+            label={t("country.isActive")}
             checked={isActive}
             onCheckedChange={setIsActive}
           />
           <BooleanField
             id="country-oapi"
-            label="Membre de l'OAPI"
+            label={t("country.isOapi")}
             checked={isOapi}
             onCheckedChange={setIsOapi}
           />
           <BooleanField
             id="country-supplier-open"
-            label="Inscriptions de fournisseurs ouvertes"
+            label={t("country.supplierRegistrationOpen")}
             checked={supplierRegistrationOpen}
             onCheckedChange={setSupplierRegistrationOpen}
           />
           <FormError message={mutation.error?.message} />
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
+              {tc("cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Enregistrement..." : "Enregistrer"}
+              {mutation.isPending ? tc("saving") : tc("save")}
             </Button>
           </DialogFooter>
         </form>
@@ -439,6 +452,8 @@ function CityEditor({
   onClose,
   onSaved,
 }: SharedProps & { value: City | null; countries: Country[] }) {
+  const t = useTranslations("adminSettings.editor");
+  const tc = useTranslations("adminSettings.common");
   const [countryCode, setCountryCode] = useState(
     value?.countryCode ?? countries[0]?.code ?? "",
   );
@@ -488,15 +503,15 @@ function CityEditor({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {value ? "Modifier la ville" : "Nouvelle ville"}
+            {value ? t("city.edit") : t("city.new")}
           </DialogTitle>
           <DialogDescription>
-            Associez la ville à un pays configuré.
+            {t("city.description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={(event) => void submit(event)} className="space-y-4">
           <div className="grid gap-2">
-            <Label htmlFor="city-country">Pays</Label>
+            <Label htmlFor="city-country">{t("city.country")}</Label>
             <select
               id="city-country"
               value={countryCode}
@@ -505,7 +520,7 @@ function CityEditor({
               required
             >
               <option value="" disabled>
-                Sélectionner un pays
+                {t("city.selectCountry")}
               </option>
               {countries.map((country) => (
                 <option key={country.code} value={country.code}>
@@ -515,7 +530,7 @@ function CityEditor({
             </select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="city-name">Nom</Label>
+            <Label htmlFor="city-name">{t("name")}</Label>
             <Input
               id="city-name"
               value={name}
@@ -524,7 +539,7 @@ function CityEditor({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="city-slug">Slug</Label>
+            <Label htmlFor="city-slug">{t("slug")}</Label>
             <Input
               id="city-slug"
               value={slug}
@@ -535,7 +550,7 @@ function CityEditor({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-2">
-              <Label htmlFor="city-latitude">Latitude du centre</Label>
+              <Label htmlFor="city-latitude">{t("city.latitude")}</Label>
               <Input
                 id="city-latitude"
                 inputMode="decimal"
@@ -545,7 +560,9 @@ function CityEditor({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="city-longitude">Longitude du centre</Label>
+              <Label htmlFor="city-longitude">
+                {t("city.longitude")}
+              </Label>
               <Input
                 id="city-longitude"
                 inputMode="decimal"
@@ -555,23 +572,22 @@ function CityEditor({
               />
             </div>
             <p className="text-muted-foreground col-span-2 text-xs">
-              Sert à la recherche « Près de moi » pour les vendeurs de la
-              ville qui n&apos;ont pas indiqué leur siège.
+              {t("city.coordinatesHint")}
             </p>
           </div>
           <BooleanField
             id="city-active"
-            label="Ville active"
+            label={t("city.isActive")}
             checked={isActive}
             onCheckedChange={setIsActive}
           />
           <FormError message={mutation.error?.message} />
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
+              {tc("cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending || !countryCode}>
-              {mutation.isPending ? "Enregistrement..." : "Enregistrer"}
+              {mutation.isPending ? tc("saving") : tc("save")}
             </Button>
           </DialogFooter>
         </form>

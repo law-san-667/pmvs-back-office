@@ -14,6 +14,7 @@ import {
 } from "@/lib/validators/quality";
 import { trpc } from "@/server/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Controller, useForm, type Resolver } from "react-hook-form";
 
@@ -21,7 +22,16 @@ import { Controller, useForm, type Resolver } from "react-hook-form";
  * The norms every supplier is measured against. Changing them re-scores
  * everyone on the next computation; certifications already granted stay.
  */
+const UNIT_KEYS: Record<string, "percent" | "days" | "units"> = {
+  "%": "percent",
+  jours: "days",
+  unités: "units",
+};
+
 export function QualityThresholdsForm() {
+  const t = useTranslations("adminSettings.quality");
+  const tc = useTranslations("adminSettings.common");
+  const locale = useLocale();
   const utils = trpc.useUtils();
   const thresholds = trpc.admin.qualityThresholds.useQuery();
   const update = trpc.admin.updateQualityThresholds.useMutation();
@@ -47,28 +57,27 @@ export function QualityThresholdsForm() {
         utils.admin.qualityRanking.invalidate(),
         utils.admin.businessQuality.invalidate(),
       ]);
-      setMessage("Normes enregistrées. Les scores sont recalculés à la prochaine consultation.");
+      setMessage(t("saved"));
     } catch (mutationError) {
-      setError(getMutationErrorMessage(mutationError, "Impossible d'enregistrer les normes."));
+      setError(getMutationErrorMessage(mutationError, t("saveFailed")));
     }
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Normes de qualité des fournisseurs</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <p className="text-muted-foreground text-sm">
-          Seuils appliqués à chaque fournisseur pour calculer son score de
-          conformité.
+          {t("description")}
           {thresholds.data?.updatedAt
-            ? ` Dernière modification le ${formatDate(thresholds.data.updatedAt, true)}.`
-            : " Valeurs par défaut de la plateforme."}
+            ? ` ${t("lastUpdated", { date: formatDate(thresholds.data.updatedAt, true, locale) })}`
+            : ` ${t("defaults")}`}
         </p>
       </CardHeader>
       <CardContent>
         {thresholds.isLoading && (
           <div className="text-muted-foreground flex items-center gap-2 text-sm">
-            <Spinner /> Chargement...
+            <Spinner /> {tc("loading")}
           </div>
         )}
         {thresholds.error && (
@@ -85,7 +94,7 @@ export function QualityThresholdsForm() {
                   render={({ field: input, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor={`threshold-${field.key}`}>
-                        {field.label}
+                        {t(`fields.${field.key}.label`)}
                       </FieldLabel>
                       <div className="flex items-center gap-2">
                         <Input
@@ -102,10 +111,10 @@ export function QualityThresholdsForm() {
                           className="h-9"
                         />
                         <span className="text-muted-foreground w-12 shrink-0 text-xs">
-                          {field.unit}
+                          {t(`units.${UNIT_KEYS[field.unit]}`)}
                         </span>
                       </div>
-                      <p className="text-muted-foreground text-xs">{field.hint}</p>
+                      <p className="text-muted-foreground text-xs">{t(`fields.${field.key}.hint`)}</p>
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
                       )}
@@ -116,7 +125,7 @@ export function QualityThresholdsForm() {
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <Button type="submit" disabled={update.isPending}>
-                {update.isPending ? "Enregistrement..." : "Enregistrer les normes"}
+                {update.isPending ? tc("saving") : t("submit")}
               </Button>
               {message && <span className="text-sm text-green-700">{message}</span>}
               {error && <span className="text-destructive text-sm">{error}</span>}

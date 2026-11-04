@@ -155,7 +155,11 @@
     "deleteError": "Error while deleting the call for tenders.",
     "noUser": "Could not identify the user. Please sign in again.",
     "invalidDeadline": "The submission deadline is invalid.",
-    "uploadError": "The photo upload failed. Please try again."
+    "uploadError": "The photo upload failed. Please try again.",
+    "diffusion": "Diffusion area",
+    "diffusionHelp": "Suppliers in this area are notified automatically, and the tender is shown there.",
+    "diffusionCountries": "Other diffusion countries",
+    "diffusionCountriesPlaceholder": "Add countries"
   },
   "errors": {
     "titleRequired": "The title is required.",
@@ -164,6 +168,12 @@
     "countryRequired": "The country is required.",
     "deadlineRequired": "The submission deadline is required.",
     "budgetInteger": "The budget must be a positive whole number.",
-    "budgetMaxBelowMin": "The maximum budget must be greater than the minimum."
+    "budgetMaxBelowMin": "The maximum budget must be greater than the minimum.",
+    "diffusionCountriesRequired": "Choose at least one other country."
+  },
+  "diffusion": {
+    "COUNTRY": "The tender's country",
+    "COUNTRIES": "The tender's country and other countries",
+    "ZLECAF": "The whole AfCFTA area"
   }
 }

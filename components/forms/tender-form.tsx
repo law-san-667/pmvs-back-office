@@ -16,11 +16,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
   ComboboxContent,
   ComboboxEmpty,
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
+  ComboboxValue,
+  useComboboxAnchor,
 } from "@/components/ui/combobox";
 import {
   Field,
@@ -51,7 +56,11 @@ import {
 } from "@/lib/upload-to-r2";
 import countries from "@/lib/countries.json";
 import { msg } from "@/lib/validators/messages";
-import { tenderStatusEnum, tenderTypeEnum } from "@/lib/validators/tenders";
+import {
+  tenderDiffusionScopes,
+  tenderStatusEnum,
+  tenderTypeEnum,
+} from "@/lib/validators/tenders";
 import { intlLocale } from "@/i18n/config";
 import { useLocale, useTranslations } from "next-intl";
 import { trpc } from "@/server/trpc/client";
@@ -116,6 +125,8 @@ const tenderFormSchema = z
     currency: z.string().min(1),
     location: z.string(),
     countryCode: z.string().min(2, msg("tenders.errors.countryRequired")),
+    diffusionScope: z.enum(tenderDiffusionScopes),
+    diffusionCountries: z.array(z.string()),
     opensAt: z.string(),
     submissionDeadline: z
       .string()
@@ -143,6 +154,16 @@ const tenderFormSchema = z
         message: msg("tenders.errors.budgetInteger"),
       });
     }
+    if (
+      data.diffusionScope === "COUNTRIES" &&
+      !data.diffusionCountries.some((code) => code !== data.countryCode)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["diffusionCountries"],
+        message: msg("tenders.errors.diffusionCountriesRequired"),
+      });
+    }
     if (min && max && /^\d+$/.test(min) && /^\d+$/.test(max)) {
       if (Number(max) < Number(min)) {
         ctx.addIssue({
@@ -168,6 +189,8 @@ const defaultValues: TenderFormData = {
   currency: "XOF",
   location: "",
   countryCode: "",
+  diffusionScope: "COUNTRY",
+  diffusionCountries: [],
   opensAt: "",
   submissionDeadline: "",
   evaluationDeadline: "",
@@ -182,6 +205,10 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
   const typeItems = Object.fromEntries(
     tenderTypeEnum.map((type) => [type, t(`type.${type}`)]),
   );
+  const diffusionItems = Object.fromEntries(
+    tenderDiffusionScopes.map((scope) => [scope, t(`diffusion.${scope}`)]),
+  );
+  const diffusionAnchor = useComboboxAnchor();
   const router = useRouter();
   const utils = trpc.useUtils();
   const isEdit = !!tenderId;
@@ -207,6 +234,7 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
 
   const watchedValues = useWatch({ control: form.control }) as TenderFormData;
   const categoryId = watchedValues.categoryId;
+  const diffusionScope = watchedValues.diffusionScope;
 
   const categories = trpc.catalog.categories.useQuery(undefined);
   const selectedCategory = categories.data?.find((c) => c.id === categoryId);
@@ -261,6 +289,8 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
       currency: tender.currency || "XOF",
       location: tender.location ?? "",
       countryCode: tender.countryCode,
+      diffusionScope: tender.diffusionScope ?? "COUNTRY",
+      diffusionCountries: tender.diffusionCountries ?? [],
       opensAt: toDatetimeLocal(tender.opensAt),
       submissionDeadline: toDatetimeLocal(tender.submissionDeadline),
       evaluationDeadline: toDatetimeLocal(tender.evaluationDeadline),
@@ -385,6 +415,9 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
       requirements: data.requirements.trim() ? data.requirements.trim() : null,
       location: data.location.trim() ? data.location.trim() : null,
       countryCode: data.countryCode,
+      diffusionScope: data.diffusionScope,
+      diffusionCountries:
+        data.diffusionScope === "COUNTRIES" ? data.diffusionCountries : [],
       opensAt: fromDatetimeLocal(data.opensAt),
       submissionDeadline,
       evaluationDeadline: fromDatetimeLocal(data.evaluationDeadline),
@@ -814,6 +847,89 @@ export default function TenderForm({ tenderId }: { tenderId?: string }) {
                       </Field>
                     )}
                   />
+
+                  <Controller
+                    name="diffusionScope"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Field>
+                        <FieldLabel>{t("form.diffusion")}</FieldLabel>
+                        <Select
+                          items={diffusionItems}
+                          value={field.value}
+                          onValueChange={(val) => val && field.onChange(val)}
+                        >
+                          <SelectTrigger className="h-9 w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {tenderDiffusionScopes.map((scope) => (
+                              <SelectItem key={scope} value={scope}>
+                                {t(`diffusion.${scope}`)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                          {t("form.diffusionHelp")}
+                        </p>
+                      </Field>
+                    )}
+                  />
+
+                  {diffusionScope === "COUNTRIES" && (
+                    <Controller
+                      name="diffusionCountries"
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel>{t("form.diffusionCountries")}</FieldLabel>
+                          <Combobox
+                            multiple
+                            items={COUNTRY_CODES}
+                            itemToStringLabel={(code) => countryName(code)}
+                            value={field.value}
+                            onValueChange={(value) => field.onChange(value)}
+                          >
+                            <ComboboxChips ref={diffusionAnchor} className="w-full">
+                              <ComboboxValue>
+                                {(values: string[]) => (
+                                  <>
+                                    {values.map((code) => (
+                                      <ComboboxChip key={code}>
+                                        {countryName(code)}
+                                      </ComboboxChip>
+                                    ))}
+                                    <ComboboxChipsInput
+                                      placeholder={
+                                        values.length
+                                          ? undefined
+                                          : t("form.diffusionCountriesPlaceholder")
+                                      }
+                                      aria-invalid={fieldState.invalid}
+                                    />
+                                  </>
+                                )}
+                              </ComboboxValue>
+                            </ComboboxChips>
+                            <ComboboxContent anchor={diffusionAnchor}>
+                              <ComboboxEmpty>{t("form.noCountry")}</ComboboxEmpty>
+                              <ComboboxList>
+                                {(code: string) => (
+                                  <ComboboxItem key={code} value={code}>
+                                    {countryName(code)}
+                                  </ComboboxItem>
+                                )}
+                              </ComboboxList>
+                            </ComboboxContent>
+                          </Combobox>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                  )}
 
                   <Controller
                     name="location"

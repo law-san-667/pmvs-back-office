@@ -38,7 +38,6 @@ import {
 } from "@/lib/admin-business-utils";
 import type { AdminBusiness } from "@/lib/admin-types";
 import type { BusinessStatus } from "@/lib/backend-resource-types";
-import { BUSINESS_CATEGORY_LABELS } from "@/lib/business-categories";
 import { formatDate, getInitials } from "@/lib/seller-dashboard-utils";
 import { trpc } from "@/server/trpc/client";
 import {
@@ -51,12 +50,16 @@ import {
     SearchIcon,
     Trash2Icon,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useDeferredValue, useState } from "react";
 
 const PAGE_SIZE = 10;
 type StatusFilter = "ALL" | BusinessStatus;
 
 export default function AdminBusinessesPage() {
+  const t = useTranslations("adminAccounts");
+  const tCategory = useTranslations("onboarding.category.options");
+  const locale = useLocale();
   const router = useRouter();
   const utils = trpc.useUtils();
   const [page, setPage] = useState(1);
@@ -98,13 +101,15 @@ export default function AdminBusinessesPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Fournisseurs"
-        description="Consultez toutes les entreprises enregistrées, validez-les et gérez leur statut."
+        title={t("businesses.title")}
+        description={t("businesses.description")}
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Fournisseurs ({businesses.data?.total ?? 0})</CardTitle>
+          <CardTitle>
+            {t("businesses.count", { count: businesses.data?.total ?? 0 })}
+          </CardTitle>
           <CardAction>
             <div className="flex items-center gap-2">
               <select
@@ -114,13 +119,13 @@ export default function AdminBusinessesPage() {
                   setPage(1);
                 }}
                 className="border-input bg-background h-9 rounded-md border px-3 text-sm"
-                aria-label="Filtrer par statut"
+                aria-label={t("businesses.filterByStatus")}
               >
-                <option value="ALL">Tous les statuts</option>
-                {Object.entries(BUSINESS_STATUS_LABELS).map(
-                  ([value, label]) => (
+                <option value="ALL">{t("businesses.allStatuses")}</option>
+                {(Object.keys(BUSINESS_STATUS_LABELS) as BusinessStatus[]).map(
+                  (value) => (
                     <option key={value} value={value}>
-                      {label}
+                      {t(`businessStatus.${value}`)}
                     </option>
                   ),
                 )}
@@ -133,7 +138,7 @@ export default function AdminBusinessesPage() {
                     setSearch(event.target.value);
                     setPage(1);
                   }}
-                  placeholder="Rechercher..."
+                  placeholder={t("businesses.searchPlaceholder")}
                   className="h-9 w-56 ps-8"
                 />
               </div>
@@ -149,13 +154,15 @@ export default function AdminBusinessesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Entreprise</TableHead>
-                <TableHead>Localisation</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Catégorisation</TableHead>
-                <TableHead>Inscription</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="w-[1%] text-end">Actions</TableHead>
+                <TableHead>{t("businesses.columns.business")}</TableHead>
+                <TableHead>{t("businesses.columns.location")}</TableHead>
+                <TableHead>{t("businesses.columns.contact")}</TableHead>
+                <TableHead>{t("businesses.columns.category")}</TableHead>
+                <TableHead>{t("businesses.columns.registeredAt")}</TableHead>
+                <TableHead>{t("businesses.columns.status")}</TableHead>
+                <TableHead className="w-[1%] text-end">
+                  {t("businesses.columns.actions")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -164,8 +171,8 @@ export default function AdminBusinessesPage() {
                 isLoading={businesses.isLoading}
                 error={businesses.error?.message}
                 isEmpty={!businesses.data?.items.length}
-                loadingLabel="Chargement des entreprises..."
-                emptyLabel="Aucune entreprise trouvée."
+                loadingLabel={t("businesses.loading")}
+                emptyLabel={t("businesses.empty")}
               />
               {businesses.data?.items.map((business) => (
                 <TableRow
@@ -201,17 +208,17 @@ export default function AdminBusinessesPage() {
                     {business.contactEmail ?? business.whatsappPhone ?? "—"}
                   </TableCell>
                   <TableCell>
-                    {BUSINESS_CATEGORY_LABELS[business.businessCategory]}
+                    {tCategory(`${business.businessCategory}.label`)}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {formatDate(business.createdAt)}
+                    {formatDate(business.createdAt, false, locale)}
                   </TableCell>
                   <TableCell>
                     <Badge
                       variant="outline"
                       className={BUSINESS_STATUS_BADGE_CLASSES[business.status]}
                     >
-                      {BUSINESS_STATUS_LABELS[business.status]}
+                      {t(`businessStatus.${business.status}`)}
                     </Badge>
                   </TableCell>
                   <TableCell
@@ -224,7 +231,9 @@ export default function AdminBusinessesPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            aria-label={`Actions pour ${business.name}`}
+                            aria-label={t("businesses.actionsFor", {
+                              name: business.name,
+                            })}
                           />
                         }
                       >
@@ -238,12 +247,12 @@ export default function AdminBusinessesPage() {
                             )
                           }
                         >
-                          <EyeIcon /> Voir les détails
+                          <EyeIcon /> {t("actions.viewDetails")}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => setEditorTarget(business)}
                         >
-                          <PencilIcon /> Modifier
+                          <PencilIcon /> {t("actions.edit")}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         {business.status !== "ACTIVE" && (
@@ -254,8 +263,8 @@ export default function AdminBusinessesPage() {
                           >
                             <CheckCircle2Icon />
                             {business.status === "PENDING_VERIFICATION"
-                              ? "Valider"
-                              : "Réactiver"}
+                              ? t("actions.validate")
+                              : t("actions.reactivate")}
                           </DropdownMenuItem>
                         )}
                         {business.status !== "SUSPENDED" && (
@@ -264,7 +273,7 @@ export default function AdminBusinessesPage() {
                               void changeStatus(business, "SUSPENDED")
                             }
                           >
-                            <BanIcon /> Suspendre
+                            <BanIcon /> {t("actions.suspend")}
                           </DropdownMenuItem>
                         )}
                         {business.status !== "INACTIVE" && (
@@ -273,7 +282,7 @@ export default function AdminBusinessesPage() {
                               void changeStatus(business, "INACTIVE")
                             }
                           >
-                            <RotateCcwIcon /> Désactiver
+                            <RotateCcwIcon /> {t("actions.deactivate")}
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuSeparator />
@@ -281,7 +290,7 @@ export default function AdminBusinessesPage() {
                           variant="destructive"
                           onClick={() => setDeleteTarget(business)}
                         >
-                          <Trash2Icon /> Supprimer
+                          <Trash2Icon /> {t("actions.delete")}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

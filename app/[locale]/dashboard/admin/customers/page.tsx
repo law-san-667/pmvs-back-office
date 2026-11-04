@@ -22,6 +22,7 @@ import {
 import { formatMoney, getInitials } from "@/lib/seller-dashboard-utils";
 import { trpc } from "@/server/trpc/client";
 import { SearchIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 type CustomerRow = {
@@ -34,6 +35,8 @@ type CustomerRow = {
 };
 
 export default function AdminCustomersPage() {
+  const t = useTranslations("adminAccounts");
+  const locale = useLocale();
   const [search, setSearch] = useState("");
   const payments = trpc.admin.payments.useQuery({
     page: 1,
@@ -78,20 +81,22 @@ export default function AdminCustomersPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Clients"
-        description="Acheteurs identifiés à partir des transactions récentes de la plateforme."
+        title={t("customers.title")}
+        description={t("customers.description")}
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Clients ({customers.length})</CardTitle>
+          <CardTitle>
+            {t("customers.count", { count: customers.length })}
+          </CardTitle>
           <CardAction>
             <div className="relative">
               <SearchIcon className="text-muted-foreground absolute top-1/2 start-2.5 size-4 -translate-y-1/2" />
               <Input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Nom, email, téléphone..."
+                placeholder={t("customers.searchPlaceholder")}
                 className="h-9 w-64 ps-8"
               />
             </div>
@@ -101,11 +106,11 @@ export default function AdminCustomersPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Client</TableHead>
-                <TableHead>Téléphone</TableHead>
-                <TableHead>Commandes récentes</TableHead>
-                <TableHead>Montant récent</TableHead>
-                <TableHead>Identifiant</TableHead>
+                <TableHead>{t("customers.columns.client")}</TableHead>
+                <TableHead>{t("customers.columns.phone")}</TableHead>
+                <TableHead>{t("customers.columns.orders")}</TableHead>
+                <TableHead>{t("customers.columns.amount")}</TableHead>
+                <TableHead>{t("customers.columns.id")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -114,8 +119,8 @@ export default function AdminCustomersPage() {
                 isLoading={payments.isLoading}
                 error={payments.error?.message}
                 isEmpty={!customers.length}
-                loadingLabel="Chargement des clients..."
-                emptyLabel="Aucun client trouvé dans les transactions récentes."
+                loadingLabel={t("customers.loading")}
+                emptyLabel={t("customers.empty")}
               />
               {customers.map((customer) => (
                 <TableRow key={customer.id}>
@@ -129,7 +134,7 @@ export default function AdminCustomersPage() {
                       <div>
                         <p className="font-medium">{customer.name}</p>
                         <p className="text-muted-foreground text-xs">
-                          {customer.email ?? "Aucun email"}
+                          {customer.email ?? t("customers.noEmail")}
                         </p>
                       </div>
                     </div>
@@ -140,7 +145,7 @@ export default function AdminCustomersPage() {
                     {Array.from(customer.totals.entries()).map(
                       ([currency, amount]) => (
                         <p key={currency} className="whitespace-nowrap">
-                          {formatMoney(amount, currency)}
+                          {formatMoney(amount, currency, locale)}
                         </p>
                       ),
                     )}

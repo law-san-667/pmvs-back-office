@@ -8,11 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "@/i18n/navigation";
-import {
-  LISTING_STATUS_LABELS,
-  MODERATION_STATUS_CLASSES,
-  MODERATION_STATUS_LABELS,
-} from "@/lib/moderation-utils";
+import { MODERATION_STATUS_CLASSES } from "@/lib/moderation-utils";
 import { formatDate, formatMoney } from "@/lib/seller-dashboard-utils";
 import { trpc } from "@/server/trpc/client";
 import {
@@ -21,6 +17,7 @@ import {
   ImageIcon,
   XCircleIcon,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
@@ -48,6 +45,9 @@ const imageUrls = (images: unknown): string[] => {
 };
 
 export function AdminListingReview({ id }: { id: string }) {
+  const t = useTranslations("adminCommerce");
+  const tProducts = useTranslations("products");
+  const locale = useLocale();
   const router = useRouter();
   const utils = trpc.useUtils();
   const [decision, setDecision] = useState<"APPROVED" | "REJECTED" | null>(
@@ -69,7 +69,7 @@ export function AdminListingReview({ id }: { id: string }) {
   };
 
   if (listing.isLoading) {
-    return <IsLoadingScreen text="Chargement de l'annonce..." />;
+    return <IsLoadingScreen text={t("listing.loading")} />;
   }
 
   if (listing.error || !listing.data) {
@@ -80,10 +80,10 @@ export function AdminListingReview({ id }: { id: string }) {
           className="w-fit"
           onClick={() => router.push("/dashboard/admin/listings")}
         >
-          <ArrowLeftIcon /> Retour
+          <ArrowLeftIcon /> {t("common.back")}
         </Button>
         <p className="text-destructive text-sm">
-          {listing.error?.message ?? "Annonce introuvable."}
+          {listing.error?.message ?? t("listing.notFound")}
         </p>
       </div>
     );
@@ -99,15 +99,23 @@ export function AdminListingReview({ id }: { id: string }) {
         className="w-fit"
         onClick={() => router.push("/dashboard/admin/listings")}
       >
-        <ArrowLeftIcon /> Retour à la modération
+        <ArrowLeftIcon /> {t("listing.backToModeration")}
       </Button>
 
       <AdminPageHeader
         title={value.title}
-        description={`${value.isService ? "Service" : "Produit"} soumis le ${formatDate(
-          value.submittedForReviewAt ?? value.createdAt,
-          true,
-        )}`}
+        description={t(
+          value.isService
+            ? "listing.submittedService"
+            : "listing.submittedProduct",
+          {
+            date: formatDate(
+              value.submittedForReviewAt ?? value.createdAt,
+              true,
+              locale,
+            ),
+          },
+        )}
       />
 
       <div className="flex flex-wrap items-center gap-2">
@@ -115,15 +123,17 @@ export function AdminListingReview({ id }: { id: string }) {
           variant="outline"
           className={MODERATION_STATUS_CLASSES[value.moderationStatus]}
         >
-          {MODERATION_STATUS_LABELS[value.moderationStatus]}
+          {tProducts(`moderation.${value.moderationStatus}`)}
         </Badge>
         <Badge variant="outline">
-          {LISTING_STATUS_LABELS[value.status] ?? value.status}
+          {t.has(`listingStatus.${value.status}`)
+            ? t(`listingStatus.${value.status}`)
+            : value.status}
         </Badge>
         <div className="ms-auto flex flex-wrap gap-2">
           {value.moderationStatus !== "APPROVED" && (
             <Button onClick={() => setDecision("APPROVED")}>
-              <CheckCircle2Icon /> Valider
+              <CheckCircle2Icon /> {t("common.approve")}
             </Button>
           )}
           {value.moderationStatus !== "REJECTED" && (
@@ -131,7 +141,7 @@ export function AdminListingReview({ id }: { id: string }) {
               variant="destructive"
               onClick={() => setDecision("REJECTED")}
             >
-              <XCircleIcon /> Refuser
+              <XCircleIcon /> {t("common.reject")}
             </Button>
           )}
         </div>
@@ -139,7 +149,7 @@ export function AdminListingReview({ id }: { id: string }) {
 
       {value.moderationStatus === "REJECTED" && value.moderationReason && (
         <div className="border-destructive/30 bg-destructive/5 rounded-md border p-3 text-sm">
-          <p className="font-medium">Motif du refus communiqué au vendeur</p>
+          <p className="font-medium">{t("listing.rejectionReason")}</p>
           <p className="text-muted-foreground">{value.moderationReason}</p>
         </div>
       )}
@@ -147,7 +157,7 @@ export function AdminListingReview({ id }: { id: string }) {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Médias ({images.length})</CardTitle>
+            <CardTitle>{t("listing.media", { count: images.length })}</CardTitle>
           </CardHeader>
           <CardContent>
             {images.length === 0 ? (
@@ -173,26 +183,26 @@ export function AdminListingReview({ id }: { id: string }) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Offre</CardTitle>
+            <CardTitle>{t("listing.offer")}</CardTitle>
           </CardHeader>
           <CardContent>
             <Row
-              label="Prix"
+              label={t("listing.price")}
               value={
                 value.priceAmountMinor < 0
-                  ? "Sur devis"
-                  : formatMoney(value.priceAmountMinor, value.currency)
+                  ? t("listings.onQuote")
+                  : formatMoney(value.priceAmountMinor, value.currency, locale)
               }
             />
-            <Row label="Stock" value={value.quantityAvailable} />
+            <Row label={t("listing.stock")} value={value.quantityAvailable} />
             <Row
-              label="Localisation"
+              label={t("listing.location")}
               value={`${value.cities?.join(", ") || "—"} (${value.countryCode})`}
             />
-            <Row label="État" value={value.condition} />
+            <Row label={t("listing.condition")} value={value.condition} />
             <Separator className="my-2" />
             <Row
-              label="Fournisseur"
+              label={t("listing.supplier")}
               value={
                 business.data ? (
                   <button
@@ -212,9 +222,11 @@ export function AdminListingReview({ id }: { id: string }) {
               }
             />
             <Row
-              label="Dernière modération"
+              label={t("listing.lastModeration")}
               value={
-                value.moderatedAt ? formatDate(value.moderatedAt, true) : null
+                value.moderatedAt
+                  ? formatDate(value.moderatedAt, true, locale)
+                  : null
               }
             />
           </CardContent>
@@ -222,7 +234,7 @@ export function AdminListingReview({ id }: { id: string }) {
 
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Description</CardTitle>
+            <CardTitle>{t("listing.description")}</CardTitle>
           </CardHeader>
           <CardContent>
             {value.description ? (
@@ -234,7 +246,7 @@ export function AdminListingReview({ id }: { id: string }) {
               />
             ) : (
               <p className="text-muted-foreground text-sm">
-                Aucune description fournie.
+                {t("listing.noDescription")}
               </p>
             )}
             {value.specificsSections?.length > 0 && (

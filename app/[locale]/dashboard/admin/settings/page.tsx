@@ -8,23 +8,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useUser } from "@/contexts/user-context";
 import { getInitials } from "@/lib/seller-dashboard-utils";
+import { useTranslations } from "next-intl";
 
 export default function AdminSettingsPage() {
+  const t = useTranslations("adminSettings.settings");
   const { user } = useUser();
   const name = user ? `${user.firstName} ${user.lastName}`.trim() : "";
 
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Paramètres"
-        description="Informations du compte administrateur actuellement connecté."
+        title={t("title")}
+        description={t("description")}
       />
 
       <AccountSecurity className="max-w-2xl" />
 
       <Card className="max-w-2xl">
         <CardHeader>
-          <CardTitle>Compte administrateur</CardTitle>
+          <CardTitle>{t("account")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="flex items-center gap-4">
@@ -33,27 +35,27 @@ export default function AdminSettingsPage() {
             </Avatar>
             <div>
               <p className="text-lg font-bold">{name}</p>
-              <Badge variant="outline">Administrateur</Badge>
+              <Badge variant="outline">{t("role")}</Badge>
             </div>
           </div>
           <Separator />
           <dl className="grid gap-4 sm:grid-cols-2">
             <div>
-              <dt className="text-muted-foreground text-xs">Email</dt>
-              <dd className="font-medium">{user?.email ?? "Non renseigné"}</dd>
+              <dt className="text-muted-foreground text-xs">{t("email")}</dt>
+              <dd className="font-medium">{user?.email ?? t("notProvided")}</dd>
             </div>
             <div>
-              <dt className="text-muted-foreground text-xs">Téléphone</dt>
+              <dt className="text-muted-foreground text-xs">{t("phone")}</dt>
               <dd className="font-medium">
-                {user?.phoneNumber ?? "Non renseigné"}
+                {user?.phoneNumber ?? t("notProvided")}
               </dd>
             </div>
             <div>
-              <dt className="text-muted-foreground text-xs">Statut</dt>
+              <dt className="text-muted-foreground text-xs">{t("status")}</dt>
               <dd className="font-medium">{user?.status ?? "—"}</dd>
             </div>
             <div>
-              <dt className="text-muted-foreground text-xs">Identifiant</dt>
+              <dt className="text-muted-foreground text-xs">{t("id")}</dt>
               <dd className="font-mono text-xs">{user?.id ?? "—"}</dd>
             </div>
           </dl>

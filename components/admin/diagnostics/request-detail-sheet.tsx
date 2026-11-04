@@ -21,6 +21,7 @@ import {
   TerminalIcon,
   UserIcon,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
   buildCurl,
@@ -37,12 +38,14 @@ export type DetailFilter =
   | { kind: "ip"; value: string; label: string }
   | { kind: "route"; value: string; method: string; label: string };
 
-const copy = async (text: string, label: string) => {
+type T = ReturnType<typeof useTranslations<"adminSystem">>;
+
+const copy = async (text: string, label: string, t: T) => {
   try {
     await navigator.clipboard.writeText(text);
-    toast.success(`${label} copié`);
+    toast.success(t("diagnostics.detail.copied", { label }));
   } catch {
-    toast.error("Copie impossible dans ce navigateur.");
+    toast.error(t("diagnostics.detail.copyFailed"));
   }
 };
 
@@ -57,6 +60,7 @@ function Field({
   mono?: boolean;
   onCopy?: () => void;
 }) {
+  const t = useTranslations("adminSystem");
   return (
     <div className="grid grid-cols-[7rem_1fr] items-start gap-2 py-1 text-sm">
       <span className="text-muted-foreground">{label}</span>
@@ -67,7 +71,7 @@ function Field({
             type="button"
             onClick={onCopy}
             className="text-muted-foreground hover:text-foreground shrink-0"
-            aria-label={`Copier ${label}`}
+            aria-label={t("diagnostics.detail.copyField", { label })}
           >
             <CopyIcon className="size-3.5" />
           </button>
@@ -78,6 +82,7 @@ function Field({
 }
 
 function JsonBlock({ value, empty }: { value: unknown; empty: string }) {
+  const t = useTranslations("adminSystem");
   const text = prettyJson(value);
 
   if (!text) {
@@ -90,8 +95,8 @@ function JsonBlock({ value, empty }: { value: unknown; empty: string }) {
         size="icon-sm"
         variant="ghost"
         className="absolute top-1 end-1"
-        onClick={() => void copy(text, "Contenu")}
-        aria-label="Copier"
+        onClick={() => void copy(text, t("diagnostics.detail.content"), t)}
+        aria-label={t("diagnostics.detail.copy")}
       >
         <CopyIcon />
       </Button>
@@ -116,6 +121,8 @@ export function RequestDetailSheet({
   onClose: () => void;
   onFilter: (filter: DetailFilter) => void;
 }) {
+  const t = useTranslations("adminSystem");
+  const locale = useLocale();
   const detail = trpc.admin.diagnosticsRequest.useQuery(
     { id: logId ?? "" },
     { enabled: Boolean(logId) },
@@ -144,18 +151,18 @@ export function RequestDetailSheet({
                 <span className="font-mono text-sm break-all">{log.path}</span>
               </>
             ) : (
-              "Détail de la requête"
+              t("diagnostics.detail.title")
             )}
           </SheetTitle>
           <SheetDescription>
-            {log ? `${formatTime(log.createdAt)} · ${formatDuration(log.durationMs)}` : " "}
+            {log ? `${formatTime(log.createdAt, locale)} · ${formatDuration(log.durationMs)}` : " "}
           </SheetDescription>
         </SheetHeader>
 
         <div className="flex flex-col gap-4 px-4 pb-6">
           {detail.isLoading && (
             <div className="text-muted-foreground flex items-center gap-2 py-10">
-              <Spinner /> Chargement...
+              <Spinner /> {t("diagnostics.detail.loading")}
             </div>
           )}
           {detail.error && (
@@ -172,33 +179,37 @@ export function RequestDetailSheet({
 
               <div className="rounded-md border p-3">
                 <Field
-                  label="Request ID"
+                  label={t("diagnostics.detail.requestId")}
                   value={log.reqId}
                   mono
-                  onCopy={log.reqId ? () => void copy(log.reqId!, "Request ID") : undefined}
+                  onCopy={
+                    log.reqId
+                      ? () => void copy(log.reqId!, t("diagnostics.detail.requestId"), t)
+                      : undefined
+                  }
                 />
-                <Field label="Route" value={log.route} mono />
+                <Field label={t("diagnostics.detail.route")} value={log.route} mono />
                 <Field
-                  label="Utilisateur"
+                  label={t("diagnostics.detail.user")}
                   value={
                     userLabel
                       ? `${userLabel}${log.userRole ? ` · ${log.userRole}` : ""}`
                       : log.userId
-                        ? `${log.userId} (supprimé)`
-                        : "Anonyme"
+                        ? t("diagnostics.detail.deletedUser", { id: log.userId })
+                        : t("diagnostics.anonymous")
                   }
                 />
-                <Field label="IP" value={log.ip} mono />
-                <Field label="User agent" value={log.userAgent} />
+                <Field label={t("diagnostics.detail.ip")} value={log.ip} mono />
+                <Field label={t("diagnostics.detail.userAgent")} value={log.userAgent} />
               </div>
 
               <div className="flex flex-wrap gap-2">
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => void copy(buildCurl(log), "cURL")}
+                  onClick={() => void copy(buildCurl(log), "cURL", t)}
                 >
-                  <TerminalIcon /> Copier en cURL
+                  <TerminalIcon /> {t("diagnostics.detail.copyCurl")}
                 </Button>
                 {log.userId && (
                   <Button
@@ -212,7 +223,7 @@ export function RequestDetailSheet({
                       })
                     }
                   >
-                    <UserIcon /> Requêtes de cet utilisateur
+                    <UserIcon /> {t("diagnostics.detail.userRequests")}
                   </Button>
                 )}
                 {log.ip && (
@@ -223,7 +234,7 @@ export function RequestDetailSheet({
                       onFilter({ kind: "ip", value: log.ip!, label: log.ip! })
                     }
                   >
-                    <GlobeIcon /> Même IP
+                    <GlobeIcon /> {t("diagnostics.detail.sameIp")}
                   </Button>
                 )}
                 {log.route && (
@@ -239,33 +250,33 @@ export function RequestDetailSheet({
                       })
                     }
                   >
-                    <RouteIcon /> Même route
+                    <RouteIcon /> {t("diagnostics.detail.sameRoute")}
                   </Button>
                 )}
               </div>
 
               <Tabs defaultValue={log.errorStack ? "error" : "request"}>
                 <TabsList className="w-full justify-start">
-                  <TabsTrigger value="request">Requête</TabsTrigger>
-                  <TabsTrigger value="response">Réponse</TabsTrigger>
-                  <TabsTrigger value="headers">En-têtes</TabsTrigger>
-                  <TabsTrigger value="error">Erreur</TabsTrigger>
+                  <TabsTrigger value="request">{t("diagnostics.detail.tabs.request")}</TabsTrigger>
+                  <TabsTrigger value="response">{t("diagnostics.detail.tabs.response")}</TabsTrigger>
+                  <TabsTrigger value="headers">{t("diagnostics.detail.tabs.headers")}</TabsTrigger>
+                  <TabsTrigger value="error">{t("diagnostics.detail.tabs.error")}</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="request" className="flex flex-col gap-3 pt-2">
                   {log.query && Object.keys(log.query).length > 0 && (
                     <div>
                       <p className="text-muted-foreground mb-1 flex items-center gap-1 text-xs font-medium">
-                        <FilterIcon className="size-3" /> Paramètres de requête
+                        <FilterIcon className="size-3" /> {t("diagnostics.detail.queryParams")}
                       </p>
                       <JsonBlock value={log.query} empty="" />
                     </div>
                   )}
                   <div>
                     <p className="text-muted-foreground mb-1 text-xs font-medium">
-                      Corps envoyé (secrets masqués)
+                      {t("diagnostics.detail.body")}
                     </p>
-                    <JsonBlock value={log.requestBody} empty="Aucun corps de requête." />
+                    <JsonBlock value={log.requestBody} empty={t("diagnostics.detail.noBody")} />
                   </div>
                 </TabsContent>
 
@@ -274,14 +285,14 @@ export function RequestDetailSheet({
                     value={log.responseBody}
                     empty={
                       log.status < 400
-                        ? "Les réponses réussies ne sont pas enregistrées : elles peuvent contenir des jetons."
-                        : "Aucun corps de réponse."
+                        ? t("diagnostics.detail.successNotStored")
+                        : t("diagnostics.detail.noResponse")
                     }
                   />
                 </TabsContent>
 
                 <TabsContent value="headers" className="pt-2">
-                  <JsonBlock value={log.requestHeaders} empty="Aucun en-tête." />
+                  <JsonBlock value={log.requestHeaders} empty={t("diagnostics.detail.noHeaders")} />
                 </TabsContent>
 
                 <TabsContent value="error" className="pt-2">
@@ -289,8 +300,8 @@ export function RequestDetailSheet({
                     value={log.errorStack}
                     empty={
                       log.errorMessage
-                        ? "Pas de trace : l'erreur a été renvoyée par l'API, pas levée."
-                        : "Aucune erreur."
+                        ? t("diagnostics.detail.noStack")
+                        : t("diagnostics.detail.noError")
                     }
                   />
                 </TabsContent>

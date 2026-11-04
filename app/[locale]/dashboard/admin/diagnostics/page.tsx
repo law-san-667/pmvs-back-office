@@ -43,6 +43,7 @@ import type { HttpMethod, StatusClass } from "@/lib/diagnostics-types";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/server/trpc/client";
 import { RefreshCwIcon, SearchIcon, XIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useDeferredValue, useEffect, useState } from "react";
 
@@ -65,8 +66,9 @@ type Chip = { key: keyof Filters; label: string };
 
 // `useSearchParams` (the `?reqId=` deep link) needs a Suspense boundary.
 export default function AdminDiagnosticsPage() {
+  const t = useTranslations("adminSystem");
   return (
-    <Suspense fallback={<IsLoadingScreen text="Chargement du diagnostic..." />}>
+    <Suspense fallback={<IsLoadingScreen text={t("diagnostics.loading")} />}>
       <DiagnosticsDashboard />
     </Suspense>
   );
@@ -74,6 +76,8 @@ export default function AdminDiagnosticsPage() {
 
 function DiagnosticsDashboard() {
   const { user } = useUser();
+  const t = useTranslations("adminSystem");
+  const locale = useLocale();
   const searchParams = useSearchParams();
 
   const [rangeKey, setRangeKey] = useState<RangeKey>("24h");
@@ -150,19 +154,19 @@ function DiagnosticsDashboard() {
       key,
       label:
         key === "status"
-          ? `Statut ${filters.status}`
+          ? t("diagnostics.chips.status", { status: String(filters.status) })
           : key === "userId"
-            ? `Utilisateur : ${chipLabels.userId ?? filters.userId}`
+            ? t("diagnostics.chips.user", { user: chipLabels.userId ?? filters.userId ?? "" })
             : key === "ip"
-              ? `IP : ${filters.ip}`
-              : `Route : ${chipLabels.route ?? filters.route}`,
+              ? t("diagnostics.chips.ip", { ip: filters.ip ?? "" })
+              : t("diagnostics.chips.route", { route: chipLabels.route ?? filters.route ?? "" }),
     }));
 
   if (user && user.role !== "ADMIN") {
     return (
       <div className="p-4 lg:p-6">
         <p className="text-destructive text-sm">
-          Le diagnostic est réservé aux administrateurs.
+          {t("diagnostics.adminOnly")}
         </p>
       </div>
     );
@@ -172,8 +176,8 @@ function DiagnosticsDashboard() {
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <AdminPageHeader
-          title="Diagnostic"
-          description="Historique des requêtes en échec et des écritures, avec leurs payloads, pour comprendre et reproduire un problème."
+          title={t("diagnostics.title")}
+          description={t("diagnostics.description")}
         />
         <div className="flex flex-wrap items-center gap-2">
           <div className="bg-muted flex rounded-lg p-1">
@@ -193,7 +197,7 @@ function DiagnosticsDashboard() {
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {preset.label}
+                {t(`diagnostics.ranges.${preset.key}`)}
               </button>
             ))}
           </div>
@@ -208,7 +212,7 @@ function DiagnosticsDashboard() {
                 isLive ? "animate-pulse bg-green-300" : "bg-muted-foreground",
               )}
             />
-            {isLive ? "En direct" : "Direct"}
+            {isLive ? t("diagnostics.live") : t("diagnostics.goLive")}
           </Button>
           <Button size="sm" variant="outline" onClick={refresh}>
             <RefreshCwIcon
@@ -216,7 +220,7 @@ function DiagnosticsDashboard() {
                 (overview.isFetching || requests.isFetching) && "animate-spin",
               )}
             />
-            Actualiser
+            {t("refresh")}
           </Button>
         </div>
       </div>
@@ -237,10 +241,9 @@ function DiagnosticsDashboard() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Historique des requêtes ({requests.data?.total ?? 0})</CardTitle>
+          <CardTitle>{t("diagnostics.history.title", { count: requests.data?.total ?? 0 })}</CardTitle>
           <CardDescription>
-            Recherche dans le chemin, le message d&apos;erreur, le Request ID,
-            l&apos;IP, le user agent et le contenu des payloads.
+            {t("diagnostics.history.hint")}
           </CardDescription>
           <CardAction>
             <div className="flex flex-wrap items-center gap-2">
@@ -252,7 +255,7 @@ function DiagnosticsDashboard() {
                     setSearch(event.target.value);
                     setPage(1);
                   }}
-                  placeholder="Rechercher (ex. +22177…, orders, too_small)"
+                  placeholder={t("diagnostics.history.searchPlaceholder")}
                   className="h-9 w-72 ps-8"
                 />
               </div>
@@ -264,9 +267,9 @@ function DiagnosticsDashboard() {
                     : setFilter("method", event.target.value as HttpMethod)
                 }
                 className="border-input bg-background h-9 rounded-md border px-2 text-sm"
-                aria-label="Méthode"
+                aria-label={t("diagnostics.history.method")}
               >
-                <option value="ALL">Toutes méthodes</option>
+                <option value="ALL">{t("diagnostics.history.allMethods")}</option>
                 {METHODS.map((method) => (
                   <option key={method} value={method}>
                     {method}
@@ -281,9 +284,9 @@ function DiagnosticsDashboard() {
                     : setFilter("statusClass", event.target.value as StatusClass)
                 }
                 className="border-input bg-background h-9 rounded-md border px-2 text-sm"
-                aria-label="Classe de statut"
+                aria-label={t("diagnostics.history.statusClass")}
               >
-                <option value="ALL">Tous statuts</option>
+                <option value="ALL">{t("diagnostics.history.allStatuses")}</option>
                 {STATUS_CLASSES.map((statusClass) => (
                   <option key={statusClass} value={statusClass}>
                     {statusClass}
@@ -302,7 +305,7 @@ function DiagnosticsDashboard() {
                   <button
                     type="button"
                     onClick={() => clearFilter(chip.key)}
-                    aria-label={`Retirer ${chip.label}`}
+                    aria-label={t("diagnostics.chips.remove", { label: chip.label })}
                     className="hover:bg-background rounded"
                   >
                     <XIcon className="size-3" />
@@ -318,7 +321,7 @@ function DiagnosticsDashboard() {
                   setPage(1);
                 }}
               >
-                Tout effacer
+                {t("diagnostics.chips.clearAll")}
               </Button>
             </div>
           )}
@@ -327,12 +330,12 @@ function DiagnosticsDashboard() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Requête</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Erreur</TableHead>
-                  <TableHead>Utilisateur</TableHead>
-                  <TableHead className="text-end">Durée</TableHead>
+                  <TableHead>{t("diagnostics.columns.date")}</TableHead>
+                  <TableHead>{t("diagnostics.columns.request")}</TableHead>
+                  <TableHead>{t("diagnostics.columns.status")}</TableHead>
+                  <TableHead>{t("diagnostics.columns.error")}</TableHead>
+                  <TableHead>{t("diagnostics.columns.user")}</TableHead>
+                  <TableHead className="text-end">{t("diagnostics.columns.duration")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -341,8 +344,8 @@ function DiagnosticsDashboard() {
                   isLoading={requests.isLoading}
                   error={requests.error?.message}
                   isEmpty={!requests.data?.items.length}
-                  loadingLabel="Chargement de l'historique..."
-                  emptyLabel="Aucune requête ne correspond à ces critères."
+                  loadingLabel={t("diagnostics.history.loading")}
+                  emptyLabel={t("diagnostics.history.empty")}
                 />
                 {requests.data?.items.map((log) => (
                   <TableRow
@@ -351,7 +354,7 @@ function DiagnosticsDashboard() {
                     className="cursor-pointer"
                   >
                     <TableCell className="text-muted-foreground whitespace-nowrap text-xs">
-                      {formatTime(log.createdAt)}
+                      {formatTime(log.createdAt, locale)}
                     </TableCell>
                     <TableCell className="max-w-80">
                       <div className="flex items-center gap-2">
@@ -384,7 +387,7 @@ function DiagnosticsDashboard() {
                     <TableCell className="text-xs whitespace-nowrap">
                       {describeUser(log.user) ?? (
                         <span className="text-muted-foreground">
-                          {log.ip ?? "Anonyme"}
+                          {log.ip ?? t("diagnostics.anonymous")}
                         </span>
                       )}
                     </TableCell>

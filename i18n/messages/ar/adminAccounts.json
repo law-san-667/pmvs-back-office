@@ -1,0 +1,415 @@
+{
+  "businessStatus": {
+    "PENDING_VERIFICATION": "قيد التحقق",
+    "ACTIVE": "نشطة",
+    "INACTIVE": "غير نشطة",
+    "SUSPENDED": "معلّقة",
+    "DELETED": "محذوفة"
+  },
+  "memberRole": {
+    "OWNER": "المالك",
+    "ADMIN": "مسؤول",
+    "MEMBER": "عضو"
+  },
+  "memberStatus": {
+    "INVITED": "مدعو",
+    "ACTIVE": "نشط",
+    "SUSPENDED": "معلّق",
+    "REMOVED": "مُزال"
+  },
+  "payoutStatus": {
+    "ACTIVE": "نشط",
+    "SUSPENDED": "معلّق"
+  },
+  "staffRole": {
+    "ADMIN": "مسؤول",
+    "MODERATOR": "مشرف",
+    "OPERATOR": "مشغّل"
+  },
+  "userStatus": {
+    "PENDING_VERIFICATION": "في انتظار التحقق",
+    "ACTIVE": "نشط",
+    "INACTIVE": "غير نشط",
+    "SUSPENDED": "معلّق",
+    "DELETED": "محذوف"
+  },
+  "actions": {
+    "validate": "اعتماد",
+    "reactivate": "إعادة التفعيل",
+    "suspend": "تعليق",
+    "deactivate": "إلغاء التفعيل",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "viewDetails": "عرض التفاصيل",
+    "view": "عرض",
+    "back": "رجوع",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "saving": "جارٍ الحفظ...",
+    "deleting": "جارٍ الحذف..."
+  },
+  "businesses": {
+    "title": "الموردون",
+    "description": "اطّلع على جميع الشركات المسجّلة واعتمدها وأدِر حالتها.",
+    "count": "الموردون ({count})",
+    "filterByStatus": "تصفية حسب الحالة",
+    "allStatuses": "جميع الحالات",
+    "searchPlaceholder": "بحث...",
+    "columns": {
+      "business": "الشركة",
+      "location": "الموقع",
+      "contact": "جهة الاتصال",
+      "category": "التصنيف",
+      "registeredAt": "التسجيل",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "loading": "جارٍ تحميل الشركات...",
+    "empty": "لم يتم العثور على أي شركة.",
+    "actionsFor": "إجراءات {name}"
+  },
+  "details": {
+    "loading": "جارٍ تحميل الشركة...",
+    "notFound": "الشركة غير موجودة.",
+    "backToList": "العودة إلى الشركات",
+    "subtitle": "{id} — مسجّلة في {date}",
+    "loadingShort": "جارٍ التحميل...",
+    "general": {
+      "title": "معلومات عامة",
+      "description": "الوصف",
+      "location": "الموقع",
+      "address": "العنوان",
+      "deliveryZones": "مناطق التوصيل",
+      "category": "التصنيف",
+      "registeredAt": "التسجيل",
+      "updatedAt": "آخر تحديث"
+    },
+    "contact": {
+      "title": "جهة الاتصال",
+      "email": "البريد الإلكتروني"
+    },
+    "owner": {
+      "title": "المالك",
+      "none": "لا يوجد مالك مرتبط بهذه الشركة.",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "platformRole": "الدور في المنصة",
+      "accountStatus": "حالة الحساب",
+      "lastLogin": "آخر تسجيل دخول",
+      "createdAt": "تاريخ إنشاء الحساب"
+    },
+    "payout": {
+      "title": "تحويلات Wave (LawPay)",
+      "none": "لا يوجد حساب Wave للتحويلات: لا يمكن لهذه الشركة استقبال الطلبات بعد. يجب على مالكها إدخال رقم Wave الخاص به في الإعدادات.",
+      "operator": "المشغّل",
+      "number": "الرقم",
+      "status": "الحالة",
+      "recipientId": "معرّف LawPay",
+      "lastEvent": "آخر حدث",
+      "commission": "العمولة",
+      "defaultRate": "النسبة الافتراضية للمنصة",
+      "suspend": "تعليق التحويلات",
+      "reactivate": "إعادة تفعيل التحويلات"
+    },
+    "compliance": {
+      "title": "الامتثال",
+      "documents": "المستندات",
+      "physicalPersonNote": "لا يقدّم الأشخاص الطبيعيون ملفًا قانونيًا.",
+      "legalStatus": "الشكل القانوني",
+      "commercialRegister": "السجل التجاري",
+      "creationYear": "سنة التأسيس",
+      "taxId": "الرقم الضريبي",
+      "permanentStaff": "عدد الموظفين الدائمين",
+      "businessTypes": "أنواع المورد",
+      "postalCode": "الرمز البريدي",
+      "legalRepresentative": "الممثل القانوني",
+      "website": "الموقع الإلكتروني",
+      "headquarters": "الموقع الجغرافي للمقر",
+      "bank": "البنك",
+      "bankAddress": "العنوان",
+      "paymentAccount": "الحساب / بوابة الدفع",
+      "keyPersons": "الأشخاص الرئيسيون",
+      "personFallback": "الشخص {index}",
+      "idNumber": "رقم الهوية {number}",
+      "contacts": "جهات الاتصال",
+      "complianceDocuments": "مستندات الامتثال",
+      "incorporationDeed": "عقد التأسيس",
+      "passportScan": "نسخة ممسوحة من جواز السفر",
+      "photos": "صور المؤسسة الصغيرة والمتوسطة",
+      "viewDocument": "عرض المستند"
+    },
+    "team": {
+      "title": "الفريق ({count})",
+      "user": "المستخدم",
+      "contact": "جهة الاتصال",
+      "role": "الدور",
+      "status": "الحالة",
+      "addedAt": "تاريخ الإضافة",
+      "loading": "جارٍ تحميل الفريق...",
+      "empty": "لا يوجد أعضاء في هذه الشركة."
+    },
+    "listings": {
+      "title": "الإعلانات الأخيرة ({count})",
+      "viewAll": "عرض جميع الإعلانات",
+      "titleColumn": "العنوان",
+      "status": "الحالة",
+      "createdAt": "تاريخ الإنشاء",
+      "loading": "جارٍ تحميل الإعلانات...",
+      "empty": "لا توجد إعلانات لهذه الشركة."
+    }
+  },
+  "editor": {
+    "title": "تعديل الشركة",
+    "description": "حدّث معلومات «{name}» وحالتها.",
+    "name": "الاسم",
+    "descriptionLabel": "الوصف",
+    "contactEmail": "البريد الإلكتروني للتواصل",
+    "address": "العنوان",
+    "status": "الحالة",
+    "category": "التصنيف",
+    "commission": "عمولة المنصة (%) — فارغ = النسبة الافتراضية",
+    "commissionPlaceholder": "مثال: 10"
+  },
+  "deleteDialog": {
+    "title": "تأكيد الحذف",
+    "description": "سيتم حذف «{name}» نهائيًا مع إعلاناتها وبياناتها المرتبطة. لا يمكن التراجع عن هذه العملية."
+  },
+  "qualityCard": {
+    "title": "الجودة والاعتماد",
+    "loading": "جارٍ حساب المؤشرات...",
+    "noData": "لا توجد بيانات",
+    "met": "مطابق",
+    "notMet": "غير مطابق",
+    "norm": "· المعيار {threshold}",
+    "certified": "مورد معتمد",
+    "notCertified": "غير معتمد",
+    "score": "درجة الامتثال · {met, plural, zero {لا معايير مستوفاة} one {معيار واحد مستوفى} two {معياران مستوفيان} few {# معايير مستوفاة} many {# معيارًا مستوفى} other {# معيار مستوفى}} من {judged, plural, zero {لا معايير قابلة للتقييم} one {معيار واحد قابل للتقييم} two {معيارين قابلين للتقييم} few {# معايير قابلة للتقييم} many {# معيارًا قابلًا للتقييم} other {# معيار قابل للتقييم}} ({total} إجمالًا)",
+    "window": "الفترة: {days, plural, zero {لا أيام} one {يوم واحد} two {يومان} few {# أيام} many {# يومًا} other {# يوم}}",
+    "pendingReports": "{count, plural, zero {لا بلاغات معلّقة} one {بلاغ واحد معلّق} two {بلاغان معلّقان} few {# بلاغات معلّقة} many {# بلاغًا معلّقًا} other {# بلاغ معلّق}} بخصوص هذه الشركة أو إعلاناتها.",
+    "measured": "المؤشرات المقيسة",
+    "teamChecks": "عمليات تحقق الفريق",
+    "notesPlaceholder": "ملاحظات داخلية حول التقييم (اختياري)",
+    "saveEvaluation": "حفظ التقييم",
+    "lastEvaluation": "آخر تقييم: {date}",
+    "certification": "الاعتماد",
+    "certifiedOn": "معتمد بتاريخ {date}.",
+    "scoreHint": "الدرجة توجّه القرار ولا تحلّ محله.",
+    "revoke": "سحب الاعتماد",
+    "certify": "اعتماد هذا المورد",
+    "saveError": "تعذّر حفظ التقييم.",
+    "certificationError": "تعذّر تعديل الاعتماد.",
+    "units": {
+      "percent": "{value}٪",
+      "days": "{value} ي",
+      "hours": "{value} س"
+    },
+    "minimumStockThreshold": "لا يوجد منتج دون الحد الأدنى",
+    "kpi": {
+      "negativeFeedback": {
+        "title": "التقييمات السلبية",
+        "description": "نسبة التقييمات بنجمة واحدة أو نجمتين."
+      },
+      "responseRate": {
+        "title": "خدمة عملاء سريعة الاستجابة",
+        "description": "نسبة محادثات العملاء التي ردّ عليها المورد."
+      },
+      "returnRate": {
+        "title": "معدل إرجاع المنتجات",
+        "description": "نسبة الطلبات المسلَّمة التي تم استرداد مبلغها (لا يوجد بعد مسار إرجاع فعلي)."
+      },
+      "cancellationRate": {
+        "title": "الإلغاءات ونفاد المخزون",
+        "description": "الطلبات التي ألغاها المورد، والإعلانات التي نفد مخزونها."
+      },
+      "shippingDelay": {
+        "title": "مهل المعالجة والشحن",
+        "description": "نسبة الطلبات المشحونة ضمن المهلة المحددة بعد التأكيد."
+      },
+      "minimumStock": {
+        "title": "الحد الأدنى للمخزون لكل منتج",
+        "description": "المنتجات المنشورة التي يقل مخزونها عن الحد الأدنى المطلوب."
+      }
+    },
+    "check": {
+      "prohibitedProductsEnforced": {
+        "title": "تطبيق صارم لقائمة المنتجات المحظورة",
+        "description": "لا يندرج أي إعلان ضمن قائمة المنتجات الممنوعة."
+      },
+      "admissibleCategoriesDefined": {
+        "title": "فئات المنتجات والخدمات المقبولة",
+        "description": "لا يبيع المورد إلا في الفئات المسموح بها لملفه."
+      },
+      "productQualityVerified": {
+        "title": "التحقق من معايير جودة المنتجات",
+        "description": "تحقق الفريق من جودة المنتجات."
+      }
+    },
+    "details": {
+      "negativeFeedback": "{negative, plural, zero {لا تقييمات سلبية} one {تقييم سلبي واحد} two {تقييمان سلبيان} few {# تقييمات سلبية} many {# تقييمًا سلبيًا} other {# تقييم سلبي}} من {total}",
+      "responseRate": "{answered, plural, zero {لا محادثات تم الرد عليها} one {محادثة واحدة تم الرد عليها} two {محادثتان تم الرد عليهما} few {# محادثات تم الرد عليها} many {# محادثة تم الرد عليها} other {# محادثة تم الرد عليها}} من {total}",
+      "returnRate": "{refunded, plural, zero {لا استردادات} one {استرداد واحد} two {استردادان} few {# استردادات} many {# استردادًا} other {# استرداد}} من {delivered, plural, zero {لا طلبات مسلَّمة} one {طلب واحد مسلَّم} two {طلبين مسلَّمين} few {# طلبات مسلَّمة} many {# طلبًا مسلَّمًا} other {# طلب مسلَّم}}",
+      "cancellationRate": "{cancelled, plural, zero {لا إلغاءات} one {إلغاء واحد} two {إلغاءان} few {# إلغاءات} many {# إلغاءً} other {# إلغاء}} من {orders, plural, zero {لا طلبات} one {طلب واحد} two {طلبين} few {# طلبات} many {# طلبًا} other {# طلب}} · نفاد المخزون {stockOutRate} ({listings, plural, zero {لا إعلانات} one {إعلان واحد} two {إعلانان} few {# إعلانات} many {# إعلانًا} other {# إعلان}})",
+      "shippingDelay": "{onTime} في الموعد من {shipped, plural, zero {لا طلبات مشحونة} one {طلب واحد مشحون} two {طلبين مشحونين} few {# طلبات مشحونة} many {# طلبًا مشحونًا} other {# طلب مشحون}} · متوسط المهلة {average} (الحد الأقصى {maxDays} ي)",
+      "minimumStock": "{under, plural, zero {لا منتجات} one {منتج واحد} two {منتجان} few {# منتجات} many {# منتجًا} other {# منتج}} دون {minimum, plural, zero {صفر وحدات} one {وحدة واحدة} two {وحدتين} few {# وحدات} many {# وحدةً} other {# وحدة}} من {published, plural, zero {لا منتجات منشورة} one {منتج واحد منشور} two {منتجين منشورين} few {# منتجات منشورة} many {# منتجًا منشورًا} other {# منتج منشور}}"
+    }
+  },
+  "qualityPage": {
+    "title": "جودة الموردين",
+    "description": "ترتيب الموردين وفق معايير الجودة في المنصة. افتح شركة لعرض التفاصيل وتقييمها واعتمادها.",
+    "count": "الترتيب ({count})",
+    "filterByCertification": "تصفية حسب الاعتماد",
+    "allSuppliers": "جميع الموردين",
+    "certifiedFilter": "المعتمدون",
+    "notCertifiedFilter": "غير المعتمدين",
+    "adjustNorms": "ضبط المعايير",
+    "columns": {
+      "supplier": "المورد",
+      "score": "الدرجة",
+      "norms": "المعايير",
+      "certification": "الاعتماد",
+      "status": "الحالة",
+      "detail": "التفاصيل"
+    },
+    "loading": "جارٍ حساب الدرجات...",
+    "empty": "لا يوجد موردون لترتيبهم.",
+    "reports": "{count, plural, zero {لا بلاغات} one {بلاغ واحد} two {بلاغان} few {# بلاغات} many {# بلاغًا} other {# بلاغ}}",
+    "norms": "{met} / {judged} قابلة للتقييم",
+    "normsWithMissing": "{met} / {judged} قابلة للتقييم ({missing} بلا بيانات)",
+    "certified": "معتمد",
+    "notCertified": "غير معتمد"
+  },
+  "customers": {
+    "title": "العملاء",
+    "description": "المشترون المحدَّدون من خلال المعاملات الأخيرة على المنصة.",
+    "count": "العملاء ({count})",
+    "searchPlaceholder": "الاسم، البريد الإلكتروني، الهاتف...",
+    "columns": {
+      "client": "العميل",
+      "phone": "الهاتف",
+      "orders": "الطلبات الأخيرة",
+      "amount": "المبلغ الأخير",
+      "id": "المعرّف"
+    },
+    "loading": "جارٍ تحميل العملاء...",
+    "empty": "لم يتم العثور على أي عميل في المعاملات الأخيرة.",
+    "noEmail": "لا يوجد بريد إلكتروني"
+  },
+  "administrators": {
+    "title": "المسؤولون",
+    "description": "الحسابات التي يمكنها الوصول إلى لوحة الإدارة. أنشئ حسابات جديدة واطّلع على الحسابات الموجودة.",
+    "count": "الحسابات ({count})",
+    "searchPlaceholder": "الاسم، البريد الإلكتروني، الهاتف...",
+    "allRoles": "جميع الأدوار",
+    "columns": {
+      "account": "الحساب",
+      "contact": "جهة الاتصال",
+      "role": "الدور",
+      "status": "الحالة",
+      "lastLogin": "آخر تسجيل دخول",
+      "createdAt": "تاريخ الإنشاء"
+    },
+    "loading": "جارٍ تحميل المسؤولين...",
+    "empty": "لم يتم العثور على أي مسؤول.",
+    "you": "(أنت)",
+    "never": "أبدًا"
+  },
+  "teamMembers": {
+    "title": "المستخدمون",
+    "description": "المستخدمون المرتبطون بالشركات والأدوار المسندة إليهم.",
+    "count": "المستخدمون ({count})",
+    "allBusinesses": "جميع الشركات",
+    "allRoles": "جميع الأدوار",
+    "columns": {
+      "user": "المستخدم",
+      "business": "الشركة",
+      "role": "الدور",
+      "status": "الحالة",
+      "addedAt": "تاريخ الإضافة",
+      "updatedAt": "آخر تحديث"
+    },
+    "loading": "جارٍ تحميل المستخدمين...",
+    "empty": "لم يتم العثور على أي مستخدم."
+  },
+  "operators": {
+    "title": "المشغّلون",
+    "description": "أسند المتاجر إلى المشغّلين: يديرون الكتالوج والطلبات والمدفوعات لهذه المتاجر فقط.",
+    "newAssignment": "إسناد جديد",
+    "operator": "المشغّل",
+    "chooseOperator": "اختر مشغّلًا",
+    "noOperator": "لا يوجد حساب مشغّل نشط",
+    "shop": "المتجر",
+    "searchShop": "البحث بالاسم…",
+    "chooseShop": "اختر متجرًا",
+    "note": "ملاحظة (اختيارية)",
+    "notePlaceholder": "مثال: المرافقة عند الإطلاق",
+    "assign": "إسناد",
+    "assigning": "جارٍ الإسناد…",
+    "assignments": "الإسنادات ({count})",
+    "columns": {
+      "operator": "المشغّل",
+      "shop": "المتجر",
+      "note": "ملاحظة",
+      "since": "منذ",
+      "state": "الحالة"
+    },
+    "loading": "جارٍ تحميل الإسنادات...",
+    "empty": "لم يتم إسناد أي متجر بعد.",
+    "active": "نشط",
+    "ended": "منتهٍ",
+    "end": "إنهاء",
+    "resume": "استئناف",
+    "toasts": {
+      "assigned": "تم إسناد المتجر.",
+      "assignFailed": "فشل الإسناد.",
+      "resumed": "تم استئناف الإسناد.",
+      "ended": "تم إنهاء الإسناد.",
+      "updateFailed": "فشل التحديث."
+    }
+  },
+  "createAdmin": {
+    "title": "مسؤول جديد",
+    "verifyTitle": "التحقق من الحساب",
+    "description": "سيُفعَّل الحساب بعد التحقق من الرمز المرسل إلى الشخص. أبلغه بكلمة المرور: لا يتم إرسال أي بريد دعوة.",
+    "verifyDescription": "أدخل الرمز المكوّن من 4 أرقام المستلم عبر {channel, select, EMAIL {البريد الإلكتروني} other {رسالة}} على {identifier}. يبقى الحساب غير نشط حتى يتم التحقق منه.",
+    "testCode": "رمز الاختبار: {code}",
+    "codeSent": "تم إرسال رمز إلى {identifier}.",
+    "newCodeSent": "تم إرسال رمز جديد إلى {identifier}.",
+    "createError": "تعذّر إنشاء حساب المسؤول هذا.",
+    "enterCode": "أدخل الرمز المكوّن من 4 أرقام.",
+    "invalidCode": "رمز غير صالح أو منتهي الصلاحية.",
+    "resendError": "تعذّرت إعادة الإرسال.",
+    "resend": "إعادة إرسال الرمز",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "name@example.com",
+    "phone": "الرقم",
+    "phoneHint": "يُرسل رمز التحقق إلى الرقم، أو إلى البريد الإلكتروني إذا لم يكن هناك رقم.",
+    "role": "الدور",
+    "roleOptions": {
+      "ADMIN": "مسؤول — وصول كامل",
+      "MODERATOR": "مشرف — الإشراف على المحتوى",
+      "OPERATOR": "مشغّل — متابعة النشاط"
+    },
+    "password": "كلمة المرور",
+    "passwordPlaceholder": "6 أحرف على الأقل، حرف كبير، رقم",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "acceptTerms": "يوافق الشخص على <link>الشروط العامة للاستخدام</link> الخاصة بـ Diarama.",
+    "validateLater": "التحقق لاحقًا",
+    "cancel": "إلغاء",
+    "validating": "جارٍ التحقق...",
+    "activate": "تفعيل الحساب",
+    "creating": "جارٍ الإنشاء...",
+    "create": "إنشاء وإرسال الرمز",
+    "errors": {
+      "firstNameRequired": "الاسم الأول مطلوب.",
+      "lastNameRequired": "اسم العائلة مطلوب.",
+      "emailInvalid": "عنوان بريد إلكتروني غير صالح.",
+      "confirmPasswordRequired": "أكّد كلمة المرور.",
+      "contactRequired": "أدخل بريدًا إلكترونيًا أو رقم هاتف.",
+      "passwordMismatch": "كلمتا المرور غير متطابقتين.",
+      "acceptTerms": "يجب على المسؤول الجديد قبول الشروط العامة للاستخدام.",
+      "codeLength": "يتكون الرمز من 4 أرقام."
+    }
+  }
+}

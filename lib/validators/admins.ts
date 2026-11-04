@@ -1,6 +1,7 @@
 import { passwordSchema } from "@/lib/validators/auth";
 import { paginationInputSchema, uuidSchema } from "@/lib/validators/backend-resources";
 import z from "zod";
+import { msg } from "./messages";
 
 /** Roles that can sign into the back office. */
 export const staffRoleSchema = z.enum(["ADMIN", "MODERATOR", "OPERATOR"]);
@@ -23,11 +24,11 @@ export const adminsInputSchema = paginationInputSchema.extend({
 
 export const createAdminInputSchema = z
   .object({
-    firstName: z.string().trim().min(1, "Prénom obligatoire."),
-    lastName: z.string().trim().min(1, "Nom obligatoire."),
+    firstName: z.string().trim().min(1, msg("adminAccounts.createAdmin.errors.firstNameRequired")),
+    lastName: z.string().trim().min(1, msg("adminAccounts.createAdmin.errors.lastNameRequired")),
     // Optional on the form: an empty input must not fail the email check.
     email: z
-      .union([z.literal(""), z.string().trim().email("Adresse email invalide.")])
+      .union([z.literal(""), z.string().trim().email(msg("adminAccounts.createAdmin.errors.emailInvalid"))])
       .optional()
       .transform((value) => value || undefined),
     phoneNumber: z
@@ -35,21 +36,21 @@ export const createAdminInputSchema = z
       .optional()
       .transform((value) => value || undefined),
     password: passwordSchema,
-    confirmPassword: z.string().min(1, "Confirmez le mot de passe."),
+    confirmPassword: z.string().min(1, msg("adminAccounts.createAdmin.errors.confirmPasswordRequired")),
     role: staffRoleSchema,
   })
   .superRefine((value, ctx) => {
     if (!value.email && !value.phoneNumber) {
       ctx.addIssue({
         code: "custom",
-        message: "Renseignez un email ou un numéro de téléphone.",
+        message: msg("adminAccounts.createAdmin.errors.contactRequired"),
         path: ["email"],
       });
     }
     if (value.password !== value.confirmPassword) {
       ctx.addIssue({
         code: "custom",
-        message: "Les mots de passe ne correspondent pas.",
+        message: msg("adminAccounts.createAdmin.errors.passwordMismatch"),
         path: ["confirmPassword"],
       });
     }
@@ -58,13 +59,13 @@ export const createAdminInputSchema = z
 /** Frontend-only: the CGU tick is checked in the dialog, never sent. */
 export const createAdminFormSchema = createAdminInputSchema.safeExtend({
   acceptTerms: z.boolean().refine((accepted) => accepted, {
-    message: "Le nouvel administrateur doit accepter les CGU.",
+    message: msg("adminAccounts.createAdmin.errors.acceptTerms"),
   }),
 });
 
 export const verifyAdminInputSchema = z.object({
   id: uuidSchema,
-  code: z.string().trim().length(4, "Le code comporte 4 chiffres."),
+  code: z.string().trim().length(4, msg("adminAccounts.createAdmin.errors.codeLength")),
 });
 
 export type StaffRole = z.infer<typeof staffRoleSchema>;

@@ -39,15 +39,6 @@ export type AfterSalesCase = {
   };
 };
 
-/** French labels (admin screens); supplier pages use the afterSales messages. */
-export const CASE_REASON_LABELS: Record<CaseReason, string> = {
-  NOT_RECEIVED: "Commande non reçue",
-  DAMAGED: "Article endommagé",
-  NOT_AS_DESCRIBED: "Non conforme à l'annonce",
-  WRONG_ITEM: "Mauvais article",
-  OTHER: "Autre problème",
-};
-
 export const CASE_STATUS_LABELS: Record<CaseStatus, string> = {
   OPEN: "En attente du vendeur",
   SUPPLIER_ACCEPTED: "Accepté par le vendeur",

@@ -1,0 +1,415 @@
+{
+  "businessStatus": {
+    "PENDING_VERIFICATION": "À vérifier",
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive",
+    "SUSPENDED": "Suspendue",
+    "DELETED": "Supprimée"
+  },
+  "memberRole": {
+    "OWNER": "Propriétaire",
+    "ADMIN": "Administrateur",
+    "MEMBER": "Membre"
+  },
+  "memberStatus": {
+    "INVITED": "Invité",
+    "ACTIVE": "Actif",
+    "SUSPENDED": "Suspendu",
+    "REMOVED": "Retiré"
+  },
+  "payoutStatus": {
+    "ACTIVE": "Actif",
+    "SUSPENDED": "Suspendu"
+  },
+  "staffRole": {
+    "ADMIN": "Administrateur",
+    "MODERATOR": "Modérateur",
+    "OPERATOR": "Opérateur"
+  },
+  "userStatus": {
+    "PENDING_VERIFICATION": "En attente de vérification",
+    "ACTIVE": "Actif",
+    "INACTIVE": "Inactif",
+    "SUSPENDED": "Suspendu",
+    "DELETED": "Supprimé"
+  },
+  "actions": {
+    "validate": "Valider",
+    "reactivate": "Réactiver",
+    "suspend": "Suspendre",
+    "deactivate": "Désactiver",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "viewDetails": "Voir les détails",
+    "view": "Voir",
+    "back": "Retour",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "deleting": "Suppression..."
+  },
+  "businesses": {
+    "title": "Fournisseurs",
+    "description": "Consultez toutes les entreprises enregistrées, validez-les et gérez leur statut.",
+    "count": "Fournisseurs ({count})",
+    "filterByStatus": "Filtrer par statut",
+    "allStatuses": "Tous les statuts",
+    "searchPlaceholder": "Rechercher...",
+    "columns": {
+      "business": "Entreprise",
+      "location": "Localisation",
+      "contact": "Contact",
+      "category": "Catégorisation",
+      "registeredAt": "Inscription",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "loading": "Chargement des entreprises...",
+    "empty": "Aucune entreprise trouvée.",
+    "actionsFor": "Actions pour {name}"
+  },
+  "details": {
+    "loading": "Chargement de l'entreprise...",
+    "notFound": "Entreprise introuvable.",
+    "backToList": "Retour aux entreprises",
+    "subtitle": "{id} — inscrite le {date}",
+    "loadingShort": "Chargement...",
+    "general": {
+      "title": "Informations générales",
+      "description": "Description",
+      "location": "Localisation",
+      "address": "Adresse",
+      "deliveryZones": "Zones de livraison",
+      "category": "Catégorisation",
+      "registeredAt": "Inscription",
+      "updatedAt": "Mise à jour"
+    },
+    "contact": {
+      "title": "Contact",
+      "email": "Email"
+    },
+    "owner": {
+      "title": "Propriétaire",
+      "none": "Aucun propriétaire associé à cette entreprise.",
+      "email": "Email",
+      "phone": "Téléphone",
+      "platformRole": "Rôle plateforme",
+      "accountStatus": "Statut compte",
+      "lastLogin": "Dernière connexion",
+      "createdAt": "Compte créé le"
+    },
+    "payout": {
+      "title": "Reversements Wave (LawPay)",
+      "none": "Aucun compte Wave de reversement : cette entreprise ne peut pas encore recevoir de commandes. Son propriétaire doit renseigner son numéro Wave dans les réglages.",
+      "operator": "Opérateur",
+      "number": "Numéro",
+      "status": "Statut",
+      "recipientId": "Identifiant LawPay",
+      "lastEvent": "Dernier évènement",
+      "commission": "Commission",
+      "defaultRate": "Taux plateforme par défaut",
+      "suspend": "Suspendre les reversements",
+      "reactivate": "Réactiver les reversements"
+    },
+    "compliance": {
+      "title": "Conformité",
+      "documents": "Documents",
+      "physicalPersonNote": "Les personnes physiques ne fournissent pas de dossier légal.",
+      "legalStatus": "Statut juridique",
+      "commercialRegister": "Registre de commerce",
+      "creationYear": "Année de création",
+      "taxId": "NIF",
+      "permanentStaff": "Effectif permanent",
+      "businessTypes": "Types de fournisseur",
+      "postalCode": "Code postal",
+      "legalRepresentative": "Représentant légal",
+      "website": "Site web",
+      "headquarters": "Géolocalisation du siège",
+      "bank": "Banque",
+      "bankAddress": "Adresse",
+      "paymentAccount": "Compte / passerelle",
+      "keyPersons": "Personnes-clés",
+      "personFallback": "Personne {index}",
+      "idNumber": "ID {number}",
+      "contacts": "Contacts",
+      "complianceDocuments": "Documents de conformité",
+      "incorporationDeed": "Acte de constitution",
+      "passportScan": "Scan du passeport",
+      "photos": "Photos MPME",
+      "viewDocument": "Voir le document"
+    },
+    "team": {
+      "title": "Équipe ({count})",
+      "user": "Utilisateur",
+      "contact": "Contact",
+      "role": "Rôle",
+      "status": "Statut",
+      "addedAt": "Ajouté le",
+      "loading": "Chargement de l'équipe...",
+      "empty": "Aucun membre pour cette entreprise."
+    },
+    "listings": {
+      "title": "Annonces récentes ({count})",
+      "viewAll": "Voir toutes les annonces",
+      "titleColumn": "Titre",
+      "status": "Statut",
+      "createdAt": "Créée le",
+      "loading": "Chargement des annonces...",
+      "empty": "Aucune annonce pour cette entreprise."
+    }
+  },
+  "editor": {
+    "title": "Modifier l'entreprise",
+    "description": "Mettez à jour les informations et le statut de « {name} ».",
+    "name": "Nom",
+    "descriptionLabel": "Description",
+    "contactEmail": "Email de contact",
+    "address": "Adresse",
+    "status": "Statut",
+    "category": "Catégorisation",
+    "commission": "Commission plateforme (%) — vide = taux par défaut",
+    "commissionPlaceholder": "ex. 10"
+  },
+  "deleteDialog": {
+    "title": "Confirmer la suppression",
+    "description": "« {name} » sera supprimée définitivement, ainsi que ses annonces et données associées. Cette opération est irréversible."
+  },
+  "qualityCard": {
+    "title": "Qualité & certification",
+    "loading": "Calcul des indicateurs...",
+    "noData": "Pas de données",
+    "met": "Conforme",
+    "notMet": "Non conforme",
+    "norm": "· norme {threshold}",
+    "certified": "Fournisseur certifié",
+    "notCertified": "Non certifié",
+    "score": "Score de conformité · {met, plural, one {# norme respectée} other {# normes respectées}} sur {judged, plural, one {# évaluable} other {# évaluables}} ({total} au total)",
+    "window": "Fenêtre : {days, plural, one {# jour} other {# jours}}",
+    "pendingReports": "{count, plural, one {# signalement en attente} other {# signalements en attente}} concernant cette entreprise ou ses annonces.",
+    "measured": "Indicateurs mesurés",
+    "teamChecks": "Contrôles de l'équipe",
+    "notesPlaceholder": "Notes internes sur l'évaluation (facultatif)",
+    "saveEvaluation": "Enregistrer l'évaluation",
+    "lastEvaluation": "Dernière évaluation : {date}",
+    "certification": "Certification",
+    "certifiedOn": "Certifié le {date}.",
+    "scoreHint": "Le score guide la décision, il ne la remplace pas.",
+    "revoke": "Retirer la certification",
+    "certify": "Certifier ce fournisseur",
+    "saveError": "Impossible d'enregistrer l'évaluation.",
+    "certificationError": "Impossible de modifier la certification.",
+    "units": {
+      "percent": "{value} %",
+      "days": "{value} j",
+      "hours": "{value} h"
+    },
+    "minimumStockThreshold": "aucun produit sous le minimum",
+    "kpi": {
+      "negativeFeedback": {
+        "title": "Rétroaction négative",
+        "description": "Part des avis notés 1 ou 2 étoiles."
+      },
+      "responseRate": {
+        "title": "Service client réactif",
+        "description": "Part des conversations clients auxquelles le fournisseur a répondu."
+      },
+      "returnRate": {
+        "title": "Taux de retour des articles",
+        "description": "Part des commandes livrées qui ont été remboursées (il n'existe pas encore de flux de retour à proprement parler)."
+      },
+      "cancellationRate": {
+        "title": "Annulations et ruptures de stock",
+        "description": "Commandes annulées par le fournisseur, et annonces en rupture de stock."
+      },
+      "shippingDelay": {
+        "title": "Délais de traitement et d'expédition",
+        "description": "Part des commandes expédiées dans le délai imparti après confirmation."
+      },
+      "minimumStock": {
+        "title": "Stock minimum par produit",
+        "description": "Produits publiés dont le stock est sous le minimum requis."
+      }
+    },
+    "check": {
+      "prohibitedProductsEnforced": {
+        "title": "Liste des produits prohibés strictement appliquée",
+        "description": "Aucune annonce ne relève de la liste des produits interdits."
+      },
+      "admissibleCategoriesDefined": {
+        "title": "Catégories de produits et services admissibles",
+        "description": "Le fournisseur ne vend que dans les catégories admises pour son profil."
+      },
+      "productQualityVerified": {
+        "title": "Normes de qualité des produits vérifiées",
+        "description": "La qualité des produits a été contrôlée par l'équipe."
+      }
+    },
+    "details": {
+      "negativeFeedback": "{negative, plural, one {# avis négatif} other {# avis négatifs}} sur {total}",
+      "responseRate": "{answered, plural, one {# conversation répondue} other {# conversations répondues}} sur {total}",
+      "returnRate": "{refunded, plural, one {# remboursement} other {# remboursements}} sur {delivered, plural, one {# commande livrée} other {# commandes livrées}}",
+      "cancellationRate": "{cancelled, plural, one {# annulation} other {# annulations}} sur {orders, plural, one {# commande} other {# commandes}} · rupture {stockOutRate} ({listings, plural, one {# annonce} other {# annonces}})",
+      "shippingDelay": "{onTime} à temps sur {shipped, plural, one {# expédiée} other {# expédiées}} · délai moyen {average} (max {maxDays} j)",
+      "minimumStock": "{under, plural, one {# produit} other {# produits}} sous {minimum, plural, one {# unité} other {# unités}} sur {published, plural, one {# publié} other {# publiés}}"
+    }
+  },
+  "qualityPage": {
+    "title": "Qualité des fournisseurs",
+    "description": "Classement des fournisseurs selon les normes de qualité de la plateforme. Ouvrez une entreprise pour voir le détail, l'évaluer et la certifier.",
+    "count": "Classement ({count})",
+    "filterByCertification": "Filtrer par certification",
+    "allSuppliers": "Tous les fournisseurs",
+    "certifiedFilter": "Certifiés",
+    "notCertifiedFilter": "Non certifiés",
+    "adjustNorms": "Régler les normes",
+    "columns": {
+      "supplier": "Fournisseur",
+      "score": "Score",
+      "norms": "Normes",
+      "certification": "Certification",
+      "status": "Statut",
+      "detail": "Détail"
+    },
+    "loading": "Calcul des scores...",
+    "empty": "Aucun fournisseur à classer.",
+    "reports": "{count, plural, one {# signalement} other {# signalements}}",
+    "norms": "{met} / {judged} évaluables",
+    "normsWithMissing": "{met} / {judged} évaluables ({missing} sans données)",
+    "certified": "Certifié",
+    "notCertified": "Non certifié"
+  },
+  "customers": {
+    "title": "Clients",
+    "description": "Acheteurs identifiés à partir des transactions récentes de la plateforme.",
+    "count": "Clients ({count})",
+    "searchPlaceholder": "Nom, email, téléphone...",
+    "columns": {
+      "client": "Client",
+      "phone": "Téléphone",
+      "orders": "Commandes récentes",
+      "amount": "Montant récent",
+      "id": "Identifiant"
+    },
+    "loading": "Chargement des clients...",
+    "empty": "Aucun client trouvé dans les transactions récentes.",
+    "noEmail": "Aucun email"
+  },
+  "administrators": {
+    "title": "Administrateurs",
+    "description": "Comptes ayant accès au back-office. Créez-en de nouveaux et consultez ceux qui existent déjà.",
+    "count": "Comptes ({count})",
+    "searchPlaceholder": "Nom, email, téléphone...",
+    "allRoles": "Tous les rôles",
+    "columns": {
+      "account": "Compte",
+      "contact": "Contact",
+      "role": "Rôle",
+      "status": "Statut",
+      "lastLogin": "Dernière connexion",
+      "createdAt": "Créé le"
+    },
+    "loading": "Chargement des administrateurs...",
+    "empty": "Aucun administrateur trouvé.",
+    "you": "(vous)",
+    "never": "Jamais"
+  },
+  "teamMembers": {
+    "title": "Utilisateurs",
+    "description": "Utilisateurs associés aux entreprises et rôles qui leur sont attribués.",
+    "count": "Utilisateurs ({count})",
+    "allBusinesses": "Toutes les entreprises",
+    "allRoles": "Tous les rôles",
+    "columns": {
+      "user": "Utilisateur",
+      "business": "Entreprise",
+      "role": "Rôle",
+      "status": "Statut",
+      "addedAt": "Ajouté le",
+      "updatedAt": "Mis à jour"
+    },
+    "loading": "Chargement des utilisateurs...",
+    "empty": "Aucun utilisateur trouvé."
+  },
+  "operators": {
+    "title": "Opérateurs",
+    "description": "Affectez des boutiques aux opérateurs : ils gèrent le catalogue, les commandes et les versements de ces boutiques uniquement.",
+    "newAssignment": "Nouvelle affectation",
+    "operator": "Opérateur",
+    "chooseOperator": "Choisir un opérateur",
+    "noOperator": "Aucun compte opérateur actif",
+    "shop": "Boutique",
+    "searchShop": "Rechercher par nom…",
+    "chooseShop": "Choisir une boutique",
+    "note": "Note (facultative)",
+    "notePlaceholder": "Ex. accompagnement à la mise en ligne",
+    "assign": "Affecter",
+    "assigning": "Affectation…",
+    "assignments": "Affectations ({count})",
+    "columns": {
+      "operator": "Opérateur",
+      "shop": "Boutique",
+      "note": "Note",
+      "since": "Depuis le",
+      "state": "État"
+    },
+    "loading": "Chargement des affectations...",
+    "empty": "Aucune boutique n’est encore affectée.",
+    "active": "Active",
+    "ended": "Terminée",
+    "end": "Terminer",
+    "resume": "Reprendre",
+    "toasts": {
+      "assigned": "Boutique affectée.",
+      "assignFailed": "L’affectation a échoué.",
+      "resumed": "Affectation reprise.",
+      "ended": "Affectation terminée.",
+      "updateFailed": "La mise à jour a échoué."
+    }
+  },
+  "createAdmin": {
+    "title": "Nouvel administrateur",
+    "verifyTitle": "Validation du compte",
+    "description": "Le compte sera activé après validation du code envoyé à la personne. Communiquez-lui son mot de passe : aucun email d'invitation n'est envoyé.",
+    "verifyDescription": "Entrez le code à 4 chiffres reçu par {channel, select, EMAIL {email} other {message}} à {identifier}. Le compte reste inactif tant qu'il n'est pas validé.",
+    "testCode": "Code de test : {code}",
+    "codeSent": "Un code a été envoyé à {identifier}.",
+    "newCodeSent": "Un nouveau code a été envoyé à {identifier}.",
+    "createError": "Impossible de créer ce compte administrateur.",
+    "enterCode": "Entrez le code à 4 chiffres.",
+    "invalidCode": "Code invalide ou expiré.",
+    "resendError": "Renvoi impossible.",
+    "resend": "Renvoyer le code",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "Email",
+    "emailPlaceholder": "nom@exemple.com",
+    "phone": "Numéro",
+    "phoneHint": "Le code de validation est envoyé au numéro, ou à l'email s'il n'y a pas de numéro.",
+    "role": "Rôle",
+    "roleOptions": {
+      "ADMIN": "Administrateur — accès complet",
+      "MODERATOR": "Modérateur — modération des contenus",
+      "OPERATOR": "Opérateur — suivi de l'activité"
+    },
+    "password": "Mot de passe",
+    "passwordPlaceholder": "6 car. min., majuscule, chiffre",
+    "confirmPassword": "Confirmation du mot de passe",
+    "acceptTerms": "La personne accepte les <link>conditions générales d'utilisation</link> de Diarama.",
+    "validateLater": "Valider plus tard",
+    "cancel": "Annuler",
+    "validating": "Validation...",
+    "activate": "Activer le compte",
+    "creating": "Création...",
+    "create": "Créer et envoyer le code",
+    "errors": {
+      "firstNameRequired": "Prénom obligatoire.",
+      "lastNameRequired": "Nom obligatoire.",
+      "emailInvalid": "Adresse email invalide.",
+      "confirmPasswordRequired": "Confirmez le mot de passe.",
+      "contactRequired": "Renseignez un email ou un numéro de téléphone.",
+      "passwordMismatch": "Les mots de passe ne correspondent pas.",
+      "acceptTerms": "Le nouvel administrateur doit accepter les CGU.",
+      "codeLength": "Le code comporte 4 chiffres."
+    }
+  }
+}

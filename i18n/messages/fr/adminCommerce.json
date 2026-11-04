@@ -1,0 +1,282 @@
+{
+  "administration": "Administration",
+  "common": {
+    "search": "Rechercher...",
+    "loading": "Chargement…",
+    "failed": "Échec.",
+    "cancel": "Annuler",
+    "approve": "Valider",
+    "reject": "Refuser",
+    "back": "Retour"
+  },
+  "listingStatus": {
+    "DRAFT": "Brouillon",
+    "PUBLISHED": "Publié",
+    "PAUSED": "En pause",
+    "SOLD": "Épuisé",
+    "ARCHIVED": "Archivé"
+  },
+  "listings": {
+    "title": "Modération des produits & services",
+    "description": "Chaque annonce publiée par un fournisseur doit être validée avant d'être visible par les acheteurs.",
+    "queue": {
+      "PENDING": "À valider",
+      "APPROVED": "Validés",
+      "REJECTED": "Refusés",
+      "ALL": "Tout"
+    },
+    "withCount": "{label} ({count})",
+    "filterType": "Filtrer par type",
+    "type": {
+      "ALL": "Tout",
+      "PRODUCT": "Produits",
+      "SERVICE": "Services"
+    },
+    "columns": {
+      "item": "Élément",
+      "type": "Type",
+      "country": "Pays",
+      "price": "Prix",
+      "submittedAt": "Soumis le",
+      "publication": "Publication",
+      "moderation": "Modération",
+      "actions": "Actions"
+    },
+    "loading": "Chargement du catalogue...",
+    "emptyPending": "Aucune annonce en attente de validation.",
+    "empty": "Aucun produit ou service trouvé.",
+    "service": "Service",
+    "product": "Produit",
+    "onQuote": "Sur devis",
+    "actionsFor": "Actions pour {title}",
+    "review": "Examiner"
+  },
+  "listing": {
+    "loading": "Chargement de l'annonce...",
+    "notFound": "Annonce introuvable.",
+    "backToModeration": "Retour à la modération",
+    "submittedService": "Service soumis le {date}",
+    "submittedProduct": "Produit soumis le {date}",
+    "rejectionReason": "Motif du refus communiqué au vendeur",
+    "media": "Médias ({count})",
+    "offer": "Offre",
+    "price": "Prix",
+    "stock": "Stock",
+    "location": "Localisation",
+    "condition": "État",
+    "supplier": "Fournisseur",
+    "lastModeration": "Dernière modération",
+    "description": "Description",
+    "noDescription": "Aucune description fournie."
+  },
+  "moderationDialog": {
+    "rejectTitle": "Refuser l'annonce",
+    "approveTitle": "Valider l'annonce",
+    "rejectDescription": "« {title} » restera invisible pour les acheteurs. Le vendeur recevra le motif ci-dessous.",
+    "approveDescription": "« {title} » sera immédiatement visible sur la marketplace.",
+    "reason": "Motif du refus",
+    "reasonPlaceholder": "Expliquez au vendeur ce qui doit être corrigé.",
+    "sending": "Envoi...",
+    "presets": {
+      "photos": "Photos de mauvaise qualité ou non conformes",
+      "description": "Description insuffisante ou trompeuse",
+      "prohibited": "Produit interdit à la vente sur la plateforme",
+      "price": "Prix manifestement erroné",
+      "category": "Catégorie inadaptée"
+    }
+  },
+  "moderation": {
+    "title": "Modération",
+    "description": "Signalements des utilisateurs et avis clients. Chaque décision est enregistrée.",
+    "tabs": {
+      "reports": "Signalements",
+      "reviews": "Avis"
+    },
+    "targetType": {
+      "LISTING": "Annonce",
+      "REVIEW": "Avis",
+      "BUSINESS": "Boutique",
+      "USER": "Utilisateur"
+    },
+    "hide": {
+      "LISTING": "Retirer l’annonce",
+      "REVIEW": "Masquer l’avis",
+      "BUSINESS": "Suspendre la boutique",
+      "USER": "Suspendre le compte"
+    },
+    "reason": {
+      "FRAUD": "Fraude",
+      "PROHIBITED_PRODUCT": "Produit interdit",
+      "COUNTERFEIT": "Contrefaçon",
+      "OFFENSIVE": "Contenu offensant",
+      "SPAM": "Spam",
+      "WRONG_INFORMATION": "Informations fausses",
+      "OTHER": "Autre"
+    },
+    "reportStatus": {
+      "PENDING": "À traiter",
+      "RESOLVED": "Traités",
+      "DISMISSED": "Rejetés"
+    },
+    "noReports": "Aucun signalement.",
+    "deletedContent": "Contenu supprimé",
+    "quote": "« {text} »",
+    "decision": "Décision : {note}",
+    "dismiss": "Rien à signaler",
+    "dismissed": "Signalement rejeté.",
+    "reasonPrompt": "Motif (communiqué à l’auteur) :",
+    "removed": "Contenu retiré.",
+    "reviewPublishing": "Publication des avis",
+    "settingSaved": "Réglage enregistré.",
+    "mode": {
+      "post": "Publiés tout de suite (retirés sur signalement)",
+      "pre": "Publiés après validation d’un modérateur"
+    },
+    "reviewStatus": {
+      "PENDING": "En attente",
+      "APPROVED": "Publiés",
+      "REJECTED": "Masqués"
+    },
+    "noReviews": "Aucun avis.",
+    "publish": "Publier",
+    "published": "Avis publié.",
+    "hideReview": "Masquer",
+    "hidden": "Avis masqué."
+  },
+  "advertising": {
+    "title": "Publicités et bannières",
+    "description": "Les bannières de l'accueil et les publicités de la plateforme, et les demandes des fournisseurs à valider.",
+    "descriptionPending": "Les bannières de l'accueil et les publicités de la plateforme, et les demandes des fournisseurs à valider ({count} en attente).",
+    "cardTitle": "Publicités ({count})",
+    "status": {
+      "ALL": "Tous les statuts",
+      "PENDING": "À valider",
+      "APPROVED": "Validées",
+      "REJECTED": "Refusées"
+    },
+    "owner": {
+      "ALL": "Tous les annonceurs",
+      "business": "Fournisseurs"
+    },
+    "allPlacements": "Tous les emplacements",
+    "new": "Nouvelle publicité",
+    "approved": "Publicité validée.",
+    "published": "Publicité publiée.",
+    "rejectTitle": "Refuser « {title} »",
+    "reasonPlaceholder": "Motif communiqué au fournisseur",
+    "rejected": "Publicité refusée, le fournisseur est prévenu."
+  },
+  "tenders": {
+    "title": "Appels d’offres",
+    "description": "Appels d’offres ouverts et visibles sur la plateforme.",
+    "cardTitle": "Appels d’offres ({count})",
+    "allTypes": "Tous les types",
+    "columns": {
+      "title": "Titre",
+      "type": "Type",
+      "publisher": "Publication",
+      "location": "Localisation",
+      "budget": "Budget",
+      "deadline": "Échéance",
+      "status": "Statut"
+    },
+    "loading": "Chargement des appels d’offres...",
+    "empty": "Aucun appel d’offres trouvé.",
+    "individual": "Particulier",
+    "budgetUnspecified": "Non précisé"
+  },
+  "orders": {
+    "title": "Commandes",
+    "description": "Toutes les commandes enregistrées sur la plateforme.",
+    "cardTitle": "Commandes ({count})",
+    "columns": {
+      "order": "Commande",
+      "client": "Client",
+      "business": "Entreprise",
+      "date": "Date",
+      "total": "Total",
+      "status": "Statut",
+      "details": "Détails"
+    },
+    "loading": "Chargement des commandes...",
+    "empty": "Aucune commande enregistrée.",
+    "view": "Voir la commande"
+  },
+  "payouts": {
+    "title": "Paiements et versements",
+    "description": "Confirmez les virements reçus, puis versez la part des fournisseurs une fois la commande livrée. Chaque décision est enregistrée.",
+    "confirmed": "Paiement de la commande {ref} confirmé.",
+    "rejectPrompt": "Motif du refus (communiqué à l'acheteur) :",
+    "rejectDefault": "Aucun virement reçu.",
+    "rejected": "Paiement refusé, commande annulée.",
+    "released": "{count, plural, one {# versement effectué.} other {# versements effectués.}}",
+    "processingToast": "{count, plural, one {# versement en cours chez PayDunya.} other {# versements en cours chez PayDunya.}}",
+    "offlineTitle": "Paiements hors ligne à confirmer ({count})",
+    "noPending": "Aucun paiement en attente.",
+    "offlineOrder": "{amount} · Commande <link>{ref}</link>",
+    "orderedBy": "{buyer} → {business} · commandé le {date}",
+    "transferReference": "Référence du virement",
+    "moneyReceived": "Argent reçu",
+    "heldTitle": "Parts fournisseurs retenues ({count})",
+    "processing": "· {count, plural, one {# versement en cours chez PayDunya} other {# versements en cours chez PayDunya}}",
+    "onlyDelivered": "Seulement les commandes livrées",
+    "noShares": "Aucune part à verser.",
+    "shareTo": "{amount} à {business}",
+    "deduction": "(part de {share} moins {refunded} remboursés)",
+    "orderLine": "Commande {ref} · {state} · {account}",
+    "delivered": "livrée",
+    "notDelivered": "pas encore livrée",
+    "noAccount": "aucun compte de versement",
+    "selection": "{count, plural, one {# part} other {# parts}} · total <strong>{total}</strong>",
+    "payoutReference": "Référence du transfert effectué",
+    "validatePayout": "Valider le versement",
+    "paydunyaHint": "Verse la part nette sur le compte mobile money du fournisseur, depuis le solde PayDunya de Diarama.",
+    "payByPaydunya": "Verser par PayDunya"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "description": "Paiements LawPay, reversements aux fournisseurs et journal comptable de la plateforme.",
+    "ledger": {
+      "SALES": "Ventes encaissées",
+      "PROVIDER_FEES": "Frais LawPay",
+      "PLATFORM_REVENUE": "Commissions plateforme",
+      "SUPPLIER_PAYABLE": "Dû aux fournisseurs",
+      "SUPPLIER_PAID": "Reversé aux fournisseurs",
+      "SUPPLIER_RECEIVABLE": "À récupérer (remboursements)",
+      "REFUNDS": "Remboursements clients"
+    },
+    "entries": "{count, plural, one {# écriture} other {# écritures}}",
+    "summary": {
+      "succeeded": "{count, plural, one {# paiement réussi} other {# paiements réussis}}",
+      "pending": "{count} en attente",
+      "failed": "{count, plural, one {# échoué/annulé} other {# échoués/annulés}}",
+      "refunded": "{count, plural, one {# remboursé} other {# remboursés}}",
+      "payoutsPending": "{count, plural, one {# reversement en cours} other {# reversements en cours}}",
+      "payoutsFailed": "{count, plural, one {# reversement en échec} other {# reversements en échec}}"
+    },
+    "cardTitle": "Paiements ({count})",
+    "filterPaymentStatus": "Filtrer par statut de paiement",
+    "allPayments": "Tous les paiements",
+    "filterPayoutStatus": "Filtrer par statut de reversement",
+    "allPayouts": "Tous les reversements",
+    "searchPlaceholder": "Référence LP-...",
+    "columns": {
+      "reference": "Référence",
+      "payer": "Payeur",
+      "method": "Moyen",
+      "amount": "Montant",
+      "lawpayFees": "Frais LawPay",
+      "commission": "Commission",
+      "supplierNet": "Net fournisseur",
+      "payment": "Paiement",
+      "payout": "Reversement",
+      "date": "Date",
+      "actions": "Actions"
+    },
+    "loading": "Chargement des transactions...",
+    "empty": "Aucune transaction trouvée.",
+    "cash": "Espèces",
+    "orderRef": "Commande {ref}",
+    "resync": "Resynchroniser avec LawPay"
+  }
+}

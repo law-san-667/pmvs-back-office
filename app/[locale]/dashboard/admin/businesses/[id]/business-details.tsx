@@ -26,24 +26,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useRouter } from "@/i18n/navigation";
-import {
-  BUSINESS_MEMBER_ROLE_LABELS,
-  BUSINESS_MEMBER_STATUS_LABELS,
-  BUSINESS_STATUS_BADGE_CLASSES,
-  BUSINESS_STATUS_LABELS,
-} from "@/lib/admin-business-utils";
+import { BUSINESS_STATUS_BADGE_CLASSES } from "@/lib/admin-business-utils";
 import type { BusinessStatus } from "@/lib/backend-resource-types";
-import {
-  BUSINESS_CATEGORY_LABELS,
-  isLegalBusinessCategory,
-} from "@/lib/business-categories";
-import {
-  BUSINESS_SIZE_LABELS,
-  getBusinessSizeClass,
-  LEGAL_BUSINESS_TYPE_LABELS,
-} from "@/lib/validators/business";
+import { isLegalBusinessCategory } from "@/lib/business-categories";
+import { getBusinessSizeClass } from "@/lib/validators/business";
 import { formatDate, getInitials } from "@/lib/seller-dashboard-utils";
-import { PAYOUT_ACCOUNT_STATUS_LABELS } from "@/lib/payment-utils";
 import { trpc } from "@/server/trpc/client";
 import {
   ArrowLeftIcon,
@@ -52,6 +39,7 @@ import {
   PencilIcon,
   Trash2Icon,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
@@ -64,6 +52,9 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 export function BusinessDetails({ id }: { id: string }) {
+  const t = useTranslations("adminAccounts");
+  const tOnboarding = useTranslations("onboarding");
+  const locale = useLocale();
   const router = useRouter();
   const utils = trpc.useUtils();
   const [isEditing, setIsEditing] = useState(false);
@@ -109,7 +100,7 @@ export function BusinessDetails({ id }: { id: string }) {
   };
 
   if (business.isLoading) {
-    return <IsLoadingScreen text="Chargement de l'entreprise..." />;
+    return <IsLoadingScreen text={t("details.loading")} />;
   }
 
   if (business.error || !business.data) {
@@ -120,10 +111,10 @@ export function BusinessDetails({ id }: { id: string }) {
           className="w-fit"
           onClick={() => router.push("/dashboard/admin/businesses")}
         >
-          <ArrowLeftIcon /> Retour
+          <ArrowLeftIcon /> {t("actions.back")}
         </Button>
         <p className="text-destructive text-sm">
-          {business.error?.message ?? "Entreprise introuvable."}
+          {business.error?.message ?? t("details.notFound")}
         </p>
       </div>
     );
@@ -140,12 +131,15 @@ export function BusinessDetails({ id }: { id: string }) {
         className="w-fit"
         onClick={() => router.push("/dashboard/admin/businesses")}
       >
-        <ArrowLeftIcon /> Retour aux entreprises
+        <ArrowLeftIcon /> {t("details.backToList")}
       </Button>
 
       <AdminPageHeader
         title={value.name}
-        description={`${value.slug ?? value.id} — inscrite le ${formatDate(value.createdAt)}`}
+        description={t("details.subtitle", {
+          id: value.slug ?? value.id,
+          date: formatDate(value.createdAt, false, locale),
+        })}
       />
 
       <div className="flex flex-wrap items-center gap-2">
@@ -157,7 +151,7 @@ export function BusinessDetails({ id }: { id: string }) {
           variant="outline"
           className={BUSINESS_STATUS_BADGE_CLASSES[value.status]}
         >
-          {BUSINESS_STATUS_LABELS[value.status]}
+          {t(`businessStatus.${value.status}`)}
         </Badge>
         <div className="ms-auto flex flex-wrap gap-2">
           {value.status !== "ACTIVE" && (
@@ -167,8 +161,8 @@ export function BusinessDetails({ id }: { id: string }) {
             >
               <CheckCircle2Icon />
               {value.status === "PENDING_VERIFICATION"
-                ? "Valider"
-                : "Réactiver"}
+                ? t("actions.validate")
+                : t("actions.reactivate")}
             </Button>
           )}
           {value.status !== "SUSPENDED" && (
@@ -177,14 +171,14 @@ export function BusinessDetails({ id }: { id: string }) {
               disabled={updateStatus.isPending}
               onClick={() => void changeStatus("SUSPENDED")}
             >
-              <BanIcon /> Suspendre
+              <BanIcon /> {t("actions.suspend")}
             </Button>
           )}
           <Button variant="outline" onClick={() => setIsEditing(true)}>
-            <PencilIcon /> Modifier
+            <PencilIcon /> {t("actions.edit")}
           </Button>
           <Button variant="destructive" onClick={() => setIsDeleting(true)}>
-            <Trash2Icon /> Supprimer
+            <Trash2Icon /> {t("actions.delete")}
           </Button>
         </div>
       </div>
@@ -195,37 +189,45 @@ export function BusinessDetails({ id }: { id: string }) {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Informations générales</CardTitle>
+            <CardTitle>{t("details.general.title")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <Row label="Description" value={value.description} />
             <Row
-              label="Localisation"
+              label={t("details.general.description")}
+              value={value.description}
+            />
+            <Row
+              label={t("details.general.location")}
               value={`${value.citySlug}, ${value.countryCode}`}
             />
-            <Row label="Adresse" value={value.address} />
+            <Row label={t("details.general.address")} value={value.address} />
             <Row
-              label="Zones de livraison"
+              label={t("details.general.deliveryZones")}
               value={value.deliveryZones?.join(", ")}
             />
             <Row
-              label="Catégorisation"
-              value={BUSINESS_CATEGORY_LABELS[value.businessCategory]}
+              label={t("details.general.category")}
+              value={tOnboarding(
+                `category.options.${value.businessCategory}.label`,
+              )}
             />
-            <Row label="Inscription" value={formatDate(value.createdAt, true)} />
             <Row
-              label="Mise à jour"
-              value={formatDate(value.updatedAt, true)}
+              label={t("details.general.registeredAt")}
+              value={formatDate(value.createdAt, true, locale)}
+            />
+            <Row
+              label={t("details.general.updatedAt")}
+              value={formatDate(value.updatedAt, true, locale)}
             />
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Contact</CardTitle>
+            <CardTitle>{t("details.contact.title")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <Row label="Email" value={value.contactEmail} />
+            <Row label={t("details.contact.email")} value={value.contactEmail} />
             <Row label="WhatsApp" value={value.whatsappPhone} />
             <Row label="Facebook" value={value.facebookLink} />
             <Row label="Instagram" value={value.instagramLink} />
@@ -236,15 +238,17 @@ export function BusinessDetails({ id }: { id: string }) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Propriétaire</CardTitle>
+            <CardTitle>{t("details.owner.title")}</CardTitle>
           </CardHeader>
           <CardContent>
             {members.isLoading && (
-              <p className="text-muted-foreground text-sm">Chargement...</p>
+              <p className="text-muted-foreground text-sm">
+                {t("details.loadingShort")}
+              </p>
             )}
             {!members.isLoading && !owner?.user && (
               <p className="text-muted-foreground text-sm">
-                Aucun propriétaire associé à cette entreprise.
+                {t("details.owner.none")}
               </p>
             )}
             {owner?.user && (
@@ -271,21 +275,30 @@ export function BusinessDetails({ id }: { id: string }) {
                   </div>
                 </div>
                 <Separator />
-                <Row label="Email" value={owner.user.email} />
-                <Row label="Téléphone" value={owner.user.phoneNumber} />
-                <Row label="Rôle plateforme" value={owner.user.role} />
-                <Row label="Statut compte" value={owner.user.status} />
+                <Row label={t("details.owner.email")} value={owner.user.email} />
                 <Row
-                  label="Dernière connexion"
+                  label={t("details.owner.phone")}
+                  value={owner.user.phoneNumber}
+                />
+                <Row
+                  label={t("details.owner.platformRole")}
+                  value={owner.user.role}
+                />
+                <Row
+                  label={t("details.owner.accountStatus")}
+                  value={owner.user.status}
+                />
+                <Row
+                  label={t("details.owner.lastLogin")}
                   value={
                     owner.user.lastLoginAt
-                      ? formatDate(owner.user.lastLoginAt, true)
+                      ? formatDate(owner.user.lastLoginAt, true, locale)
                       : null
                   }
                 />
                 <Row
-                  label="Compte créé le"
-                  value={formatDate(owner.user.createdAt)}
+                  label={t("details.owner.createdAt")}
+                  value={formatDate(owner.user.createdAt, false, locale)}
                 />
               </>
             )}
@@ -294,45 +307,55 @@ export function BusinessDetails({ id }: { id: string }) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Reversements Wave (LawPay)</CardTitle>
+            <CardTitle>{t("details.payout.title")}</CardTitle>
           </CardHeader>
           <CardContent>
             {payoutAccount.isLoading && (
-              <p className="text-muted-foreground text-sm">Chargement...</p>
+              <p className="text-muted-foreground text-sm">
+                {t("details.loadingShort")}
+              </p>
             )}
             {!payoutAccount.isLoading && !payoutAccount.data && (
               <p className="text-muted-foreground text-sm">
-                Aucun compte Wave de reversement : cette entreprise ne peut
-                pas encore recevoir de commandes. Son propriétaire doit
-                renseigner son numéro Wave dans les réglages.
+                {t("details.payout.none")}
               </p>
             )}
             {payoutAccount.data && (
               <>
-                <Row label="Opérateur" value={payoutAccount.data.service} />
-                <Row label="Numéro" value={payoutAccount.data.destinationNumber} />
                 <Row
-                  label="Statut"
-                  value={PAYOUT_ACCOUNT_STATUS_LABELS[payoutAccount.data.status]}
+                  label={t("details.payout.operator")}
+                  value={payoutAccount.data.service}
                 />
                 <Row
-                  label="Identifiant LawPay"
+                  label={t("details.payout.number")}
+                  value={payoutAccount.data.destinationNumber}
+                />
+                <Row
+                  label={t("details.payout.status")}
+                  value={t(`payoutStatus.${payoutAccount.data.status}`)}
+                />
+                <Row
+                  label={t("details.payout.recipientId")}
                   value={payoutAccount.data.recipientId}
                 />
                 <Row
-                  label="Dernier évènement"
+                  label={t("details.payout.lastEvent")}
                   value={
                     payoutAccount.data.lastProviderEventAt
-                      ? formatDate(payoutAccount.data.lastProviderEventAt, true)
+                      ? formatDate(
+                          payoutAccount.data.lastProviderEventAt,
+                          true,
+                          locale,
+                        )
                       : null
                   }
                 />
                 <Row
-                  label="Commission"
+                  label={t("details.payout.commission")}
                   value={
                     value.commissionRatePercent != null
                       ? `${value.commissionRatePercent} %`
-                      : "Taux plateforme par défaut"
+                      : t("details.payout.defaultRate")
                   }
                 />
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -358,8 +381,8 @@ export function BusinessDetails({ id }: { id: string }) {
                     }
                   >
                     {payoutAccount.data.status === "ACTIVE"
-                      ? "Suspendre les reversements"
-                      : "Réactiver les reversements"}
+                      ? t("details.payout.suspend")
+                      : t("details.payout.reactivate")}
                   </Button>
                 </div>
                 {updatePayoutStatus.error && (
@@ -374,11 +397,11 @@ export function BusinessDetails({ id }: { id: string }) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Conformité</CardTitle>
+            <CardTitle>{t("details.compliance.title")}</CardTitle>
           </CardHeader>
           <CardContent>
             <Row
-              label="Documents"
+              label={t("details.compliance.documents")}
               value={
                 value.legalDocuments?.length ? (
                   <ul className="flex flex-col gap-1">
@@ -400,52 +423,55 @@ export function BusinessDetails({ id }: { id: string }) {
             />
             {!isLegalBusinessCategory(value.businessCategory) && (
               <p className="text-muted-foreground text-sm">
-                Les personnes physiques ne fournissent pas de dossier légal.
+                {t("details.compliance.physicalPersonNote")}
               </p>
             )}
             {legalInformation && (
               <>
                 <Row
-                  label="Statut juridique"
+                  label={t("details.compliance.legalStatus")}
                   value={legalInformation.legalStatus}
                 />
                 <Row
-                  label="Registre de commerce"
+                  label={t("details.compliance.commercialRegister")}
                   value={legalInformation.commercialRegisterNumber}
                 />
                 <Row
-                  label="Année de création"
+                  label={t("details.compliance.creationYear")}
                   value={legalInformation.creationYear}
                 />
                 <Row
-                  label="NIF"
+                  label={t("details.compliance.taxId")}
                   value={legalInformation.taxIdentificationNumber}
                 />
                 <Row
-                  label="Effectif permanent"
+                  label={t("details.compliance.permanentStaff")}
                   value={
                     legalInformation.permanentStaffCount !== undefined
                       ? `${legalInformation.permanentStaffCount}${
                           getBusinessSizeClass(legalInformation.permanentStaffCount)
-                            ? ` — ${BUSINESS_SIZE_LABELS[getBusinessSizeClass(legalInformation.permanentStaffCount)!]}`
+                            ? ` — ${tOnboarding(`legal.sizeClasses.${getBusinessSizeClass(legalInformation.permanentStaffCount)!}`)}`
                             : ""
                         }`
                       : null
                   }
                 />
                 <Row
-                  label="Types de fournisseur"
+                  label={t("details.compliance.businessTypes")}
                   value={legalInformation.businessTypes
                     ?.map((type) =>
                       type === "OTHER" && legalInformation.otherBusinessType
                         ? legalInformation.otherBusinessType
-                        : LEGAL_BUSINESS_TYPE_LABELS[type],
+                        : tOnboarding(`activities.types.${type}`),
                     )
                     .join(", ")}
                 />
-                <Row label="Code postal" value={legalInformation.postalCode} />
                 <Row
-                  label="Représentant légal"
+                  label={t("details.compliance.postalCode")}
+                  value={legalInformation.postalCode}
+                />
+                <Row
+                  label={t("details.compliance.legalRepresentative")}
                   value={
                     // Shops created before this field existed have no legal representative.
                     legalInformation.legalRepresentative &&
@@ -454,9 +480,12 @@ export function BusinessDetails({ id }: { id: string }) {
                       .join(" — ")
                   }
                 />
-                <Row label="Site web" value={legalInformation.website} />
                 <Row
-                  label="Géolocalisation du siège"
+                  label={t("details.compliance.website")}
+                  value={legalInformation.website}
+                />
+                <Row
+                  label={t("details.compliance.headquarters")}
                   value={
                     legalInformation.headquartersGeolocation ? (
                       <a
@@ -475,27 +504,46 @@ export function BusinessDetails({ id }: { id: string }) {
             )}
             {legalInformation?.bankDetails && (
               <>
-                <div className="border-t pt-2 text-sm font-medium">Banque</div>
-                <Row label="Banque" value={legalInformation.bankDetails.bankName} />
-                <Row label="Adresse" value={legalInformation.bankDetails.bankAddress} />
+                <div className="border-t pt-2 text-sm font-medium">
+                  {t("details.compliance.bank")}
+                </div>
                 <Row
-                  label="Compte / passerelle"
+                  label={t("details.compliance.bank")}
+                  value={legalInformation.bankDetails.bankName}
+                />
+                <Row
+                  label={t("details.compliance.bankAddress")}
+                  value={legalInformation.bankDetails.bankAddress}
+                />
+                <Row
+                  label={t("details.compliance.paymentAccount")}
                   value={legalInformation.bankDetails.paymentAccount}
                 />
               </>
             )}
             {legalInformation?.keyPersons?.length ? (
               <>
-                <div className="border-t pt-2 text-sm font-medium">Personnes-clés</div>
+                <div className="border-t pt-2 text-sm font-medium">
+                  {t("details.compliance.keyPersons")}
+                </div>
                 {legalInformation.keyPersons.map((person, index) => (
                   <Row
                     key={index}
-                    label={person.position ?? `Personne ${index + 1}`}
+                    label={
+                      person.position ??
+                      t("details.compliance.personFallback", {
+                        index: index + 1,
+                      })
+                    }
                     value={[
                       `${person.title ?? ""} ${person.firstName} ${person.lastName}`.trim(),
                       person.mobilePhone,
                       person.email,
-                      person.idNumber ? `ID ${person.idNumber}` : null,
+                      person.idNumber
+                        ? t("details.compliance.idNumber", {
+                            number: person.idNumber,
+                          })
+                        : null,
                     ]
                       .filter(Boolean)
                       .join(" · ")}
@@ -505,7 +553,9 @@ export function BusinessDetails({ id }: { id: string }) {
             ) : null}
             {legalInformation?.contacts?.length ? (
               <>
-                <div className="border-t pt-2 text-sm font-medium">Contacts</div>
+                <div className="border-t pt-2 text-sm font-medium">
+                  {t("details.compliance.contacts")}
+                </div>
                 {legalInformation.contacts.map((contact, index) => (
                   <Row
                     key={index}
@@ -520,10 +570,10 @@ export function BusinessDetails({ id }: { id: string }) {
             {legalInformation?.complianceDocuments && (
               <>
                 <div className="border-t pt-2 text-sm font-medium">
-                  Documents de conformité
+                  {t("details.compliance.complianceDocuments")}
                 </div>
                 <Row
-                  label="Acte de constitution"
+                  label={t("details.compliance.incorporationDeed")}
                   value={
                     legalInformation.complianceDocuments.incorporationDeedUrl ? (
                       <a
@@ -532,13 +582,13 @@ export function BusinessDetails({ id }: { id: string }) {
                         rel="noreferrer"
                         className="text-primary underline"
                       >
-                        Voir le document
+                        {t("details.compliance.viewDocument")}
                       </a>
                     ) : null
                   }
                 />
                 <Row
-                  label="Scan du passeport"
+                  label={t("details.compliance.passportScan")}
                   value={
                     legalInformation.complianceDocuments.passportScanUrl ? (
                       <a
@@ -547,13 +597,13 @@ export function BusinessDetails({ id }: { id: string }) {
                         rel="noreferrer"
                         className="text-primary underline"
                       >
-                        Voir le document
+                        {t("details.compliance.viewDocument")}
                       </a>
                     ) : null
                   }
                 />
                 <Row
-                  label="Photos MPME"
+                  label={t("details.compliance.photos")}
                   value={
                     legalInformation.complianceDocuments.photoUrls?.length ? (
                       <div className="flex flex-wrap gap-2">
@@ -588,17 +638,19 @@ export function BusinessDetails({ id }: { id: string }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Équipe ({members.data?.total ?? 0})</CardTitle>
+          <CardTitle>
+            {t("details.team.title", { count: members.data?.total ?? 0 })}
+          </CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Utilisateur</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Rôle</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Ajouté le</TableHead>
+                <TableHead>{t("details.team.user")}</TableHead>
+                <TableHead>{t("details.team.contact")}</TableHead>
+                <TableHead>{t("details.team.role")}</TableHead>
+                <TableHead>{t("details.team.status")}</TableHead>
+                <TableHead>{t("details.team.addedAt")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -607,8 +659,8 @@ export function BusinessDetails({ id }: { id: string }) {
                 isLoading={members.isLoading}
                 error={members.error?.message}
                 isEmpty={!members.data?.items.length}
-                loadingLabel="Chargement de l'équipe..."
-                emptyLabel="Aucun membre pour cette entreprise."
+                loadingLabel={t("details.team.loading")}
+                emptyLabel={t("details.team.empty")}
               />
               {members.data?.items.map((member) => (
                 <TableRow key={member.id}>
@@ -621,15 +673,15 @@ export function BusinessDetails({ id }: { id: string }) {
                     {member.user?.email ?? member.user?.phoneNumber ?? "—"}
                   </TableCell>
                   <TableCell>
-                    {BUSINESS_MEMBER_ROLE_LABELS[member.role]}
+                    {t(`memberRole.${member.role}`)}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">
-                      {BUSINESS_MEMBER_STATUS_LABELS[member.status]}
+                      {t(`memberStatus.${member.status}`)}
                     </Badge>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {formatDate(member.createdAt)}
+                    {formatDate(member.createdAt, false, locale)}
                   </TableCell>
                 </TableRow>
               ))}
@@ -640,14 +692,16 @@ export function BusinessDetails({ id }: { id: string }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Annonces récentes ({listings.data?.total ?? 0})</CardTitle>
+          <CardTitle>
+            {t("details.listings.title", { count: listings.data?.total ?? 0 })}
+          </CardTitle>
           <CardAction>
             <Button
               variant="outline"
               size="sm"
               onClick={() => router.push("/dashboard/admin/listings")}
             >
-              Voir toutes les annonces
+              {t("details.listings.viewAll")}
             </Button>
           </CardAction>
         </CardHeader>
@@ -655,9 +709,9 @@ export function BusinessDetails({ id }: { id: string }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Titre</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Créée le</TableHead>
+                <TableHead>{t("details.listings.titleColumn")}</TableHead>
+                <TableHead>{t("details.listings.status")}</TableHead>
+                <TableHead>{t("details.listings.createdAt")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -666,8 +720,8 @@ export function BusinessDetails({ id }: { id: string }) {
                 isLoading={listings.isLoading}
                 error={listings.error?.message}
                 isEmpty={!listings.data?.items.length}
-                loadingLabel="Chargement des annonces..."
-                emptyLabel="Aucune annonce pour cette entreprise."
+                loadingLabel={t("details.listings.loading")}
+                emptyLabel={t("details.listings.empty")}
               />
               {listings.data?.items.map((listing) => (
                 <TableRow key={listing.id}>
@@ -676,7 +730,7 @@ export function BusinessDetails({ id }: { id: string }) {
                     <Badge variant="outline">{listing.status}</Badge>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {formatDate(listing.createdAt)}
+                    {formatDate(listing.createdAt, false, locale)}
                   </TableCell>
                 </TableRow>
               ))}

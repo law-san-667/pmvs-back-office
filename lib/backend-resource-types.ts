@@ -178,6 +178,8 @@ export type Tender = {
   documents: unknown;
   location: string | null;
   countryCode: string;
+  diffusionScope?: "COUNTRY" | "COUNTRIES" | "ZLECAF";
+  diffusionCountries?: string[];
   opensAt: string | null;
   submissionDeadline: string;
   evaluationDeadline: string | null;

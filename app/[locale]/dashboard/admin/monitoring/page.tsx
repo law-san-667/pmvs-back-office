@@ -24,14 +24,12 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useUser } from "@/contexts/user-context";
+import { intlLocale } from "@/i18n/config";
 import {
   type MonitoredJob,
   type MonitoringAlert,
   type MonitoringSettings,
   type SystemStatus,
-  formatBytes,
-  formatEvery,
-  formatUptime,
 } from "@/lib/monitoring";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/server/trpc/client";
@@ -45,15 +43,18 @@ import {
   ShieldAlertIcon,
   TriangleAlertIcon,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 const REFRESH_MS = 60_000;
 const PAGE_SIZE = 10;
 
-const formatTime = (value: string | null) =>
+type T = ReturnType<typeof useTranslations<"adminSystem">>;
+
+const formatTime = (value: string | null, locale: string) =>
   value
-    ? new Intl.DateTimeFormat("fr-FR", {
+    ? new Intl.DateTimeFormat(intlLocale(locale), {
         dateStyle: "short",
         timeStyle: "short",
       }).format(new Date(value))
@@ -62,8 +63,34 @@ const formatTime = (value: string | null) =>
 const formatDuration = (ms: number | null) =>
   ms === null ? "—" : ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixed(1)} s`;
 
+const formatBytes = (bytes: number, t: T) => {
+  if (bytes < 1024 * 1024)
+    return t("monitoring.units.kb", { value: String(Math.round(bytes / 1024)) });
+  if (bytes < 1024 ** 3)
+    return t("monitoring.units.mb", { value: (bytes / 1024 / 1024).toFixed(1) });
+  return t("monitoring.units.gb", { value: (bytes / 1024 ** 3).toFixed(2) });
+};
+
+const formatEvery = (minutes: number | null, t: T) => {
+  if (!minutes) return "—";
+  if (minutes < 60) return t("monitoring.units.everyMinutes", { count: minutes });
+  if (minutes === 24 * 60) return t("monitoring.units.daily");
+  return t("monitoring.units.everyHours", { count: Math.round(minutes / 60) });
+};
+
+const formatUptime = (seconds: number, t: T) => {
+  const days = Math.floor(seconds / 86_400);
+  const hours = Math.floor((seconds % 86_400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  if (days) return t("monitoring.units.uptimeDays", { days, hours });
+  if (hours) return t("monitoring.units.uptimeHours", { hours, minutes });
+  return t("monitoring.units.uptimeMinutes", { minutes });
+};
+
 export default function AdminMonitoringPage() {
   const { user } = useUser();
+  const t = useTranslations("adminSystem");
+  const locale = useLocale();
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
   const [alertsPage, setAlertsPage] = useState(1);
   const [runsPage, setRunsPage] = useState(1);
@@ -94,12 +121,12 @@ export default function AdminMonitoringPage() {
       const result = await runCheck.mutateAsync();
       toast.success(
         result.findings
-          ? `${result.findings} problème(s) détecté(s), ${result.opened} nouvelle(s) alerte(s).`
-          : "Aucun problème détecté.",
+          ? t("monitoring.checkResult", { findings: result.findings, opened: result.opened })
+          : t("monitoring.noProblem"),
       );
       await refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Vérification impossible.");
+      toast.error(error instanceof Error ? error.message : t("monitoring.checkFailed"));
     }
   };
 
@@ -107,7 +134,7 @@ export default function AdminMonitoringPage() {
     return (
       <div className="p-4 lg:p-6">
         <p className="text-destructive text-sm">
-          La supervision est réservée aux administrateurs.
+          {t("monitoring.adminOnly")}
         </p>
       </div>
     );
@@ -119,17 +146,17 @@ export default function AdminMonitoringPage() {
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <AdminPageHeader
-          title="Supervision"
-          description="État de la plateforme, des tâches planifiées et des services externes. Les alertes partent par e-mail, WhatsApp ou SMS et dans l'application."
+          title={t("monitoring.title")}
+          description={t("monitoring.description")}
         />
         <div className="flex flex-wrap items-center gap-2">
           <Button size="sm" variant="outline" onClick={refresh}>
             <RefreshCwIcon className={cn(status.isFetching && "animate-spin")} />
-            Actualiser
+            {t("refresh")}
           </Button>
           <Button size="sm" onClick={checkNow} disabled={runCheck.isPending}>
             <ShieldAlertIcon />
-            Vérifier maintenant
+            {t("monitoring.checkNow")}
           </Button>
         </div>
       </div>
@@ -153,18 +180,22 @@ export default function AdminMonitoringPage() {
       <Card>
         <CardHeader>
           <CardTitle>
-            Exécutions récentes
             {selectedJob
-              ? ` : ${data?.jobs.find((job) => job.name === selectedJob)?.label ?? selectedJob}`
-              : ""}
+              ? t("monitoring.runs.titleForJob", {
+                  job: (() => {
+                    const job = data?.jobs.find((item) => item.name === selectedJob);
+                    return job ? jobLabel(job, t) : selectedJob;
+                  })(),
+                })
+              : t("monitoring.runs.title")}
           </CardTitle>
           <CardDescription>
-            Cliquez sur une tâche ci-dessus pour ne voir que ses exécutions.
+            {t("monitoring.runs.hint")}
           </CardDescription>
           {selectedJob && (
             <CardAction>
               <Button size="sm" variant="ghost" onClick={() => setSelectedJob(null)}>
-                Toutes les tâches
+                {t("monitoring.runs.allJobs")}
               </Button>
             </CardAction>
           )}
@@ -173,20 +204,23 @@ export default function AdminMonitoringPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Tâche</TableHead>
-                <TableHead>Début</TableHead>
-                <TableHead>Durée</TableHead>
-                <TableHead>État</TableHead>
-                <TableHead>Résultat</TableHead>
+                <TableHead>{t("monitoring.columns.job")}</TableHead>
+                <TableHead>{t("monitoring.columns.start")}</TableHead>
+                <TableHead>{t("monitoring.columns.duration")}</TableHead>
+                <TableHead>{t("monitoring.columns.state")}</TableHead>
+                <TableHead>{t("monitoring.columns.result")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {runs.data?.items.map((run) => (
                 <TableRow key={run.id}>
                   <TableCell className="font-medium">
-                    {data?.jobs.find((job) => job.name === run.name)?.label ?? run.name}
+                    {(() => {
+                      const job = data?.jobs.find((item) => item.name === run.name);
+                      return job ? jobLabel(job, t) : run.name;
+                    })()}
                   </TableCell>
-                  <TableCell>{formatTime(run.startedAt)}</TableCell>
+                  <TableCell>{formatTime(run.startedAt, locale)}</TableCell>
                   <TableCell>{formatDuration(run.durationMs)}</TableCell>
                   <TableCell>
                     <RunBadge status={run.status} />
@@ -205,7 +239,7 @@ export default function AdminMonitoringPage() {
               {runs.data && !runs.data.items.length && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-muted-foreground text-center">
-                    Aucune exécution enregistrée.
+                    {t("monitoring.runs.empty")}
                   </TableCell>
                 </TableRow>
               )}
@@ -223,20 +257,19 @@ export default function AdminMonitoringPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Historique des alertes ({alerts.data?.total ?? 0})</CardTitle>
+          <CardTitle>{t("monitoring.alerts.title", { count: alerts.data?.total ?? 0 })}</CardTitle>
           <CardDescription>
-            Une alerte se ferme d&apos;elle-même quand le problème n&apos;est plus
-            détecté ; les destinataires en sont prévenus.
+            {t("monitoring.alerts.hint")}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Alerte</TableHead>
-                <TableHead>Gravité</TableHead>
-                <TableHead>Début</TableHead>
-                <TableHead>Fin</TableHead>
+                <TableHead>{t("monitoring.columns.alert")}</TableHead>
+                <TableHead>{t("monitoring.columns.severity")}</TableHead>
+                <TableHead>{t("monitoring.columns.start")}</TableHead>
+                <TableHead>{t("monitoring.columns.end")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -253,12 +286,12 @@ export default function AdminMonitoringPage() {
                   <TableCell>
                     <SeverityBadge severity={alert.severity} />
                   </TableCell>
-                  <TableCell>{formatTime(alert.firstSeenAt)}</TableCell>
+                  <TableCell>{formatTime(alert.firstSeenAt, locale)}</TableCell>
                   <TableCell>
                     {alert.status === "OPEN" ? (
-                      <Badge variant="destructive">En cours</Badge>
+                      <Badge variant="destructive">{t("monitoring.alerts.ongoing")}</Badge>
                     ) : (
-                      formatTime(alert.resolvedAt)
+                      formatTime(alert.resolvedAt, locale)
                     )}
                   </TableCell>
                 </TableRow>
@@ -266,7 +299,7 @@ export default function AdminMonitoringPage() {
               {alerts.data && !alerts.data.items.length && (
                 <TableRow>
                   <TableCell colSpan={4} className="text-muted-foreground text-center">
-                    Aucune alerte pour l&apos;instant.
+                    {t("monitoring.alerts.empty")}
                   </TableCell>
                 </TableRow>
               )}
@@ -288,11 +321,13 @@ export default function AdminMonitoringPage() {
 }
 
 function OpenAlerts({ alerts }: { alerts: MonitoringAlert[] }) {
+  const t = useTranslations("adminSystem");
+  const locale = useLocale();
   if (!alerts.length) {
     return (
       <div className="flex items-center gap-3 rounded-lg border border-green-600/30 bg-green-600/5 p-4 text-sm">
         <CheckCircle2Icon className="size-5 text-green-600" />
-        Aucun problème détecté lors de la dernière vérification.
+        {t("monitoring.alerts.none")}
       </div>
     );
   }
@@ -320,8 +355,10 @@ function OpenAlerts({ alerts }: { alerts: MonitoringAlert[] }) {
               <p className="text-muted-foreground break-words">{alert.details}</p>
             )}
             <p className="text-muted-foreground mt-1 text-xs">
-              Depuis le {formatTime(alert.firstSeenAt)} · vu le{" "}
-              {formatTime(alert.lastSeenAt)}
+              {t("monitoring.alerts.since", {
+                first: formatTime(alert.firstSeenAt, locale),
+                last: formatTime(alert.lastSeenAt, locale),
+              })}
             </p>
           </div>
         </div>
@@ -370,93 +407,115 @@ function StatusCard({
 }
 
 function StatusCards({ status }: { status: SystemStatus }) {
+  const t = useTranslations("adminSystem");
+  const locale = useLocale();
   const { whatsapp, sms, email } = status.services;
   const messages = (channel: string) => {
     const rows = status.messages24h.filter((row) => row.channel === channel);
     const sent = rows.filter((row) => row.status !== "FAILED").reduce((sum, row) => sum + row.count, 0);
     const failed = rows.filter((row) => row.status === "FAILED").reduce((sum, row) => sum + row.count, 0);
-    return `24 h : ${sent} envoyé(s), ${failed} en échec`;
+    return t("monitoring.status.messages24h", { sent, failed });
   };
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <StatusCard
         icon={<ServerIcon className="size-4" />}
-        title="API"
+        title={t("monitoring.status.api")}
         ok={status.requests15m.serverErrors === 0}
         value={
           status.requests15m.serverErrors
-            ? `${status.requests15m.serverErrors} erreur(s) serveur`
-            : "En ligne"
+            ? t("monitoring.status.serverErrors", { count: status.requests15m.serverErrors })
+            : t("monitoring.status.online")
         }
         lines={[
-          `Démarrée depuis ${formatUptime(status.uptimeSeconds)}`,
-          `15 min : ${status.requests15m.recorded} requête(s) enregistrée(s), 95 % sous ${status.requests15m.p95Ms} ms`,
+          t("monitoring.status.uptime", { duration: formatUptime(status.uptimeSeconds, t) }),
+          t("monitoring.status.requests15m", {
+            count: status.requests15m.recorded,
+            p95: status.requests15m.p95Ms,
+          }),
         ]}
       />
       <StatusCard
         icon={<DatabaseIcon className="size-4" />}
-        title="Base de données"
+        title={t("monitoring.status.database")}
         ok
-        value={formatBytes(status.database.sizeBytes)}
+        value={formatBytes(status.database.sizeBytes, t)}
         lines={[
-          `Réponse en ${status.database.latencyMs} ms`,
-          `${status.database.connections} connexion(s) ouverte(s)`,
-          `Plus grosse table : ${status.database.largestTables[0]?.name ?? "—"}`,
+          t("monitoring.status.dbLatency", { ms: status.database.latencyMs }),
+          t("monitoring.status.dbConnections", { count: status.database.connections }),
+          t("monitoring.status.largestTable", {
+            name: status.database.largestTables[0]?.name ?? "—",
+          }),
         ]}
       />
       <StatusCard
         icon={<MessageCircleIcon className="size-4" />}
-        title="WhatsApp (Evolution)"
+        title={t("monitoring.status.whatsapp")}
         ok={whatsapp.configured ? whatsapp.state === "open" : null}
         value={
           !whatsapp.configured
-            ? "Non configuré"
+            ? t("monitoring.status.notConfigured")
             : whatsapp.state === "open"
-              ? "Connecté"
+              ? t("monitoring.status.connected")
               : whatsapp.state
-                ? `Déconnecté (${whatsapp.state})`
-                : "Injoignable"
+                ? t("monitoring.status.disconnected", { state: whatsapp.state })
+                : t("monitoring.status.unreachable")
         }
         lines={[messages("WHATSAPP")]}
       />
       <StatusCard
         icon={<SendIcon className="size-4" />}
-        title="SMS et e-mail"
+        title={t("monitoring.status.smsEmail")}
         ok={sms.configured && email.configured}
         value={
           sms.configured && email.configured
-            ? "Configurés"
+            ? t("monitoring.status.allConfigured")
             : !sms.configured && !email.configured
-              ? "Non configurés"
+              ? t("monitoring.status.noneConfigured")
               : sms.configured
-                ? "E-mail non configuré"
-                : "SMS non configuré"
+                ? t("monitoring.status.emailNotConfigured")
+                : t("monitoring.status.smsNotConfigured")
         }
-        lines={[`SMS — ${messages("SMS")}`, `Mis à jour le ${formatTime(status.checkedAt)}`]}
+        lines={[
+          t("monitoring.status.smsLine", { summary: messages("SMS") }),
+          t("monitoring.status.updatedAt", { date: formatTime(status.checkedAt, locale) }),
+        ]}
       />
     </div>
   );
 }
 
 function JobState({ job }: { job: MonitoredJob }) {
-  if (job.lastStatus === "FAILED") return <Badge variant="destructive">En échec</Badge>;
-  if (job.late) return <Badge className="bg-amber-500/15 text-amber-700">En retard</Badge>;
-  if (job.lastStatus === "RUNNING") return <Badge variant="secondary">En cours</Badge>;
-  if (!job.lastStatus) return <Badge variant="outline">Jamais exécutée</Badge>;
-  return <Badge className="bg-green-600/15 text-green-700">OK</Badge>;
+  const t = useTranslations("adminSystem");
+  if (job.lastStatus === "FAILED")
+    return <Badge variant="destructive">{t("monitoring.jobState.failed")}</Badge>;
+  if (job.late)
+    return (
+      <Badge className="bg-amber-500/15 text-amber-700">{t("monitoring.jobState.late")}</Badge>
+    );
+  if (job.lastStatus === "RUNNING")
+    return <Badge variant="secondary">{t("monitoring.jobState.running")}</Badge>;
+  if (!job.lastStatus) return <Badge variant="outline">{t("monitoring.jobState.never")}</Badge>;
+  return <Badge className="bg-green-600/15 text-green-700">{t("monitoring.jobState.ok")}</Badge>;
 }
 
 function RunBadge({ status }: { status: string }) {
-  if (status === "FAILED") return <Badge variant="destructive">Échec</Badge>;
-  if (status === "RUNNING") return <Badge variant="secondary">En cours</Badge>;
-  return <Badge className="bg-green-600/15 text-green-700">Réussie</Badge>;
+  const t = useTranslations("adminSystem");
+  if (status === "FAILED")
+    return <Badge variant="destructive">{t("monitoring.runStatus.failed")}</Badge>;
+  if (status === "RUNNING")
+    return <Badge variant="secondary">{t("monitoring.runStatus.running")}</Badge>;
+  return (
+    <Badge className="bg-green-600/15 text-green-700">{t("monitoring.runStatus.succeeded")}</Badge>
+  );
 }
 
 function SeverityBadge({ severity }: { severity: string }) {
+  const t = useTranslations("adminSystem");
   return severity === "CRITICAL" ? (
-    <Badge variant="destructive">Critique</Badge>
+    <Badge variant="destructive">{t("monitoring.severity.CRITICAL")}</Badge>
   ) : (
-    <Badge className="bg-amber-500/15 text-amber-700">Avertissement</Badge>
+    <Badge className="bg-amber-500/15 text-amber-700">{t("monitoring.severity.WARNING")}</Badge>
   );
 }
 
@@ -469,26 +528,24 @@ function JobsCard({
   selected: string | null;
   onSelect: (name: string) => void;
 }) {
+  const t = useTranslations("adminSystem");
+  const locale = useLocale();
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Tâches planifiées</CardTitle>
-        <CardDescription>
-          Une tâche est en retard après trois exécutions manquées. Après un
-          redémarrage de l&apos;API, les tâches quotidiennes apparaissent
-          « jamais exécutées » jusqu&apos;à leur prochain passage.
-        </CardDescription>
+        <CardTitle>{t("monitoring.jobs.title")}</CardTitle>
+        <CardDescription>{t("monitoring.jobs.hint")}</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Tâche</TableHead>
-              <TableHead>Fréquence</TableHead>
-              <TableHead>Dernière exécution</TableHead>
-              <TableHead>Dernière réussite</TableHead>
-              <TableHead>Échecs (24 h)</TableHead>
-              <TableHead>État</TableHead>
+              <TableHead>{t("monitoring.columns.job")}</TableHead>
+              <TableHead>{t("monitoring.columns.frequency")}</TableHead>
+              <TableHead>{t("monitoring.columns.lastRun")}</TableHead>
+              <TableHead>{t("monitoring.columns.lastSuccess")}</TableHead>
+              <TableHead>{t("monitoring.columns.failures24h")}</TableHead>
+              <TableHead>{t("monitoring.columns.state")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -499,14 +556,14 @@ function JobsCard({
                 className={cn("cursor-pointer", selected === job.name && "bg-muted")}
               >
                 <TableCell className="whitespace-normal">
-                  <p className="font-medium">{job.label}</p>
+                  <p className="font-medium">{jobLabel(job, t)}</p>
                   {job.lastStatus === "FAILED" && job.lastError && (
                     <p className="text-destructive text-xs break-words">{job.lastError}</p>
                   )}
                 </TableCell>
-                <TableCell>{formatEvery(job.everyMinutes)}</TableCell>
-                <TableCell>{formatTime(job.lastStartedAt)}</TableCell>
-                <TableCell>{formatTime(job.lastSuccessAt)}</TableCell>
+                <TableCell>{formatEvery(job.everyMinutes, t)}</TableCell>
+                <TableCell>{formatTime(job.lastStartedAt, locale)}</TableCell>
+                <TableCell>{formatTime(job.lastSuccessAt, locale)}</TableCell>
                 <TableCell className={cn(job.failures24h > 0 && "text-destructive font-medium")}>
                   {job.failures24h}
                 </TableCell>
@@ -529,6 +586,7 @@ const splitList = (value: string) =>
     .filter(Boolean);
 
 function SettingsCard() {
+  const t = useTranslations("adminSystem");
   const settings = trpc.monitoring.settings.useQuery();
   const save = trpc.monitoring.updateSettings.useMutation();
   const test = trpc.monitoring.testAlert.useMutation();
@@ -567,9 +625,9 @@ function SettingsCard() {
       });
       setForm({ ...saved, emails: saved.emails.join("\n"), phones: saved.phones.join("\n") });
       await utils.monitoring.settings.invalidate();
-      toast.success("Réglages enregistrés.");
+      toast.success(t("monitoring.settings.saved"));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Enregistrement impossible.");
+      toast.error(error instanceof Error ? error.message : t("monitoring.settings.saveFailed"));
     }
   };
 
@@ -577,30 +635,32 @@ function SettingsCard() {
     try {
       const result = await test.mutateAsync();
       toast.success(
-        `Message de test : ${result.sent} canal(aux) OK${result.failed ? `, ${result.failed} en échec` : ""}.`,
+        result.failed
+          ? t("monitoring.settings.testResultWithFailures", {
+              sent: result.sent,
+              failed: result.failed,
+            })
+          : t("monitoring.settings.testResult", { sent: result.sent }),
       );
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Envoi impossible.");
+      toast.error(error instanceof Error ? error.message : t("monitoring.settings.sendFailed"));
     }
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Destinataires et seuils</CardTitle>
+        <CardTitle>{t("monitoring.settings.title")}</CardTitle>
         <CardDescription>
-          Les administrateurs reçoivent aussi chaque alerte dans l&apos;application.
-          Une alerte toujours en cours est renvoyée après le délai choisi. Pour
-          être prévenu si l&apos;API entière tombe, branchez une sonde externe
-          (UptimeRobot ou Better Stack, gratuits) sur l&apos;adresse{" "}
-          <code>/v1/health</code>{" "}
-          de l&apos;API.
+          {t.rich("monitoring.settings.description", {
+            code: (chunks) => <code>{chunks}</code>,
+          })}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={submit} className="grid gap-4 md:grid-cols-2">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="monitoring-emails">E-mails (un par ligne)</Label>
+            <Label htmlFor="monitoring-emails">{t("monitoring.settings.emails")}</Label>
             <Textarea
               id="monitoring-emails"
               rows={3}
@@ -610,7 +670,7 @@ function SettingsCard() {
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="monitoring-phones">Téléphones WhatsApp / SMS (un par ligne)</Label>
+            <Label htmlFor="monitoring-phones">{t("monitoring.settings.phones")}</Label>
             <Textarea
               id="monitoring-phones"
               rows={3}
@@ -620,19 +680,19 @@ function SettingsCard() {
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="monitoring-errors">Erreurs serveur en 15 min</Label>
+            <Label htmlFor="monitoring-errors">{t("monitoring.settings.serverErrors")}</Label>
             <Input id="monitoring-errors" min={1} {...number("serverErrorsPer15Min")} />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="monitoring-slow">Lenteur : 95 % des requêtes au-delà de (ms)</Label>
+            <Label htmlFor="monitoring-slow">{t("monitoring.settings.slow")}</Label>
             <Input id="monitoring-slow" min={200} step={100} {...number("slowP95Ms")} />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="monitoring-db">Taille de la base au-delà de (Mo)</Label>
+            <Label htmlFor="monitoring-db">{t("monitoring.settings.databaseSize")}</Label>
             <Input id="monitoring-db" min={100} step={100} {...number("databaseSizeMb")} />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="monitoring-repeat">Renvoyer une alerte en cours toutes les (h)</Label>
+            <Label htmlFor="monitoring-repeat">{t("monitoring.settings.repeat")}</Label>
             <Input id="monitoring-repeat" min={1} max={168} {...number("repeatHours")} />
           </div>
           <label className="flex items-center gap-2 text-sm md:col-span-2">
@@ -642,19 +702,28 @@ function SettingsCard() {
               onChange={(event) => setForm({ ...form, checkWhatsapp: event.target.checked })}
               className="size-4"
             />
-            Alerter quand WhatsApp est déconnecté
+            {t("monitoring.settings.checkWhatsapp")}
           </label>
           <div className="flex flex-wrap gap-2 md:col-span-2">
             <Button type="submit" disabled={save.isPending}>
-              Enregistrer
+              {t("monitoring.settings.save")}
             </Button>
             <Button type="button" variant="outline" onClick={sendTest} disabled={test.isPending}>
               <SendIcon />
-              Envoyer un message de test
+              {t("monitoring.settings.sendTest")}
             </Button>
           </div>
         </form>
       </CardContent>
     </Card>
   );
+}
+
+/** The job's name in the admin's language; the API's French label for an unknown job. */
+function jobLabel(
+  job: { name: string; label: string },
+  t: ReturnType<typeof useTranslations<"adminSystem">>,
+) {
+  const key = `monitoring.jobNames.${job.name}` as Parameters<typeof t>[0];
+  return t.has(key) ? t(key) : job.label;
 }

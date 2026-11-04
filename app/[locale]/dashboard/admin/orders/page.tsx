@@ -22,11 +22,14 @@ import {
 } from "@/lib/seller-dashboard-utils";
 import { trpc } from "@/server/trpc/client";
 import { EyeIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 const PAGE_SIZE = 10;
 
 export default function AdminOrdersPage() {
+  const t = useTranslations("adminCommerce");
+  const locale = useLocale();
   const [page, setPage] = useState(1);
   const payments = trpc.admin.payments.useQuery({
     page,
@@ -38,25 +41,29 @@ export default function AdminOrdersPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Commandes"
-        description="Toutes les commandes enregistrées sur la plateforme."
+        title={t("orders.title")}
+        description={t("orders.description")}
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Commandes ({payments.data?.total ?? 0})</CardTitle>
+          <CardTitle>
+            {t("orders.cardTitle", { count: payments.data?.total ?? 0 })}
+          </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Commande</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>Entreprise</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-end">Détails</TableHead>
+                <TableHead>{t("orders.columns.order")}</TableHead>
+                <TableHead>{t("orders.columns.client")}</TableHead>
+                <TableHead>{t("orders.columns.business")}</TableHead>
+                <TableHead>{t("orders.columns.date")}</TableHead>
+                <TableHead>{t("orders.columns.total")}</TableHead>
+                <TableHead>{t("orders.columns.status")}</TableHead>
+                <TableHead className="text-end">
+                  {t("orders.columns.details")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -65,8 +72,8 @@ export default function AdminOrdersPage() {
                 isLoading={payments.isLoading}
                 error={payments.error?.message}
                 isEmpty={!payments.data?.items.length}
-                loadingLabel="Chargement des commandes..."
-                emptyLabel="Aucune commande enregistrée."
+                loadingLabel={t("orders.loading")}
+                emptyLabel={t("orders.empty")}
               />
               {payments.data?.items.map((payment) => {
                 const order = payment.order;
@@ -90,10 +97,10 @@ export default function AdminOrdersPage() {
                       {order.businessId.slice(0, 8)}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
-                      {formatDate(order.createdAt, true)}
+                      {formatDate(order.createdAt, true, locale)}
                     </TableCell>
                     <TableCell className="font-bold whitespace-nowrap">
-                      {formatMoney(order.totalAmountMinor, order.currency)}
+                      {formatMoney(order.totalAmountMinor, order.currency, locale)}
                     </TableCell>
                     <TableCell>
                       <OrderStatusBadge status={order.status} />
@@ -107,7 +114,7 @@ export default function AdminOrdersPage() {
                         }
                       >
                         <EyeIcon className="size-4" />
-                        <span className="sr-only">Voir la commande</span>
+                        <span className="sr-only">{t("orders.view")}</span>
                       </Button>
                     </TableCell>
                   </TableRow>

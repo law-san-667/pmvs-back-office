@@ -26,24 +26,13 @@ import type { StaffRole, UserStatus } from "@/lib/admin-types";
 import { formatDate } from "@/lib/seller-dashboard-utils";
 import { trpc } from "@/server/trpc/client";
 import { SearchIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 const PAGE_SIZE = 10;
 type RoleFilter = "ALL" | StaffRole;
 
-const ROLE_LABELS: Record<StaffRole, string> = {
-  ADMIN: "Administrateur",
-  MODERATOR: "Modérateur",
-  OPERATOR: "Opérateur",
-};
-
-const STATUS_LABELS: Record<UserStatus, string> = {
-  PENDING_VERIFICATION: "En attente de vérification",
-  ACTIVE: "Actif",
-  INACTIVE: "Inactif",
-  SUSPENDED: "Suspendu",
-  DELETED: "Supprimé",
-};
+const ROLES: StaffRole[] = ["ADMIN", "MODERATOR", "OPERATOR"];
 
 const STATUS_CLASSES: Record<UserStatus, string> = {
   PENDING_VERIFICATION: "border-amber-200 bg-amber-50 text-amber-700",
@@ -54,6 +43,8 @@ const STATUS_CLASSES: Record<UserStatus, string> = {
 };
 
 export default function AdminAdministratorsPage() {
+  const t = useTranslations("adminAccounts");
+  const locale = useLocale();
   const { user } = useUser();
   const [page, setPage] = useState(1);
   const [role, setRole] = useState<RoleFilter>("ALL");
@@ -71,13 +62,15 @@ export default function AdminAdministratorsPage() {
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Administrateurs"
-        description="Comptes ayant accès au back-office. Créez-en de nouveaux et consultez ceux qui existent déjà."
+        title={t("administrators.title")}
+        description={t("administrators.description")}
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Comptes ({admins.data?.total ?? 0})</CardTitle>
+          <CardTitle>
+            {t("administrators.count", { count: admins.data?.total ?? 0 })}
+          </CardTitle>
           <CardAction>
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative">
@@ -88,7 +81,7 @@ export default function AdminAdministratorsPage() {
                     setSearch(event.target.value);
                     setPage(1);
                   }}
-                  placeholder="Nom, email, téléphone..."
+                  placeholder={t("administrators.searchPlaceholder")}
                   className="h-9 w-56 ps-8"
                 />
               </div>
@@ -100,10 +93,10 @@ export default function AdminAdministratorsPage() {
                 }}
                 className="border-input bg-background h-9 rounded-md border px-3 text-sm"
               >
-                <option value="ALL">Tous les rôles</option>
-                {Object.entries(ROLE_LABELS).map(([value, label]) => (
+                <option value="ALL">{t("administrators.allRoles")}</option>
+                {ROLES.map((value) => (
                   <option key={value} value={value}>
-                    {label}
+                    {t(`staffRole.${value}`)}
                   </option>
                 ))}
               </select>
@@ -115,12 +108,12 @@ export default function AdminAdministratorsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Compte</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Rôle</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Dernière connexion</TableHead>
-                <TableHead>Créé le</TableHead>
+                <TableHead>{t("administrators.columns.account")}</TableHead>
+                <TableHead>{t("administrators.columns.contact")}</TableHead>
+                <TableHead>{t("administrators.columns.role")}</TableHead>
+                <TableHead>{t("administrators.columns.status")}</TableHead>
+                <TableHead>{t("administrators.columns.lastLogin")}</TableHead>
+                <TableHead>{t("administrators.columns.createdAt")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -129,8 +122,8 @@ export default function AdminAdministratorsPage() {
                 isLoading={admins.isLoading}
                 error={admins.error?.message}
                 isEmpty={!admins.data?.items.length}
-                loadingLabel="Chargement des administrateurs..."
-                emptyLabel="Aucun administrateur trouvé."
+                loadingLabel={t("administrators.loading")}
+                emptyLabel={t("administrators.empty")}
               />
               {admins.data?.items.map((admin) => (
                 <TableRow key={admin.id}>
@@ -139,7 +132,7 @@ export default function AdminAdministratorsPage() {
                       {admin.firstName} {admin.lastName}
                       {admin.id === user?.id && (
                         <span className="text-muted-foreground ms-2 text-xs font-normal">
-                          (vous)
+                          {t("administrators.you")}
                         </span>
                       )}
                     </p>
@@ -150,22 +143,22 @@ export default function AdminAdministratorsPage() {
                       {admin.phoneNumber ?? "—"}
                     </p>
                   </TableCell>
-                  <TableCell>{ROLE_LABELS[admin.role]}</TableCell>
+                  <TableCell>{t(`staffRole.${admin.role}`)}</TableCell>
                   <TableCell>
                     <Badge
                       variant="outline"
                       className={STATUS_CLASSES[admin.status]}
                     >
-                      {STATUS_LABELS[admin.status]}
+                      {t(`userStatus.${admin.status}`)}
                     </Badge>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
                     {admin.lastLoginAt
-                      ? formatDate(admin.lastLoginAt, true)
-                      : "Jamais"}
+                      ? formatDate(admin.lastLoginAt, true, locale)
+                      : t("administrators.never")}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {formatDate(admin.createdAt)}
+                    {formatDate(admin.createdAt, false, locale)}
                   </TableCell>
                 </TableRow>
               ))}

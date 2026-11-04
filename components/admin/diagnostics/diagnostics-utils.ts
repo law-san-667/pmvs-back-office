@@ -1,12 +1,13 @@
+import { intlLocale } from "@/i18n/config";
 import type { RequestLogDetail } from "@/lib/diagnostics-types";
 
 export const RANGE_PRESETS = [
-  { key: "15m", label: "15 min", ms: 15 * 60_000 },
-  { key: "1h", label: "1 h", ms: 60 * 60_000 },
-  { key: "6h", label: "6 h", ms: 6 * 60 * 60_000 },
-  { key: "24h", label: "24 h", ms: 24 * 60 * 60_000 },
-  { key: "7d", label: "7 j", ms: 7 * 24 * 60 * 60_000 },
-  { key: "30d", label: "30 j", ms: 30 * 24 * 60 * 60_000 },
+  { key: "15m", ms: 15 * 60_000 },
+  { key: "1h", ms: 60 * 60_000 },
+  { key: "6h", ms: 6 * 60 * 60_000 },
+  { key: "24h", ms: 24 * 60 * 60_000 },
+  { key: "7d", ms: 7 * 24 * 60 * 60_000 },
+  { key: "30d", ms: 30 * 24 * 60 * 60_000 },
 ] as const;
 
 export type RangeKey = (typeof RANGE_PRESETS)[number]["key"];
@@ -39,14 +40,14 @@ export const METHOD_CLASSES: Record<string, string> = {
 export const formatDuration = (ms: number) =>
   ms >= 1000 ? `${(ms / 1000).toFixed(1)} s` : `${ms} ms`;
 
-export const formatTime = (value: string, withSeconds = true) =>
-  new Intl.DateTimeFormat("fr-FR", {
+export const formatTime = (value: string, locale: string, withSeconds = true) =>
+  new Intl.DateTimeFormat(intlLocale(locale), {
     dateStyle: "short",
     timeStyle: withSeconds ? "medium" : "short",
   }).format(new Date(value));
 
-export const formatPercent = (ratio: number) =>
-  `${(ratio * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`;
+export const formatPercent = (ratio: number, locale: string) =>
+  ratio.toLocaleString(intlLocale(locale), { style: "percent", maximumFractionDigits: 1 });
 
 export const prettyJson = (value: unknown) => {
   if (value === null || value === undefined) return "";

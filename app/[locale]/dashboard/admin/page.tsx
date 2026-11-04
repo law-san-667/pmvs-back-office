@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@/i18n/navigation";
+import { intlLocale } from "@/i18n/config";
 import { trpc } from "@/server/trpc/client";
 import {
     ArrowUpRightIcon,
@@ -21,41 +22,36 @@ import {
     ShoppingCartIcon,
     UserCogIcon,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
 const metricDefinitions = [
   {
     key: "totalBusinesses" as const,
-    title: "Fournisseurs",
     href: "/dashboard/admin/businesses",
     icon: Building2Icon,
   },
   {
     key: "totalListings" as const,
-    title: "Produits & services publiés",
     href: "/dashboard/admin/listings",
     icon: PackageIcon,
   },
   {
     key: "totalTenders" as const,
-    title: "Appels d’offres ouverts",
     href: "/dashboard/admin/tenders",
     icon: GavelIcon,
   },
   {
     key: "totalOrders" as const,
-    title: "Commandes",
     href: "/dashboard/admin/orders",
     icon: ShoppingCartIcon,
   },
   {
     key: "totalTransactions" as const,
-    title: "Transactions",
     href: "/dashboard/admin/transactions",
     icon: CreditCardIcon,
   },
   {
     key: "totalTeamMembers" as const,
-    title: "Utilisateurs",
     href: "/dashboard/admin/team-members",
     icon: UserCogIcon,
   },
@@ -64,12 +60,14 @@ const metricDefinitions = [
 export default function AdminDashboardPage() {
   const stats = trpc.admin.stats.useQuery();
   const moderation = trpc.admin.moderationSummary.useQuery();
+  const t = useTranslations("adminSystem");
+  const locale = useLocale();
 
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-6">
       <AdminPageHeader
-        title="Tableau de bord"
-        description="Vue d’ensemble de l’activité et des ressources de la plateforme."
+        title={t("dashboard.title")}
+        description={t("dashboard.description")}
       />
 
       {(moderation.data?.pending ?? 0) > 0 && (
@@ -79,15 +77,15 @@ export default function AdminDashboardPage() {
         >
           <span className="flex items-center gap-2">
             <ShieldAlertIcon className="size-5" />
-            {moderation.data?.pending} annonce(s) en attente de validation.
+            {t("dashboard.pendingModeration", { count: moderation.data?.pending ?? 0 })}
           </span>
-          <span className="font-medium underline">Ouvrir la modération</span>
+          <span className="font-medium underline">{t("dashboard.openModeration")}</span>
         </Link>
       )}
 
       {stats.isError && (
         <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-4 text-sm">
-          Impossible de charger les statistiques : {stats.error.message}
+          {t("dashboard.statsError", { error: stats.error.message })}
         </div>
       )}
 
@@ -95,13 +93,14 @@ export default function AdminDashboardPage() {
         {metricDefinitions.map((metric) => {
           const Icon = metric.icon;
           const value = stats.data?.[metric.key];
+          const title = t(`dashboard.metrics.${metric.key}`);
 
           return (
             <Card key={metric.key}>
               <CardHeader>
-                <CardTitle>{metric.title}</CardTitle>
+                <CardTitle>{title}</CardTitle>
                 <CardAction>
-                  <Link href={metric.href} aria-label={`Voir ${metric.title}`}>
+                  <Link href={metric.href} aria-label={t("dashboard.view", { title })}>
                     <ArrowUpRightIcon className="text-muted-foreground size-4" />
                   </Link>
                 </CardAction>
@@ -111,7 +110,7 @@ export default function AdminDashboardPage() {
                   <Skeleton className="h-9 w-20" />
                 ) : (
                   <p className="text-3xl font-bold text-[#3B9AE1]">
-                    {value.toLocaleString("fr-FR")}
+                    {value.toLocaleString(intlLocale(locale))}
                   </p>
                 )}
                 <div className="bg-primary/10 text-primary flex size-11 items-center justify-center rounded-xl">

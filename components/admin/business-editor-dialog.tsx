@@ -19,6 +19,7 @@ import type {
   BusinessStatus,
 } from "@/lib/backend-resource-types";
 import { BUSINESS_CATEGORY_LABELS } from "@/lib/business-categories";
+import { useTranslations } from "next-intl";
 import { trpc } from "@/server/trpc/client";
 import { useState, type FormEvent } from "react";
 
@@ -31,6 +32,8 @@ export function BusinessEditorDialog({
   onClose: () => void;
   onSaved: () => Promise<void>;
 }) {
+  const t = useTranslations("adminAccounts");
+  const tCategory = useTranslations("onboarding.category.options");
   const [name, setName] = useState(business.name);
   const [description, setDescription] = useState(business.description ?? "");
   const [contactEmail, setContactEmail] = useState(business.contactEmail ?? "");
@@ -76,14 +79,14 @@ export function BusinessEditorDialog({
       <DialogContent className="sm:max-w-lg">
         <form onSubmit={submit} className="flex flex-col gap-4">
           <DialogHeader>
-            <DialogTitle>Modifier l&apos;entreprise</DialogTitle>
+            <DialogTitle>{t("editor.title")}</DialogTitle>
             <DialogDescription>
-              Mettez à jour les informations et le statut de « {business.name} ».
+              {t("editor.description", { name: business.name })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="business-name">Nom</Label>
+            <Label htmlFor="business-name">{t("editor.name")}</Label>
             <Input
               id="business-name"
               value={name}
@@ -93,7 +96,9 @@ export function BusinessEditorDialog({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="business-description">Description</Label>
+            <Label htmlFor="business-description">
+              {t("editor.descriptionLabel")}
+            </Label>
             <Textarea
               id="business-description"
               value={description}
@@ -103,7 +108,9 @@ export function BusinessEditorDialog({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="business-email">Email de contact</Label>
+              <Label htmlFor="business-email">
+                {t("editor.contactEmail")}
+              </Label>
               <Input
                 id="business-email"
                 type="email"
@@ -122,7 +129,7 @@ export function BusinessEditorDialog({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="business-address">Adresse</Label>
+            <Label htmlFor="business-address">{t("editor.address")}</Label>
             <Input
               id="business-address"
               value={address}
@@ -131,7 +138,7 @@ export function BusinessEditorDialog({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="business-status">Statut</Label>
+            <Label htmlFor="business-status">{t("editor.status")}</Label>
             <select
               id="business-status"
               value={status}
@@ -140,16 +147,18 @@ export function BusinessEditorDialog({
               }
               className="border-input bg-background h-9 rounded-md border px-3 text-sm"
             >
-              {Object.entries(BUSINESS_STATUS_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
+              {(Object.keys(BUSINESS_STATUS_LABELS) as BusinessStatus[]).map(
+                (value) => (
+                  <option key={value} value={value}>
+                    {t(`businessStatus.${value}`)}
+                  </option>
+                ),
+              )}
             </select>
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="business-category">Catégorisation</Label>
+            <Label htmlFor="business-category">{t("editor.category")}</Label>
             <select
               id="business-category"
               value={businessCategory}
@@ -158,10 +167,10 @@ export function BusinessEditorDialog({
               }
               className="border-input bg-background h-9 rounded-md border px-3 text-sm"
             >
-              {Object.entries(BUSINESS_CATEGORY_LABELS).map(
-                ([value, label]) => (
+              {(Object.keys(BUSINESS_CATEGORY_LABELS) as BusinessCategory[]).map(
+                (value) => (
                   <option key={value} value={value}>
-                    {label}
+                    {tCategory(`${value}.label`)}
                   </option>
                 ),
               )}
@@ -170,7 +179,7 @@ export function BusinessEditorDialog({
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="business-commission">
-              Commission plateforme (%) — vide = taux par défaut
+              {t("editor.commission")}
             </Label>
             <Input
               id="business-commission"
@@ -180,7 +189,7 @@ export function BusinessEditorDialog({
               step="0.5"
               value={commissionRate}
               onChange={(event) => setCommissionRate(event.target.value)}
-              placeholder="ex. 10"
+              placeholder={t("editor.commissionPlaceholder")}
             />
           </div>
 
@@ -195,10 +204,10 @@ export function BusinessEditorDialog({
               onClick={onClose}
               disabled={update.isPending}
             >
-              Annuler
+              {t("actions.cancel")}
             </Button>
             <Button type="submit" disabled={update.isPending}>
-              {update.isPending ? "Enregistrement..." : "Enregistrer"}
+              {update.isPending ? t("actions.saving") : t("actions.save")}
             </Button>
           </DialogFooter>
         </form>

@@ -5,17 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { type ComplianceFinding, FINDING_KIND_LABELS, formatDateTime } from "@/lib/compliance";
+import { type ComplianceFinding, formatDateTime } from "@/lib/compliance";
 import { trpc } from "@/server/trpc/client";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
-const STATUSES = [
-  { value: "OPEN", label: "À examiner" },
-  { value: "DISMISSED", label: "Écartés" },
-  { value: "RESOLVED", label: "Résolus" },
-] as const;
+const STATUSES = ["OPEN", "DISMISSED", "RESOLVED"] as const;
 
 /** Screen that deals with a finding. */
 const findingHref = (finding: ComplianceFinding) =>
@@ -26,6 +23,9 @@ const findingHref = (finding: ComplianceFinding) =>
       : null;
 
 export function FindingsList() {
+  const t = useTranslations("adminSettings.findings");
+  const tc = useTranslations("adminSettings.common");
+  const locale = useLocale();
   const [status, setStatus] = useState<ComplianceFinding["status"]>("OPEN");
   const [page, setPage] = useState(1);
   const utils = trpc.useUtils();
@@ -38,14 +38,14 @@ export function FindingsList() {
   const act = async (finding: ComplianceFinding, next: "OPEN" | "DISMISSED") => {
     const note =
       next === "DISMISSED"
-        ? (window.prompt("Pourquoi écarter ce point ? (conservé dans le journal)") ?? undefined)
+        ? (window.prompt(t("dismissPrompt")) ?? undefined)
         : undefined;
     if (next === "DISMISSED" && note === undefined) return;
     try {
       await handle.mutateAsync({ id: finding.id, status: next, note: note || undefined });
       await utils.compliance.invalidate();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Action impossible.");
+      toast.error(error instanceof Error ? error.message : tc("actionFailed"));
     }
   };
 
@@ -53,7 +53,7 @@ export function FindingsList() {
     <Card>
       <CardContent className="flex flex-col gap-4">
         <select
-          aria-label="État"
+          aria-label={t("status")}
           value={status}
           onChange={(event) => {
             setStatus(event.target.value as ComplianceFinding["status"]);
@@ -62,14 +62,14 @@ export function FindingsList() {
           className="border-input bg-background h-9 w-fit rounded-md border px-2 text-sm"
         >
           {STATUSES.map((item) => (
-            <option key={item.value} value={item.value}>{item.label}</option>
+            <option key={item} value={item}>{t(`statuses.${item}`)}</option>
           ))}
         </select>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Point</TableHead>
-              <TableHead>Depuis</TableHead>
+              <TableHead>{t("columns.finding")}</TableHead>
+              <TableHead>{t("columns.since")}</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -80,21 +80,21 @@ export function FindingsList() {
                 <TableRow key={finding.id}>
                   <TableCell className="whitespace-normal">
                     <Badge variant={finding.kind === "DOCUMENT_EXPIRED" ? "destructive" : "secondary"}>
-                      {FINDING_KIND_LABELS[finding.kind]}
+                      {t(`kinds.${finding.kind}`)}
                     </Badge>
                     <p className="mt-1 break-words">{finding.details}</p>
-                    {finding.note && <p className="text-muted-foreground text-xs">Note : {finding.note}</p>}
+                    {finding.note && <p className="text-muted-foreground text-xs">{t("note", { note: finding.note })}</p>}
                   </TableCell>
-                  <TableCell>{formatDateTime(finding.firstSeenAt)}</TableCell>
+                  <TableCell>{formatDateTime(finding.firstSeenAt, locale)}</TableCell>
                   <TableCell className="text-end whitespace-nowrap">
                     {href && (
-                      <Button size="sm" variant="ghost" nativeButton={false} render={<Link href={href} />}>Ouvrir</Button>
+                      <Button size="sm" variant="ghost" nativeButton={false} render={<Link href={href} />}>{t("open")}</Button>
                     )}
                     {finding.status === "OPEN" && (
-                      <Button size="sm" variant="outline" onClick={() => act(finding, "DISMISSED")}>Écarter</Button>
+                      <Button size="sm" variant="outline" onClick={() => act(finding, "DISMISSED")}>{t("dismiss")}</Button>
                     )}
                     {finding.status === "DISMISSED" && (
-                      <Button size="sm" variant="outline" onClick={() => act(finding, "OPEN")}>Rouvrir</Button>
+                      <Button size="sm" variant="outline" onClick={() => act(finding, "OPEN")}>{t("reopen")}</Button>
                     )}
                   </TableCell>
                 </TableRow>
@@ -102,7 +102,7 @@ export function FindingsList() {
             })}
             {findings.data && !findings.data.items.length && (
               <TableRow>
-                <TableCell colSpan={3} className="text-muted-foreground text-center">Rien à signaler.</TableCell>
+                <TableCell colSpan={3} className="text-muted-foreground text-center">{t("empty")}</TableCell>
               </TableRow>
             )}
           </TableBody>

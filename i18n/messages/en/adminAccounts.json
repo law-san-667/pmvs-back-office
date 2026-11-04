@@ -1,0 +1,415 @@
+{
+  "businessStatus": {
+    "PENDING_VERIFICATION": "To verify",
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive",
+    "SUSPENDED": "Suspended",
+    "DELETED": "Deleted"
+  },
+  "memberRole": {
+    "OWNER": "Owner",
+    "ADMIN": "Administrator",
+    "MEMBER": "Member"
+  },
+  "memberStatus": {
+    "INVITED": "Invited",
+    "ACTIVE": "Active",
+    "SUSPENDED": "Suspended",
+    "REMOVED": "Removed"
+  },
+  "payoutStatus": {
+    "ACTIVE": "Active",
+    "SUSPENDED": "Suspended"
+  },
+  "staffRole": {
+    "ADMIN": "Administrator",
+    "MODERATOR": "Moderator",
+    "OPERATOR": "Operator"
+  },
+  "userStatus": {
+    "PENDING_VERIFICATION": "Pending verification",
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive",
+    "SUSPENDED": "Suspended",
+    "DELETED": "Deleted"
+  },
+  "actions": {
+    "validate": "Approve",
+    "reactivate": "Reactivate",
+    "suspend": "Suspend",
+    "deactivate": "Deactivate",
+    "edit": "Edit",
+    "delete": "Delete",
+    "viewDetails": "View details",
+    "view": "View",
+    "back": "Back",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "deleting": "Deleting..."
+  },
+  "businesses": {
+    "title": "Suppliers",
+    "description": "View all registered businesses, approve them and manage their status.",
+    "count": "Suppliers ({count})",
+    "filterByStatus": "Filter by status",
+    "allStatuses": "All statuses",
+    "searchPlaceholder": "Search...",
+    "columns": {
+      "business": "Business",
+      "location": "Location",
+      "contact": "Contact",
+      "category": "Category",
+      "registeredAt": "Registered",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "loading": "Loading businesses...",
+    "empty": "No businesses found.",
+    "actionsFor": "Actions for {name}"
+  },
+  "details": {
+    "loading": "Loading business...",
+    "notFound": "Business not found.",
+    "backToList": "Back to businesses",
+    "subtitle": "{id} — registered on {date}",
+    "loadingShort": "Loading...",
+    "general": {
+      "title": "General information",
+      "description": "Description",
+      "location": "Location",
+      "address": "Address",
+      "deliveryZones": "Delivery zones",
+      "category": "Category",
+      "registeredAt": "Registered",
+      "updatedAt": "Last updated"
+    },
+    "contact": {
+      "title": "Contact",
+      "email": "Email"
+    },
+    "owner": {
+      "title": "Owner",
+      "none": "No owner linked to this business.",
+      "email": "Email",
+      "phone": "Phone",
+      "platformRole": "Platform role",
+      "accountStatus": "Account status",
+      "lastLogin": "Last login",
+      "createdAt": "Account created on"
+    },
+    "payout": {
+      "title": "Wave payouts (LawPay)",
+      "none": "No Wave payout account: this business cannot receive orders yet. Its owner must enter their Wave number in the settings.",
+      "operator": "Provider",
+      "number": "Number",
+      "status": "Status",
+      "recipientId": "LawPay ID",
+      "lastEvent": "Last event",
+      "commission": "Commission",
+      "defaultRate": "Default platform rate",
+      "suspend": "Suspend payouts",
+      "reactivate": "Reactivate payouts"
+    },
+    "compliance": {
+      "title": "Compliance",
+      "documents": "Documents",
+      "physicalPersonNote": "Individuals do not provide legal documents.",
+      "legalStatus": "Legal status",
+      "commercialRegister": "Trade register",
+      "creationYear": "Year founded",
+      "taxId": "Tax ID",
+      "permanentStaff": "Permanent staff",
+      "businessTypes": "Supplier types",
+      "postalCode": "Postal code",
+      "legalRepresentative": "Legal representative",
+      "website": "Website",
+      "headquarters": "Headquarters location",
+      "bank": "Bank",
+      "bankAddress": "Address",
+      "paymentAccount": "Account / gateway",
+      "keyPersons": "Key people",
+      "personFallback": "Person {index}",
+      "idNumber": "ID {number}",
+      "contacts": "Contacts",
+      "complianceDocuments": "Compliance documents",
+      "incorporationDeed": "Articles of incorporation",
+      "passportScan": "Passport scan",
+      "photos": "MSME photos",
+      "viewDocument": "View document"
+    },
+    "team": {
+      "title": "Team ({count})",
+      "user": "User",
+      "contact": "Contact",
+      "role": "Role",
+      "status": "Status",
+      "addedAt": "Added on",
+      "loading": "Loading team...",
+      "empty": "No members for this business."
+    },
+    "listings": {
+      "title": "Recent listings ({count})",
+      "viewAll": "View all listings",
+      "titleColumn": "Title",
+      "status": "Status",
+      "createdAt": "Created on",
+      "loading": "Loading listings...",
+      "empty": "No listings for this business."
+    }
+  },
+  "editor": {
+    "title": "Edit business",
+    "description": "Update the details and status of “{name}”.",
+    "name": "Name",
+    "descriptionLabel": "Description",
+    "contactEmail": "Contact email",
+    "address": "Address",
+    "status": "Status",
+    "category": "Category",
+    "commission": "Platform commission (%) — empty = default rate",
+    "commissionPlaceholder": "e.g. 10"
+  },
+  "deleteDialog": {
+    "title": "Confirm deletion",
+    "description": "“{name}” will be permanently deleted, along with its listings and related data. This cannot be undone."
+  },
+  "qualityCard": {
+    "title": "Quality & certification",
+    "loading": "Calculating indicators...",
+    "noData": "No data",
+    "met": "Compliant",
+    "notMet": "Non-compliant",
+    "norm": "· norm {threshold}",
+    "certified": "Certified supplier",
+    "notCertified": "Not certified",
+    "score": "Compliance score · {met, plural, one {# norm met} other {# norms met}} out of {judged, plural, one {# assessable} other {# assessable}} ({total} in total)",
+    "window": "Window: {days, plural, one {# day} other {# days}}",
+    "pendingReports": "{count, plural, one {# pending report} other {# pending reports}} about this business or its listings.",
+    "measured": "Measured indicators",
+    "teamChecks": "Team checks",
+    "notesPlaceholder": "Internal notes on the assessment (optional)",
+    "saveEvaluation": "Save assessment",
+    "lastEvaluation": "Last assessment: {date}",
+    "certification": "Certification",
+    "certifiedOn": "Certified on {date}.",
+    "scoreHint": "The score guides the decision; it does not replace it.",
+    "revoke": "Revoke certification",
+    "certify": "Certify this supplier",
+    "saveError": "Unable to save the assessment.",
+    "certificationError": "Unable to change the certification.",
+    "units": {
+      "percent": "{value}%",
+      "days": "{value} d",
+      "hours": "{value} h"
+    },
+    "minimumStockThreshold": "no product below the minimum",
+    "kpi": {
+      "negativeFeedback": {
+        "title": "Negative feedback",
+        "description": "Share of reviews rated 1 or 2 stars."
+      },
+      "responseRate": {
+        "title": "Responsive customer service",
+        "description": "Share of customer conversations the supplier replied to."
+      },
+      "returnRate": {
+        "title": "Item return rate",
+        "description": "Share of delivered orders that were refunded (there is no dedicated return flow yet)."
+      },
+      "cancellationRate": {
+        "title": "Cancellations and stock-outs",
+        "description": "Orders cancelled by the supplier, and out-of-stock listings."
+      },
+      "shippingDelay": {
+        "title": "Processing and shipping times",
+        "description": "Share of orders shipped within the set time after confirmation."
+      },
+      "minimumStock": {
+        "title": "Minimum stock per product",
+        "description": "Published products whose stock is below the required minimum."
+      }
+    },
+    "check": {
+      "prohibitedProductsEnforced": {
+        "title": "Prohibited products list strictly enforced",
+        "description": "No listing falls under the list of prohibited products."
+      },
+      "admissibleCategoriesDefined": {
+        "title": "Eligible product and service categories",
+        "description": "The supplier only sells in the categories allowed for its profile."
+      },
+      "productQualityVerified": {
+        "title": "Product quality standards verified",
+        "description": "Product quality has been checked by the team."
+      }
+    },
+    "details": {
+      "negativeFeedback": "{negative, plural, one {# negative review} other {# negative reviews}} out of {total}",
+      "responseRate": "{answered, plural, one {# conversation answered} other {# conversations answered}} out of {total}",
+      "returnRate": "{refunded, plural, one {# refund} other {# refunds}} out of {delivered, plural, one {# delivered order} other {# delivered orders}}",
+      "cancellationRate": "{cancelled, plural, one {# cancellation} other {# cancellations}} out of {orders, plural, one {# order} other {# orders}} · stock-out {stockOutRate} ({listings, plural, one {# listing} other {# listings}})",
+      "shippingDelay": "{onTime} on time out of {shipped, plural, one {# shipped} other {# shipped}} · average time {average} (max {maxDays} d)",
+      "minimumStock": "{under, plural, one {# product} other {# products}} below {minimum, plural, one {# unit} other {# units}} out of {published, plural, one {# published} other {# published}}"
+    }
+  },
+  "qualityPage": {
+    "title": "Supplier quality",
+    "description": "Suppliers ranked against the platform's quality standards. Open a business to see the details, assess it and certify it.",
+    "count": "Ranking ({count})",
+    "filterByCertification": "Filter by certification",
+    "allSuppliers": "All suppliers",
+    "certifiedFilter": "Certified",
+    "notCertifiedFilter": "Not certified",
+    "adjustNorms": "Adjust standards",
+    "columns": {
+      "supplier": "Supplier",
+      "score": "Score",
+      "norms": "Norms",
+      "certification": "Certification",
+      "status": "Status",
+      "detail": "Details"
+    },
+    "loading": "Calculating scores...",
+    "empty": "No suppliers to rank.",
+    "reports": "{count, plural, one {# report} other {# reports}}",
+    "norms": "{met} / {judged} assessable",
+    "normsWithMissing": "{met} / {judged} assessable ({missing} without data)",
+    "certified": "Certified",
+    "notCertified": "Not certified"
+  },
+  "customers": {
+    "title": "Customers",
+    "description": "Buyers identified from the platform's recent transactions.",
+    "count": "Customers ({count})",
+    "searchPlaceholder": "Name, email, phone...",
+    "columns": {
+      "client": "Customer",
+      "phone": "Phone",
+      "orders": "Recent orders",
+      "amount": "Recent amount",
+      "id": "ID"
+    },
+    "loading": "Loading customers...",
+    "empty": "No customers found in recent transactions.",
+    "noEmail": "No email"
+  },
+  "administrators": {
+    "title": "Administrators",
+    "description": "Accounts with access to the back office. Create new ones and review existing ones.",
+    "count": "Accounts ({count})",
+    "searchPlaceholder": "Name, email, phone...",
+    "allRoles": "All roles",
+    "columns": {
+      "account": "Account",
+      "contact": "Contact",
+      "role": "Role",
+      "status": "Status",
+      "lastLogin": "Last login",
+      "createdAt": "Created on"
+    },
+    "loading": "Loading administrators...",
+    "empty": "No administrators found.",
+    "you": "(you)",
+    "never": "Never"
+  },
+  "teamMembers": {
+    "title": "Users",
+    "description": "Users linked to businesses and the roles assigned to them.",
+    "count": "Users ({count})",
+    "allBusinesses": "All businesses",
+    "allRoles": "All roles",
+    "columns": {
+      "user": "User",
+      "business": "Business",
+      "role": "Role",
+      "status": "Status",
+      "addedAt": "Added on",
+      "updatedAt": "Updated"
+    },
+    "loading": "Loading users...",
+    "empty": "No users found."
+  },
+  "operators": {
+    "title": "Operators",
+    "description": "Assign shops to operators: they manage the catalogue, orders and payouts of those shops only.",
+    "newAssignment": "New assignment",
+    "operator": "Operator",
+    "chooseOperator": "Choose an operator",
+    "noOperator": "No active operator account",
+    "shop": "Shop",
+    "searchShop": "Search by name…",
+    "chooseShop": "Choose a shop",
+    "note": "Note (optional)",
+    "notePlaceholder": "e.g. help with going live",
+    "assign": "Assign",
+    "assigning": "Assigning…",
+    "assignments": "Assignments ({count})",
+    "columns": {
+      "operator": "Operator",
+      "shop": "Shop",
+      "note": "Note",
+      "since": "Since",
+      "state": "State"
+    },
+    "loading": "Loading assignments...",
+    "empty": "No shop has been assigned yet.",
+    "active": "Active",
+    "ended": "Ended",
+    "end": "End",
+    "resume": "Resume",
+    "toasts": {
+      "assigned": "Shop assigned.",
+      "assignFailed": "The assignment failed.",
+      "resumed": "Assignment resumed.",
+      "ended": "Assignment ended.",
+      "updateFailed": "The update failed."
+    }
+  },
+  "createAdmin": {
+    "title": "New administrator",
+    "verifyTitle": "Account verification",
+    "description": "The account will be activated once the code sent to the person is verified. Share their password with them: no invitation email is sent.",
+    "verifyDescription": "Enter the 4-digit code received by {channel, select, EMAIL {email} other {message}} at {identifier}. The account stays inactive until it is verified.",
+    "testCode": "Test code: {code}",
+    "codeSent": "A code has been sent to {identifier}.",
+    "newCodeSent": "A new code has been sent to {identifier}.",
+    "createError": "Unable to create this administrator account.",
+    "enterCode": "Enter the 4-digit code.",
+    "invalidCode": "Invalid or expired code.",
+    "resendError": "Unable to resend.",
+    "resend": "Resend code",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "emailPlaceholder": "name@example.com",
+    "phone": "Number",
+    "phoneHint": "The verification code is sent to the number, or to the email if there is no number.",
+    "role": "Role",
+    "roleOptions": {
+      "ADMIN": "Administrator — full access",
+      "MODERATOR": "Moderator — content moderation",
+      "OPERATOR": "Operator — activity monitoring"
+    },
+    "password": "Password",
+    "passwordPlaceholder": "Min. 6 chars, uppercase, digit",
+    "confirmPassword": "Confirm password",
+    "acceptTerms": "The person accepts the Diarama <link>terms of use</link>.",
+    "validateLater": "Verify later",
+    "cancel": "Cancel",
+    "validating": "Verifying...",
+    "activate": "Activate account",
+    "creating": "Creating...",
+    "create": "Create and send code",
+    "errors": {
+      "firstNameRequired": "First name is required.",
+      "lastNameRequired": "Last name is required.",
+      "emailInvalid": "Invalid email address.",
+      "confirmPasswordRequired": "Confirm the password.",
+      "contactRequired": "Enter an email or a phone number.",
+      "passwordMismatch": "Passwords do not match.",
+      "acceptTerms": "The new administrator must accept the terms of use.",
+      "codeLength": "The code has 4 digits."
+    }
+  }
+}

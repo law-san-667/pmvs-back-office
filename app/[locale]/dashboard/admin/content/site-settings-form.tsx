@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/server/trpc/client";
 import type { SiteLink, SiteSettings } from "@/lib/content-format";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -33,16 +34,18 @@ const textToColumns = (text: string) =>
     }));
 
 const CONTACT_FIELDS = [
-  ["legalName", "Raison sociale"],
-  ["tradeName", "Nom commercial"],
-  ["address", "Adresse"],
-  ["city", "Ville et pays"],
-  ["phone", "Téléphone"],
-  ["whatsapp", "WhatsApp"],
-  ["email", "Adresse électronique"],
+  "legalName",
+  "tradeName",
+  "address",
+  "city",
+  "phone",
+  "whatsapp",
+  "email",
 ] as const;
 
 export function SiteSettingsForm({ site }: { site: SiteSettings }) {
+  const t = useTranslations("adminSettings.siteSettings");
+  const tc = useTranslations("adminSettings.common");
   const utils = trpc.useUtils();
   const save = trpc.content.saveSite.useMutation();
   const [contact, setContact] = useState(site.contact);
@@ -70,11 +73,11 @@ export function SiteSettingsForm({ site }: { site: SiteSettings }) {
         socialLinks: textToLinks(social),
         footerColumns: textToColumns(columns),
       });
-      toast.success("Pied de page et coordonnées enregistrés.");
+      toast.success(t("saved"));
       await utils.content.site.invalidate();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Échec de l’enregistrement.",
+        error instanceof Error ? error.message : tc("saveFailed"),
       );
     }
   };
@@ -82,9 +85,11 @@ export function SiteSettingsForm({ site }: { site: SiteSettings }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid gap-4 md:grid-cols-2">
-        {CONTACT_FIELDS.map(([key, label]) => (
+        {CONTACT_FIELDS.map((key) => (
           <Field key={key}>
-            <FieldLabel htmlFor={`contact-${key}`}>{label}</FieldLabel>
+            <FieldLabel htmlFor={`contact-${key}`}>
+              {t(`contact.${key}`)}
+            </FieldLabel>
             <Input
               id={`contact-${key}`}
               value={contact[key] ?? ""}
@@ -96,7 +101,7 @@ export function SiteSettingsForm({ site }: { site: SiteSettings }) {
         ))}
       </div>
       <Field>
-        <FieldLabel htmlFor="tagline">Texte de présentation</FieldLabel>
+        <FieldLabel htmlFor="tagline">{t("tagline")}</FieldLabel>
         <Input
           id="tagline"
           value={tagline}
@@ -105,12 +110,8 @@ export function SiteSettingsForm({ site }: { site: SiteSettings }) {
         />
       </Field>
       <Field>
-        <FieldLabel htmlFor="offline">Instructions de paiement par virement</FieldLabel>
-        <FieldDescription>
-          Montrées à l’acheteur qui choisit « Virement ou dépôt » : banque,
-          titulaire, IBAN / RIB, référence à indiquer. Laisser vide retire
-          cette option du paiement.
-        </FieldDescription>
+        <FieldLabel htmlFor="offline">{t("offline")}</FieldLabel>
+        <FieldDescription>{t("offlineHint")}</FieldDescription>
         <Textarea
           id="offline"
           value={offline}
@@ -119,10 +120,8 @@ export function SiteSettingsForm({ site }: { site: SiteSettings }) {
         />
       </Field>
       <Field>
-        <FieldLabel htmlFor="social">Réseaux sociaux</FieldLabel>
-        <FieldDescription>
-          Un lien par ligne : « Facebook | https://… »
-        </FieldDescription>
+        <FieldLabel htmlFor="social">{t("social")}</FieldLabel>
+        <FieldDescription>{t("socialHint")}</FieldDescription>
         <Textarea
           id="social"
           value={social}
@@ -131,11 +130,8 @@ export function SiteSettingsForm({ site }: { site: SiteSettings }) {
         />
       </Field>
       <Field>
-        <FieldLabel htmlFor="columns">Colonnes du pied de page</FieldLabel>
-        <FieldDescription>
-          Une colonne par bloc (séparés par une ligne vide) : le titre sur la
-          première ligne, puis un lien par ligne « Libellé | /adresse ».
-        </FieldDescription>
+        <FieldLabel htmlFor="columns">{t("columns")}</FieldLabel>
+        <FieldDescription>{t("columnsHint")}</FieldDescription>
         <Textarea
           id="columns"
           value={columns}
@@ -152,7 +148,7 @@ export function SiteSettingsForm({ site }: { site: SiteSettings }) {
           }
           onClick={() => void submit()}
         >
-          {save.isPending ? "Enregistrement…" : "Enregistrer"}
+          {save.isPending ? tc("savingEllipsis") : tc("save")}
         </Button>
       </div>
     </div>

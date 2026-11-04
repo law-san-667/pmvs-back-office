@@ -1,14 +1,6 @@
 import { formatDate, formatNumber } from "@/lib/utils";
-import type { AdPlacement, AdState } from "@/lib/advertising";
+import type { AdState } from "@/lib/advertising";
 import type { useTranslations } from "next-intl";
-
-/** French names of the placements, for the admin screens (shops use the "ads" messages). */
-export const PLACEMENT_LABELS: Record<AdPlacement, string> = {
-  HOME_BANNER: "Bannière de l'accueil",
-  SEARCH_RESULTS: "Résultats de recherche",
-  LISTING_DETAIL: "Fiche produit",
-  CATEGORY_SIDEBAR: "Pages catégorie",
-};
 
 export const STATE_CLASSES: Record<AdState, string> = {
   RUNNING: "bg-emerald-100 text-emerald-800",

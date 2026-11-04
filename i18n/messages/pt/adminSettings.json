@@ -1,0 +1,331 @@
+{
+  "common": {
+    "save": "Guardar",
+    "saving": "A guardar...",
+    "savingEllipsis": "A guardar…",
+    "cancel": "Cancelar",
+    "add": "Adicionar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "loading": "A carregar...",
+    "loadingEllipsis": "A carregar…",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "activeFeminine": "Ativa",
+    "yes": "Sim",
+    "no": "Não",
+    "actionFailed": "Não foi possível concluir a ação.",
+    "saveFailed": "Falha ao guardar."
+  },
+  "configuration": {
+    "title": "Configuração",
+    "description": "Categorias do catálogo, zonas geográficas e normas de qualidade aplicadas aos fornecedores.",
+    "tabs": {
+      "categories": "Categorias",
+      "subCategories": "Subcategorias",
+      "countries": "Países",
+      "cities": "Cidades",
+      "quality": "Normas de qualidade"
+    },
+    "columns": {
+      "code": "Código",
+      "name": "Nome",
+      "slug": "Slug",
+      "type": "Tipo",
+      "status": "Estado",
+      "actions": "Ações",
+      "category": "Categoria",
+      "country": "País",
+      "currency": "Moeda",
+      "phonePrefix": "Indicativo",
+      "oapi": "OAPI",
+      "phase": "Fase",
+      "suppliers": "Fornecedores",
+      "city": "Cidade",
+      "createdAt": "Criada em"
+    },
+    "service": "Serviço",
+    "product": "Produto",
+    "registrationOpen": "Inscrições abertas",
+    "closed": "Fechado",
+    "loadingCategories": "A carregar as categorias...",
+    "emptyCategories": "Nenhuma categoria configurada.",
+    "loadingSubCategories": "A carregar as subcategorias...",
+    "emptySubCategories": "Nenhuma subcategoria configurada.",
+    "loadingCountries": "A carregar os países...",
+    "emptyCountries": "Nenhum país configurado.",
+    "loadingCities": "A carregar as cidades...",
+    "emptyCities": "Nenhuma cidade configurada."
+  },
+  "editor": {
+    "name": "Nome",
+    "slug": "Slug",
+    "description": "Descrição",
+    "category": {
+      "edit": "Editar categoria",
+      "new": "Nova categoria",
+      "description": "Configure a classificação dos produtos ou serviços.",
+      "isService": "Categoria de serviços"
+    },
+    "subCategory": {
+      "edit": "Editar subcategoria",
+      "new": "Nova subcategoria",
+      "description": "Associe a subcategoria a uma categoria existente.",
+      "category": "Categoria",
+      "selectCategory": "Selecionar uma categoria",
+      "isService": "Subcategoria de serviços"
+    },
+    "country": {
+      "edit": "Editar país",
+      "new": "Novo país",
+      "description": "Configure o código, a moeda e o indicativo do país.",
+      "code": "Código do país",
+      "currency": "Moeda",
+      "phonePrefix": "Indicativo telefónico",
+      "phase": "Fase de implementação",
+      "phaseNone": "Não definida",
+      "phase1": "Fase 1: Senegal e países fronteiriços",
+      "phase2": "Fase 2: CEDEAO",
+      "phase3": "Fase 3: outros países",
+      "isActive": "País apresentado na plataforma",
+      "isOapi": "Membro da OAPI",
+      "supplierRegistrationOpen": "Inscrições de fornecedores abertas"
+    },
+    "city": {
+      "edit": "Editar cidade",
+      "new": "Nova cidade",
+      "description": "Associe a cidade a um país configurado.",
+      "country": "País",
+      "selectCountry": "Selecionar um país",
+      "latitude": "Latitude do centro",
+      "longitude": "Longitude do centro",
+      "coordinatesHint": "Usada na pesquisa «Perto de mim» para os vendedores da cidade que não indicaram a sua sede.",
+      "isActive": "Cidade ativa"
+    }
+  },
+  "deleteDialog": {
+    "title": "Confirmar eliminação",
+    "description": "«{label}» será eliminado definitivamente. Esta operação pode falhar se o elemento ainda estiver em uso.",
+    "deleting": "A eliminar..."
+  },
+  "quality": {
+    "title": "Normas de qualidade dos fornecedores",
+    "description": "Limiares aplicados a cada fornecedor para calcular a sua pontuação de conformidade.",
+    "lastUpdated": "Última alteração em {date}.",
+    "defaults": "Valores predefinidos da plataforma.",
+    "saved": "Normas guardadas. As pontuações são recalculadas na próxima consulta.",
+    "saveFailed": "Não foi possível guardar as normas.",
+    "submit": "Guardar as normas",
+    "units": {
+      "percent": "%",
+      "days": "dias",
+      "units": "unidades"
+    },
+    "fields": {
+      "maxNegativeFeedbackRate": {
+        "label": "Avaliações negativas máximas",
+        "hint": "Avaliações de 1 ou 2 estrelas."
+      },
+      "minResponseRate": {
+        "label": "Taxa de resposta mínima",
+        "hint": "Conversas com clientes com pelo menos uma resposta."
+      },
+      "maxReturnRate": {
+        "label": "Taxa de devolução máxima",
+        "hint": "Encomendas entregues e depois reembolsadas."
+      },
+      "maxCancellationRate": {
+        "label": "Taxa de cancelamento máxima",
+        "hint": "Encomendas canceladas pelo fornecedor."
+      },
+      "maxStockOutRate": {
+        "label": "Taxa de rutura máxima",
+        "hint": "Anúncios em rutura entre os publicados."
+      },
+      "maxShippingDelayDays": {
+        "label": "Prazo de expedição máximo",
+        "hint": "Entre a confirmação e a expedição."
+      },
+      "minOnTimeShippingRate": {
+        "label": "Parte mínima de expedições dentro do prazo",
+        "hint": "Encomendas expedidas dentro do prazo."
+      },
+      "minStockPerProduct": {
+        "label": "Stock mínimo por produto",
+        "hint": "Cada produto publicado deve ter pelo menos esta quantidade."
+      },
+      "evaluationWindowDays": {
+        "label": "Janela de avaliação",
+        "hint": "Período sobre o qual os indicadores são calculados."
+      }
+    }
+  },
+  "content": {
+    "title": "Conteúdos",
+    "description": "Páginas de ajuda, perguntas frequentes, condições de utilização e rodapé do site e da aplicação.",
+    "pages": "Páginas",
+    "page": "Página",
+    "published": "Publicada",
+    "draft": "Rascunho",
+    "newPage": "Nova página",
+    "newTitlePlaceholder": "Título (ex. Entrega)",
+    "newSlugPlaceholder": "Endereço (ex. entrega)",
+    "create": "Criar",
+    "createFailed": "Não foi possível criar a página.",
+    "noPage": "Nenhuma página.",
+    "footerTitle": "Rodapé e contactos",
+    "siteUnavailable": "Contactos indisponíveis."
+  },
+  "pageEditor": {
+    "languages": {
+      "fr": "Francês",
+      "en": "Inglês",
+      "pt": "Português",
+      "ar": "Árabe"
+    },
+    "saved": "{locale, select, fr {Conteúdo em francês guardado.} en {Conteúdo em inglês guardado.} pt {Conteúdo em português guardado.} ar {Conteúdo em árabe guardado.} other {Conteúdo guardado.}}",
+    "unpublished": "Página retirada do site.",
+    "publishedToast": "Página publicada.",
+    "publishFailed": "Falha na publicação.",
+    "storefrontPath": "Endereço no site: {path}",
+    "unpublish": "Retirar do site",
+    "publish": "Publicar",
+    "missingTranslation": "{locale, select, en {Ainda não existe versão em inglês: os visitantes leem a versão francesa.} pt {Ainda não existe versão em português: os visitantes leem a versão francesa.} ar {Ainda não existe versão em árabe: os visitantes leem a versão francesa.} other {Ainda não existe versão: os visitantes leem a versão francesa.}}",
+    "title": "Título",
+    "summary": "Resumo (por baixo do título)",
+    "body": "Conteúdo",
+    "bodyHint": "«## Título» inicia uma secção, «- » um item de lista; uma linha em branco separa os parágrafos. Pode colar um texto inteiro.",
+    "sections": "{count, plural, one {# secção} other {# secções}}",
+    "sectionsWithTitles": "{count, plural, one {# secção} other {# secções}}: {titles}"
+  },
+  "siteSettings": {
+    "contact": {
+      "legalName": "Denominação social",
+      "tradeName": "Nome comercial",
+      "address": "Morada",
+      "city": "Cidade e país",
+      "phone": "Telefone",
+      "whatsapp": "WhatsApp",
+      "email": "Endereço de e-mail"
+    },
+    "saved": "Rodapé e contactos guardados.",
+    "tagline": "Texto de apresentação",
+    "offline": "Instruções de pagamento por transferência",
+    "offlineHint": "Apresentadas ao comprador que escolhe «Transferência ou depósito»: banco, titular, IBAN / NIB, referência a indicar. Deixar vazio remove esta opção de pagamento.",
+    "social": "Redes sociais",
+    "socialHint": "Uma ligação por linha: «Facebook | https://…»",
+    "columns": "Colunas do rodapé",
+    "columnsHint": "Uma coluna por bloco (separados por uma linha em branco): o título na primeira linha e depois uma ligação por linha «Etiqueta | /endereço»."
+  },
+  "settings": {
+    "title": "Definições",
+    "description": "Informações da conta de administrador com sessão iniciada.",
+    "account": "Conta de administrador",
+    "role": "Administrador",
+    "email": "E-mail",
+    "phone": "Telefone",
+    "status": "Estado",
+    "id": "Identificador",
+    "notProvided": "Não indicado"
+  },
+  "compliance": {
+    "teamOnly": "Reservado à equipa Diarama.",
+    "runDone": "Verificação concluída: {raised, plural, one {# novo ponto} other {# novos pontos}}, {closed, plural, one {# resolvido} other {# resolvidos}}, {reminders, plural, one {# lembrete} other {# lembretes}}.",
+    "runFailed": "Não foi possível efetuar a verificação.",
+    "title": "Conformidade",
+    "description": "Documentos dos fornecedores, termos proibidos e registo de auditoria. Verificação automática todas as manhãs.",
+    "descriptionLastRun": "Documentos dos fornecedores, termos proibidos e registo de auditoria. Verificação automática todas as manhãs (última: {date}).",
+    "runNow": "Verificar agora",
+    "tiles": {
+      "openFindings": "Pontos a analisar",
+      "pendingDocuments": "Documentos a validar",
+      "expiringDocuments": "Expiram dentro de 30 dias",
+      "expiredDocuments": "Documentos expirados"
+    },
+    "tabs": {
+      "findings": "Pontos a analisar",
+      "documents": "Documentos",
+      "terms": "Termos proibidos",
+      "audit": "Registo de auditoria"
+    }
+  },
+  "audit": {
+    "before": "Antes",
+    "after": "Depois",
+    "unknownAgent": "agente desconhecido",
+    "title": "Registo de auditoria ({count})",
+    "description": "Quem fez o quê, quando e a partir de onde: ações financeiras, moderação, catálogo, definições. Clique numa linha para ver os valores antes e depois. A exportação está limitada a 10 000 linhas e é ela própria registada.",
+    "search": "Pesquisar",
+    "searchPlaceholder": "Ação, e-mail, loja, endereço IP…",
+    "from": "De",
+    "to": "Até",
+    "export": "Exportar em CSV",
+    "columns": {
+      "date": "Data",
+      "action": "Ação",
+      "author": "Autor",
+      "shop": "Loja",
+      "ip": "Endereço IP"
+    },
+    "system": "Sistema",
+    "empty": "Nenhuma entrada."
+  },
+  "documents": {
+    "views": {
+      "PENDING": "A validar",
+      "EXPIRING": "Expiram dentro de 30 dias ou expirados",
+      "APPROVED": "Validados",
+      "REJECTED": "Recusados"
+    },
+    "rejectReason": "Motivo da recusa (enviado ao fornecedor)",
+    "view": "Vista",
+    "columns": {
+      "document": "Documento",
+      "shop": "Loja",
+      "expiry": "Validade",
+      "status": "Estado"
+    },
+    "approve": "Validar",
+    "reject": "Recusar",
+    "empty": "Nenhum documento."
+  },
+  "findings": {
+    "statuses": {
+      "OPEN": "A analisar",
+      "DISMISSED": "Descartados",
+      "RESOLVED": "Resolvidos"
+    },
+    "kinds": {
+      "DOCUMENT_EXPIRING": "Documento prestes a expirar",
+      "DOCUMENT_EXPIRED": "Documento expirado",
+      "BANNED_TERM": "Termo vigiado"
+    },
+    "dismissPrompt": "Porquê descartar este ponto? (fica guardado no registo)",
+    "status": "Estado",
+    "columns": {
+      "finding": "Ponto",
+      "since": "Desde"
+    },
+    "note": "Nota: {note}",
+    "open": "Abrir",
+    "dismiss": "Descartar",
+    "reopen": "Reabrir",
+    "empty": "Nada a assinalar."
+  },
+  "terms": {
+    "title": "Termos proibidos ({count})",
+    "description": "Pesquisados como palavras inteiras no título e na descrição dos anúncios, sem ter em conta maiúsculas nem acentos («arma» não abrange «armazém»). «Recusado» impede o registo; «A vigiar» deixa passar e assinala o anúncio à equipa. A verificação da manhã analisa também os anúncios já publicados.",
+    "term": "Termo",
+    "termPlaceholder": "Termo ou expressão",
+    "action": "Ação",
+    "reason": "Motivo",
+    "reasonPlaceholder": "Motivo (opcional)",
+    "actions": {
+      "BLOCK": "Recusado",
+      "REVIEW": "A vigiar"
+    },
+    "suspend": "Suspender",
+    "reactivate": "Reativar",
+    "empty": "Ainda não há termos."
+  }
+}
