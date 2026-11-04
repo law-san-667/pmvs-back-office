@@ -1,0 +1,99 @@
+{
+  "title": "Pequenos anúncios",
+  "description": "Os anúncios de oferta e de procura ficam visíveis para todos depois de validados. Os pendentes mais antigos aparecem primeiro.",
+  "withCount": "{label} ({count})",
+  "search": "Pesquisar um título…",
+  "filterType": "Filtrar por tipo",
+  "loading": "A carregar os anúncios…",
+  "empty": "Nenhum anúncio.",
+  "emptyPending": "Nenhum anúncio a aguardar validação.",
+  "failed": "A ação falhou.",
+  "queue": {
+    "PENDING": "Pendentes",
+    "PUBLISHED": "Publicados",
+    "REJECTED": "Recusados",
+    "CLOSED": "Encerrados",
+    "ALL": "Todos"
+  },
+  "type": {
+    "ALL": "Todos os tipos",
+    "OFFER": "Oferta",
+    "DEMAND": "Procura"
+  },
+  "typeLong": {
+    "OFFER": "Anúncio de oferta",
+    "DEMAND": "Anúncio de procura"
+  },
+  "status": {
+    "PENDING": "A aguardar validação",
+    "PUBLISHED": "Publicado",
+    "REJECTED": "Recusado",
+    "CLOSED": "Encerrado",
+    "EXPIRED": "Expirado"
+  },
+  "pendingShort": "Pendente",
+  "profile": {
+    "AUTO_ENTREPRENEUR": "Empresário em nome individual",
+    "PRODUCER": "Produtor ou transformador",
+    "EXPORTER": "Exportador",
+    "IMPORTER": "Importador",
+    "RESELLER": "Grossista ou revendedor",
+    "SERVICE_PROVIDER": "Prestador de serviços",
+    "OTHER": "Outro"
+  },
+  "diffusion": {
+    "COUNTRY": "País do anúncio",
+    "COUNTRIES": "Lista de países",
+    "ZLECAF": "Toda a ZCLCA"
+  },
+  "columns": {
+    "title": "Anúncio",
+    "publisher": "Anunciante",
+    "country": "País / difusão",
+    "terms": "Quantidade / preço",
+    "date": "Criado / alterado",
+    "status": "Estado",
+    "actions": "Ações"
+  },
+  "fields": {
+    "publisher": "Anunciante",
+    "profile": "Perfil",
+    "category": "Categoria",
+    "location": "Local",
+    "diffusion": "Difusão",
+    "quantity": "Quantidade",
+    "price": "Preço indicativo",
+    "incoterm": "Incoterm",
+    "createdAt": "Criado em",
+    "updatedAt": "Alterado em",
+    "publishedAt": "Publicado em",
+    "expiresAt": "Fim do anúncio",
+    "description": "Descrição",
+    "images": "Imagens",
+    "moderationReason": "Motivo da recusa"
+  },
+  "pricePerUnit": "{price} / {unit}",
+  "updated": "alterado em {date}",
+  "noImages": "Nenhuma imagem.",
+  "view": "Ver detalhes",
+  "actionsFor": "Ações para {title}",
+  "approve": "Validar",
+  "reject": "Recusar",
+  "cancel": "Cancelar",
+  "sending": "A enviar…",
+  "approved": "Anúncio validado e publicado.",
+  "rejected": "Anúncio recusado. O anunciante foi avisado.",
+  "rejectDialog": {
+    "title": "Recusar o anúncio",
+    "description": "«{title}» não será publicado. O motivo é enviado ao anunciante.",
+    "reason": "Motivo da recusa",
+    "placeholder": "Explique o que deve ser corrigido…",
+    "presets": {
+      "description": "Descrição insuficiente",
+      "prohibited": "Produto proibido",
+      "contact": "Contactos no texto",
+      "category": "Categoria errada",
+      "duplicate": "Anúncio duplicado"
+    }
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "title": "Classified ads",
+  "description": "Offer and request ads are visible to everyone once approved. The oldest pending ones come first.",
+  "withCount": "{label} ({count})",
+  "search": "Search a title…",
+  "filterType": "Filter by type",
+  "loading": "Loading ads…",
+  "empty": "No ads.",
+  "emptyPending": "No ads awaiting approval.",
+  "failed": "The action failed.",
+  "queue": {
+    "PENDING": "Pending",
+    "PUBLISHED": "Published",
+    "REJECTED": "Rejected",
+    "CLOSED": "Closed",
+    "ALL": "All"
+  },
+  "type": {
+    "ALL": "All types",
+    "OFFER": "Offer",
+    "DEMAND": "Request"
+  },
+  "typeLong": {
+    "OFFER": "Offer ad",
+    "DEMAND": "Request ad"
+  },
+  "status": {
+    "PENDING": "Awaiting approval",
+    "PUBLISHED": "Published",
+    "REJECTED": "Rejected",
+    "CLOSED": "Closed",
+    "EXPIRED": "Expired"
+  },
+  "pendingShort": "Pending",
+  "profile": {
+    "AUTO_ENTREPRENEUR": "Self-employed",
+    "PRODUCER": "Producer or processor",
+    "EXPORTER": "Exporter",
+    "IMPORTER": "Importer",
+    "RESELLER": "Wholesaler or reseller",
+    "SERVICE_PROVIDER": "Service provider",
+    "OTHER": "Other"
+  },
+  "diffusion": {
+    "COUNTRY": "The ad's country",
+    "COUNTRIES": "List of countries",
+    "ZLECAF": "The whole AfCFTA area"
+  },
+  "columns": {
+    "title": "Ad",
+    "publisher": "Advertiser",
+    "country": "Country / diffusion",
+    "terms": "Quantity / price",
+    "date": "Created / updated",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "fields": {
+    "publisher": "Advertiser",
+    "profile": "Profile",
+    "category": "Category",
+    "location": "Location",
+    "diffusion": "Diffusion",
+    "quantity": "Quantity",
+    "price": "Indicative price",
+    "incoterm": "Incoterm",
+    "createdAt": "Created on",
+    "updatedAt": "Updated on",
+    "publishedAt": "Published on",
+    "expiresAt": "Ad ends on",
+    "description": "Description",
+    "images": "Images",
+    "moderationReason": "Reason for rejection"
+  },
+  "pricePerUnit": "{price} / {unit}",
+  "updated": "updated on {date}",
+  "noImages": "No images.",
+  "view": "View details",
+  "actionsFor": "Actions for {title}",
+  "approve": "Approve",
+  "reject": "Reject",
+  "cancel": "Cancel",
+  "sending": "Sending…",
+  "approved": "Ad approved and published.",
+  "rejected": "Ad rejected. The advertiser has been notified.",
+  "rejectDialog": {
+    "title": "Reject the ad",
+    "description": "“{title}” will not be published. The reason is sent to the advertiser.",
+    "reason": "Reason for rejection",
+    "placeholder": "Explain what needs to be fixed…",
+    "presets": {
+      "description": "Description too thin",
+      "prohibited": "Prohibited product",
+      "contact": "Contact details in the text",
+      "category": "Wrong category",
+      "duplicate": "Duplicate ad"
+    }
+  }
+}

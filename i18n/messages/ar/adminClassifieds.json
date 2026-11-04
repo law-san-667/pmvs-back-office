@@ -1,0 +1,99 @@
+{
+  "title": "الإعلانات المبوبة",
+  "description": "تصبح إعلانات العرض والطلب مرئية للجميع بعد الموافقة عليها. تظهر أقدم الإعلانات المنتظرة أولاً.",
+  "withCount": "{label} ({count})",
+  "search": "ابحث عن عنوان…",
+  "filterType": "التصفية حسب النوع",
+  "loading": "جارٍ تحميل الإعلانات…",
+  "empty": "لا توجد إعلانات.",
+  "emptyPending": "لا توجد إعلانات في انتظار الموافقة.",
+  "failed": "فشل الإجراء.",
+  "queue": {
+    "PENDING": "قيد الانتظار",
+    "PUBLISHED": "منشورة",
+    "REJECTED": "مرفوضة",
+    "CLOSED": "مغلقة",
+    "ALL": "الكل"
+  },
+  "type": {
+    "ALL": "كل الأنواع",
+    "OFFER": "عرض",
+    "DEMAND": "طلب"
+  },
+  "typeLong": {
+    "OFFER": "إعلان عرض",
+    "DEMAND": "إعلان طلب"
+  },
+  "status": {
+    "PENDING": "في انتظار الموافقة",
+    "PUBLISHED": "منشور",
+    "REJECTED": "مرفوض",
+    "CLOSED": "مغلق",
+    "EXPIRED": "منتهي الصلاحية"
+  },
+  "pendingShort": "قيد الانتظار",
+  "profile": {
+    "AUTO_ENTREPRENEUR": "مقاول ذاتي",
+    "PRODUCER": "منتج أو محوّل",
+    "EXPORTER": "مصدّر",
+    "IMPORTER": "مستورد",
+    "RESELLER": "تاجر جملة أو موزّع",
+    "SERVICE_PROVIDER": "مقدّم خدمات",
+    "OTHER": "آخر"
+  },
+  "diffusion": {
+    "COUNTRY": "بلد الإعلان",
+    "COUNTRIES": "قائمة بلدان",
+    "ZLECAF": "كامل منطقة التجارة الحرة القارية الأفريقية"
+  },
+  "columns": {
+    "title": "الإعلان",
+    "publisher": "المعلِن",
+    "country": "البلد / النشر",
+    "terms": "الكمية / السعر",
+    "date": "الإنشاء / التعديل",
+    "status": "الحالة",
+    "actions": "الإجراءات"
+  },
+  "fields": {
+    "publisher": "المعلِن",
+    "profile": "الصفة",
+    "category": "الفئة",
+    "location": "المكان",
+    "diffusion": "النشر",
+    "quantity": "الكمية",
+    "price": "السعر الاسترشادي",
+    "incoterm": "شرط التسليم (Incoterm)",
+    "createdAt": "تاريخ الإنشاء",
+    "updatedAt": "تاريخ التعديل",
+    "publishedAt": "تاريخ النشر",
+    "expiresAt": "نهاية الإعلان",
+    "description": "الوصف",
+    "images": "الصور",
+    "moderationReason": "سبب الرفض"
+  },
+  "pricePerUnit": "{price} / {unit}",
+  "updated": "عُدّل في {date}",
+  "noImages": "لا توجد صور.",
+  "view": "عرض التفاصيل",
+  "actionsFor": "إجراءات لـ {title}",
+  "approve": "موافقة",
+  "reject": "رفض",
+  "cancel": "إلغاء",
+  "sending": "جارٍ الإرسال…",
+  "approved": "تمت الموافقة على الإعلان ونشره.",
+  "rejected": "تم رفض الإعلان وإبلاغ المعلِن.",
+  "rejectDialog": {
+    "title": "رفض الإعلان",
+    "description": "لن يُنشر «{title}». يُرسَل السبب إلى المعلِن.",
+    "reason": "سبب الرفض",
+    "placeholder": "اشرح ما يجب تصحيحه…",
+    "presets": {
+      "description": "وصف غير كافٍ",
+      "prohibited": "منتج محظور",
+      "contact": "بيانات اتصال في النص",
+      "category": "فئة غير مناسبة",
+      "duplicate": "إعلان مكرر"
+    }
+  }
+}

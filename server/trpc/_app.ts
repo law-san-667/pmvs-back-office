@@ -2,6 +2,7 @@ import { adminRouter } from "./_procedures/admin";
 import { authRouter } from "./_procedures/auth";
 import { businessesRouter } from "./_procedures/businesses";
 import { catalogRouter } from "./_procedures/catalog";
+import { classifiedsRouter } from "./_procedures/classifieds";
 import { complianceRouter } from "./_procedures/compliance";
 import { contentRouter } from "./_procedures/content";
 import { geographyRouter } from "./_procedures/geography";
@@ -35,6 +36,7 @@ export const appRouter = createTRPCRouter({
   auth: authRouter,
   businesses: businessesRouter,
   catalog: catalogRouter,
+  classifieds: classifiedsRouter,
   compliance: complianceRouter,
   content: contentRouter,
   geography: geographyRouter,

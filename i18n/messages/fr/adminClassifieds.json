@@ -1,0 +1,99 @@
+{
+  "title": "Petites annonces",
+  "description": "Les annonces d'offre et de demande sont visibles par tous une fois validées. Les plus anciennes en attente apparaissent en premier.",
+  "withCount": "{label} ({count})",
+  "search": "Rechercher un titre…",
+  "filterType": "Filtrer par type",
+  "loading": "Chargement des annonces…",
+  "empty": "Aucune annonce.",
+  "emptyPending": "Aucune annonce en attente de validation.",
+  "failed": "L'action a échoué.",
+  "queue": {
+    "PENDING": "En attente",
+    "PUBLISHED": "Publiées",
+    "REJECTED": "Refusées",
+    "CLOSED": "Clôturées",
+    "ALL": "Toutes"
+  },
+  "type": {
+    "ALL": "Tous les types",
+    "OFFER": "Offre",
+    "DEMAND": "Demande"
+  },
+  "typeLong": {
+    "OFFER": "Annonce d'offre",
+    "DEMAND": "Annonce de demande"
+  },
+  "status": {
+    "PENDING": "En attente de validation",
+    "PUBLISHED": "Publiée",
+    "REJECTED": "Refusée",
+    "CLOSED": "Clôturée",
+    "EXPIRED": "Expirée"
+  },
+  "pendingShort": "En attente",
+  "profile": {
+    "AUTO_ENTREPRENEUR": "Auto-entrepreneur",
+    "PRODUCER": "Producteur ou transformateur",
+    "EXPORTER": "Exportateur",
+    "IMPORTER": "Importateur",
+    "RESELLER": "Grossiste ou revendeur",
+    "SERVICE_PROVIDER": "Prestataire de services",
+    "OTHER": "Autre"
+  },
+  "diffusion": {
+    "COUNTRY": "Pays de l'annonce",
+    "COUNTRIES": "Liste de pays",
+    "ZLECAF": "Toute la ZLECAf"
+  },
+  "columns": {
+    "title": "Annonce",
+    "publisher": "Annonceur",
+    "country": "Pays / diffusion",
+    "terms": "Quantité / prix",
+    "date": "Créée / modifiée",
+    "status": "Statut",
+    "actions": "Actions"
+  },
+  "fields": {
+    "publisher": "Annonceur",
+    "profile": "Profil",
+    "category": "Catégorie",
+    "location": "Lieu",
+    "diffusion": "Diffusion",
+    "quantity": "Quantité",
+    "price": "Prix indicatif",
+    "incoterm": "Incoterm",
+    "createdAt": "Créée le",
+    "updatedAt": "Modifiée le",
+    "publishedAt": "Publiée le",
+    "expiresAt": "Fin de l'annonce",
+    "description": "Description",
+    "images": "Images",
+    "moderationReason": "Motif du refus"
+  },
+  "pricePerUnit": "{price} / {unit}",
+  "updated": "modifiée le {date}",
+  "noImages": "Aucune image.",
+  "view": "Voir le détail",
+  "actionsFor": "Actions pour {title}",
+  "approve": "Valider",
+  "reject": "Refuser",
+  "cancel": "Annuler",
+  "sending": "Envoi…",
+  "approved": "Annonce validée et publiée.",
+  "rejected": "Annonce refusée. L'annonceur est prévenu.",
+  "rejectDialog": {
+    "title": "Refuser l'annonce",
+    "description": "« {title} » ne sera pas publiée. Le motif est envoyé à l'annonceur.",
+    "reason": "Motif du refus",
+    "placeholder": "Expliquez ce qu'il faut corriger…",
+    "presets": {
+      "description": "Description insuffisante",
+      "prohibited": "Produit interdit",
+      "contact": "Coordonnées dans le texte",
+      "category": "Mauvaise catégorie",
+      "duplicate": "Annonce en double"
+    }
+  }
+}

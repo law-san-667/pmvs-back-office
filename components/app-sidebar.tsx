@@ -37,6 +37,7 @@ import {
     MapPinnedIcon,
     MegaphoneIcon,
     MessageSquareIcon,
+    NewspaperIcon,
     PackageIcon,
     PercentIcon,
     SendIcon,
@@ -184,6 +185,11 @@ const adminItems: NavItem[] = [
     icon: <PackageIcon />,
   },
   {
+    key: "admin.classifieds",
+    url: "/dashboard/admin/classifieds",
+    icon: <NewspaperIcon />,
+  },
+  {
     key: "admin.tenders",
     url: "/dashboard/admin/tenders",
     icon: <GavelIcon />,
@@ -327,6 +333,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               key: "admin.listingsToReview",
               url: "/dashboard/admin/listings",
               icon: <PackageIcon />,
+            },
+            {
+              key: "admin.classifieds",
+              url: "/dashboard/admin/classifieds",
+              icon: <NewspaperIcon />,
             },
             {
               key: "admin.advertising",
