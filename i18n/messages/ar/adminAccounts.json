@@ -136,7 +136,14 @@
       "incorporationDeed": "عقد التأسيس",
       "passportScan": "نسخة ممسوحة من جواز السفر",
       "photos": "صور المؤسسة الصغيرة والمتوسطة",
-      "viewDocument": "عرض المستند"
+      "viewDocument": "عرض المستند",
+      "technicalTitle": "المعلومات التقنية والمهنية",
+      "machineCount": "عدد الآلات",
+      "machinesDescription": "مواصفات الآلات",
+      "producedProducts": "المنتجات أو الخدمات المصنَّعة",
+      "purchasedProducts": "المنتجات أو الخدمات المشتراة أو المراد شراؤها",
+      "tradeProducts": "المنتجات المسوَّقة",
+      "hsCode": "النظام المنسق {code}"
     },
     "team": {
       "title": "الفريق ({count})",

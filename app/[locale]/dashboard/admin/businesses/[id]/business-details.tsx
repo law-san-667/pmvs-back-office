@@ -502,6 +502,72 @@ export function BusinessDetails({ id }: { id: string }) {
                 />
               </>
             )}
+            {legalInformation &&
+              (legalInformation.productionResources?.machineCount !== undefined ||
+                legalInformation.productionResources?.machinesDescription ||
+                legalInformation.producedProducts ||
+                legalInformation.purchasedProducts) && (
+                <>
+                  <div className="border-t pt-2 text-sm font-medium">
+                    {t("details.compliance.technicalTitle")}
+                  </div>
+                  <Row
+                    label={t("details.compliance.machineCount")}
+                    value={legalInformation.productionResources?.machineCount}
+                  />
+                  <Row
+                    label={t("details.compliance.machinesDescription")}
+                    value={
+                      legalInformation.productionResources?.machinesDescription && (
+                        <span className="whitespace-pre-line">
+                          {legalInformation.productionResources?.machinesDescription}
+                        </span>
+                      )
+                    }
+                  />
+                  <Row
+                    label={t("details.compliance.producedProducts")}
+                    value={
+                      legalInformation.producedProducts && (
+                        <span className="whitespace-pre-line">
+                          {legalInformation.producedProducts}
+                        </span>
+                      )
+                    }
+                  />
+                  <Row
+                    label={t("details.compliance.purchasedProducts")}
+                    value={
+                      legalInformation.purchasedProducts && (
+                        <span className="whitespace-pre-line">
+                          {legalInformation.purchasedProducts}
+                        </span>
+                      )
+                    }
+                  />
+                </>
+              )}
+            {legalInformation?.tradeProducts?.length ? (
+              <>
+                <div className="border-t pt-2 text-sm font-medium">
+                  {t("details.compliance.tradeProducts")}
+                </div>
+                {legalInformation.tradeProducts.map((product, index) => (
+                  <Row
+                    key={index}
+                    label={product.commercialName}
+                    value={[
+                      product.industrialName,
+                      product.hsCode
+                        ? t("details.compliance.hsCode", { code: product.hsCode })
+                        : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  />
+                ))}
+              </>
+            ) : null}
             {legalInformation?.bankDetails && (
               <>
                 <div className="border-t pt-2 text-sm font-medium">

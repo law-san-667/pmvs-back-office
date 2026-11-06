@@ -104,6 +104,19 @@ export function useClassifiedFormat() {
   return { country, quantity, price, publisher, diffusion, category, date };
 }
 
+/** Lot H « offre commerciale » fields, in display order. */
+const COMMERCIAL_FIELDS = [
+  "productName",
+  "productModel",
+  "productBrand",
+  "hsCode",
+  "productionCapacity",
+  "deliveryLead",
+  "minimumOrder",
+  "certifications",
+  "paymentTerms",
+] as const satisfies readonly (keyof Classified)[];
+
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="grid grid-cols-3 gap-2 py-1.5 text-sm">
@@ -131,6 +144,11 @@ export function ClassifiedSheet({
 }) {
   const t = useTranslations("adminClassifieds");
   const format = useClassifiedFormat();
+  const commercialFields = COMMERCIAL_FIELDS.filter(
+    (field) => classified[field],
+  );
+  const hasCommercialDetails =
+    Boolean(classified.originCountryCode) || commercialFields.length > 0;
 
   return (
     <Sheet open onOpenChange={(open) => !open && onClose()}>
@@ -199,7 +217,11 @@ export function ClassifiedSheet({
               value={format.publisher(classified)}
             />
             <Row
-              label={t("fields.profile")}
+              label={
+                classified.type === "OFFER"
+                  ? t("fields.productRole")
+                  : t("fields.profile")
+              }
               value={t(`profile.${classified.publisherProfile}`)}
             />
             <Row
@@ -220,7 +242,21 @@ export function ClassifiedSheet({
               label={t("fields.quantity")}
               value={format.quantity(classified)}
             />
-            <Row label={t("fields.price")} value={format.price(classified)} />
+            <Row
+              label={t("fields.price")}
+              value={
+                format.price(classified) && (
+                  <span className="inline-flex flex-wrap items-center gap-2">
+                    {format.price(classified)}
+                    {classified.priceKind && (
+                      <Badge variant="outline">
+                        {t(`priceKind.${classified.priceKind}`)}
+                      </Badge>
+                    )}
+                  </span>
+                )
+              }
+            />
             <Row label={t("fields.incoterm")} value={classified.incoterm} />
             <Row
               label={t("fields.createdAt")}
@@ -239,6 +275,29 @@ export function ClassifiedSheet({
               value={format.date(classified.expiresAt)}
             />
           </section>
+
+          {hasCommercialDetails && (
+            <section>
+              <h3 className="mb-1 text-sm font-semibold">
+                {t(`commercial.${classified.type}`)}
+              </h3>
+              <div className="divide-y">
+                {classified.originCountryCode && (
+                  <Row
+                    label={t("fields.originCountry")}
+                    value={format.country(classified.originCountryCode)}
+                  />
+                )}
+                {commercialFields.map((field) => (
+                  <Row
+                    key={field}
+                    label={t(`fields.${field}`)}
+                    value={classified[field]}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
         </div>
 
         {(canApprove(classified) || canReject(classified)) && (

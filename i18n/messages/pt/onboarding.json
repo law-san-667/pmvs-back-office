@@ -108,7 +108,14 @@
     },
     "otherBusinessType": "Outro tipo de atividade",
     "importExportIssues": "Dificuldades de importação-exportação (opcional)",
-    "plannedActions": "Ações previstas (opcional)"
+    "plannedActions": "Ações previstas (opcional)",
+    "commercialTitle": "Informações comerciais (opcional)",
+    "commercialHint": "Os produtos que comercializa, com a respetiva posição pautal, se a conhecer.",
+    "commercialName": "Nome comercial",
+    "industrialName": "Nome industrial",
+    "hsCode": "Posição pautal (código SH)",
+    "addProduct": "Adicionar um produto",
+    "removeProduct": "Remover este produto"
   },
   "representative": {
     "title": "Representante e meios de produção",
@@ -121,7 +128,16 @@
     "productionDescription": "Descrição dos meios de produção",
     "workshop": "Oficina (m²)",
     "store": "Armazém (m²)",
-    "outdoor": "Exterior (m²)"
+    "outdoor": "Exterior (m²)",
+    "technicalTitle": "Informações técnico-profissionais (opcional)",
+    "technicalHint": "O seu equipamento, o que produz e o que compra.",
+    "equipmentTitle": "Equipamento",
+    "machineCount": "Número de máquinas",
+    "machinesDescription": "Características das máquinas",
+    "productionSubtitle": "Produção",
+    "producedProducts": "Características dos produtos ou serviços fabricados",
+    "purchaseSubtitle": "Compra",
+    "purchasedProducts": "Características dos produtos ou serviços comprados ou a comprar"
   },
   "questions": {
     "title": "Questões aplicáveis",
@@ -237,6 +253,8 @@
     "countryRequired": "O país é obrigatório.",
     "cityRequired": "A cidade é obrigatória.",
     "legalDocumentsRequired": "Os documentos legais são obrigatórios para um negócio regularizado.",
-    "legalInformationRequired": "As informações legais são obrigatórias para um negócio regularizado."
+    "legalInformationRequired": "As informações legais são obrigatórias para um negócio regularizado.",
+    "tradeProductNameRequired": "Indique o nome comercial de cada produto comercializado.",
+    "hsCodeInvalid": "A posição pautal (código SH) deve ter entre 4 e 10 algarismos."
   }
 }

@@ -141,7 +141,33 @@ export const legalBusinessInformationSchema = z.object({
       workshopAreaM2: z.number().nonnegative().optional(),
       storeAreaM2: z.number().nonnegative().optional(),
       outdoorAreaM2: z.number().nonnegative().optional(),
+      /** Equipment: number and characteristics of the machines. */
+      machineCount: z.number().int().nonnegative().optional(),
+      machinesDescription: z.string().trim().min(1).max(2000).optional(),
     })
+    .optional(),
+  /** Characteristics of the products or services made. */
+  producedProducts: z.string().trim().min(1).max(2000).optional(),
+  /** Characteristics of the products or services bought or to buy. */
+  purchasedProducts: z.string().trim().min(1).max(2000).optional(),
+  /** Products sold: commercial and industrial names, tariff position (HS code). */
+  tradeProducts: z
+    .array(
+      z.object({
+        commercialName: z
+          .string()
+          .trim()
+          .min(1, msg("onboarding.errors.tradeProductNameRequired"))
+          .max(150),
+        industrialName: z.string().trim().min(1).max(150).optional(),
+        hsCode: z
+          .string()
+          .trim()
+          .regex(/^\d{4,10}$/, msg("onboarding.errors.hsCodeInvalid"))
+          .optional(),
+      }),
+    )
+    .max(20)
     .optional(),
   importExportIssues: z.string().trim().min(1).optional(),
   plannedActions: z.string().trim().min(1).optional(),

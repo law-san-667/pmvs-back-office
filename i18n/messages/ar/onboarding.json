@@ -108,7 +108,14 @@
     },
     "otherBusinessType": "نوع نشاط آخر",
     "importExportIssues": "صعوبات الاستيراد والتصدير (اختياري)",
-    "plannedActions": "الإجراءات المخطط لها (اختياري)"
+    "plannedActions": "الإجراءات المخطط لها (اختياري)",
+    "commercialTitle": "المعلومات التجارية (اختياري)",
+    "commercialHint": "المنتجات التي تسوّقونها، مع بندها الجمركي إن كنتم تعرفونه.",
+    "commercialName": "الاسم التجاري",
+    "industrialName": "الاسم الصناعي",
+    "hsCode": "البند الجمركي (رمز النظام المنسق)",
+    "addProduct": "إضافة منتج",
+    "removeProduct": "إزالة هذا المنتج"
   },
   "representative": {
     "title": "الممثل ووسائل الإنتاج",
@@ -121,7 +128,16 @@
     "productionDescription": "وصف وسائل الإنتاج",
     "workshop": "الورشة (م²)",
     "store": "المخزن (م²)",
-    "outdoor": "المساحة الخارجية (م²)"
+    "outdoor": "المساحة الخارجية (م²)",
+    "technicalTitle": "المعلومات التقنية والمهنية (اختياري)",
+    "technicalHint": "معداتكم، وما تنتجونه، وما تشترونه.",
+    "equipmentTitle": "المعدات",
+    "machineCount": "عدد الآلات",
+    "machinesDescription": "مواصفات الآلات",
+    "productionSubtitle": "الإنتاج",
+    "producedProducts": "مواصفات المنتجات أو الخدمات المصنَّعة",
+    "purchaseSubtitle": "الشراء",
+    "purchasedProducts": "مواصفات المنتجات أو الخدمات المشتراة أو المراد شراؤها"
   },
   "questions": {
     "title": "الأسئلة المعنية",
@@ -237,6 +253,8 @@
     "countryRequired": "البلد مطلوب.",
     "cityRequired": "المدينة مطلوبة.",
     "legalDocumentsRequired": "الوثائق القانونية مطلوبة للنشاط المسجّل رسميًا.",
-    "legalInformationRequired": "المعلومات القانونية مطلوبة للنشاط المسجّل رسميًا."
+    "legalInformationRequired": "المعلومات القانونية مطلوبة للنشاط المسجّل رسميًا.",
+    "tradeProductNameRequired": "أدخلوا الاسم التجاري لكل منتج تسوّقونه.",
+    "hsCodeInvalid": "يجب أن يتكون البند الجمركي (رمز النظام المنسق) من 4 إلى 10 أرقام."
   }
 }

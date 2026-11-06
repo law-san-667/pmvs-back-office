@@ -56,7 +56,8 @@
       "compliance": "Conformité",
       "monitoring": "Supervision",
       "diagnostics": "Diagnostic",
-      "settings": "Paramètres"
+      "settings": "Paramètres",
+      "classifiedContacts": "Mises en relation"
     }
   },
   "header": {

@@ -70,7 +70,18 @@
     "expiresAt": "Ad ends on",
     "description": "Description",
     "images": "Images",
-    "moderationReason": "Reason for rejection"
+    "moderationReason": "Reason for rejection",
+    "productRole": "Role for this product",
+    "originCountry": "Country of origin",
+    "productName": "Product name",
+    "productModel": "Product model",
+    "productBrand": "Product brand",
+    "hsCode": "Tariff heading (HS code)",
+    "productionCapacity": "Production capacity",
+    "deliveryLead": "Delivery time",
+    "minimumOrder": "Minimum order",
+    "certifications": "Certifications",
+    "paymentTerms": "Payment methods"
   },
   "pricePerUnit": "{price} / {unit}",
   "updated": "updated on {date}",
@@ -95,5 +106,49 @@
       "category": "Wrong category",
       "duplicate": "Duplicate ad"
     }
+  },
+  "priceKind": {
+    "B2B": "B2B price",
+    "B2C": "B2C price"
+  },
+  "commercial": {
+    "OFFER": "Commercial offer",
+    "DEMAND": "Request details"
+  },
+  "contacts": {
+    "title": "Business contacts",
+    "description": "Replies to classified ads and how both parties follow them up: status, ratings and comments.",
+    "loading": "Loading business contacts…",
+    "empty": "No business contacts.",
+    "tiles": {
+      "total": "Contacts",
+      "totalHint": "{offers} on offers, {demands} on requests",
+      "concluded": "Deals closed",
+      "rate": "Closing rate: {rate}%",
+      "noRate": "Closing rate: —",
+      "rating": "Average rating",
+      "ratingsCount": "{count, plural, =0 {No reviews} one {# review} other {# reviews}}",
+      "pairs": "Offer–request matches",
+      "pairsHint": "Offers and requests that match each other"
+    },
+    "ratingValue": "{rating}/5",
+    "status": {
+      "ALL": "All",
+      "OPEN": "New",
+      "IN_DISCUSSION": "In discussion",
+      "CONCLUDED": "Deal closed",
+      "NO_FOLLOW_UP": "No follow-up"
+    },
+    "columns": {
+      "classified": "Ad",
+      "type": "Type",
+      "publisher": "Author",
+      "responder": "Respondent",
+      "status": "Status",
+      "ratings": "Ratings",
+      "date": "Date"
+    },
+    "ratingByPublisher": "Author:",
+    "ratingByResponder": "Respondent:"
   }
 }

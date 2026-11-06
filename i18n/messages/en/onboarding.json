@@ -108,7 +108,14 @@
     },
     "otherBusinessType": "Other type of activity",
     "importExportIssues": "Import-export difficulties (optional)",
-    "plannedActions": "Planned actions (optional)"
+    "plannedActions": "Planned actions (optional)",
+    "commercialTitle": "Commercial information (optional)",
+    "commercialHint": "The products you sell, with their tariff heading if you know it.",
+    "commercialName": "Commercial name",
+    "industrialName": "Industrial name",
+    "hsCode": "Tariff heading (HS code)",
+    "addProduct": "Add a product",
+    "removeProduct": "Remove this product"
   },
   "representative": {
     "title": "Representative and production resources",
@@ -121,7 +128,16 @@
     "productionDescription": "Description of the production resources",
     "workshop": "Workshop (m²)",
     "store": "Store (m²)",
-    "outdoor": "Outdoor (m²)"
+    "outdoor": "Outdoor (m²)",
+    "technicalTitle": "Technical and professional information (optional)",
+    "technicalHint": "Your equipment, what you produce and what you buy.",
+    "equipmentTitle": "Equipment",
+    "machineCount": "Number of machines",
+    "machinesDescription": "Machine specifications",
+    "productionSubtitle": "Production",
+    "producedProducts": "Specifications of the products or services you make",
+    "purchaseSubtitle": "Purchasing",
+    "purchasedProducts": "Specifications of the products or services you buy or plan to buy"
   },
   "questions": {
     "title": "Applicable questions",
@@ -237,6 +253,8 @@
     "countryRequired": "The country is required.",
     "cityRequired": "The city is required.",
     "legalDocumentsRequired": "Legal documents are required for a registered business.",
-    "legalInformationRequired": "Legal information is required for a registered business."
+    "legalInformationRequired": "Legal information is required for a registered business.",
+    "tradeProductNameRequired": "Enter the commercial name of each product you sell.",
+    "hsCodeInvalid": "The tariff heading (HS code) must have 4 to 10 digits."
   }
 }

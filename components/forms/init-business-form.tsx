@@ -87,7 +87,13 @@ const legalBusinessIdentitySchema = legalBusinessInformationSchema.omit({
   otherBusinessType: true,
   importExportIssues: true,
   plannedActions: true,
+  producedProducts: true,
+  purchasedProducts: true,
+  tradeProducts: true,
 });
+
+const tradeProductsSchema = legalBusinessInformationSchema.shape.tradeProducts;
+const MAX_TRADE_PRODUCTS = 20;
 
 const LEGAL_BUSINESS_TYPES: LegalBusinessType[] = legalBusinessTypeSchema.options;
 
@@ -136,6 +142,18 @@ type KeyPersonForm = {
   mobilePhone: string;
   email: string;
 };
+
+type TradeProductForm = {
+  commercialName: string;
+  industrialName: string;
+  hsCode: string;
+};
+
+const emptyTradeProduct = (): TradeProductForm => ({
+  commercialName: "",
+  industrialName: "",
+  hsCode: "",
+});
 
 type ContactForm = {
   title: PersonTitle;
@@ -200,6 +218,11 @@ interface FormData {
   workshopAreaM2: string;
   storeAreaM2: string;
   outdoorAreaM2: string;
+  machineCount: string;
+  machinesDescription: string;
+  producedProducts: string;
+  purchasedProducts: string;
+  tradeProducts: TradeProductForm[];
   importExportIssues: string;
   plannedActions: string;
   legalQuestionTitles: string[];
@@ -261,6 +284,11 @@ const initialFormData: FormData = {
   workshopAreaM2: "",
   storeAreaM2: "",
   outdoorAreaM2: "",
+  machineCount: "",
+  machinesDescription: "",
+  producedProducts: "",
+  purchasedProducts: "",
+  tradeProducts: [emptyTradeProduct()],
   importExportIssues: "",
   plannedActions: "",
   legalQuestionTitles: [],
@@ -304,6 +332,23 @@ const cleanObject = <T extends Record<string, unknown>>(value: T) => {
   return entries.length ? (Object.fromEntries(entries) as T) : undefined;
 };
 
+/** Rows left fully empty are dropped; undefined when none is left. */
+const buildTradeProducts = (formData: FormData) => {
+  const products = formData.tradeProducts
+    .filter(
+      (product) =>
+        product.commercialName.trim() ||
+        product.industrialName.trim() ||
+        product.hsCode.trim(),
+    )
+    .map((product) => ({
+      commercialName: product.commercialName.trim(),
+      industrialName: optional(product.industrialName),
+      hsCode: optional(product.hsCode),
+    }));
+  return products.length ? products : undefined;
+};
+
 const buildLegalBusinessInformation = (
   formData: FormData,
 ): LegalBusinessInformation => {
@@ -331,6 +376,9 @@ const buildLegalBusinessInformation = (
     otherBusinessType: optional(formData.otherBusinessType),
     importExportIssues: optional(formData.importExportIssues),
     plannedActions: optional(formData.plannedActions),
+    producedProducts: optional(formData.producedProducts),
+    purchasedProducts: optional(formData.purchasedProducts),
+    tradeProducts: buildTradeProducts(formData),
     taxIdentificationNumber: optional(formData.taxIdentificationNumber),
     postalCode: optional(formData.postalCode),
     bankDetails: cleanObject({
@@ -395,6 +443,8 @@ const buildLegalBusinessInformation = (
     workshopAreaM2: optionalNumber(formData.workshopAreaM2),
     storeAreaM2: optionalNumber(formData.storeAreaM2),
     outdoorAreaM2: optionalNumber(formData.outdoorAreaM2),
+    machineCount: optionalNumber(formData.machineCount),
+    machinesDescription: optional(formData.machinesDescription),
   };
   const definedProductionResources = Object.fromEntries(
     Object.entries(productionResources).filter(
@@ -654,6 +704,21 @@ export default function InitBusinessForm() {
     ) {
       setSubmissionErrors([t("errors.otherBusinessTypeRequired")]);
       return;
+    }
+
+    if (step === 7) {
+      const result = tradeProductsSchema.safeParse(
+        buildTradeProducts(formData),
+      );
+
+      if (!result.success) {
+        setSubmissionErrors([
+          ...new Set(
+            result.error.issues.map((issue) => validation.text(issue.message)),
+          ),
+        ]);
+        return;
+      }
     }
 
     if (step === 8) {
@@ -1434,6 +1499,10 @@ type LegalStringField =
   | "workshopAreaM2"
   | "storeAreaM2"
   | "outdoorAreaM2"
+  | "machineCount"
+  | "machinesDescription"
+  | "producedProducts"
+  | "purchasedProducts"
   | "importExportIssues"
   | "plannedActions"
   | "otherQuestionsAnswer"
@@ -1703,6 +1772,82 @@ function Step7({
         name="plannedActions"
         label={t("plannedActions")}
       />
+
+      <div className="border-t pt-2">
+        <h3 className="font-medium">{t("commercialTitle")}</h3>
+        <p className="text-muted-foreground text-xs">{t("commercialHint")}</p>
+      </div>
+      <Controller
+        name="tradeProducts"
+        control={control}
+        render={({ field }) => (
+          <div className="flex flex-col gap-3">
+            {field.value.map((product, index) => {
+              const update = (patch: Partial<TradeProductForm>) =>
+                field.onChange(
+                  field.value.map((item, i) =>
+                    i === index ? { ...item, ...patch } : item,
+                  ),
+                );
+              return (
+                <div
+                  key={index}
+                  className="grid gap-2 rounded-md border p-3 sm:grid-cols-2"
+                >
+                  <Input
+                    placeholder={t("commercialName")}
+                    aria-label={t("commercialName")}
+                    value={product.commercialName}
+                    onChange={(e) => update({ commercialName: e.target.value })}
+                  />
+                  <Input
+                    placeholder={t("industrialName")}
+                    aria-label={t("industrialName")}
+                    value={product.industrialName}
+                    onChange={(e) => update({ industrialName: e.target.value })}
+                  />
+                  <div className="flex items-center gap-2 sm:col-span-2">
+                    <Input
+                      placeholder={t("hsCode")}
+                      aria-label={t("hsCode")}
+                      inputMode="numeric"
+                      maxLength={10}
+                      value={product.hsCode}
+                      onChange={(e) => update({ hsCode: e.target.value })}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        field.onChange(
+                          field.value.length > 1
+                            ? field.value.filter((_, i) => i !== index)
+                            : [emptyTradeProduct()],
+                        )
+                      }
+                      aria-label={t("removeProduct")}
+                    >
+                      <X className="text-muted-foreground size-4" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+            {field.value.length < MAX_TRADE_PRODUCTS && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-fit"
+                onClick={() =>
+                  field.onChange([...field.value, emptyTradeProduct()])
+                }
+              >
+                {t("addProduct")}
+              </Button>
+            )}
+          </div>
+        )}
+      />
     </FieldGroup>
   );
 }
@@ -1767,6 +1912,37 @@ function Step8({ control }: { control: Control<FormData> }) {
           type="number"
         />
       </div>
+
+      <div className="border-t pt-2">
+        <h3 className="font-medium">{t("technicalTitle")}</h3>
+        <p className="text-muted-foreground text-xs">{t("technicalHint")}</p>
+      </div>
+      <h4 className="text-sm font-medium">{t("equipmentTitle")}</h4>
+      <div className="grid gap-4 sm:grid-cols-[12rem_1fr]">
+        <LegalInput
+          control={control}
+          name="machineCount"
+          label={t("machineCount")}
+          type="number"
+        />
+        <LegalTextarea
+          control={control}
+          name="machinesDescription"
+          label={t("machinesDescription")}
+        />
+      </div>
+      <h4 className="text-sm font-medium">{t("productionSubtitle")}</h4>
+      <LegalTextarea
+        control={control}
+        name="producedProducts"
+        label={t("producedProducts")}
+      />
+      <h4 className="text-sm font-medium">{t("purchaseSubtitle")}</h4>
+      <LegalTextarea
+        control={control}
+        name="purchasedProducts"
+        label={t("purchasedProducts")}
+      />
     </FieldGroup>
   );
 }

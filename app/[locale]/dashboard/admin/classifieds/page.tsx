@@ -194,6 +194,8 @@ export default function AdminClassifiedsPage() {
                 const terms = [
                   format.quantity(classified),
                   format.price(classified),
+                  classified.priceKind &&
+                    t(`priceKind.${classified.priceKind}`),
                   classified.incoterm,
                 ].filter(Boolean);
                 return (

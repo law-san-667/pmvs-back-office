@@ -57,6 +57,64 @@ export type Classified = {
   category: { id: string; name: string };
   subCategory: { id: string; name: string } | null;
   isActive: boolean;
+  /** Lot H: full commercial offer (all optional). */
+  priceKind: "B2B" | "B2C" | null;
+  originCountryCode: string | null;
+  productName: string | null;
+  productModel: string | null;
+  productBrand: string | null;
+  hsCode: string | null;
+  productionCapacity: string | null;
+  deliveryLead: string | null;
+  minimumOrder: string | null;
+  certifications: string | null;
+  paymentTerms: string | null;
+};
+
+export const CLASSIFIED_CONTACT_STATUSES = [
+  "OPEN",
+  "IN_DISCUSSION",
+  "CONCLUDED",
+  "NO_FOLLOW_UP",
+] as const;
+export type ClassifiedContactStatus =
+  (typeof CLASSIFIED_CONTACT_STATUSES)[number];
+
+/** A « mise en relation »: someone answered a classified. */
+export type ClassifiedContact = {
+  id: string;
+  classifiedId: string;
+  conversationId: string;
+  responderUserId: string;
+  responderBusinessId: string | null;
+  status: ClassifiedContactStatus;
+  /** Given by the classified's author to the responder. */
+  publisherRating: number | null;
+  publisherComment: string | null;
+  /** Given by the responder to the classified's author. */
+  responderRating: number | null;
+  responderComment: string | null;
+  createdAt: string;
+  updatedAt: string;
+  classified: {
+    id: string;
+    type: ClassifiedType;
+    title: string;
+    status: ClassifiedStatus;
+  };
+  publisherName: string | null;
+  responderName: string | null;
+};
+
+export type ClassifiedContactStats = {
+  total: number;
+  byStatus: Record<ClassifiedContactStatus, number>;
+  byType: Record<ClassifiedType, number>;
+  conclusionRate: number | null;
+  averageRating: number | null;
+  ratingsCount: number;
+  /** Offer–demand matches found by the platform. */
+  pairs: number;
 };
 
 export const classifiedsRouter = createTRPCRouter({
@@ -91,4 +149,25 @@ export const classifiedsRouter = createTRPCRouter({
         ctx.api.patch(`/admin/classifieds/${id}/moderation`, payload),
       );
     }),
+  /** Platform follow-up of the « mises en relation ». */
+  contactStats: privateProcedure.query(({ ctx }) =>
+    callBackend<ClassifiedContactStats>(
+      ctx.api.get("/admin/classified-contacts/stats"),
+    ),
+  ),
+  adminContacts: privateProcedure
+    .input(
+      z.object({
+        page: z.number().int().positive(),
+        limit: z.number().int().positive().max(100),
+        status: z.enum(CLASSIFIED_CONTACT_STATUSES).optional(),
+        type: z.enum(["OFFER", "DEMAND"]).optional(),
+      }),
+    )
+    .query(({ ctx, input }) =>
+      callBackend<ClassifiedContact, "paginated">(
+        ctx.api.get("/admin/classified-contacts", { params: input }),
+        { mode: "paginated" },
+      ),
+    ),
 });

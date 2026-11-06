@@ -70,7 +70,18 @@
     "expiresAt": "Fim do anúncio",
     "description": "Descrição",
     "images": "Imagens",
-    "moderationReason": "Motivo da recusa"
+    "moderationReason": "Motivo da recusa",
+    "productRole": "Papel para este produto",
+    "originCountry": "País de proveniência",
+    "productName": "Nome do produto",
+    "productModel": "Modelo do produto",
+    "productBrand": "Marca do produto",
+    "hsCode": "Posição pautal (código SH)",
+    "productionCapacity": "Capacidade de produção",
+    "deliveryLead": "Prazo de entrega",
+    "minimumOrder": "Encomenda mínima",
+    "certifications": "Certificações",
+    "paymentTerms": "Modos de pagamento"
   },
   "pricePerUnit": "{price} / {unit}",
   "updated": "alterado em {date}",
@@ -95,5 +106,49 @@
       "category": "Categoria errada",
       "duplicate": "Anúncio duplicado"
     }
+  },
+  "priceKind": {
+    "B2B": "Preço B2B",
+    "B2C": "Preço B2C"
+  },
+  "commercial": {
+    "OFFER": "Oferta comercial",
+    "DEMAND": "Detalhes da procura"
+  },
+  "contacts": {
+    "title": "Contactos comerciais",
+    "description": "As respostas aos pequenos anúncios e o seu acompanhamento pelas duas partes: estado, avaliações e comentários.",
+    "loading": "A carregar os contactos comerciais…",
+    "empty": "Nenhum contacto comercial.",
+    "tiles": {
+      "total": "Contactos",
+      "totalHint": "{offers} em ofertas, {demands} em procuras",
+      "concluded": "Negócios fechados",
+      "rate": "Taxa de conclusão: {rate} %",
+      "noRate": "Taxa de conclusão: —",
+      "rating": "Avaliação média",
+      "ratingsCount": "{count, plural, =0 {Nenhuma avaliação} one {# avaliação} other {# avaliações}}",
+      "pairs": "Correspondências oferta-procura",
+      "pairsHint": "Ofertas e procuras que se correspondem"
+    },
+    "ratingValue": "{rating}/5",
+    "status": {
+      "ALL": "Todos",
+      "OPEN": "Novo",
+      "IN_DISCUSSION": "Em discussão",
+      "CONCLUDED": "Negócio fechado",
+      "NO_FOLLOW_UP": "Sem seguimento"
+    },
+    "columns": {
+      "classified": "Anúncio",
+      "type": "Tipo",
+      "publisher": "Autor",
+      "responder": "Respondente",
+      "status": "Estado",
+      "ratings": "Avaliações",
+      "date": "Data"
+    },
+    "ratingByPublisher": "Autor:",
+    "ratingByResponder": "Respondente:"
   }
 }

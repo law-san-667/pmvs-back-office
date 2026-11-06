@@ -56,7 +56,8 @@
       "compliance": "Compliance",
       "monitoring": "Monitoring",
       "diagnostics": "Diagnostics",
-      "settings": "Settings"
+      "settings": "Settings",
+      "classifiedContacts": "Business contacts"
     }
   },
   "header": {

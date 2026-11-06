@@ -108,7 +108,14 @@
     },
     "otherBusinessType": "Autre type d'activité",
     "importExportIssues": "Difficultés d'import-export (optionnel)",
-    "plannedActions": "Actions prévues (optionnel)"
+    "plannedActions": "Actions prévues (optionnel)",
+    "commercialTitle": "Renseignements commerciaux (optionnel)",
+    "commercialHint": "Les produits que vous commercialisez, avec leur position tarifaire si vous la connaissez.",
+    "commercialName": "Nom commercial",
+    "industrialName": "Nom industriel",
+    "hsCode": "Position tarifaire (code SH)",
+    "addProduct": "Ajouter un produit",
+    "removeProduct": "Retirer ce produit"
   },
   "representative": {
     "title": "Représentant et moyens de production",
@@ -121,7 +128,16 @@
     "productionDescription": "Description des moyens de production",
     "workshop": "Atelier (m²)",
     "store": "Magasin (m²)",
-    "outdoor": "Extérieur (m²)"
+    "outdoor": "Extérieur (m²)",
+    "technicalTitle": "Renseignements technico-professionnels (optionnel)",
+    "technicalHint": "Votre matériel, ce que vous produisez et ce que vous achetez.",
+    "equipmentTitle": "Matériel",
+    "machineCount": "Nombre de machines",
+    "machinesDescription": "Caractéristiques des machines",
+    "productionSubtitle": "Production",
+    "producedProducts": "Caractéristiques des produits ou services fabriqués",
+    "purchaseSubtitle": "Achat",
+    "purchasedProducts": "Caractéristiques des produits ou services achetés ou à acheter"
   },
   "questions": {
     "title": "Questions applicables",
@@ -237,6 +253,8 @@
     "countryRequired": "Le pays est requis.",
     "cityRequired": "La ville est requise.",
     "legalDocumentsRequired": "Les documents légaux sont requis pour un business régularisé.",
-    "legalInformationRequired": "Les informations légales sont requises pour un business régularisé."
+    "legalInformationRequired": "Les informations légales sont requises pour un business régularisé.",
+    "tradeProductNameRequired": "Indiquez le nom commercial de chaque produit commercialisé.",
+    "hsCodeInvalid": "La position tarifaire (code SH) doit compter 4 à 10 chiffres."
   }
 }

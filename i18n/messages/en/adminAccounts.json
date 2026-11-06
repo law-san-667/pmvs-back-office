@@ -136,7 +136,14 @@
       "incorporationDeed": "Articles of incorporation",
       "passportScan": "Passport scan",
       "photos": "MSME photos",
-      "viewDocument": "View document"
+      "viewDocument": "View document",
+      "technicalTitle": "Technical and professional information",
+      "machineCount": "Number of machines",
+      "machinesDescription": "Machine specifications",
+      "producedProducts": "Products or services made",
+      "purchasedProducts": "Products or services bought or to buy",
+      "tradeProducts": "Products sold",
+      "hsCode": "HS {code}"
     },
     "team": {
       "title": "Team ({count})",

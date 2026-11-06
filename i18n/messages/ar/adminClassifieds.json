@@ -70,7 +70,18 @@
     "expiresAt": "نهاية الإعلان",
     "description": "الوصف",
     "images": "الصور",
-    "moderationReason": "سبب الرفض"
+    "moderationReason": "سبب الرفض",
+    "productRole": "الدور بالنسبة لهذا المنتج",
+    "originCountry": "بلد المنشأ",
+    "productName": "اسم المنتج",
+    "productModel": "طراز المنتج",
+    "productBrand": "العلامة التجارية للمنتج",
+    "hsCode": "البند الجمركي (رمز النظام المنسق)",
+    "productionCapacity": "الطاقة الإنتاجية",
+    "deliveryLead": "مهلة التسليم",
+    "minimumOrder": "الحد الأدنى للطلب",
+    "certifications": "الشهادات",
+    "paymentTerms": "طرق الدفع"
   },
   "pricePerUnit": "{price} / {unit}",
   "updated": "عُدّل في {date}",
@@ -95,5 +106,49 @@
       "category": "فئة غير مناسبة",
       "duplicate": "إعلان مكرر"
     }
+  },
+  "priceKind": {
+    "B2B": "سعر B2B",
+    "B2C": "سعر B2C"
+  },
+  "commercial": {
+    "OFFER": "العرض التجاري",
+    "DEMAND": "تفاصيل الطلب"
+  },
+  "contacts": {
+    "title": "علاقات الأعمال",
+    "description": "الردود على الإعلانات المبوبة ومتابعتها من الطرفين: الحالة والتقييمات والتعليقات.",
+    "loading": "جارٍ تحميل علاقات الأعمال…",
+    "empty": "لا توجد علاقات أعمال.",
+    "tiles": {
+      "total": "جهات الاتصال",
+      "totalHint": "{offers} على عروض، {demands} على طلبات",
+      "concluded": "صفقات مُبرمة",
+      "rate": "نسبة الإبرام: {rate}٪",
+      "noRate": "نسبة الإبرام: —",
+      "rating": "متوسط التقييم",
+      "ratingsCount": "{count, plural, =0 {لا توجد تقييمات} one {تقييم واحد} two {تقييمان} few {# تقييمات} many {# تقييمًا} other {# تقييم}}",
+      "pairs": "مطابقات العرض والطلب",
+      "pairsHint": "عروض وطلبات متطابقة"
+    },
+    "ratingValue": "{rating}/5",
+    "status": {
+      "ALL": "الكل",
+      "OPEN": "جديد",
+      "IN_DISCUSSION": "قيد النقاش",
+      "CONCLUDED": "صفقة مُبرمة",
+      "NO_FOLLOW_UP": "دون متابعة"
+    },
+    "columns": {
+      "classified": "الإعلان",
+      "type": "النوع",
+      "publisher": "صاحب الإعلان",
+      "responder": "المُجيب",
+      "status": "الحالة",
+      "ratings": "التقييمات",
+      "date": "التاريخ"
+    },
+    "ratingByPublisher": "صاحب الإعلان:",
+    "ratingByResponder": "المُجيب:"
   }
 }

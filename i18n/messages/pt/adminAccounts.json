@@ -136,7 +136,14 @@
       "incorporationDeed": "Ato de constituição",
       "passportScan": "Digitalização do passaporte",
       "photos": "Fotos MPME",
-      "viewDocument": "Ver o documento"
+      "viewDocument": "Ver o documento",
+      "technicalTitle": "Informações técnico-profissionais",
+      "machineCount": "Número de máquinas",
+      "machinesDescription": "Características das máquinas",
+      "producedProducts": "Produtos ou serviços fabricados",
+      "purchasedProducts": "Produtos ou serviços comprados ou a comprar",
+      "tradeProducts": "Produtos comercializados",
+      "hsCode": "SH {code}"
     },
     "team": {
       "title": "Equipa ({count})",
